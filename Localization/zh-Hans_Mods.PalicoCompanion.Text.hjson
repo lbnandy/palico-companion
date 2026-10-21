@@ -1,0 +1,566 @@
+CompanionCat: {
+	DrankPotion: 喝下背包血药，恢复{0}生命
+	Recovering: 恢复中
+	FlyingToLoot: 正在飞过去捡东西
+	WatchingEnemies: 留意敌人
+	KeepingDistance: 保持距离
+	CatchingUp: 正在追上老大
+	HoldingTorch: 手持火把照明
+	RouteBlocked: 路线受阻，已回到身边
+}
+
+CompanionCommand: {
+	Description: 呆猫操作指令
+	SinglePlayerOnly: 这些文字指令仅限单人；联机请使用呆猫面板，背包与物品不受影响。
+	PlanUsage: /palico plan right|left|down 长度 — 鼠标指向施工起点，方向依次为右、左、下。
+	Help:
+		'''
+		/palico summon | dismiss | follow | pause | recall | bag | give | takeall | pet | chest | store | supply | mine | place torch/platform/rope | plan right/left/down LENGTH | confirm | cancel | pickup | combat | torches | bridges | ropes
+		常用操作可直接在呆猫面板完成；快捷键可在控件设置中修改。
+		'''
+}
+
+CompanionPanel: {
+	Guide: 指南
+	Equipment: 装备
+	Work: 工作
+	Support: 支援
+	WorkHint: 掠夺刀、采矿工具或丰收篮
+	SupportHint: 同类支援装备不可重复装备
+}
+
+CompanionCatching.CatchingCritters: 正在用网兜抓小动物
+
+CompanionControl: {
+	Unavailable: 暂时无法操作
+	Pending: 正在等待上次操作完成
+}
+
+CompanionControlUI: {
+	AimHint: 指向矿石、树木、掉落物或水面
+	ConfirmHint: " · 左键确认"
+}
+
+CompanionDelivery: {
+	CoinsBanked: 钱币存进小猪存钱罐了喵！
+	ItemsDelivered: 新捡的东西给老大放好啦喵！
+}
+
+CompanionDirective: {
+	Mine: 挖这片矿
+	Tree: 砍这棵树
+	Collect: 收集这里
+	Fish: 在这里钓鱼
+	AimHint: 指向矿石、树木、掉落物或水面
+	CannotWork: 呆猫现在不能工作
+	TooFar: 目标不在附近
+	AlreadyWorking: 正在处理这个目标
+	CannotChop: 这棵树不能采伐
+	NoItems: 这里没有可以收集的物品
+	BagFull: 背包没有空间
+	NoBait: 背包里没有可用的鱼饵
+	NoWater: 这里不是可以钓鱼的水面
+	FishingBlocked: 鱼池、钓具或岸边位置不适合钓鱼
+	NoTarget: 没有可指挥的目标
+	TreeBlocked: 这棵树暂时不能采伐
+	LeftWorksite: 已离开工作地点，继续跟随
+	MineDone: 这片矿已处理完
+	TreeDone: 这棵树已处理完
+	CollectDone: 这里的物品收好了
+	CollectFull: 背包没有空间，剩下的物品还在原处
+	CollectBlocked: 暂时够不到剩下的物品
+	OutOfBait: 鱼饵用完了
+	CatchFull: 背包没有空间收鱼
+	CannotCast: 这里暂时无法抛竿
+}
+
+CompanionFishing: {
+	ApproachingShore: 正在走到水边钓鱼
+	ReelingIn: 正在收竿
+	WaitingForBite: 在水边等鱼儿上钩
+}
+
+CompanionLighting: {
+	NeedGlowstick: 水下照明：需要荧光棒
+	NeedLight: 照明：需要火把或荧光棒
+	HoldingGlowstick: 手持荧光棒照明
+	NoTorch: 照明：没有可用的未收藏火把
+	NoSupport: 照明：附近没有安全支撑，继续手持照明
+	LightingPrefix: 照明：
+}
+
+CompanionLoadoutButtons: {
+	Loadout: 呆猫配装 {0}
+	Current: " · 当前"
+}
+
+CompanionLoadouts: {
+	Invalid: 配装不存在
+	AlreadyActive: 正在使用配装 {0}
+	Switched: 已切换至配装 {0}
+}
+
+CompanionNetworkInventory: {
+	UpgradeDone: 培养完成！
+	UpgradeRejected: 当前无法升级，材料已退回。
+}
+
+CompanionPickup: {
+	LootBlocked: 暂时够不到掉落物，先继续其他工作
+	PickingUp: "正在拾取 "
+}
+
+CompanionSkillActivation: {
+	AutomaticOnly: 这个装备会在需要时自动生效
+	NotEquipped: 请先装备这个技能
+	Unavailable: 呆猫现在不能使用技能
+	Cooldown: 技能还在冷却
+	NoHealingNeeded: 老大现在不需要治疗
+	NoDebuff: 没有可以清除的减益
+	NoManaNeeded: 老大和呆猫现在都不需要补充法力
+	NotAttacking: 呆猫尚未开始攻击
+	NoTarget: 附近没有可以攻击的目标
+	ProjectileLimit: 暂时无法释放弹幕
+	ServerPending: 等待服务器确认
+	Used: 已使用{0}
+}
+
+CompanionSupplies: {
+	CollectingSupply: 正在捡给老大的补给
+	DeliveringSupply: 把补给送给老大
+}
+
+ConstructionAssist.HelpingBuild: 正在顺着老大铺设的方向帮忙
+DiggingIntent.HelpingDig: 正在沿你的挖掘方向帮忙
+
+FieldAssist: {
+	NotSolid: 目标不是可用镐开采的实心方块
+	NotOre: 目标不是已登记的矿石
+	Excluded: 已跳过不采集的物块
+	StayNearby: 正在协助挖掘，请留在附近
+	RouteBlocked: 采矿路线受阻，已停止本次协助；请先打通附近通道
+	CombatPause: 先应付敌人，稍后继续采矿
+	FindingFooting: 正在寻找方块旁的落脚点
+	DiggingAhead: 正在沿你的挖掘方向开路
+	MiningOre: 正在使用当前镐开采矿石
+	OutOfReach: 矿块超出当前镐的协助范围
+	CannotMine: 当前镐力不足或原版规则不允许挖掘
+	DirectionChanged: 挖掘方向已结束或改变
+	ProtectedBlock: 保护涂色或虚化方块
+	HousingWall: 矿块位于住房墙内
+	FallingBlock: 矿块正托着会下落的物块
+}
+
+GardenAssist.NoSeeds: 药草已采收，没有可用种子，暂未补种
+Logistics.Restocked: 已补充 {0} 件消耗品
+MiningIntent.ExposedOre: 正在开采附近露出的矿石
+
+SafeConstruction: {
+	ServerPending: 等待：由服务器执行施工
+	OwnerUnavailable: 停止：主人不可用
+	BagUnavailable: 停止：背包不可用
+	Unsupported: 停止：只允许火把、木平台、绳索
+	WorldEdge: 停止：接近世界边界
+	InvalidPosition: 停止：猫的位置无效
+	Approaching: 等待：猫需要走近施工点
+	OwnerTooFar: 停止：施工点离主人太远
+	Obstructed: 停止：施工点被遮挡
+	WorldSpawn: 停止：世界出生点保护区
+	BedSpawn: 停止：床出生点保护区
+	Occupied: 停止：已有方块，不会覆盖
+	Liquid: 停止：施工点邻近液体
+	Wiring: 停止：施工点邻近电线或促动器
+	Housing: 停止：房屋背景墙保护区
+	Furniture: 停止：储物家具保护区
+	Chest: 停止：箱子周围八格保护区
+	TownNpc: 停止：城镇居民附近保护区
+	NoMaterials: 停止：猫背包缺少未收藏的材料
+	ModBlocked: 停止：其他模组禁止此处放置
+	Changed: 停止：落点或材料已改变
+	PlacementFailed: 失败：原版物件放置判定未通过，未消耗材料
+	NoSupport: 失败：缺少支撑或放置被拒绝，未消耗材料
+	Placed: 放置一个
+}
+
+TrainingHud: {
+	Ready: 就绪
+	Cooldown: 冷却中
+	Active: 持续生效
+	Triggered: 触发提示
+	ClickUse:
+		'''
+
+		点击请求使用
+		'''
+}
+
+TrainingPanel: {
+	Basics: 上手
+	Support: 支援装备
+	Work: 工作装备
+	Upgrades: 成长与制作
+	Progress: 当前进度
+	Meet: 认识呆猫
+	Combat: 战斗与补给
+	Mining: 采掘与砍树
+	Exploring: 探索与拾取
+	Fishing: 钓鱼与捕捉
+	Storage: 背包与箱子
+	Equipment: 装备与成长
+	Multiplayer: 联机游玩
+	DragHint: 拖动标题栏移动指南
+	Title: 呆猫指南
+	Back: 返回背包
+	Settings: 设置
+	Baseline: 当前
+	ProgressSummary: 当前：{0}档 · {1} 个支援格 · 1 个工作格
+	DemonHeartActive: 恶魔之心：额外支援格已启用。
+	DemonHeartExpert: 恶魔之心：额外支援格在专家／大师世界启用。
+	DemonHeartAvailable: 使用恶魔之心，可再增加一个支援格。
+	DemonHeartClassic: 专家／大师中使用恶魔之心可增加额外支援格。
+	NextSteps: 接下来可以做
+	Details: 详情
+	AllReady: 已准备齐全，可在各分类中查看装备与配方。
+	CurrentTier: 当前档位
+	CompareTiers: 对比档位
+	TierLegend: 自制／改良／精工
+	CurrentEffect: 当前效果 · {0}
+	Ingredients: 制作材料 · 随身 / 需要
+	SwitchRecipe: 切换配方（{0}/{1}）
+	Station: 制作站：
+	MissingMaterials: 随身材料不足
+}
+
+TrainingProgress: {
+	Used: 已使用
+	NeedsImproved: 需先使用改良工具组
+	ReadyToUse: 已持有 · 可直接使用
+	Craftable: 可在制作栏制作
+	NeedsStation: 随身材料齐全 · 需满足制作条件
+	MissingMaterials: 随身材料不足
+	NextImproved: 下一档：改良工具组（神圣锭、光明／暗影之魂）。
+	NextMasterwork: 下一档：精工工具组（叶绿锭、灵气、齿轮）。
+	MaxTier: 工具已达精工档；可以按当前武器与需要更换装备组合。
+}
+
+TrainingStatus: {
+	Stowed: 呆猫已收起
+	Recovering: 呆猫正在恢复
+	Paused: 呆猫已暂停工作
+	OwnerDead: 等待老大复活
+	Disabled: 呆猫功能已关闭
+	Waiting: 等待呆猫出现
+	Inactive: "未生效 · "
+	Passive: 被动效果生效中
+	Healing: 老大持续回血
+	DebuffImmunity: 老大减益免疫
+	PlayerMana: 老大法力消耗降低
+	PalicoMana: 呆猫法力消耗降低
+	DrumBuff: 呆猫奋战
+	Duration: "{0} · 剩余 {1} 秒"
+	CooldownSuffix: ；冷却 {0} 秒
+	CooldownRemaining: 冷却中 · 剩余 {0} 秒
+	CombatDisabled: 待命 · 开启战斗后自动使用
+	Ready: 就绪 · 符合条件时自动使用
+}
+
+TravelAssist: {
+	NoRope: 绳索：猫包或玩家背包缺少未收藏的绳索
+	NoPlatform: 搭桥：猫包或玩家背包缺少未收藏的木平台
+	Approaching: 走近施工点
+	NoFooting: 等待：附近没有可到达的施工站位
+}
+
+TreeAssist: {
+	CombatPause: 先应付敌人，稍后继续砍树
+	Helping: 正在帮老大砍这棵树
+	Blocked: 树木路线受阻，暂缓砍伐
+	Approaching: 正在走向成熟树木
+	Chopping: 正在砍树
+	Replanted: 树木已砍下并补种
+	ReplantBlocked: 木材已保留；补种位置受阻，未消耗橡实
+	NoAcorn: 树木已砍下，缺少对应橡实，暂未补种
+	LeftTree: 树木已砍下，已离开补种位置
+	Replanting: 回到树旁补种
+}
+
+Catalog: {
+	HoneyCage: 为老大立即恢复 15 / 30 / 50 生命，随后 5 秒再恢复共 5 / 10 / 15 生命。生命不高于 70%，且缺少至少 20 / 40 / 65 生命时触发；冷却 60 秒。药水冷却期间也能治疗。
+	GuardShield: 为老大抵挡一次重击，最多抵消 15 / 30 / 40 点伤害；60 秒冷却。老大生命高于 70% 时，也会保护生命不高于 35% 或将受致命伤的呆猫；两者共用冷却。
+	CleansingPot: 为老大清除一种中毒、着火或减速等常见减益，优先处理危害较大的减益。随后免疫该减益 2 / 3 / 4 秒；40 秒冷却。即将结束的轻微减益不会触发。不会解除药水冷却或魔力病。
+	CheerBell: 为老大或呆猫恢复 20 / 40 / 60 法力，并使受益者 6 秒内法力消耗降低 10% / 15% / 20%；冷却 35 秒。优先帮助正在施法且法力不足一半的老大，否则帮助正在施法或等待回蓝的呆猫。缺少的法力需达到恢复量或法力上限的一半，两者取较低值。
+	BattleDrum: 呆猫开始攻击时触发奋战：呆猫伤害 +20% / 25% / 30%，攻速 +10% / 15% / 20%，持续 10 秒，45 秒冷却。奋战期间，呆猫的召唤物伤害 +25% / 35% / 45%。
+	PiercingBoomerang: 破甲：命中后老大与呆猫对目标获得 4 / 8 / 12 护甲穿透，持续 15 / 18 / 20 秒；35 秒冷却。优先攻击强敌，并避开仍有较长破甲时间的目标。同类效果不叠加。
+	UpdraftBag: 老大未骑乘坐骑，在空中持续按跳跃且飞行即将耗尽时，为老大补充 0.6 / 0.9 / 1.2 秒飞行；老大无翅膀时获得小幅助跃。30 秒冷却。
+	BombPot: 呆猫向敌人投掷爆弹：范围伤害 120 / 480 / 1200；爆炸范围 10×10 格，18 秒冷却，不破坏物块。优先投向附近可见的密集敌人，并预判移动位置。
+	PlunderKnife: 老大或呆猫伤害过的敌人被击败时，可额外掉落战利品，不限彼此距离。普通敌人的可堆叠战利品有 10% / 12% / 15% 概率额外掉落 1 件；原版 Boss 常规材料平均增加 5% / 7.5% / 10%。不复制战利品袋、不可堆叠物品、钱币、红心、魔力星、生物群落钥匙，以及普通敌人的青色及以上稀有物品。友好生物和雕像敌人不触发。多人参与时，普通敌人取最高档生效一次，Boss 袋材料分别判定。
+	MiningKit: 呆猫采掘速度 +20% / 25% / 30%，寻找矿石、协助挖掘和挥镐的范围各增加 1 / 2 / 3 格。不增加镐力，也不影响老大的采掘属性。
+	GardenKit: 老大或呆猫砍树、采集成熟药草时均可获得额外收获，不限彼此距离。木材平均增加 8% / 12% / 16%，药草平均增加 20% / 30% / 40%（随机结算）。不增加种子、宝石或家具掉落，拆除放置的木材方块也不触发。呆猫钓鱼力 +5 / 10 / 15。
+	ExpandedBelt: 使用后永久增加一个呆猫支援装备格，最多使用一次。
+	ImprovedTools: 使用后永久将呆猫的支援和工作装备效果升为改良档，最多使用一次。
+	MasterTools: 使用后将呆猫的支援和工作装备效果永久升为精工档。需要先使用改良工具组。
+	CatWorkbench: 集中制作呆猫装备、扩容工具带和升级工具组。右键查看呆猫指南。
+	Basic: 自制
+	Improved: 改良
+	Masterwork: 精工
+	IronBars: 铁／铅锭
+	SilverBars: 银／钨锭
+	GoldBars: 金／铂金锭
+	SupportGear: 呆猫支援装备
+	WorkGear: 呆猫工作装备
+	CraftingStation: 呆猫制作站
+	PermanentUpgrade: 呆猫永久强化道具
+	ActiveCondition: 装备且呆猫已召出时生效；收起、暂停或恢复时停用
+	CurrentTier: 当前档位：
+	Legacy: 旧版改装已融入装备效果；进入背包后自动归还改装材料，保留装备
+	SupportSlotAdded: 支援装备格 +1
+	ImprovedUpgrade: 呆猫工具 · 改良
+	MasterworkUpgrade: 呆猫工具 · 精工
+}
+
+Guide: {
+	Saves:
+		'''
+
+
+		【保存】
+		成长和装备随角色保存，箱子许可按世界分别记忆。
+		'''
+	AdvancedOrders:
+		'''
+
+		高级手动工作仅限单人。
+		'''
+	Multiplayer:
+		'''
+		【各自的伙伴】
+		每人的背包、成长和配装独立保存。对主人的私下台词只有本人能看到，自动行为按各自设置运行。
+
+		【交接物品】
+		玩家扔出的物品有 10 秒交接时间；需要呆猫立即捡起时，可指定拾取。
+		'''
+	RecipeBrowser:
+		'''
+
+		配方浏览器中也有“呆猫装备”分类。
+		'''
+	Equipment:
+		'''
+		【三套配装】
+		每套分别保存武器、工作和支援装备，染料共用。切换不会重置技能冷却。
+
+		【增加支援格】
+		扩容工具带增加 1 个支援格；专家／大师世界中，玩家使用恶魔之心后再增加 1 个。
+		进入经典世界时，额外专家格中的装备收回背包；满包时暂存。
+
+		【提升档位】
+		改良工具组和精工工具组可永久强化装备效果，精工需要先改良。配方见“成长与制作”。
+		'''
+	Reserves:
+		'''
+
+
+		【储备与钱币】
+		去向和储备量可在设置中调整。储备为 0 时不主动补充，已有物品仍可使用。
+		钱币枪弹药会保留；存钱罐装不下的余款留在呆猫背包。
+		'''
+	MagicStorage:
+		'''
+
+		魔法存储界面旁的猫头像可授权整套储存网络；该界面开着也能补给。
+		'''
+	Storage:
+		'''
+		【快捷转移】
+		呆猫背包打开时，Shift 点击玩家背包或箱子中的物品可转入。收藏物品不参与快捷转移。
+
+		【箱子补给】
+		打开箱子，点击旁边的猫头像授权，可允许多个箱子。你在附近且箱子关闭时，呆猫存入同类物品并补充消耗品。
+		'''
+	Fishing:
+		'''
+		【钓鱼】
+		给呆猫背包装入鱼饵，再到水边逗留、自己抛竿或指定水面。
+		使用你携带的最佳鱼竿，继承你的鱼力加成，消耗自己的鱼饵。不使用松露虫；熔岩钓鱼仍需相应鱼竿、鱼饵或装备。
+		渔获装不下时落在地上；处理渔获或腾出空间后继续。
+
+		【捕捉小动物】
+		使用基础网兜或你携带的更好网兜，捕捉附近的小动物。
+
+		基础工作不需要工作装备；丰收篮可提高采收收益和呆猫钓鱼力。
+		'''
+	Exploring:
+		'''
+		【拾取与递交】
+		玩家扔出的物品有 10 秒交接时间；指定拾取可立即收集。不想捡的物品可在设置中排除。
+		新捡物品会补入你已有的堆叠，也会递交你仍可使用的生命水晶等。呆猫先留自己的补给；手动存入或收藏的物品不递交。
+
+		【探索与照明】
+		发现生命水晶、宝箱等目标时会提醒你，需要恢复时会递送附近的红心和魔力星。
+		背包装入火把或荧光棒即可照明，单纯手持不消耗。
+		'''
+	HarvestAndBuild:
+		'''
+
+
+		【砍树与药草】
+		砍成熟树木，采收开花药草；有种子和合适位置时补种，没种子也能采收。收藏的材料不会被消耗。
+
+		【施工协助】
+		可帮助延长你连续铺设的平台或绳索，在设置中分别开启。
+		'''
+	QotMining:
+		'''
+
+		已开启的 「更好的体验」 连锁挖矿也对呆猫生效。
+		'''
+	Mining:
+		'''
+		【挖掘与采矿】
+		你挥镐时，呆猫在附近协助；空闲时会采集露出的矿石和宝石。
+		使用你携带的最强镐，没有镐时用基础工具。挖不动时先检查镐力和通路；不想挖的物块可在设置中排除。
+		'''
+	Summons:
+		'''
+
+
+		【召唤与哨兵】
+		上限各与玩家相同，至少为 1，不占玩家的位置。
+		撒旦军队武器沿用原版条件；事件期间背包需有天国魔力。
+		'''
+	QotAmmo:
+		'''
+
+		启用 「更好的体验」 无限弹药后，呆猫补给会考虑相应堆叠门槛。
+		'''
+	Combat:
+		'''
+		支援技能自动触发，也可点击状态卡图标请求使用；小盾牌和助跃袋仅自动触发。
+
+		【武器与补给】
+		投掷武器可整叠装备。弹药、药水放入呆猫背包。
+		'''
+	DirectAndRecover:
+		'''
+		指向矿石、树木、掉落物或水面，左键指派。
+		战斗时暂缓，召回取消，走远后恢复跟随。
+
+		【力尽恢复】
+		呆猫力尽后暂时撤退，恢复后自动回来。
+		'''
+	Introduction:
+		'''
+		【打开背包】
+		靠近呆猫右键，或点击左上角状态卡。点击背包标题中的头像或名字，可以改名和配色。
+
+		【指定工作】
+
+		'''
+	BindKey: 先在控件设置中绑定指挥键，再按住该键，
+	HoldKey: "按住 "
+	AfterKey: ，
+}
+
+CompanionStatusBar.Vitals: "{0} · 生命 {1}/{2} · 法力 {3}/{4}"
+
+Storage: {
+	Allowed:
+		'''
+		呆猫可使用这套储存网络
+		点击取消
+		'''
+	Allow:
+		'''
+		允许呆猫使用这套储存网络
+		在附近存入同类物品、补充消耗品
+		'''
+}
+
+ItemTooltips: {
+	HoneyCage:
+		'''
+		为你恢复 {0} 生命，随后 5 秒再恢复 {1} 生命
+		生命不高于 70% 且缺少至少 {2} 生命时触发
+		冷却 60 秒；药水冷却期间也能治疗
+		'''
+	GuardShield:
+		'''
+		为你抵挡一次重击，最多抵消 {0} 伤害
+		你生命充足时，也会保护濒危的呆猫
+		共用 60 秒冷却
+		'''
+	CleansingPot:
+		'''
+		清除你的一种常见减益，并免疫该减益 {0} 秒
+		无法解除药水冷却或魔力病
+		冷却 40 秒
+		'''
+	CheerBell:
+		'''
+		为正在施法的你，或正在施法、等待回蓝的呆猫恢复 {0} 法力
+		受益者的法力消耗降低 {1}，持续 6 秒
+		冷却 35 秒
+		'''
+	BattleDrum:
+		'''
+		战斗中提升呆猫 {0} 伤害、{1} 攻速
+		期间呆猫的召唤物伤害提升 {2}
+		持续 10 秒；冷却 45 秒
+		'''
+	PiercingBoomerang:
+		'''
+		你和呆猫对命中目标获得 {0} 护甲穿透
+		持续 {1} 秒；同类效果不叠加
+		冷却 35 秒
+		'''
+	UpdraftBag:
+		'''
+		飞行将耗尽时按住跳跃，补充 {0} 秒飞行
+		无翅膀时获得小幅助跃；骑乘时无效
+		冷却 30 秒
+		'''
+	BombPot:
+		'''
+		投掷爆弹，在 10×10 格范围内造成 {0} 伤害
+		不破坏物块
+		冷却 18 秒
+		'''
+	PlunderKnife:
+		'''
+		你或呆猫伤害过的敌人，每种可堆叠战利品有 {0} 概率多掉落 1 件
+		原版 Boss 材料平均增加 {1}
+		不额外掉落战利品袋、装备和贵重物品；雕像敌人无效
+		'''
+	MiningKit:
+		'''
+		呆猫采掘速度提升 {0}
+		寻找矿石、协助挖掘和挥镐范围各增加 {1} 格
+		不增加镐力
+		'''
+	GardenKit:
+		'''
+		你和呆猫收获的木材平均增加 {0}，药草增加 {1}
+		呆猫钓鱼力增加 {2}
+		不增加种子、宝石或家具掉落
+		'''
+	ExpandedBelt:
+		'''
+		永久增加一个呆猫支援装备格
+		最多使用一次
+		'''
+	ImprovedTools:
+		'''
+		永久将呆猫的支援和工作装备升为改良档
+		最多使用一次
+		'''
+	MasterTools:
+		'''
+		永久将呆猫的支援和工作装备升为精工档
+		需先使用改良工具组
+		'''
+	CatWorkbench:
+		'''
+		用于制作呆猫装备与升级道具
+		右键查看呆猫指南
+		'''
+}

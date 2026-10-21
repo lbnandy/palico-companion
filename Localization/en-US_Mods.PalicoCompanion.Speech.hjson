@@ -1,0 +1,339 @@
+BossCalamityDesertScourge: {
+	Line1: Something's coming through the sand! That's a LOT of worm!
+	Line2: How did something that big hide under the sand?
+}
+
+BossVictoryCalamityDesertScourge: {
+	Line1: Ptoo! Ptoo! I've got sand in my mouth!
+	Line2: We beat all of THAT! I'll be telling everyone back home.
+}
+
+BossCalamityCrabulon: {
+	Line1: Is that a crab or a mushroom, Meowster?
+	Line2: It can run with all those mushrooms on it?! Here it comes!
+}
+
+BossVictoryCalamityCrabulon: {
+	Line1: If you want crab for dinner, let's find another one...
+	Line2: I haven't got mushrooms growing on my head, have I?
+}
+
+BossCalamityHiveMind: {
+	Line1: Why does that lump have a FACE?!
+	Line2: That smell! I'm having a bath after this!
+}
+
+BossVictoryCalamityHiveMind: {
+	Line1: It's over! Why does everything still smell like it?
+	Line2: We won... Don't sniff me just yet.
+}
+
+BossCalamityPerforators: {
+	Line1: More worms inside it?! How many are we fighting?
+	Line2: Don't burrow this way! Meowster, worms incoming!
+}
+
+BossVictoryCalamityPerforators: {
+	Line1: Ugh... I think I'll skip dinner, Meowster.
+	Line2: Done! Please don't let those worms turn up in my dreams.
+}
+
+BossCalamitySlimeGod: {
+	Line1: That little blob brought two BIG helpers!
+	Line2: Those two blobs take up all the room! Where do I stand?
+}
+
+BossVictoryCalamitySlimeGod: {
+	Line1: The little one's getting away! Fast, too...
+	Line2: It left its helpers and ran! I'd never do that to you.
+}
+
+BossCalamityCryogen: {
+	Line1: Now the ice wants a fight?!
+	Line2: Is there something frozen inside that, Meowster?
+}
+
+BossVictoryCalamityCryogen: {
+	Line1: Ice broken! What was in there, anyway?
+	Line2: My paws are frozen... Warm them up for me?
+}
+
+BossCalamityAquaticScourge: {
+	Line1: It's coming after us! It swims much faster than me!
+	Line2: What IS that smell? My nose hurts!
+}
+
+BossVictoryCalamityAquaticScourge: {
+	Line1: We won! But the smell's still here...
+	Line2: We're not making fish soup out of that, are we?
+}
+
+BossCalamityBrimstoneElemental: {
+	Line1: Someone in the fire... She's looking this way!
+	Line2: She stays in those flames all the time? Doesn't it hurt?
+}
+
+BossVictoryCalamityBrimstoneElemental: {
+	Line1: I've still got all my fur, right? Give it a pat and check.
+	Line2: We won! No sitting by the fire tonight, please.
+}
+
+BossCalamityCalamitasClone: {
+	Line1: There's fire inside that metal shell! It's coming!
+	Line2: What's burning in there? The fire's so red!
+}
+
+BossVictoryCalamityCalamitasClone: {
+	Line1: We won... What was inside that shell?
+	Line2: Even the fire inside is out. It's really over this time, right?
+}
+
+BossCalamityLeviathan: {
+	Line1: Why's the singer attacking us?!
+	Line2: I hear something in the sea... Is there another one?
+}
+
+BossVictoryCalamityLeviathan: {
+	Line1: We beat BOTH of them! I get to brag too, right?
+	Line2: How many more things like that are hiding in the sea?
+}
+
+BossCalamityAstrumAureus: {
+	Line1: That machine's covered in the strange stuff too!
+	Line2: It's jumping at us! I don't want to be a cat pancake!
+}
+
+BossVictoryCalamityAstrumAureus: {
+	Line1: Machine's broken. The glowing stuff's still stuck to it.
+	Line2: Not jumping anymore! Nearly got sat on back there.
+}
+
+BossCalamityPlaguebringer: {
+	Line1: A bee that big needs weapons too?! No fair!
+	Line2: The bee fires missiles?! I want that trick!
+}
+
+BossVictoryCalamityPlaguebringer: {
+	Line1: We won! Don't think that bee made very good honey.
+	Line2: The big bee's down... What about all the sick creatures in the jungle?
+}
+
+BossCalamityRavager: {
+	Line1: Is that stone or flesh, Meowster?!
+	Line2: Something that big shouldn't bounce! It'll break the ground!
+}
+
+BossVictoryCalamityRavager: {
+	Line1: Taken apart! I'm not helping put it back together.
+	Line2: Let's not decorate the house with those bits... They look awful.
+}
+
+BossCalamityAstrumDeus: {
+	Line1: Thought that was a shooting star... Why's it coming at US?!
+	Line2: Did that worm eat all those stars?
+}
+
+BossVictoryCalamityAstrumDeus: {
+	Line1: That's the last of it, right? No more worms behind that one?
+	Line2: We beat that huge shining thing too, Meowster!
+}
+
+BossCalamityGuardians: {
+	Line1: All three at once?! I'm coming, Meowster!
+	Line2: Flying around together... Are they keeping us out?
+}
+
+BossVictoryCalamityGuardians: {
+	Line1: Three of them and we still won!
+	Line2: They had helpers. Yours was better. Hehe.
+}
+
+BossCalamityDragonfolly: {
+	Line1: Its feathers make lightning! Why doesn't my fur do that?
+	Line2: Bird or dragon? Either way, it's a big one!
+}
+
+BossVictoryCalamityDragonfolly: {
+	Line1: We won! Why's my fur standing up too...?
+	Line2: If I touch you now, will I give you a shock?
+}
+
+BossCalamityProvidence: {
+	Line1: Even the rocks around her are burning!
+	Line2: We're fighting her too? Then I'm giving it everything!
+}
+
+BossVictoryCalamityProvidence: {
+	Line1: Whew... We won. My paws are still shaking.
+	Line2: You're not burned, are you? Let me see.
+}
+
+BossCalamityCeaselessVoid: {
+	Line1: Grab my paw, Meowster! It's pulling me in!
+	Line2: How am I supposed to hit a hole?!
+}
+
+BossVictoryCalamityCeaselessVoid: {
+	Line1: Still here, Meowster! Didn't get sucked away!
+	Line2: I've decided I don't want to know what's in there.
+}
+
+BossCalamityStormWeaver: {
+	Line1: Worms in the SKY too?! Isn't the ground enough?
+	Line2: This one's armored! Better equipped than I am.
+}
+
+BossVictoryCalamityStormWeaver: {
+	Line1: Brought it down! Flying didn't save that worm.
+	Line2: Mrr... My ears are still ringing.
+}
+
+BossCalamitySignus: {
+	Line1: Is there anyone under that cloak?
+	Line2: Mrr?! It was over THERE a moment ago!
+}
+
+BossVictoryCalamitySignus: {
+	Line1: Is it over? Don't let it pop out and scare me again.
+	Line2: Got you! Can't hide from us now!
+}
+
+BossCalamityPolterghast: {
+	Line1: All those souls packed together... Isn't it cramped?
+	Line2: Walls don't stop it! Where am I supposed to hide?
+}
+
+BossVictoryCalamityPolterghast: {
+	Line1: Whew... Can we get out of here, Meowster?
+	Line2: Not sleeping in the Dungeon tonight. You don't want to either, right?
+}
+
+BossCalamityOldDuke: {
+	Line1: That fish looks old! How does it swim so fast?!
+	Line2: If that's what we're fishing for, I'd rather catch nothing.
+}
+
+BossVictoryCalamityOldDuke: {
+	Line1: Still fighting like that at its age! I want to be like that someday.
+	Line2: I just want an ordinary fish for dinner now...
+}
+
+BossCalamityDevourer: {
+	Line1: It eats GODS? I'm barely a mouthful!
+	Line2: Coming out of that hole! Does this thing ever end?
+}
+
+BossVictoryCalamityDevourer: {
+	Line1: Eats gods, couldn't eat us! Didn't expect that, did it?
+	Line2: I thought we weren't going to make it home, Meowster...
+}
+
+BossCalamityYharon: {
+	Line1: That dragon is HUGE! Now that's a big hunt!
+	Line2: I'm fighting the dragon too! Take me with you!
+}
+
+BossVictoryCalamityYharon: {
+	Line1: I helped beat that dragon... That whole enormous dragon.
+	Line2: No way I can copy that roar when we get home.
+}
+
+BossCalamityExoMechs: {
+	Line1: He built ALL those machines just to fight us?!
+	Line2: Doesn't he have a smaller one? I want to dismantle one too!
+}
+
+BossVictoryCalamityExoMechs: {
+	Line1: All scrap! That'll teach him to underestimate us!
+	Line2: All those machines, and none could beat my Meowster!
+}
+
+BossCalamityCalamitas: {
+	Line1: That's a lot of fire... I'm right behind you, Meowster.
+	Line2: I'm a little scared... But if you're going, so am I.
+}
+
+BossVictoryCalamityCalamitas: {
+	Line1: She's stopped fighting, Meowster. Let's stop too.
+	Line2: It's over. She looks so tired...
+}
+
+BossCalamityPrimordialWyrm: {
+	Line1: What's down there...? How big IS it?
+	Line2: It's awake! Did we wake it up?
+}
+
+BossVictoryCalamityPrimordialWyrm: {
+	Line1: We really won? Pinch me... Gently!
+	Line2: Let's celebrate on the surface. I want some sunshine.
+}
+
+BossRematchCalamityLeviathan: {
+	Line1: Back to fight those two in the sea, Meowster?
+	Line2: I know that song! The big one's bound to be here too.
+}
+
+BossRematchCalamityProvidence: {
+	Line1: The blazing one again! I'm here to help!
+	Line2: Somewhere cool afterward? Last time nearly cooked me.
+}
+
+BossRematchCalamityDevourer: {
+	Line1: The god-eating one again! Didn't eat us last time.
+	Line2: It couldn't eat us last time, and it's STILL trying?!
+}
+
+BossRematchCalamityYharon: {
+	Line1: I'd know that roar anywhere! It's him again!
+	Line2: Hunting that dragon again? Count me in!
+}
+
+BossRematchCalamityExoMechs: {
+	Line1: He built ANOTHER batch?! How much metal does he have?
+	Line2: Once we scrap these, will he just build more?
+}
+
+BossRematchCalamityCalamitas: {
+	Line1: Fighting her again? I'll stay with you.
+	Line2: I'm not missing this fight, Meowster!
+}
+
+RestCalamitySulphur: {
+	Line1: That sea's the wrong colour... Doesn't smell right either.
+	Line2: Would you eat a fish caught here? I'm not so sure.
+}
+
+RestCalamitySunkenSea: {
+	Line1: There's a whole sea down here! A sparkly one!
+	Line2: It's so pretty underwater... Could our home look like this?
+}
+
+RestCalamityBrimstone: {
+	Line1: All these houses are burned black... People lived here once, didn't they?
+	Line2: What happened here to burn it all like this...?
+}
+
+RestCalamityAstral: {
+	Line1: They shine like stars... But even the trees have changed.
+	Line2: Pretty, I suppose. I still like our old trees at home better.
+}
+
+RestCalamityAbyss: {
+	Line1: Still no bottom... Slow down a little, Meowster.
+	Line2: So dark down here. I'm right beside you.
+}
+
+RestCalamityDeepAbyss: {
+	Line1: Did you hear something...? Or was that just me?
+	Line2: Say something, Meowster. It's too dark to see you.
+}
+
+BossEventCalamityAcidRain: {
+	Line1: This rain stings my nose! We can't just stand in it!
+	Line2: More creatures on the shore! THEY don't seem to mind this rain.
+}
+
+BossEventCalamityBossRush: {
+	Line1: All of them in one go?! I haven't even eaten!
+	Line2: That's a lot of fighting! Remember to count my part too!
+}

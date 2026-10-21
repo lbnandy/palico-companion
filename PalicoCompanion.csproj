@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="$(TmlInstallRoot)/tMLMod.targets" Condition="'$(TmlInstallRoot)' != ''" />
+  <Import Project="../tModLoader.targets" Condition="'$(TmlInstallRoot)' == '' and Exists('../tModLoader.targets')" />
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <LangVersion>12</LangVersion>
+    <Nullable>disable</Nullable>
+    <ModReferencePath Condition="'$(ModReferencePath)' == ''">$(MSBuildProjectDirectory)/references</ModReferencePath>
+    <PathMap>$(MSBuildProjectDirectory)=/_/PalicoCompanion</PathMap>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Remove="tests/**/*.cs;tools/**/*.cs" />
+    <Reference Include="CalamityMod" HintPath="$(ModReferencePath)/CalamityMod.dll" Private="false" />
+    <Reference Include="MagicStorage" HintPath="$(ModReferencePath)/MagicStorage.dll" Private="false" />
+    <Reference Include="ImproveGame" HintPath="$(ModReferencePath)/ImproveGame.dll" Private="false" />
+  </ItemGroup>
+  <Target Name="CheckBuildSetup" BeforeTargets="ResolveReferences">
+    <Error Condition="'$(tMLSteamPath)' == ''" Text="Set TmlInstallRoot to your tModLoader installation, or place this repository in ModSources/PalicoCompanion. See docs/DEVELOPMENT.md." />
+    <Error Condition="!Exists('$(ModReferencePath)/CalamityMod.dll') or !Exists('$(ModReferencePath)/MagicStorage.dll') or !Exists('$(ModReferencePath)/ImproveGame.dll')" Text="IDE builds need the three optional integrations' reference assemblies. Set ModReferencePath, or use tModLoader's built-in build instead; see docs/DEVELOPMENT.md." />
+  </Target>
+</Project>

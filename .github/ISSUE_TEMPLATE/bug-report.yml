@@ -1,0 +1,37 @@
+name: 问题反馈 / Bug report
+description: 描述遇到的问题 / Report something that is not working
+body:
+  - type: input
+    id: versions
+    attributes:
+      label: 版本 / Versions
+      description: 呆猫伙伴与 tModLoader 的完整版本号 / Full Palico Companion and tModLoader versions
+    validations:
+      required: true
+  - type: dropdown
+    id: mode
+    attributes:
+      label: 游戏方式 / Game mode
+      options:
+        - 单人 / Single-player
+        - 开服并游玩 / Host & Play
+        - 加入别人的服务器 / Joining a server
+        - 专用服务器 / Dedicated server
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: 问题与复现步骤 / Problem and steps to reproduce
+      description: 原本期望什么、实际发生什么？涉及武器时写出名称。 / What did you expect, and what happened? Include weapon names if relevant.
+    validations:
+      required: true
+  - type: textarea
+    id: mods
+    attributes:
+      label: 其他模组 / Other enabled mods
+  - type: textarea
+    id: attachments
+    attributes:
+      label: 截图或日志 / Screenshots or logs
+      description: 可选；公开日志前检查是否含个人信息。 / Optional; check logs for personal information before posting.

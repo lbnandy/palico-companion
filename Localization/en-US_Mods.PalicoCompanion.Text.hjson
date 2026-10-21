@@ -1,0 +1,566 @@
+CompanionCat: {
+	DrankPotion: Drank a healing potion: restored {0} life
+	Recovering: Recovering
+	FlyingToLoot: Flying to collect items
+	WatchingEnemies: Watching for enemies
+	KeepingDistance: Keeping a safe distance
+	CatchingUp: Catching up
+	HoldingTorch: Lighting the way
+	RouteBlocked: Path blocked; returned to your side
+}
+
+CompanionCommand: {
+	Description: Palico commands
+	SinglePlayerOnly: Chat commands are single-player only. Use the Palico panel in multiplayer.
+	PlanUsage: /palico plan right|left|down LENGTH — aim the cursor at the starting tile.
+	Help:
+		'''
+		/palico summon / dismiss / follow / pause / recall / bag / give / takeall / pet / chest / store / supply / mine / place torch/platform/rope / plan right/left/down LENGTH / confirm / cancel / pickup / combat / torches / bridges / ropes
+		Common actions are available in the Palico panel. Set shortcuts in Controls.
+		'''
+}
+
+CompanionPanel: {
+	Guide: Guide
+	Equipment: Equipment
+	Work: Work
+	Support: Support
+	WorkHint: Plunderblade, Mining Kit or Harvest Basket
+	SupportHint: Cannot equip duplicates of the same support gear
+}
+
+CompanionCatching.CatchingCritters: Catching critters
+
+CompanionControl: {
+	Unavailable: Cannot do that right now
+	Pending: Waiting for the previous action to finish
+}
+
+CompanionControlUI: {
+	AimHint: Point at ore, a tree, dropped items or water
+	ConfirmHint: " · Left-click to confirm"
+}
+
+CompanionDelivery: {
+	CoinsBanked: Your coins are tucked away in the Piggy Bank, Meowster!
+	ItemsDelivered: Here you go, Meowster! All packed away.
+}
+
+CompanionDirective: {
+	Mine: Mine this vein
+	Tree: Chop this tree
+	Collect: Collect here
+	Fish: Fish here
+	AimHint: Point at ore, a tree, dropped items or water
+	CannotWork: Your Palico cannot work right now
+	TooFar: Target is too far away
+	AlreadyWorking: Already working on this target
+	CannotChop: This tree cannot be chopped
+	NoItems: No items to collect here
+	BagFull: Palico inventory is full
+	NoBait: No usable bait in the Palico inventory
+	NoWater: Point at a fishable water surface
+	FishingBlocked: Check the pool, fishing gear and access to the shore
+	NoTarget: No valid target
+	TreeBlocked: Cannot reach or chop this tree right now
+	LeftWorksite: Left the worksite; following you again
+	MineDone: Finished mining here
+	TreeDone: Finished with this tree
+	CollectDone: Collected the items here
+	CollectFull: Inventory full; remaining items are still on the ground
+	CollectBlocked: Cannot reach the remaining items
+	OutOfBait: Out of bait
+	CatchFull: No room for the catch
+	CannotCast: Cannot cast here right now
+}
+
+CompanionFishing: {
+	ApproachingShore: Walking to the shore
+	ReelingIn: Reeling in
+	WaitingForBite: Waiting for a bite
+}
+
+CompanionLighting: {
+	NeedGlowstick: Underwater lighting needs a Glowstick
+	NeedLight: Needs a Torch or Glowstick
+	HoldingGlowstick: Lighting the way with a Glowstick
+	NoTorch: No unfavorited Torch available
+	NoSupport: No safe place for a Torch; holding it instead
+	LightingPrefix: "Lighting: "
+}
+
+CompanionLoadoutButtons: {
+	Loadout: Palico loadout {0}
+	Current: " · Active"
+}
+
+CompanionLoadouts: {
+	Invalid: Invalid loadout
+	AlreadyActive: Already using loadout {0}
+	Switched: Switched to loadout {0}
+}
+
+CompanionNetworkInventory: {
+	UpgradeDone: Upgrade complete!
+	UpgradeRejected: Cannot upgrade right now; materials returned.
+}
+
+CompanionPickup: {
+	LootBlocked: Cannot reach those items; continuing other tasks
+	PickingUp: "Collecting "
+}
+
+CompanionSkillActivation: {
+	AutomaticOnly: This gear activates automatically when needed
+	NotEquipped: Equip this skill first
+	Unavailable: Your Palico cannot use skills right now
+	Cooldown: Skill is still recharging
+	NoHealingNeeded: You do not need healing right now
+	NoDebuff: No debuff to cleanse
+	NoManaNeeded: Neither you nor your Palico needs mana right now
+	NotAttacking: Your Palico has not started attacking
+	NoTarget: No target in range
+	ProjectileLimit: Cannot create a projectile right now
+	ServerPending: Waiting for the server
+	Used: Used {0}
+}
+
+CompanionSupplies: {
+	CollectingSupply: Collecting supplies for you
+	DeliveringSupply: Bringing you supplies
+}
+
+ConstructionAssist.HelpingBuild: Extending your construction
+DiggingIntent.HelpingDig: Following your digging direction
+
+FieldAssist: {
+	NotSolid: Target is not a solid block that a pickaxe can mine
+	NotOre: Target is not a recognized ore
+	Excluded: Skipped an excluded block
+	StayNearby: Helping you dig; stay nearby
+	RouteBlocked: Mining path blocked; clear a route first
+	CombatPause: Dealing with enemies; mining will resume afterward
+	FindingFooting: Finding a place to stand
+	DiggingAhead: Digging in your direction
+	MiningOre: Mining with the current pickaxe
+	OutOfReach: Ore is beyond the current pickaxe's assistance range
+	CannotMine: Not enough pickaxe power, or vanilla mining rules prevent this
+	DirectionChanged: Digging direction ended or changed
+	ProtectedBlock: Leaving painted or actuated blocks intact
+	HousingWall: Leaving ore inside housing walls intact
+	FallingBlock: Ore is supporting a falling block
+}
+
+GardenAssist.NoSeeds: Herbs harvested; no seeds available to replant
+Logistics.Restocked: Restocked {0} consumables
+MiningIntent.ExposedOre: Mining nearby exposed ore
+
+SafeConstruction: {
+	ServerPending: Waiting for the server to build
+	OwnerUnavailable: Building stopped; waiting for you to return or respawn
+	BagUnavailable: Cannot access the Palico inventory; try again shortly
+	Unsupported: Only Torches, Wood Platforms and Rope are supported
+	WorldEdge: Too close to the edge of the world
+	InvalidPosition: Cannot locate your Palico; recall and try again
+	Approaching: Approaching the building site
+	OwnerTooFar: Building site is too far from you
+	Obstructed: Building site is obstructed
+	WorldSpawn: Leaving the world spawn area intact
+	BedSpawn: Leaving the bed spawn area intact
+	Occupied: A block is already here; it will not be replaced
+	Liquid: Building site is next to liquid
+	Wiring: Building site is next to wiring or actuators
+	Housing: Leaving housing walls intact
+	Furniture: Leaving storage furniture intact
+	Chest: Leaving the area within eight tiles of a chest intact
+	TownNpc: Building site is too close to a town NPC
+	NoMaterials: Not enough materials in the Palico inventory; favorites are not consumed
+	ModBlocked: Another mod prevents placement here
+	Changed: The building site or materials have changed
+	PlacementFailed: Cannot place here; no materials consumed
+	NoSupport: No support, or placement was blocked; no materials consumed
+	Placed: "Placed one "
+}
+
+TrainingHud: {
+	Ready: Ready
+	Cooldown: Recharging
+	Active: Active
+	Triggered: Triggered
+	ClickUse:
+		'''
+
+		Click to use
+		'''
+}
+
+TrainingPanel: {
+	Basics: Getting started
+	Support: Support gear
+	Work: Work gear
+	Upgrades: Upgrades & crafting
+	Progress: Your progress
+	Meet: Meet your Palico
+	Combat: Combat & supplies
+	Mining: Mining & logging
+	Exploring: Exploring & loot
+	Fishing: Fishing & critters
+	Storage: Inventory & storage
+	Equipment: Gear & upgrades
+	Multiplayer: Multiplayer
+	DragHint: Drag the title bar to move the guide
+	Title: Palico Guide
+	Back: Inventory
+	Settings: Settings
+	Baseline: Current
+	ProgressSummary: "{0} · {1} support {^1:slot;slots} · 1 work slot"
+	DemonHeartActive: Demon Heart: extra support slot active.
+	DemonHeartExpert: Demon Heart: extra support slot requires an Expert or Master world.
+	DemonHeartAvailable: Use a Demon Heart for another support slot.
+	DemonHeartClassic: A Demon Heart grants an extra support slot in Expert or Master worlds.
+	NextSteps: What to make next
+	Details: Details
+	AllReady: All set! Browse the categories for gear and recipes.
+	CurrentTier: Current tier
+	CompareTiers: Compare tiers
+	TierLegend: Basic / Improved / Masterwork
+	CurrentEffect: Current effects · {0}
+	Ingredients: Materials · Carried / Needed
+	SwitchRecipe: Switch recipe ({0}/{1})
+	Station: "Crafting station: "
+	MissingMaterials: Missing materials
+}
+
+TrainingProgress: {
+	Used: Already used
+	NeedsImproved: Use an Improved Toolkit first
+	ReadyToUse: In inventory · Ready to use
+	Craftable: Ready to craft
+	NeedsStation: Materials ready · Check crafting requirements
+	MissingMaterials: Missing materials
+	NextImproved: Next: Improved Toolkit (Hallowed Bars, Souls of Light and Night).
+	NextMasterwork: Next: Masterwork Toolkit (Chlorophyte Bars, Ectoplasm and Cogs).
+	MaxTier: Masterwork tier reached. Choose gear to suit your weapon and plans.
+}
+
+TrainingStatus: {
+	Stowed: Palico is resting away
+	Recovering: Palico is recovering
+	Paused: Palico's work is paused
+	OwnerDead: Waiting for you to respawn
+	Disabled: Palico is disabled
+	Waiting: Waiting for your Palico
+	Inactive: "Inactive · "
+	Passive: Passive effect active
+	Healing: Your life is regenerating
+	DebuffImmunity: You are immune to the cleansed debuff
+	PlayerMana: Your mana cost is reduced
+	PalicoMana: Palico's mana cost is reduced
+	DrumBuff: Palico's attack boost is active
+	Duration: "{0} · {1}s remaining"
+	CooldownSuffix: ; cooldown {0}s
+	CooldownRemaining: Recharging · {0}s remaining
+	CombatDisabled: Waiting · Enable combat to use automatically
+	Ready: Ready · Activates when needed
+}
+
+TravelAssist: {
+	NoRope: No unfavorited Rope in either inventory
+	NoPlatform: No unfavorited Wood Platforms in either inventory
+	Approaching: Approaching the building site
+	NoFooting: No reachable place to stand near the building site
+}
+
+TreeAssist: {
+	CombatPause: Dealing with enemies; logging will resume afterward
+	Helping: Helping chop this tree
+	Blocked: Path to the tree is blocked; logging postponed
+	Approaching: Walking to a mature tree
+	Chopping: Chopping a tree
+	Replanted: Tree chopped and replanted
+	ReplantBlocked: Wood retained; replanting blocked, Acorn not consumed
+	NoAcorn: Tree chopped; no matching Acorn to replant
+	LeftTree: Tree chopped; left the replanting site
+	Replanting: Returning to replant
+}
+
+Catalog: {
+	HoneyCage: Restores 15 / 30 / 50 life to you immediately, then another 5 / 10 / 15 life over 5 seconds. Triggers at 70% life or below when you are missing at least 20 / 40 / 65 life. 60-second cooldown. Works during Potion Sickness.
+	GuardShield: Blocks one heavy hit against you, preventing up to 15 / 30 / 40 damage. 60-second cooldown. When you are above 70% life, it can instead protect your Palico at 35% life or below, or from a lethal hit. Both uses share a cooldown.
+	CleansingPot: Removes one common debuff from you, such as Poisoned, On Fire! or Slow, prioritizing more harmful effects. Grants immunity to that debuff for 2 / 3 / 4 seconds afterward. 40-second cooldown. Minor debuffs about to expire do not trigger it. Does not remove Potion Sickness or Mana Sickness.
+	CheerBell: Restores 20 / 40 / 60 mana to you or your Palico and reduces the recipient's mana cost by 10% / 15% / 20% for 6 seconds. 35-second cooldown. Prioritizes you when casting below half mana; otherwise helps your Palico while casting or waiting for mana. The recipient must be missing at least the restoration amount or half their maximum mana, whichever is lower.
+	BattleDrum: Triggers when your Palico starts attacking: +20% / 25% / 30% damage and +10% / 15% / 20% attack speed for 10 seconds. 45-second cooldown. During the effect, your Palico's summons deal +25% / 35% / 45% damage.
+	PiercingBoomerang: On hit, you and your Palico gain 4 / 8 / 12 armor penetration against the target for 15 / 18 / 20 seconds. 35-second cooldown. Prioritizes stronger enemies and avoids targets with plenty of time left on this effect. Multiple applications do not stack.
+	UpdraftBag: While you are airborne, unmounted and holding Jump with little flight time left, restores 0.6 / 0.9 / 1.2 seconds of flight. Without wings, gives you a small upward boost instead. 30-second cooldown.
+	BombPot: Your Palico throws a bomb dealing 120 / 480 / 1200 area damage in a 10×10-tile area. 18-second cooldown. Does not destroy blocks. Aims ahead of moving targets and prioritizes nearby groups of visible enemies.
+	PlunderKnife: Enemies damaged by you or your Palico can drop extra loot on defeat, regardless of the distance between you. Normal enemies have a 10% / 12% / 15% chance to drop 1 extra stackable loot item. Vanilla boss materials yield an average of 5% / 7.5% / 10% extra. Excludes Treasure Bags, unstackable items, coins, Hearts, Stars, biome keys, and normal enemies' Cyan-rarity or higher items. Does not trigger on friendly creatures or statue-spawned enemies. With multiple players, normal enemies use only the highest tier; boss bag materials are checked separately for each player.
+	MiningKit: Your Palico mines 20% / 25% / 30% faster. Ore detection, digging assistance and pickaxe reach each extend by 1 / 2 / 3 tiles. Does not increase pickaxe power or change your own mining stats.
+	GardenKit: Chopping trees or harvesting mature herbs with either you or your Palico yields extra resources, regardless of the distance between you. Average extra yield: 8% / 12% / 16% wood and 20% / 30% / 40% herbs, awarded at random. Does not increase seeds, gems or furniture drops, or apply to placed wood blocks. Your Palico gains 5 / 10 / 15 fishing power.
+	ExpandedBelt: Permanently adds one Palico support slot. Can only be used once.
+	ImprovedTools: Permanently upgrades Palico support and work gear to the Improved tier. Can only be used once.
+	MasterTools: Permanently upgrades Palico support and work gear to the Masterwork tier. Requires the Improved Toolkit first.
+	CatWorkbench: Craft Palico gear, the Expanded Toolbelt and toolkit upgrades here. Right-click to open the Palico Guide.
+	Basic: Basic
+	Improved: Improved
+	Masterwork: Masterwork
+	IronBars: Iron / Lead Bars
+	SilverBars: Silver / Tungsten Bars
+	GoldBars: Gold / Platinum Bars
+	SupportGear: Palico support gear
+	WorkGear: Palico work gear
+	CraftingStation: Palico crafting station
+	PermanentUpgrade: Permanent Palico upgrade
+	ActiveCondition: Active while equipped and your Palico is out; inactive while stowed, paused or recovering
+	CurrentTier: "Current tier: "
+	Legacy: Legacy modifications are now built in. Modification materials are refunded when this enters your inventory; the gear is kept.
+	SupportSlotAdded: Support slots +1
+	ImprovedUpgrade: Palico tools · Improved
+	MasterworkUpgrade: Palico tools · Masterwork
+}
+
+Guide: {
+	Saves:
+		'''
+
+
+		[Saving]
+		Upgrades and gear stay with your character. Chest permissions are remembered separately for each world.
+		'''
+	AdvancedOrders:
+		'''
+
+		Advanced manual work orders are single-player only.
+		'''
+	Multiplayer:
+		'''
+		[Your own companion]
+		Each player's inventory, upgrades and loadouts are saved separately. Private chatter is only shown to the owner. Automatic tasks follow each player's settings.
+
+		[Passing items]
+		Items dropped by players have a 10-second handoff window. Use a direct collection order to pick them up immediately.
+		'''
+	RecipeBrowser:
+		'''
+
+		Recipe Browser also has a Palico gear category.
+		'''
+	Equipment:
+		'''
+		[Three loadouts]
+		Each stores its own weapon, work gear and support gear. Dye is shared. Switching does not reset cooldowns.
+
+		[More support slots]
+		The Expanded Toolbelt adds 1 support slot. Using a Demon Heart adds another in Expert or Master worlds.
+		In Classic worlds, gear from the extra Expert slot returns to the inventory, or is held safely if it is full.
+
+		[Upgrades]
+		Improved and Masterwork Toolkits permanently strengthen gear. Improved is required before Masterwork. See Upgrades & crafting for recipes.
+		'''
+	Reserves:
+		'''
+
+
+		[Reserves and coins]
+		Choose coin destinations and reserve amounts in settings. A reserve of 0 disables restocking, but existing supplies can still be used.
+		Coin Gun ammunition is kept. Coins that do not fit in the Piggy Bank stay in the Palico inventory.
+		'''
+	MagicStorage:
+		'''
+
+		The cat icon beside Magic Storage grants access to the whole network. Restocking also works while its interface is open.
+		'''
+	Storage:
+		'''
+		[Quick transfer]
+		With the Palico inventory open, Shift-click items in your inventory or a chest to transfer them. Favorited items stay put.
+
+		[Supply chests]
+		Open a chest and click the cat icon to allow access. You can allow several chests. While you are nearby and the chest is closed, your Palico stores matching items and restocks consumables.
+		'''
+	Fishing:
+		'''
+		[Fishing]
+		Give your Palico bait, then linger by water, cast your own line or direct them to a pool.
+		Uses the best rod you carry and inherits your fishing bonuses, but consumes their own bait. Never uses Truffle Worms. Lava fishing still requires suitable gear or bait.
+		If the inventory is full, catches land on the ground. Clear them or make room to continue.
+
+		[Critters]
+		Catches nearby critters with a basic net, or a better net you carry.
+
+		Work gear is optional. The Harvest Basket improves gathering yields and your Palico's fishing power.
+		'''
+	Exploring:
+		'''
+		[Collecting and sharing]
+		Items dropped by players have a 10-second handoff window. A direct collection order bypasses it. Exclude unwanted items in settings.
+		New loot tops up your existing stacks. Usable upgrades, such as Life Crystals, are handed over too. Your Palico keeps supplies first; favorited and manually stored items stay put.
+
+		[Exploring and lighting]
+		Points out Life Crystals, chests and other finds, and brings nearby Hearts or Stars when you need them.
+		Put Torches or Glowsticks in the Palico inventory for light. Holding them does not consume them.
+		'''
+	HarvestAndBuild:
+		'''
+
+
+		[Logging and herbs]
+		Chops mature trees and harvests blooming herbs. Replants when seeds and space are available; gathering still works without seeds. Favorited materials are never consumed.
+
+		[Building assistance]
+		Can extend the platforms or ropes you are placing. Enable each in settings.
+		'''
+	QotMining:
+		'''
+
+		Quality of Terraria vein mining also applies to your Palico when enabled.
+		'''
+	Mining:
+		'''
+		[Digging and mining]
+		Your Palico helps nearby while you swing a pickaxe, and gathers exposed ore and gems while idle.
+		Uses the strongest pickaxe you carry, or a basic tool if you have none. If mining stalls, check pickaxe power and access. Exclude unwanted blocks in settings.
+		'''
+	Summons:
+		'''
+
+
+		[Minions and sentries]
+		Both limits match yours, with a minimum of 1. They do not use your own slots.
+		Old One's Army weapons follow vanilla unlock rules. During the event, keep Etherian Mana in the Palico inventory.
+		'''
+	QotAmmo:
+		'''
+
+		With Quality of Terraria infinite ammo enabled, restocking accounts for the required stack size.
+		'''
+	Combat:
+		'''
+		Support skills activate automatically. You can also click a status-card icon to use one; the Shield and Updraft Pouch are automatic only.
+
+		[Weapons and supplies]
+		Equip throwing weapons as a stack. Keep ammunition and potions in the Palico inventory.
+		'''
+	DirectAndRecover:
+		'''
+		point at ore, a tree, dropped items or water and left-click.
+		Tasks pause during combat. Recall cancels them; moving away resumes following.
+
+		[Fainting]
+		Your Palico retreats when defeated and returns after recovering.
+		'''
+	Introduction:
+		'''
+		[Inventory]
+		Right-click your Palico nearby, or click the status card. Click the portrait or name in the inventory title to change their name and colour.
+
+		[Give a task]
+
+		'''
+	BindKey: "Assign the Direct companion key in Controls, then hold it and "
+	HoldKey: "Hold "
+	AfterKey: " and "
+}
+
+CompanionStatusBar.Vitals: "{0} · Life {1}/{2} · Mana {3}/{4}"
+
+Storage: {
+	Allowed:
+		'''
+		Palico access allowed
+		Click to revoke
+		'''
+	Allow:
+		'''
+		Allow your Palico to use this storage network
+		Stores matching items and restocks nearby
+		'''
+}
+
+ItemTooltips: {
+	HoneyCage:
+		'''
+		Heals you for {0} life, then another {1} over 5 seconds
+		Triggers at 70% life or below when at least {2} life is missing
+		60-second cooldown; works during Potion Sickness
+		'''
+	GuardShield:
+		'''
+		Blocks up to {0} damage from one heavy hit
+		Can protect your Palico instead when you are healthy
+		60-second shared cooldown
+		'''
+	CleansingPot:
+		'''
+		Removes one common debuff and grants {0} seconds of immunity to it
+		Does not remove Potion Sickness or Mana Sickness
+		40-second cooldown
+		'''
+	CheerBell:
+		'''
+		Restores {0} mana while you or your Palico casts, or while your Palico waits for mana
+		Reduces the recipient's mana cost by {1} for 6 seconds
+		35-second cooldown
+		'''
+	BattleDrum:
+		'''
+		In combat, increases your Palico's damage by {0} and attack speed by {1}
+		Its summons gain {2} damage during the effect
+		Lasts 10 seconds; 45-second cooldown
+		'''
+	PiercingBoomerang:
+		'''
+		Grants you and your Palico {0} armor penetration against the target
+		Lasts {1} seconds; does not stack
+		35-second cooldown
+		'''
+	UpdraftBag:
+		'''
+		Hold Jump near the end of your flight to regain {0} seconds of flight
+		Gives a small boost without wings; cannot be used while mounted
+		30-second cooldown
+		'''
+	BombPot:
+		'''
+		Throws a bomb dealing {0} damage in a 10×10-tile area
+		Does not destroy blocks
+		18-second cooldown
+		'''
+	PlunderKnife:
+		'''
+		From enemies hit by you or your Palico: {0} chance of 1 extra item per stackable drop
+		Vanilla boss materials yield an average of {1} extra
+		Excludes Treasure Bags, equipment, valuables and statue-spawned enemies
+		'''
+	MiningKit:
+		'''
+		Your Palico mines {0} faster
+		{1}-tile increase to its ore detection, digging assistance and pickaxe reach
+		Does not increase pickaxe power
+		'''
+	GardenKit:
+		'''
+		You and your Palico gather an average of {0} more wood and {1} more herbs
+		Your Palico gains {2} fishing power
+		Does not increase seeds, gems or furniture drops
+		'''
+	ExpandedBelt:
+		'''
+		Permanently adds one Palico support slot
+		Can only be used once
+		'''
+	ImprovedTools:
+		'''
+		Permanently upgrades Palico support and work gear to the Improved tier
+		Can only be used once
+		'''
+	MasterTools:
+		'''
+		Permanently upgrades Palico support and work gear to the Masterwork tier
+		Requires the Improved Toolkit first
+		'''
+	CatWorkbench:
+		'''
+		Used to craft Palico gear and upgrades
+		Right-click to open the Palico Guide
+		'''
+}
