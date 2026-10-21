@@ -1,0 +1,7 @@
+1.0.0 — 首次发布 / First release
+
+带上呆猫，一起战斗、采集和探索。搭配武器、支援与工作装备，管理背包，设置名字和衣服颜色。
+支持单人、多人、简体中文和英文；可选魔法存储、更好的体验与灾厄联动。
+
+Bring a Palico along to fight, gather and explore. Choose its weapons, support and work gear, manage its backpack, and customize its name and outfit.
+Supports single-player, multiplayer, English and Simplified Chinese, with optional Magic Storage, Quality of Terraria and Calamity integrations.

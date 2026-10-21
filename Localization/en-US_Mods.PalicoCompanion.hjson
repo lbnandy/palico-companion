@@ -1,0 +1,1171 @@
+Keybinds: {
+	Direct.DisplayName: Direct companion (hold and click)
+	Panel.DisplayName: Companion panel
+	Recall.DisplayName: Recall companion
+}
+
+UI: {
+	NameEmpty: Enter a name to continue
+	DefaultName: Kit
+	DyeSlot: Dye
+	DyeHint: Dyes your Palico, kite and status-card portrait
+	SortBag: Sort items
+	SortDone: Backpack sorted
+	SortUnavailable: Sorting unavailable; items remain unchanged
+	PetCloser: Come closer to pet your companion
+	PetHappy: Mrr... That's the spot.
+	HudStowed: Resting away
+	HudRecovering: Recovering
+	HudWorking: Working
+	HudFishing: Fishing
+	HudCombat: Fighting
+	HudDelivering: Delivering
+	HudHint: Open Palico inventory
+	Stowed: Resting away; belongings retained
+	CallOut: Call out
+	RecallAction: Recall
+	Stow: Rest away
+	RecoveryWait: Recovering; wait for your companion to return
+	Tiles: tiles
+	AppearanceMeetTitle: Meet your Palico
+	AppearanceName: Name
+	AppearanceLater: Later
+	AppearanceStart: Let's go
+	AppearanceTitle: Name and color
+	AppearanceReset: Reset color
+	AppearanceCancel: Cancel
+	AppearanceConfirm: Confirm
+	AppearanceHue: Hue
+	AppearanceSaturation: Saturation
+	AppearanceLightness: Lightness
+	AppearanceEntry: Name and color
+	GardenWalking: Walking to blooming herb
+	GardenWorking: Harvesting and replanting
+	GardenDone: Harvested and replanted with one seed.
+	GardenReplantBlocked: Replant blocked; seed and normal drops retained.
+	GardenBlocked: Harvest blocked; seed retained.
+	QuickStack: Quick stack
+	NativeBagHint: While this panel is open, Shift-click in your inventory or a chest transfers to the companion. Favorited items stay put.
+	Transferred: Transferred {0} items
+	Recovering: Recovering: back in {0}s
+	GearHint: Equip throwing weapons as a stack; keep ammo in the Palico inventory
+	DefaultWeaponHint: An empty weapon slot uses a Copper Shortsword
+	CannonStagesHint: Your Palico fires energy shots; the final sustained beam is currently disabled
+	RecoverArmor: Retrieve
+	LegacyArmorHint: Legacy armor is withdrawal-only; defense now scales with the player
+	Weapon: Weapon
+	HealthHint: Maximum health is 75% of the player
+	ManaHint: Maximum mana matches yours (minimum 20), with separate spending and recovery. When out of mana and unable to drink a mana potion, your Palico waits for a full refill before casting again
+	DefenseHint: Defense is 75% of the player
+	HealthLabel: Life
+	ManaLabel: Mana
+	MinionSlots: Minion slots
+	SentrySlots: Sentry slots
+	SentrySlotsHint: Placed / limit. Matches your sentry limit, with a minimum of 1. Uses separate slots and repositions as combat moves. Old One's Army weapons follow vanilla unlock rules and use Etherian Mana from the Palico inventory during the event.
+	MinionSlotsHint: Used minion slots / limit. Matches your minion limit, with a minimum of 1, without using your own slots. Some minions use multiple or fractional slots.
+	Defense: Defense
+	StorageLinked: You can use this chest now, Meowster? Leave it to me!
+	StorageUnlinked: Permission for this chest revoked. Other chests are unchanged.
+	ChestSupplyOn: Companion access: Allowed
+	ChestSupplyOff: Companion access: Not allowed
+	ChestSupplyLinkHint: Allow access to this chest. When you are nearby and it is closed, your Palico stores matching items and restocks consumables. Favorites stay put. Permissions are saved per character and world.
+	ChestSupplyUnlinkHint: Revoke access to this chest
+	ChestSupplyDisabledHint: Automatic logistics is disabled in Mod Settings. Enable it to use permitted chests.
+	StorageWalking: Walking to our supply chest
+	StorageWorking: Sorting and packing supplies
+	StorageBlocked: Cannot reach the supply chest; will try again later.
+	StorageDone: Stored {0} items and restocked {1}.
+	Required: Needed
+	Available: Available
+	Following: Following you
+	Guarding: Guarding
+	VeinOn: Vein: up to 12
+	VeinOff: Mining: one tile
+	BagTab: Inventory
+	WorkTab: Work
+	CompanionTab: Companion
+	PausedState: Paused
+	RestState: Resting
+	MineTarget: Select ore
+	BuildTarget: Choose start, then confirm material budget
+	TargetHint: Left click below to select; right click / Esc cancels
+	Left: Platform left
+	Right: Platform right
+	Down: Rope down
+	Length: Length
+	Preview: Choose start
+	Confirm: Confirm build
+	Progress: Build progress
+	NoOrder: No order
+	WorkHint: Give real materials. Preview first, then confirm to build.
+	Recall: Recall
+	Pet: Pet
+	Take: Take all
+}
+
+Projectiles: {
+	CompanionCat.DisplayName: Palico
+	TrainingBomb.DisplayName: Palico Bomb
+	TrainingDart.DisplayName: Piercing Boomerang
+}
+
+CoinChoices: {
+	Owner: You
+	Bank: Piggy Bank
+	Bag: Palico inventory
+}
+
+Configs: {
+	CompanionConfig: {
+		Headers: {
+			Companion: "[palicohead:icon] Companion and combat"
+			Work: "[palicoitem:GoldPickaxe] Gathering and exploration"
+			Building: "[palicoitem:Torch] Lighting and building"
+			Deliveries: "[palicoitem:GoldCoin] Deliveries to you"
+			Restocking: "[palicoitem:Chest] Chest supplies and reserves"
+			Display: "[palicoitem:Goggles] Interface and notifications"
+			Advanced: "[palicoitem:Wrench] Other options"
+		}
+
+		ShareNewPickups: {
+			Label: Share new loot
+			Tooltip: Tops up your existing stacks and brings you usable permanent upgrades. Keeps your Palico's reserves first. Manually stored and favorited items stay put.
+		}
+
+		CoinDestination: {
+			Label: Where collected coins go
+			Tooltip: Applies to newly collected coins. Keeps Coin Gun ammunition and any coins that do not fit in the Piggy Bank.
+		}
+
+		StockTorches: {
+			Label: Torches to keep
+			Tooltip: Restocks from permitted storage when supplies fall below about a third of this amount. Set to 0 to stop restocking. Favorited items are not used or counted.
+		}
+
+		StockGlowsticks: {
+			Label: Glowsticks to keep
+			Tooltip: Restocks from permitted storage when supplies fall below about a third of this amount. Set to 0 to stop restocking. Favorited items are not used or counted.
+		}
+
+		StockPlatforms: {
+			Label: Wood Platforms to keep
+			Tooltip: Restocks from permitted storage when supplies fall below about a third of this amount. Set to 0 to stop restocking. Favorited items are not used or counted.
+		}
+
+		StockRopes: {
+			Label: Rope to keep
+			Tooltip: Restocks from permitted storage when supplies fall below about a third of this amount. Set to 0 to stop restocking. Favorited items are not used or counted.
+		}
+
+		StockHealing: {
+			Label: Healing Potions to keep
+			Tooltip: Restocks from permitted storage when supplies fall below about a third of this amount. Set to 0 to stop restocking. Favorited items are not used or counted.
+		}
+
+		StockMana: {
+			Label: Mana Potions to keep
+			Tooltip: Restocks from permitted storage when supplies fall below about a third of this amount. Set to 0 to stop restocking. Favorited items are not used or counted.
+		}
+
+		StockAmmo: {
+			Label: Ammunition to keep
+			Tooltip: Restocks ammunition for the equipped weapon, including throwing weapons. With Quality of Terraria infinite ammo enabled, tops up the active type to its threshold. Otherwise restocks below about a third of this amount. Set to 0 to stop restocking. Favorites are not used.
+		}
+
+		StockAcorns: {
+			Label: Acorns to keep
+			Tooltip: Restocks from permitted storage when supplies fall below about a third of this amount. Set to 0 to stop restocking. Favorited items are not used or counted.
+		}
+
+		StockBait: {
+			Label: Bait to keep
+			Tooltip: Restocks from permitted storage when supplies fall below about a third of this amount. Set to 0 to stop restocking. Favorited items are not used or counted.
+		}
+
+		CatSounds: {
+			Label: Palico sounds
+			Tooltip: Quiet Terraria cat sounds when chatting, hurt or petted, with limits on repeated playback.
+		}
+
+		Fishing: {
+			Label: Automatic fishing
+			Tooltip: Fishes when you linger by water or cast your own line, using unfavorited bait from the Palico inventory. Moving nearby or opening your inventory does not interrupt it. Water, honey and lava use the usual fishing requirements.
+		}
+
+		DeliverRecoveryDrops: {
+			Label: Bring Hearts and Stars
+			Tooltip: Brings nearby Hearts and Stars when you need life or mana, without interrupting digging.
+		}
+
+		CatchCritters: {
+			Label: Catch nearby critters
+			Tooltip: Uses a basic net or a better net you carry. Leaves released critters, statue-spawned critters and guiding fairies alone.
+		}
+
+		RunInBackground: {
+			Label: Keep playing in the background
+			Tooltip: Keeps single-player running while the window is unfocused. Settings menus and inventory Auto Pause still work.
+		}
+
+		Ropes: {
+			Label: Help place Rope
+			Tooltip: Extends ropes while descending or continues your rope placement, using real materials. Saved per character; off for new characters.
+		}
+
+		AutoHeal: {
+			Label: Use recovery potions
+			Tooltip: Drinks Healing Potions at half life and Mana Potions when a spell needs mana. Uses unfavorited Palico supplies. Potion cooldowns and Mana Sickness are saved.
+		}
+
+		Chatter: {
+			Label: Palico chatter
+			Tooltip: Occasional comments, work reports and discovery callouts. Urgent messages take priority; repeated work reports are grouped.
+		}
+
+		Discoveries: {
+			Label: Point out nearby discoveries
+			Tooltip: Points out Life Crystals, Life Fruit, chests, Plantera's Bulbs and stranded NPCs within 16 tiles, including through terrain. Remembers finds without opening or harvesting them.
+		}
+
+		Emotes: {
+			Label: Expression bubbles
+			Tooltip: Shows Terraria emote bubbles for healing, petting, resting and other events.
+		}
+
+		Gardening: {
+			Label: Harvest blooming herbs
+			Tooltip: Harvests wild or planted blooming herbs. Replants when an unfavorited seed is available, including fresh drops. Only successful replanting consumes a seed. Leaves unbloomed herbs alone.
+		}
+
+		CompanionHud: {
+			Label: Palico status card
+			Tooltip: Shown below your buffs. Click to open the Palico inventory. Hidden while your inventory or full-screen map is open.
+		}
+
+		ShowActivityStatus: {
+			Label: Show current task in the panel
+			Tooltip: Shows what your Palico is doing in the inventory panel. Does not affect work, chatter or the status card.
+		}
+
+		CompanionMarker: {
+			Label: Show Palico location
+			Tooltip: Shows a map icon and an off-screen direction and distance indicator. Hidden while resting away.
+		}
+
+		Enabled: {
+			Label: Enable Palico
+			Tooltip: Turning this off keeps your Palico's items, name and upgrades. To send it away temporarily, use Rest away in its inventory.
+		}
+
+		AdvancedOrders: {
+			Label: Advanced manual work orders
+			Tooltip: Adds manual mining and construction plans to the Palico panel. Not needed for automatic work. This page is only available in single-player.
+		}
+
+		Forestry: {
+			Label: Chop and replant trees
+			Tooltip: Uses a basic axe or a stronger axe you carry. Chops mature trees, including palms, ash trees and gem trees. Replants with a matching unfavorited seed when possible; only successful planting consumes it. Leaves trees built into housing walls or actuators alone unless you start chopping them.
+		}
+
+		DiggingAssist: {
+			Label: Help you dig
+			Tooltip: Follows your pickaxe strikes for up to 8 seconds, including downward digging. Stops when you move away, jump, switch items or pause. Uses normal pickaxe power and mining rules.
+		}
+
+		MiningBlacklist: {
+			Label: Mining exclusions
+			Tooltip: Select placeable ore, gem or block items. Your Palico skips their tiles but can still collect their drops.
+		}
+
+		PickupBlacklist: {
+			Label: Pickup exclusions
+			Tooltip: Your Palico will not pursue, attract or carry these world drops. Player pickup and storage restocking are unaffected.
+		}
+
+		MiningAssist: {
+			Label: Mine exposed ore
+			Tooltip: Uses a basic pickaxe or the strongest one you carry. Mines exposed ore and gems when the pickaxe is strong enough, and can fly along a clear path to reach them.
+		}
+
+		DisplayName: Palico Companion settings
+
+		Pickup: {
+			Label: Collect items
+			Tooltip: Collects nearby drops that fit in the Palico inventory. Modded items with special pickup effects are left for players. Deliveries and collected coins have separate settings below.
+		}
+
+		Combat: {
+			Label: Fight enemies
+			Tooltip: Uses its equipped weapon, or a Copper Shortsword if the slot is empty. When turned off, your Palico still follows you and works.
+		}
+
+		Torches: {
+			Label: Automatic lighting
+			Tooltip: Prefers Torches on land and holds Glowsticks underwater or when Torches run out. Uses unfavorited supplies. Placing a Torch consumes it; holding a light does not.
+		}
+
+		Bridges: {
+			Label: Help place Platforms
+			Tooltip: Bridges small gaps or continues your platform placement, using real materials. Saved per character; off for new characters.
+		}
+
+		AutoLogistics: {
+			Label: Use permitted storage
+			Tooltip: Stores matching items and restocks supplies while you are nearby and the chest is closed. Open a chest and click the Palico button to allow access; you can allow more than one chest.
+		}
+
+		TrainingHints: {
+			Label: Gear and upgrade hints
+			Tooltip: Occasional private hints about the workbench, gear and upgrades. Each hint appears once per character.
+		}
+	}
+
+	CoinDestinationMode: {
+		Tooltip: ""
+		Owner.Tooltip: ""
+		Bank.Tooltip: ""
+		Bag.Tooltip: ""
+	}
+}
+
+MemoryTwins: the Twins
+
+Speech: {
+	BossEventGoblin: {
+		Line1: Goblins at our doorstep, Meowster!
+		Line2: Spiky balls! Watch your paws... feet!
+		Line3: They brought a whole army. Good thing you brought me!
+	}
+
+	BossEventSnowman: {
+		Line1: That snowman has a GUN! Mine never do that!
+		Line2: Don't shoot! Meowster, scoot over!
+		Line3: Why can't the snowmen I build help with the fighting?
+	}
+
+	BossEventPirate: {
+		Line1: Pirates! They're not getting our stuff, Meowster!
+		Line2: Even their birds are fighting! Heads up!
+		Line3: If they're here to rob us... can we rob them back?
+	}
+
+	BossEventMartian: {
+		Line1: They're coming down from the sky! Watch that beam!
+		Line2: Flying saucers! Can we keep one if we knock it down?
+		Line3: Mrr?! What IS that? Have you seen one before?
+	}
+
+	BossEventBloodMoon: {
+		Line1: The moon's gone red... I'm staying close tonight.
+		Line2: With all that racket outside, are we getting any sleep?
+		Line3: A red moon... I'll keep watch with you, Meowster.
+	}
+
+	BossEventEclipse: {
+		Line1: Why's it dark already? Those things don't look sleepy!
+		Line2: It's daytime! Where did all these monsters come from?
+		Line3: Meowster, the sun's gone! It was just there!
+	}
+
+	BossEventPumpkinMoon: {
+		Line1: The pumpkins are chasing us! How am I supposed to eat pumpkin after this?
+		Line2: I know how to pick pumpkins. Not THIS kind!
+		Line3: That pumpkin's staring at us... and GRINNING!
+	}
+
+	BossEventFrostMoon: {
+		Line1: That present's moving! Who wraps a present that runs away?
+		Line2: Now the trees want a fight! Would an axe help?
+		Line3: This is NOT the holiday I was promised!
+	}
+
+	BossEventArmy: {
+		Line1: They're after the crystal! I'll help guard it!
+		Line2: More of them by the crystal, Meowster! On my way!
+		Line3: Want our crystal? You'll have to get past me!
+	}
+
+	BossEventSlimeRain: {
+		Line1: That's not rain, Meowster! It's slimes!
+		Line2: Jelly falling from the sky... Wait. Not food.
+		Line3: Heads up! Today's rain bounces!
+	}
+
+	BossEventPillars: {
+		Line1: That's a lot of strange creatures around that pillar. Let's go together.
+		Line2: Where did that huge pillar come from?
+		Line3: I don't know this place, Meowster. Don't leave me behind!
+	}
+
+	RestEventQuiet: {
+		Line1: Meowster... I'm hungry. Didn't notice until now.
+		Line2: Let me have a look. You're not hurt, are you?
+		Line3: Finally, some quiet. I could barely hear myself calling you!
+	}
+
+	OwnerHurtDeath: {
+		Line1: Meowster...? I'll watch our things until you get back.
+		Line2: Meowster... I couldn't protect you.
+		Line3: We'll get it when you come back. I'll be here.
+	}
+
+	WelcomeRevived: {
+		Line1: Meowster! You're back! I was so worried.
+		Line2: You're back! Let me look at you. You're really okay?
+		Line3: Oh, thank goodness... I didn't know what to do.
+	}
+
+	WorkingBagFull: {
+		Line1: Bag's full, Meowster! Can't fit any more!
+		Line2: Can't squeeze another thing in. A little room, Meowster?
+		Line3: My bag's bursting... But there's more loot!
+	}
+
+	DeliveredUpgrade: {
+		Line1: This'll make you stronger, Meowster! Here!
+		Line2: Found something good! Don't lose it!
+		Line3: Saved this one for you. Go on, take it!
+	}
+
+	LootPlunder: {
+		Line1: Extra loot! {0}, all ours!
+		Line2: Hehe! They were hiding {0}. Not from these paws!
+		Line3: Look, Meowster! Another {0}. I'll take it!
+	}
+
+	BossRematchSlimeKing: {
+		Line1: The big jelly's back, Meowster!
+		Line2: Back for another fight, crown and all. Sore loser?
+		Line3: We've beaten this one! Still a very big blob, though.
+	}
+
+	BossRematchEye: {
+		Line1: That giant eyeball again! I'd know it anywhere.
+		Line2: That's the one that grew a mouth halfway through!
+		Line3: Staring at me again? Let's give it another black eye!
+	}
+
+	BossRematchEater: {
+		Line1: That long worm's back under our paws!
+		Line2: We've fought this one. There's always more worm after the worm.
+		Line3: That rumbling... It's another one of those huge worms!
+	}
+
+	BossRematchBrain: {
+		Line1: The brain with no body is back!
+		Line2: Its little eyeball friends came too. Well, you've got me!
+		Line3: This one again! Making copies of yourself is cheating!
+	}
+
+	BossRematchBee: {
+		Line1: The big bee again! I haven't touched her honey. This time either!
+		Line2: I heard her before I saw her. That's our big bee!
+		Line3: Queen Bee again? Can I have some honey afterward?
+	}
+
+	BossRematchSkeletron: {
+		Line1: The big skeleton's back! Both hands, too.
+		Line2: We knocked it into pieces! Did it put itself back together?
+		Line3: Still no body. Still picking fights.
+	}
+
+	BossRematchDeerclops: {
+		Line1: The one-eyed brute's back! Hasn't shrunk a bit.
+		Line2: That's the one that makes ice shoot out of the ground!
+		Line3: We beat it before. Count me in again!
+	}
+
+	BossRematchWall: {
+		Line1: That moving wall again! Run and fight, Meowster!
+		Line2: Same wall. Still won't let us turn back!
+		Line3: Another long run? Wait for these little legs!
+	}
+
+	BossRematchQueenSlime: {
+		Line1: The sparkly slime's back! Remember, she flies!
+		Line2: Keep looking up, Meowster! I remember those wings.
+		Line3: The queen wants another try. Doesn't give up... just like you.
+	}
+
+	BossRematchTwins: {
+		Line1: Those two metal eyes are back!
+		Line2: One spits fire, one shoots lasers. Couldn't they take turns?
+		Line3: These two again? Time to take them apart!
+	}
+
+	BossRematchDestroyer: {
+		Line1: The metal worm's back, Meowster!
+		Line2: It brought those little flying eyes again!
+		Line3: I hear it underneath us! Just like last time!
+	}
+
+	BossRematchPrime: {
+		Line1: The skeleton with all the arms again!
+		Line2: That saw's started up again. Makes my teeth hurt!
+		Line3: We've beaten this metal skeleton before. Let's dismantle it together!
+	}
+
+	BossRematchPlantera: {
+		Line1: The flower that chases people is back!
+		Line2: Remember this flower? It gets even angrier!
+		Line3: Who broke the bulb this time, Meowster?
+	}
+
+	BossRematchGolem: {
+		Line1: That big lump of temple stone again!
+		Line2: Last time, even knocking its head off didn't stop it!
+		Line3: Back to break the temple's big rock, Meowster?
+	}
+
+	BossRematchDuke: {
+		Line1: The big flying fish is back!
+		Line2: That fish again! Did you feed it another Truffle Worm?
+		Line3: We've beaten it before... but it's still awfully fast!
+	}
+
+	BossRematchEmpress: {
+		Line1: The pretty one's back! The one who hits REALLY hard.
+		Line2: Lights everywhere again... I could barely find you last time!
+		Line3: I remember her! We beat her together!
+	}
+
+	BossRematchCultist: {
+		Line1: The hooded fellow again!
+		Line2: We've fought him. Watch out when he makes copies!
+		Line3: Is he doing the copy trick again? Fooled me good last time.
+	}
+
+	BossRematchMoonLord: {
+		Line1: That huge thing from the sky again... I'm with you!
+		Line2: We beat something that big before. We can do it again!
+		Line3: Moon Lord's back. My knees are shaking, but I'm staying!
+	}
+
+	BossRematchBetsy: {
+		Line1: The fire-breathing dragon's back!
+		Line2: Let's bring that dragon down again! I'll help!
+		Line3: Back to burn our crystal? Didn't get enough last time?
+	}
+
+	RestMemory: {
+		Line1: Remember when we beat {0}, Meowster? Hehe. I do.
+		Line2: We beat {0}, you and me! Still feels good to say it.
+		Line3: When you tell everyone about {0}, mention me too, okay?
+	}
+
+	FirstMeet: {
+		Line1: Gathering, hunting... take me along, Meowster! I'm here to help.
+		Line2: So you're my Meowster? Then I'm coming with you!
+		Line3: Meowster! Meowster! Don't leave without me!
+		Line4: All packed! Where are we going?
+		Line5: Small cat, roomy bag. You'll see!
+		Line6: I want to see what's out there too, Meowster.
+	}
+
+	Welcome: {
+		Line1: Where to today, Meowster?
+		Line2: Take me! Take me!
+		Line3: Out with my Meowster again. Hehe.
+		Line4: Bag's packed. Paws ready!
+		Line5: There you are, Meowster! I've been waiting!
+		Line6: Oh, you're here! I'm awake, I'm awake!
+	}
+
+	Heal: {
+		Line1: Gulp... Took my potion, Meowster. I can keep up.
+		Line2: Bitter... I didn't spit it out! Honest.
+		Line3: Potion down! I've still got some fight in me!
+		Line4: That's a bit better. That last hit really stung.
+		Line5: Could we put a little honey in this stuff?
+		Line6: Glug, glug... Better than getting hit again!
+	}
+
+	Downed: {
+		Line1: I need to hide a moment... Let me catch my breath.
+		Line2: No more hitting! I'm getting out of here!
+		Line3: Falling back, Meowster! I'll come help as soon as I can!
+		Line4: Can't swing another paw... Just need a rest.
+		Line5: Couldn't hold on that time. I'll be back.
+		Line6: I'll come back, Meowster... Don't replace me.
+	}
+
+	Recovered: {
+		Line1: Meowster! All better!
+		Line2: Back to help! You're okay, aren't you?
+		Line3: I'm fine now! Where'd that nasty thing go?
+		Line4: Got my strength back. Let's get to it!
+		Line5: I'm back, I'm back! Miss me?
+		Line6: Ready to lend a paw again!
+	}
+
+	Tree: {
+		Line1: New little tree planted, Meowster!
+		Line2: One tree down, one sapling in!
+		Line3: That tiny thing grows into a whole tree?
+		Line4: Grow big, little tree! We'll be back!
+		Line5: Mind the little sapling!
+		Line6: All planted!
+	}
+
+	Pet: {
+		Line1: Hehe... Your hand's warm.
+		Line2: One more pat? Just one?
+		Line3: Right there! A little more?
+		Line4: Easy on the ears! They're still attached!
+		Line5: I'll get back to work after this. Or after one more pat.
+		Line6: Purrr... That feels good.
+	}
+
+	Recall: {
+		Line1: Coming, Meowster!
+		Line2: You call, I come running!
+		Line3: Here! Here! Glad you didn't forget me.
+		Line4: Need a paw with something?
+		Line5: Heard you! What's up, Meowster?
+		Line6: I'm coming, I'm coming!
+	}
+
+	Rest: {
+		Line1: Not asleep. Just resting my eyes.
+		Line2: I was thinking... What was I thinking about?
+		Line3: Want to sit down too, Meowster?
+		Line4: No hurry? I'll sit a tiny bit longer.
+		Line5: Scoot over a little, Meowster?
+		Line6: Zzz... Hm? Are we going?
+	}
+
+	OwnerHurt: {
+		Line1: Meowster! Did that hurt?
+		Line2: Who hit my Meowster?!
+		Line3: Still fighting after that? Then I'm with you.
+		Line4: You can say it hurts. I won't laugh.
+		Line5: I'm coming to help!
+		Line6: Meowster! Are you all right?
+	}
+
+	Ore: {
+		Line1: Got that ore loose, Meowster!
+		Line2: Hehe! Got it!
+		Line3: Oof... My paws are tingling.
+		Line4: Heave... there it goes!
+		Line5: Is that enough ore, Meowster?
+		Line6: More ore for us!
+	}
+
+	Loot: {
+		Line1: Found something!
+		Line2: This looks good. Into the bag!
+		Line3: Meowster! Another treasure for the bag!
+		Line4: Taking this too. You might need it.
+		Line5: Safely tucked away!
+		Line6: I'll carry the loot, Meowster!
+	}
+
+	RouteRecovered: {
+		Line1: I'm back! Couldn't get through that way.
+		Line2: Much easier over here with you.
+		Line3: I wasn't lost... Just took the long way.
+		Line4: That path's blocked. Coming back to you!
+		Line5: Can't get through... Wait for me, Meowster!
+		Line6: Meowster! Finally caught up!
+	}
+
+	Build: {
+		Line1: Another piece in place!
+		Line2: Hup! There we go!
+		Line3: I'm helping build the path too!
+		Line4: There, that's joined up!
+		Line5: One more goes here...
+		Line6: Hehe! Getting longer!
+	}
+
+	FoundCrystal: {
+		Line1: Meowster! Life Crystal, {0}!
+		Line2: That shiny thing {0} is a Life Crystal!
+		Line3: Life Crystal {0}! Let's take it!
+		Line4: Found a Life Crystal! Look {0}.
+		Line5: There's a Life Crystal tucked away {0}. Almost missed it!
+		Line6: Life Crystal, {0}! I spotted it first!
+	}
+
+	FoundChest: {
+		Line1: A chest, {0}! What's inside, I wonder?
+		Line2: Meowster! Chest, {0}!
+		Line3: A chest! Look {0}. I want a peek too.
+		Line4: There's a chest {0}! Let me watch you open it.
+		Line5: Found a chest, {0}. Shall we?
+		Line6: Chest, {0}! Bet there's something good in there.
+	}
+
+	FoundFruit: {
+		Line1: Life Fruit, {0}, Meowster!
+		Line2: Look {0}! That's Life Fruit!
+		Line3: Meowster! Look! Life Fruit, {0}!
+		Line4: Found the Life Fruit! It's {0}.
+		Line5: Life Fruit, {0}. Saving that for you!
+		Line6: There's Life Fruit hiding in the leaves, {0}.
+	}
+
+	FoundBulb: {
+		Line1: Plantera's Bulb, {0}! Feel like a fight?
+		Line2: Bulb, {0}! Break it and we're in for a fight.
+		Line3: Plantera's Bulb, {0}! Take me if you're fighting it.
+		Line4: That pink flower {0} means big trouble.
+		Line5: Plantera's Bulb, {0}. Let's remember this spot.
+		Line6: Meowster! Plantera's Bulb! Right {0}.
+	}
+
+	FoundRescue: {
+		Line1: Someone needs help, {0}!
+		Line2: There's someone over there! Look {0}.
+		Line3: Let's check {0}. That person looks in trouble.
+		Line4: Someone's stuck, {0}. Can we help?
+		Line5: Meowster, someone's trapped {0}!
+		Line6: Someone needs rescuing {0}, Meowster!
+	}
+
+	NoAmmo: {
+		Line1: Meowster, I've got no ammo for this weapon!
+		Line2: More ammo, Meowster?
+		Line3: Huh? Nothing's coming out... I'm out of ammo!
+		Line4: Meowster, have you got any ammo for me?
+		Line5: Not a single shot left in the bag...
+		Line6: I'm not slacking! I'm out of ammo!
+	}
+
+	NoMana: {
+		Line1: I'm out of mana!
+		Line2: Nothing... Give me a moment to get some mana back.
+		Line3: Not enough mana, Meowster. Let me catch my breath.
+		Line4: Give me a moment to get my mana back, Meowster.
+		Line5: No spells left in me... I need a breather.
+		Line6: Any Mana Potions, Meowster? I'm running on empty.
+	}
+
+	ManaPotion: {
+		Line1: Gulp... Mana's back!
+		Line2: Potion down, Meowster! Back to it.
+		Line3: Good thing I packed a Mana Potion. Gulp!
+		Line4: Glug... There's my mana!
+		Line5: Glug, glug... Ready to fight again!
+		Line6: Got some mana back. Here I go!
+	}
+
+	Boss: {
+		Line1: "{0} is here! I'm with you, Meowster!"
+		Line2: "{0}... We're really fighting this? Then I'm in!"
+		Line3: "{0} wants a fight! Count me in too!"
+		Line4: Who cares how big it is? Let's get {0}!
+		Line5: It's {0}. I'm a little scared. Just a little.
+		Line6: "{0} is here, Meowster! Watch me!"
+	}
+
+	BossVictory: {
+		Line1: We beat {0}, Meowster!
+		Line2: "{0} down! Knew you could do it!"
+		Line3: We beat {0}! I helped too... right?
+		Line4: We beat {0}! You all right, Meowster?
+		Line5: Hehe! Even {0} couldn't beat my Meowster.
+		Line6: We beat {0}! Something tasty for dinner tonight?
+	}
+
+	Working: {
+		Line1: I'll lend a paw over here!
+		Line2: Hup! Time to work!
+		Line3: Leave this bit to me, Meowster!
+		Line4: Spotted it! On my way.
+		Line5: My turn to help!
+		Line6: Watch these paws, Meowster!
+	}
+
+	FishCaught: {
+		Line1: Caught {0}, Meowster!
+		Line2: A bite! It's {0}!
+		Line3: Up it comes! {0}!
+		Line4: Hehe! Got you, {0}!
+		Line5: Finally! {0}!
+		Line6: Meowster, {0}! Worth the wait!
+	}
+
+	Delivered: {
+		Line1: Brought it back! Here, Meowster!
+		Line2: Catch, Meowster!
+		Line3: Here you go, Meowster!
+		Line4: Go on, take it! Picked it up for you.
+		Line5: Got it! You needed this, right?
+		Line6: Over here, Meowster! A little something for you!
+	}
+
+	BossSlimeKing: {
+		Line1: Does wearing a crown make a slime king? I want to try!
+		Line2: That's a huge blob! It'll squash me flat!
+		Line3: King Slime! If I step on him, will I sink in?
+	}
+
+	BossVictorySlimeKing: {
+		Line1: King Slime's all over the place! Crown didn't help much.
+		Line2: Would I look that grand in a crown?
+		Line3: We won! On second thought, I won't be a slime king.
+	}
+
+	BossEye: {
+		Line1: That eye's bigger than me... Who's it looking at?
+		Line2: That giant eye's coming right at us!
+		Line3: It keeps staring at us. Doesn't it ever blink?
+	}
+
+	BossVictoryEye: {
+		Line1: Phew... The big eye's down. I was afraid to blink.
+		Line2: We won! When it grew that mouth, I nearly jumped out of my fur.
+		Line3: Its teeth were longer than mine...
+	}
+
+	BossEater: {
+		Line1: Where's the end of that worm?!
+		Line2: Something huge underfoot! Watch the worm!
+		Line3: It eats WORLDS? How hungry can one worm be?
+	}
+
+	BossVictoryEater: {
+		Line1: Finally ran out of worm! I lost count of the pieces.
+		Line2: Not even a tail left. Nice work, Meowster!
+		Line3: World's still here. So are we! No dinner for that worm.
+	}
+
+	BossBrain: {
+		Line1: Meowster! Its brain's on the OUTSIDE!
+		Line2: Little eyes around a giant brain... I'm getting dizzy.
+		Line3: With a brain that big, is it smarter than me?
+	}
+
+	BossVictoryBrain: {
+		Line1: Big brain. Still couldn't beat us!
+		Line2: All those little eyes are gone too! So many eyes...
+		Line3: Who needs a giant brain? I've got my Meowster!
+	}
+
+	BossBee: {
+		Line1: That bee is LOUD!
+		Line2: Queen Bee! I didn't eat her honey. Honest!
+		Line3: Keep that stinger away from me! Meowster!
+	}
+
+	BossVictoryBee: {
+		Line1: The buzzing stopped! We won!
+		Line2: Queen Bee's down. Can we have the honey now?
+		Line3: Did you see me dodge that one? Did you?
+	}
+
+	BossSkeletron: {
+		Line1: The skull's floating... Where's the rest of it?
+		Line2: Hands that big? That's no gentle pat. Watch out!
+		Line3: Skeletron! Why does he look so pleased about this?
+	}
+
+	BossVictorySkeletron: {
+		Line1: Skeletron's down! No more grabbing hands.
+		Line2: You could build several of me out of all those bones!
+		Line3: Can we look in the Dungeon now? I'll come with you.
+	}
+
+	BossDeerclops: {
+		Line1: Here comes the one-eyed brute! Listen to those footsteps!
+		Line2: Mrr! Ice spikes! They're coming this way!
+		Line3: The ground's shaking! Watch the one-eyed one!
+	}
+
+	BossVictoryDeerclops: {
+		Line1: The one-eyed brute's down, Meowster!
+		Line2: Ground's stopped shaking. We won!
+		Line3: We won! I was only shivering because it's cold.
+	}
+
+	BossWall: {
+		Line1: Meowster, the wall's chasing us! RUN!
+		Line2: Flesh and eyes all over that wall... I don't want to be squashed!
+		Line3: It keeps getting closer! Forward, forward!
+	}
+
+	BossVictoryWall: {
+		Line1: The wall's gone! We didn't end up flat as pancakes!
+		Line2: Wall of Flesh beaten! That was a close shave.
+		Line3: Finally! No more being chased by a wall.
+	}
+
+	BossQueenSlime: {
+		Line1: That slime sparkles like a giant gem!
+		Line2: Queen Slime! How many rulers do slimes need?
+		Line3: Do we have to fight something so pretty? ...Ah! She started it!
+	}
+
+	BossVictoryQueenSlime: {
+		Line1: Even the big sparkly slime couldn't stop us!
+		Line2: I'd like wings like those, Meowster.
+		Line3: Ugh... My fur's all stuck together.
+	}
+
+	BossTwins: {
+		Line1: Metal eyes with weapons?! That's not fair!
+		Line2: Why are these two eyes made of metal?
+		Line3: One spits fire, one shoots light. They know more tricks than I do!
+	}
+
+	BossVictoryTwins: {
+		Line1: Both metal eyes are down!
+		Line2: All done! There isn't a third one coming, is there?
+		Line3: Got them both! Neither got away!
+	}
+
+	BossDestroyer: {
+		Line1: Who built a metal worm that long?
+		Line2: It stretches all the way from me to you!
+		Line3: Metal worm coming up from below!
+	}
+
+	BossVictoryDestroyer: {
+		Line1: The metal worm fell apart too!
+		Line2: We won! How much does all that metal weigh?
+		Line3: All that armor still couldn't stop you!
+	}
+
+	BossPrime: {
+		Line1: Four arms?! I've only got two paws!
+		Line2: Metal skeleton incoming! Watch those tools!
+		Line3: Is it here for a fight or to demolish the house?
+	}
+
+	BossVictoryPrime: {
+		Line1: Metal skeleton in pieces! Extra arms didn't help.
+		Line2: Four arms and it still lost! Two paws are plenty for me.
+		Line3: Those horrible tools finally stopped.
+	}
+
+	BossPlantera: {
+		Line1: The flower's coming after us! It's got a mouth!
+		Line2: Don't sniff that flower! It'll bite back!
+		Line3: How did something that big fit in the bulb?!
+	}
+
+	BossVictoryPlantera: {
+		Line1: The big biting flower's down!
+		Line2: Let's not bring that flower home, Meowster.
+		Line3: Next time I get you flowers, I'll pick ones that don't bite.
+	}
+
+	BossGolem: {
+		Line1: The stone thing moved! Thought it was just a statue!
+		Line2: That rock throws punches! Careful!
+		Line3: Does fighting this count as mining?
+	}
+
+	BossVictoryGolem: {
+		Line1: Now the stone thing really isn't moving!
+		Line2: Broke it! That was one stubborn rock.
+		Line3: Even something that tough came down!
+	}
+
+	BossDuke: {
+		Line1: Why does that fish have WINGS?!
+		Line2: It moves so fast! Fish aren't supposed to do that!
+		Line3: That fish could feed us for... Mrr?! Here it comes!
+	}
+
+	BossVictoryDuke: {
+		Line1: Big fish down! I'm worn out from all that chasing.
+		Line2: Even a fish with wings couldn't beat us. Hehe!
+		Line3: How big a pot would we need for that fish?
+	}
+
+	BossEmpress: {
+		Line1: So pretty... Wait. Are those lights coming AT us?
+		Line2: How can someone so pretty hit so hard?!
+		Line3: Lights everywhere! Which way are you, Meowster?
+	}
+
+	BossVictoryEmpress: {
+		Line1: We won! Still seeing lights when I close my eyes.
+		Line2: Pretty, but fierce! You were amazing, Meowster.
+		Line3: Those wings were lovely, Meowster.
+	}
+
+	BossCultist: {
+		Line1: The robed one's flying! Doesn't even need a kite.
+		Line2: Meowster, he's casting something at us!
+		Line3: Mrr?! How'd he get up there so fast?
+	}
+
+	BossVictoryCultist: {
+		Line1: The robed one's down... What's wrong with the sky?
+		Line2: We won! Don't put your weapon away yet, though.
+		Line3: He's stopped chanting. Why do I feel worse?
+	}
+
+	BossMoonLord: {
+		Line1: Big as he is, I'm helping you fight him!
+		Line2: Why are there eyes ALL OVER him?!
+		Line3: I'm here too! You're not fighting that thing without me!
+	}
+
+	BossVictoryMoonLord: {
+		Line1: We beat THAT! We really, really did!
+		Line2: See, Meowster? I stayed with you. We won!
+		Line3: We won... Extra pats when we get home?
+	}
+
+	BossBetsy: {
+		Line1: A big fire-breathing dragon this time!
+		Line2: A real fire-breathing dragon! Now THIS is a hunt!
+		Line3: Let me get a hit in on the dragon too!
+	}
+
+	BossVictoryBetsy: {
+		Line1: Dragon down! High paw, Meowster!
+		Line2: I've fought a dragon now. Hehe!
+		Line3: Even a fire-breathing dragon couldn't beat us!
+	}
+
+	RestRain: {
+		Line1: When's the rain going to stop?
+		Line2: Sounds heavy out there... Can we wait until it stops?
+		Line3: Rain makes me sleepy. Wake me when we're going.
+	}
+
+	RestSnow: {
+		Line1: My paws are cold. What? I'm not inching closer to you!
+		Line2: Are you cold too, Meowster?
+		Line3: Even my nose is cold here.
+	}
+
+	RestDesert: {
+		Line1: Meowster, there's sand all through my clothes...
+		Line2: It's so hot, I ought to turn over so I cook evenly.
+		Line3: It's all sand. How do you know which way we're going?
+	}
+
+	RestJungle: {
+		Line1: Can you still see me? The grass is taller than I am.
+		Line2: Big bugs, big flowers... How come I'm still little?
+		Line3: Hear that? More bugs singing.
+	}
+
+	RestEvil: {
+		Line1: Wouldn't you have nightmares living here?
+		Line2: Just standing a little closer. Not scared.
+		Line3: Even the ground looks mean here.
+	}
+
+	RestUnderworld: {
+		Line1: I'm hot and I haven't even moved.
+		Line2: Better check before sitting down. Don't want toasted buns.
+		Line3: I don't want to be a roast dumpling, Meowster.
+	}
+
+	RestOcean: {
+		Line1: So much water... Think of all the fish.
+		Line2: Can we watch the sea a little longer?
+		Line3: What's on the other side? I'd like to go with you.
+	}
+
+	RestMushroom: {
+		Line1: These mushrooms don't need lamps at night.
+		Line2: That mushroom's big enough to be an umbrella.
+		Line3: If my head glowed too, you'd never lose me.
+	}
+
+	DeliveredLife: {
+		Line1: Brought you {0}! Patch yourself up!
+		Line2: Over here, Meowster! {0} delivery!
+		Line3: Here's {0}! Still hurting?
+	}
+
+	DeliveredMana: {
+		Line1: Brought you {0}! A little mana for you.
+		Line2: Here, {0}! Get some mana back.
+		Line3: Your {0} is here, Meowster!
+	}
+
+	FishCaughtCrate: {
+		Line1: Caught {0}! Do boxes bite hooks too?
+		Line2: Not a fish! {0}! What's inside?
+		Line3: "{0} in the water too! Worth the wait!"
+	}
+
+	FishCaughtQuest: {
+		Line1: Caught {0}! That's what the little Angler wanted, right?
+		Line2: It's {0}! Tell the Angler I caught it.
+		Line3: Got the {0} for your quest, Meowster!
+	}
+}
+
+TrainingSpeech: {
+	DeliveredUpgrade: {
+		Line1: This'll make you stronger, Meowster! Here!
+		Line2: Found something good! Don't lose it!
+		Line3: Saved this one for you. Go on, take it!
+	}
+
+	LootPlunder: {
+		Line1: Extra loot! {0}, all ours!
+		Line2: Hehe! They were hiding {0}. Not from these paws!
+		Line3: Look, Meowster! Another {0}. I'll take it!
+	}
+
+	Ready: We've got the materials for {0}, Meowster! Recipe's in the guide.
+	Workbench: Wood and some iron bars make a Palico Workbench. I want to learn new tricks, Meowster!
+	PlaceBench: Got the workbench! Put it down and right-click for my gear recipes.
+	Equip: Pop that gear in the slots beside my bag. Let me try it!
+	Belt: An Expanded Toolbelt means room for another support item! Recipe's in the guide.
+	Improved: Hallowed Bars! We can make an Improved Toolkit and give my gear an upgrade!
+	Master: Ectoplasm for a Masterwork Toolkit! I'll hold it... Just don't let it wriggle.
+}
+
+Discovery: {
+	Hint: "{0}, about {1} tiles away"
+	Near: nearby
+	Left: to the left
+	Right: to the right
+	Up: above us
+	Down: below us
+	LeftUp: above and to the left
+	RightUp: above and to the right
+	LeftDown: below and to the left
+	RightDown: below and to the right
+}
+
+CatWorkbenchName: Palico Workbench
+
+TrainingNames: {
+	HoneyCage: Vigorwasp Cage
+	GuardShield: Shield
+	CleansingPot: Vase of Vitality
+	CheerBell: Cheer Bell
+	BattleDrum: Power Drum
+	PiercingBoomerang: Piercing Boomerang
+	UpdraftBag: Updraft Pouch
+	BombPot: Bomb Pot
+	PlunderKnife: Plunderblade
+	MiningKit: Mining Kit
+	GardenKit: Harvest Basket
+	ExpandedBelt: Expanded Toolbelt
+	ImprovedTools: Improved Toolkit
+	MasterTools: Masterwork Toolkit
+	CatWorkbench: Palico Workbench
+}
+
+Items: {
+	HoneyCage.Tooltip: ""
+	GuardShield.Tooltip: ""
+	CleansingPot.Tooltip: ""
+	CheerBell.Tooltip: ""
+	BattleDrum.Tooltip: ""
+	PiercingBoomerang.Tooltip: ""
+	UpdraftBag.Tooltip: ""
+	BombPot.Tooltip: ""
+	PlunderKnife.Tooltip: ""
+	MiningKit.Tooltip: ""
+	GardenKit.Tooltip: ""
+	ExpandedBelt.Tooltip: ""
+	ImprovedTools.Tooltip: ""
+	MasterTools.Tooltip: ""
+	CatWorkbench.Tooltip: ""
+}

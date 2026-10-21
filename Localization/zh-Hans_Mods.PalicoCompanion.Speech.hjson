@@ -1,0 +1,339 @@
+BossCalamityDesertScourge: {
+	Line1: 老大，沙子底下有东西钻过来了喵！好长一条！
+	Line2: 老大，这么大一条，怎么藏进沙子里的喵？
+}
+
+BossVictoryCalamityDesertScourge: {
+	Line1: 呸呸……老大，我嘴里全是沙子喵！
+	Line2: 老大，这么长一条也打赢了喵！回去够吹好久了。
+}
+
+BossCalamityCrabulon: {
+	Line1: 老大，这到底算螃蟹，还是蘑菇喵？
+	Line2: 它背着那么多蘑菇还跑得动喵？！老大，它过来了！
+}
+
+BossVictoryCalamityCrabulon: {
+	Line1: 老大，想吃螃蟹咱们再找一只喵……这只有点怪。
+	Line2: 老大，我头上没长蘑菇吧喵？
+}
+
+BossCalamityHiveMind: {
+	Line1: 老大，那坨东西怎么还长着脸喵？！
+	Line2: 好臭喵！老大，打完我一定要洗澡！
+}
+
+BossVictoryCalamityHiveMind: {
+	Line1: 老大，打完了喵！我现在闻什么都是那个味道。
+	Line2: 赢是赢了喵……老大，你先别闻我。
+}
+
+BossCalamityPerforators: {
+	Line1: 老大，它肚子里还有虫喵！那我们到底要打几个？
+	Line2: 补药往这边钻喵！老大，虫子来了！
+}
+
+BossVictoryCalamityPerforators: {
+	Line1: 呕……老大，我吃不下晚饭了喵。
+	Line2: 打完啦喵！老大，我梦里可不想再见到这些虫子。
+}
+
+BossCalamitySlimeGod: {
+	Line1: 老大，中间那小团还带了两个大帮手喵！
+	Line2: 老大，这两大团挤一起，都没我站的地方了喵！
+}
+
+BossVictoryCalamitySlimeGod: {
+	Line1: 老大，小的溜走了喵！跑得还挺快……
+	Line2: 老大，它把两个帮手扔下就跑了喵！我可不会这样。
+}
+
+BossCalamityCryogen: {
+	Line1: 老大，冰块怎么也来打架喵？！
+	Line2: 老大，这里面是不是冻着什么喵？
+}
+
+BossVictoryCalamityCryogen: {
+	Line1: 冰打碎啦喵！老大，刚才里面到底有什么？
+	Line2: 老大，爪子冻僵了喵……给我暖暖。
+}
+
+BossCalamityAquaticScourge: {
+	Line1: 老大，它追过来了喵！游得比我快多了！
+	Line2: 老大，这条虫身上什么味儿啊，熏得我鼻子疼喵！
+}
+
+BossVictoryCalamityAquaticScourge: {
+	Line1: 老大，赢了喵！可这味道怎么还在啊……
+	Line2: 老大，这个不能做鱼汤吧喵？
+}
+
+BossCalamityBrimstoneElemental: {
+	Line1: 老大，火里有人影喵……她看过来了！
+	Line2: 她一直在火里待着喵……老大，她不烫吗？
+}
+
+BossVictoryCalamityBrimstoneElemental: {
+	Line1: 老大，我没烧秃吧喵？摸摸看。
+	Line2: 打赢了喵！回去可别再让我烤火了，老大。
+}
+
+BossCalamityCalamitasClone: {
+	Line1: 老大，那个铁壳子里在冒火喵！它飞过来了！
+	Line2: 老大，这铁壳子是拿什么烧的，火这么红喵？
+}
+
+BossVictoryCalamityCalamitasClone: {
+	Line1: 老大，打赢了喵……刚才那铁壳子里面到底是什么？
+	Line2: 老大，壳子里头也没火了喵。这回真打完了吧？
+}
+
+BossCalamityLeviathan: {
+	Line1: 老大，唱歌的那位怎么开始打人了喵？！
+	Line2: 老大，我好像听见海里有声音喵……还有别的家伙？
+}
+
+BossVictoryCalamityLeviathan: {
+	Line1: 老大，我们把这两个都打赢了喵！我也能吹这个吧？
+	Line2: 老大，海里还藏着多少这种家伙喵……
+}
+
+BossCalamityAstrumAureus: {
+	Line1: 老大，那台机器身上也长了这些怪东西喵！
+	Line2: 它跳过来了喵！老大，我可不想被踩成猫饼！
+}
+
+BossVictoryCalamityAstrumAureus: {
+	Line1: 老大，机器坏了，那些发光的东西还没掉喵。
+	Line2: 这回跳不起来了喵！老大，我刚才差点被坐扁。
+}
+
+BossCalamityPlaguebringer: {
+	Line1: 这么大的蜜蜂还装武器，太赖皮了喵！
+	Line2: 老大，蜜蜂往外放导弹了喵？！我也想要这个！
+}
+
+BossVictoryCalamityPlaguebringer: {
+	Line1: 老大，打赢了喵！这蜜蜂可酿不出什么好蜜。
+	Line2: 老大，大蜜蜂打倒了，丛林里那些生病的家伙怎么办喵？
+}
+
+BossCalamityRavager: {
+	Line1: 老大，它到底是石头还是肉喵？！
+	Line2: 这么大个还蹦来蹦去，老大，地都快踩塌了喵！
+}
+
+BossVictoryCalamityRavager: {
+	Line1: 拆散了喵！老大，我可不帮忙拼回去。
+	Line2: 老大，这堆碎块就别往家里摆了喵……看着怪吓人的。
+}
+
+BossCalamityAstrumDeus: {
+	Line1: 老大，我还以为是流星……它怎么冲着咱们来喵？！
+	Line2: 老大，这条虫把星星都吃进肚子里了喵？
+}
+
+BossVictoryCalamityAstrumDeus: {
+	Line1: 老大，这回后面没有了吧喵？我怕还有一条。
+	Line2: 老大，天上这么亮的家伙，咱们也打赢了喵！
+}
+
+BossCalamityGuardians: {
+	Line1: 怎么三个一起上喵？！老大，我来帮忙！
+	Line2: 老大，它们围着一起飞，是不让我们过去喵？
+}
+
+BossVictoryCalamityGuardians: {
+	Line1: 老大，三个又怎样，还不是咱们赢了喵！
+	Line2: 它们也有帮手，老大的帮手更厉害喵。嘿嘿。
+}
+
+BossCalamityDragonfolly: {
+	Line1: 老大，它的毛会放电喵！我的怎么不会？
+	Line2: 老大，这算鸟还是龙喵？飞过来好大一只！
+}
+
+BossVictoryCalamityDragonfolly: {
+	Line1: 老大，打赢了喵！我的毛怎么也竖起来了……
+	Line2: 老大，我现在摸你会不会也放电喵？
+}
+
+BossCalamityProvidence: {
+	Line1: 老大，连她旁边的石头都在烧喵！
+	Line2: 老大，这位也要打喵？那我可要使出全力了！
+}
+
+BossVictoryCalamityProvidence: {
+	Line1: 呼……赢了喵，爪子还在抖。
+	Line2: 老大，你没烧伤吧喵？让我看看。
+}
+
+BossCalamityCeaselessVoid: {
+	Line1: 老大，拉我一把喵！要被吸过去了！
+	Line2: 老大，打这个窟窿会打到哪里去喵？
+}
+
+BossVictoryCalamityCeaselessVoid: {
+	Line1: 老大，我还在喵！没让它吸走！
+	Line2: 老大，我不想知道那里面是什么了喵。
+}
+
+BossCalamityStormWeaver: {
+	Line1: 老大，天上也有长虫喵？！地上还不够它们钻吗？
+	Line2: 老大，这条还带铁甲喵！装备比我还齐。
+}
+
+BossVictoryCalamityStormWeaver: {
+	Line1: 老大，打下来了喵！长虫飞天也没用！
+	Line2: 喵……耳朵还嗡嗡的。
+}
+
+BossCalamitySignus: {
+	Line1: 老大，那件斗篷底下到底有没有人喵？
+	Line2: 喵？！刚才还在那边，怎么就到这里了！
+}
+
+BossVictoryCalamitySignus: {
+	Line1: 老大，打完了吗喵？别又突然冒出来吓我。
+	Line2: 不躲啦？这下逮着了喵！
+}
+
+BossCalamityPolterghast: {
+	Line1: 老大，好多魂挤在一块儿喵……它们不挤吗？
+	Line2: 老大，墙拦不住它喵！我躲哪儿啊？
+}
+
+BossVictoryCalamityPolterghast: {
+	Line1: 呼……老大，咱们出去吧喵。
+	Line2: 老大，今天不想睡地牢里喵……你也不想吧？
+}
+
+BossCalamityOldDuke: {
+	Line1: 老大，这条鱼看着老，怎么游这么快喵？！
+	Line2: 老大，钓鱼要是钓到这种，我宁可空着回来喵。
+}
+
+BossVictoryCalamityOldDuke: {
+	Line1: 老大，它一把年纪还这么能打喵！我以后也要这样。
+	Line2: 老大，我想吃普通的鱼了喵……
+}
+
+BossCalamityDevourer: {
+	Line1: 老大，它连神都吃喵？那我这点肉可不够它塞牙。
+	Line2: 老大，它从那个洞钻出来了喵！这条有完没完啊？
+}
+
+BossVictoryCalamityDevourer: {
+	Line1: 老大，吃神的也没吃掉我们喵！嘿嘿，没想到吧。
+	Line2: 老大，我刚才差点以为回不去了喵……
+}
+
+BossCalamityYharon: {
+	Line1: 老大，这头龙好大喵！这回真是大狩猎了！
+	Line2: 老大，我也要打龙喵！带上我！
+}
+
+BossVictoryCalamityYharon: {
+	Line1: 老大，我也帮忙打赢这头龙了喵……这么大一头呢。
+	Line2: 老大，这声龙吼，我回去可学不来喵。
+}
+
+BossCalamityExoMechs: {
+	Line1: 老大，那个人造这么多机器，就是为了打我们喵？！
+	Line2: 老大，他就没有小一号的机器喵？我也想拆一个！
+}
+
+BossVictoryCalamityExoMechs: {
+	Line1: 全拆啦喵！还敢小瞧我们！
+	Line2: 老大，他造那么多，都没我老大能打喵！
+}
+
+BossCalamityCalamitas: {
+	Line1: 火好大……老大，我跟着你喵。
+	Line2: 老大，我有点怕喵……不过你上，我就上。
+}
+
+BossVictoryCalamityCalamitas: {
+	Line1: 老大，她不打了喵。我们也停吧。
+	Line2: 结束了喵。老大，她好像也很累……
+}
+
+BossCalamityPrimordialWyrm: {
+	Line1: 老大，水底下那是什么喵……它到底有多大啊？
+	Line2: 老大，它醒了喵！我们是不是吵到它了？
+}
+
+BossVictoryCalamityPrimordialWyrm: {
+	Line1: 老大，我们真打赢了喵？你掐我一下……轻点。
+	Line2: 老大，咱们上去再庆祝喵，我想晒晒太阳。
+}
+
+BossRematchCalamityLeviathan: {
+	Line1: 老大，又来找海里那两位打架了喵？
+	Line2: 老大，歌声我认得喵！那个大块头肯定也在。
+}
+
+BossRematchCalamityProvidence: {
+	Line1: 老大，又是那位烧得亮亮的喵！我也来帮忙！
+	Line2: 老大，这回打完能去凉快地方吗喵？上回热坏了。
+}
+
+BossRematchCalamityDevourer: {
+	Line1: 老大，又是吃神的那条喵！上回可没吃掉我们。
+	Line2: 老大，它上次没吃成，这次还来喵？！
+}
+
+BossRematchCalamityYharon: {
+	Line1: 老大，这声龙吼我认得喵！又是它！
+	Line2: 老大，又要打这头龙喵？我的那份也算上！
+}
+
+BossRematchCalamityExoMechs: {
+	Line1: 老大，又造了一批喵？！那个人家里到底多少铁？
+	Line2: 老大，这回拆完，他还要造吗喵？
+}
+
+BossRematchCalamityCalamitas: {
+	Line1: 老大，又要和她打喵？那我还陪你。
+	Line2: 老大，这场我也不能缺席喵！
+}
+
+RestCalamitySulphur: {
+	Line1: 老大，这海水的颜色不太对喵……我闻着也不舒服。
+	Line2: 老大，这海里钓出来的鱼，你敢吃吗喵？
+}
+
+RestCalamitySunkenSea: {
+	Line1: 老大，这下面也有一片海喵！还亮晶晶的。
+	Line2: 老大，水底下亮晶晶的喵……咱们家也能弄这么好看吗？
+}
+
+RestCalamityBrimstone: {
+	Line1: 老大，这些房子都烧黑了喵……以前有人住吧。
+	Line2: 老大，这里怎么烧成这样了喵……
+}
+
+RestCalamityAstral: {
+	Line1: 老大，这些东西亮得像星星喵……可是连树都变样了。
+	Line2: 老大，它们是好看，可我还是喜欢咱们家原来的树喵。
+}
+
+RestCalamityAbyss: {
+	Line1: 老大，下面还没到底喵……你慢一点。
+	Line2: 这里好暗喵。老大，我就在你旁边。
+}
+
+RestCalamityDeepAbyss: {
+	Line1: 老大，你听见什么没有喵……还是我听错了？
+	Line2: 老大，你喊我一声喵，太黑了，看不见你。
+}
+
+BossEventCalamityAcidRain: {
+	Line1: 老大，这雨好呛喵！根本不是能淋的雨啊！
+	Line2: 老大，岸上又来了好多怪家伙喵！它们倒不怕这场雨。
+}
+
+BossEventCalamityBossRush: {
+	Line1: 老大，要一口气打这么多喵？！我饭还没吃呢！
+	Line2: 老大，这回可有得打了喵！我也要算战功！
+}

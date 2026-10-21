@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="$(TmlInstallRoot)/Libraries/FNA/1.0.0/FNA.dll" />
+    <Compile Include="../../Systems/CompanionReplica.cs" Link="CompanionReplica.cs" />
+    <Compile Include="../../Systems/CompanionAnimation.cs" Link="CompanionAnimation.cs" />
+    <Compile Include="../../Systems/CompanionSpriteLayout.cs" Link="CompanionSpriteLayout.cs" />
+  </ItemGroup>
+  <Target Name="CheckRuntimePath" BeforeTargets="ResolveReferences">
+    <Error Condition="!Exists('$(TmlInstallRoot)/Libraries/FNA/1.0.0/FNA.dll')" Text="Pass -p:TmlInstallRoot pointing to your tModLoader 1.4.4 installation." />
+  </Target>
+</Project>

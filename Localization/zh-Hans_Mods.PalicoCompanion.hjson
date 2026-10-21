@@ -1,0 +1,1176 @@
+Keybinds: {
+	Direct.DisplayName: 指挥呆猫（按住并左键选择）
+	Panel.DisplayName: 呆猫面板
+	Recall.DisplayName: 召回呆猫
+}
+
+UI: {
+	NameEmpty: 请输入名字，再确认
+	DefaultName: 呆猫
+	DyeSlot: 染料
+	DyeHint: 同时为呆猫、风筝和状态卡头像染色
+	SortBag: 整理物品
+	SortDone: 背包整理好了
+	SortUnavailable: 暂时无法整理，请稍后重试
+	PetCloser: 靠近呆猫就能摸摸了
+	PetHappy: 嘿嘿，好舒服喵～
+	HudStowed: 已收起
+	HudRecovering: 恢复中
+	HudWorking: 工作中
+	HudFishing: 钓鱼中
+	HudCombat: 战斗中
+	HudDelivering: 送补给
+	HudHint: 点击打开呆猫背包
+	Stowed: 呆猫已收起
+	CallOut: 叫出来
+	RecallAction: 召回
+	Stow: 暂时收起
+	RecoveryWait: 呆猫正在恢复，稍等它回来
+	Tiles: 格
+	AppearanceMeetTitle: 认识你的呆猫
+	AppearanceName: 名字
+	AppearanceLater: 稍后设置
+	AppearanceStart: 一起出发
+	AppearanceTitle: 名字与配色
+	AppearanceReset: 恢复原色
+	AppearanceCancel: 取消
+	AppearanceConfirm: 确定
+	AppearanceHue: 色相
+	AppearanceSaturation: 饱和度
+	AppearanceLightness: 亮度
+	AppearanceEntry: 名字与配色
+	GardenWalking: 去照料开花的药草
+	GardenWorking: 正在收获、补种
+	GardenDone: 药草已采收并补种
+	GardenReplantBlocked: 药草已采收，当前位置暂时无法补种
+	GardenBlocked: 暂时无法采收，种子未消耗
+	QuickStack: 快捷堆叠
+	NativeBagHint: 面板打开时，玩家或箱子中的 Shift 点击会转入呆猫背包；收藏物品不会快捷转移。
+	Transferred: 转移了 {0} 件物品
+	Recovering: 正在恢复，{0} 秒后回来帮忙
+	GearHint: 投掷武器可整叠装备；弹药放入呆猫背包
+	DefaultWeaponHint: 空栏时自带铜短剑
+	CannonStagesHint: 呆猫使用能量弹攻击，暂不使用最后的持续光束
+	RecoverArmor: 取回
+	LegacyArmorHint: 旧版防具仅供取回，防御现在随玩家成长
+	Weapon: 武器
+	HealthHint: 呆猫的生命上限为玩家的 75%
+	ManaHint: 呆猫的法力上限与玩家相同，至少为 20；独立消耗和恢复。缺蓝且没有可用蓝药时，回满后继续施法
+	DefenseHint: 呆猫的防御为玩家的 75%
+	HealthLabel: 生命
+	ManaLabel: 法力
+	MinionSlots: 仆从位
+	SentrySlots: 哨兵位
+	SentrySlotsHint: 已放置 / 自动布置上限。上限与玩家相同，至少为 1，不占用玩家的哨兵位。战斗转移时重新布置。撒旦军队武器沿用原版解锁条件，事件中消耗呆猫背包里的天国魔力。
+	MinionSlotsHint: 已占用 / 上限。上限与玩家相同，至少为 1，不占用玩家的仆从位；部分召唤物会占用多个或不足一个位置。
+	Defense: 防御
+	StorageLinked: 老大，这个箱子我也可以用了喵！
+	StorageUnlinked: 已撤销此箱子的使用许可
+	ChestSupplyOn: 允许呆猫使用：是
+	ChestSupplyOff: 允许呆猫使用：否
+	ChestSupplyLinkHint:
+		'''
+		点击允许呆猫使用这个箱子，可以同时允许多个箱子。
+		你在附近且箱子关闭时，存入同类战利品，并按需补充药水、当前武器弹药及工作消耗品。
+		不取收藏物品；许可随角色保存，各世界分别记忆。
+		'''
+	ChestSupplyUnlinkHint: 撤销此箱子的使用许可
+	ChestSupplyDisabledHint: 已关闭箱子补给。可在模组设置中开启“使用获准的箱子”。
+	StorageWalking: 前往补给箱
+	StorageWorking: 存放物品并补充消耗品
+	StorageBlocked: 暂时无法到达补给箱，稍后重试
+	StorageDone: 已存入 {0} 件物品，补充 {1} 件消耗品
+	Required: 需要
+	Available: 持有
+	Following: 跟随主人
+	Guarding: 警戒中
+	VeinOn: 矿脉：最多 12 块
+	VeinOff: 采矿：单块
+	BagTab: 背包
+	WorkTab: 工作
+	CompanionTab: 呆猫
+	PausedState: 已暂停
+	RestState: 休息中
+	MineTarget: 选择矿块
+	BuildTarget: 选择施工起点，再确认材料用量
+	TargetHint: 左键选择场景位置 · 右键 / Esc 取消
+	Left: 向左平台
+	Right: 向右平台
+	Down: 向下绳索
+	Length: 长度
+	Preview: 选择起点
+	Confirm: 确认施工
+	Progress: 施工进度
+	NoOrder: 暂无施工任务
+	WorkHint: 先放入材料，再选择起点；确认后开始施工。预览不会改变地形。
+	Recall: 召回
+	Pet: 摸摸
+	Take: 全部取回
+}
+
+Projectiles: {
+	CompanionCat.DisplayName: 呆猫
+	TrainingBomb.DisplayName: 呆猫爆弹
+	TrainingDart.DisplayName: 贯通回旋镖
+}
+
+CoinChoices: {
+	Owner: 给主人
+	Bank: 存入小猪存钱罐
+	Bag: 留在呆猫背包
+}
+
+Configs: {
+	CompanionConfig: {
+		Headers: {
+			Companion: "[palicohead:icon] 陪伴与战斗"
+			Work: "[palicoitem:GoldPickaxe] 采集与探索"
+			Building: "[palicoitem:Torch] 照明与施工"
+			Deliveries: "[palicoitem:GoldCoin] 递交给玩家"
+			Restocking: "[palicoitem:Chest] 箱子补给与储备"
+			Display: "[palicoitem:Goggles] 界面与提示"
+			Advanced: "[palicoitem:Wrench] 其他选项"
+		}
+
+		ShareNewPickups: {
+			Label: 递交新拾取的物品
+			Tooltip: 靠近你时，将新捡的物品补入你已有的堆叠；你仍可使用的生命水晶等会优先递交。先留下呆猫需要的补给，不递交手动放入或收藏的物品。
+		}
+
+		CoinDestination: {
+			Label: 新拾取的钱币去向
+			Tooltip: 只处理呆猫新捡的钱币，不移动你原有的钱币。小猪存钱罐装不下的余款留在呆猫背包；装备钱币枪时会保留弹药。
+		}
+
+		StockTorches: {
+			Label: 火把储备数量
+			Tooltip: 呆猫可用存量低于目标约三分之一时，从获准的箱子补足。设为 0 时不主动补充，已有物品仍可使用；收藏物品不计入存量，也不会被消耗。
+		}
+
+		StockGlowsticks: {
+			Label: 荧光棒储备数量
+			Tooltip: 呆猫可用存量低于目标约三分之一时，从获准的箱子补足。设为 0 时不主动补充，已有物品仍可使用；收藏物品不计入存量，也不会被消耗。
+		}
+
+		StockPlatforms: {
+			Label: 木平台储备数量
+			Tooltip: 呆猫可用存量低于目标约三分之一时，从获准的箱子补足。设为 0 时不主动补充，已有物品仍可使用；收藏物品不计入存量，也不会被消耗。
+		}
+
+		StockRopes: {
+			Label: 绳索储备数量
+			Tooltip: 呆猫可用存量低于目标约三分之一时，从获准的箱子补足。设为 0 时不主动补充，已有物品仍可使用；收藏物品不计入存量，也不会被消耗。
+		}
+
+		StockHealing: {
+			Label: 治疗药水储备数量
+			Tooltip: 呆猫可用存量低于目标约三分之一时，从获准的箱子补足。设为 0 时不主动补充，已有物品仍可使用；收藏物品不计入存量，也不会被消耗。
+		}
+
+		StockMana: {
+			Label: 魔力药水储备数量
+			Tooltip: 呆猫可用存量低于目标约三分之一时，从获准的箱子补足。设为 0 时不主动补充，已有物品仍可使用；收藏物品不计入存量，也不会被消耗。
+		}
+
+		StockAmmo: {
+			Label: 弹药储备数量
+			Tooltip: 用于当前武器的弹药和投掷物。开启 「更好的体验」 无限弹药或投掷物时，优先将正在使用的一种补到无限门槛；否则低于目标约三分之一时补足。设为 0 不主动补充。只取获准储物中的未收藏物品。
+		}
+
+		StockAcorns: {
+			Label: 橡实储备数量
+			Tooltip: 呆猫可用存量低于目标约三分之一时，从获准的箱子补足。设为 0 时不主动补充，已有物品仍可使用；收藏物品不计入存量，也不会被消耗。
+		}
+
+		StockBait: {
+			Label: 鱼饵储备数量
+			Tooltip: 呆猫可用存量低于目标约三分之一时，从获准的箱子补足。设为 0 时不主动补充，已有物品仍可使用；收藏物品不计入存量，也不会被消耗。
+		}
+
+		CatSounds: {
+			Label: 播放猫叫声
+			Tooltip: 在说话、受伤、抚摸等情境播放猫叫，避免连续重复。
+		}
+
+		Fishing: {
+			Label: 自动钓鱼
+			Tooltip: 在水边逗留或你开始钓鱼时，呆猫会寻找钓点。需要呆猫背包中未收藏的鱼饵，可参考你携带的更好鱼竿；不使用松露虫，不钓起敌人。
+		}
+
+		DeliverRecoveryDrops: {
+			Label: 递送红心和魔力星
+			Tooltip: 你需要恢复生命或法力时，呆猫把附近掉落的红心或魔力星送给你。不消耗背包物品。
+		}
+
+		CatchCritters: {
+			Label: 自动捕捉小动物
+			Tooltip: 使用基础网兜，或参考你背包里更高级的网兜。避开放生的小动物、雕像生成的生物和指路仙灵。
+		}
+
+		RunInBackground: {
+			Label: 切换窗口后继续游戏
+			Tooltip: 单人游戏失去焦点时仍然运行。原版菜单暂停和背包自动暂停照常生效。
+		}
+
+		Ropes: {
+			Label: 协助铺设绳索
+			Tooltip: 连续铺绳索时帮忙延长，下行时接长绳索；在落差边缘按住向下键可开始铺绳。使用你或呆猫背包中未收藏的绳索。此选项随当前角色保存，新角色默认关闭。
+		}
+
+		AutoHeal: {
+			Label: 自动喝药
+			Tooltip: 呆猫生命不高于一半时喝治疗药水，施法时法力不足则喝魔力药水。消耗呆猫背包中未收藏的药水；药水冷却与魔力病独立于玩家。
+		}
+
+		Chatter: {
+			Label: 在聊天栏显示呆猫台词
+			Tooltip: 包含探索提醒、工作结果和日常闲聊；优先显示重要消息，合并重复的工作结果。
+		}
+
+		Discoveries: {
+			Label: 提示附近的重要发现
+			Tooltip: 提示 16 格内的生命水晶、生命果、宝箱、世纪之花花苞和受困 NPC，不受地形遮挡。同一目标不会反复提示，也不会自动开启或采集。
+		}
+
+		Emotes: {
+			Label: 显示表情气泡
+			Tooltip: 在呆猫头顶显示喝药、抚摸、休息等情境的表情。
+		}
+
+		Gardening: {
+			Label: 自动采收药草
+			Tooltip: 采收附近开花的药草，未开花的不动。有可用种子时补种；没有种子也能采收。收藏的种子不会被消耗。
+		}
+
+		CompanionHud: {
+			Label: 显示左上角状态卡
+			Tooltip: 在增益图标下方显示生命、状态和装备冷却。点击可打开呆猫背包；打开物品栏或全屏地图时隐藏。
+		}
+
+		ShowActivityStatus: {
+			Label: 显示背包内的工作详情
+			Tooltip: 在呆猫背包底部显示当前任务和操作结果。只改变显示，不影响工作、聊天或左上角状态卡。
+		}
+
+		CompanionMarker: {
+			Label: 显示位置标记
+			Tooltip: 在地图上显示呆猫头像；呆猫在画面外时显示方向和距离。收起后隐藏。
+		}
+
+		Enabled: {
+			Label: 启用呆猫
+			Tooltip: 关闭呆猫功能，保留物品、名字和成长进度。临时离队可使用背包底部的“暂时收起”。
+		}
+
+		AdvancedOrders: {
+			Label: 显示手动工作页（单人）
+			Tooltip: 在呆猫背包增加手动选矿、预览施工和取消任务的页面。日常自动工作不需要开启；多人模式不显示此页。
+		}
+
+		Forestry: {
+			Label: 自动砍树
+			Tooltip: 采伐附近成熟树木，有合适的橡实和位置时补种。没有橡实也能砍树；保留幼苗及树干有住房墙或促动器的装饰树。你主动砍伐时也会协助。
+		}
+
+		DiggingAssist: {
+			Label: 协助玩家挖掘
+			Tooltip: 沿你挥镐的方向接着挖，也支持竖直向下挖掘。使用当前可用的镐力；停手后最多继续约 8 秒，离开或改做其他事情时停止。打开呆猫背包不会中断协助。
+		}
+
+		MiningBlacklist: {
+			Label: 不挖的物块
+			Tooltip: 选择对应的矿石、宝石或方块物品。呆猫会跳过这些物块，仍可正常拾取它们的掉落物。只影响自己的呆猫。
+		}
+
+		PickupBlacklist: {
+			Label: 不捡的物品
+			Tooltip: 呆猫不会追逐、吸取或搬运所选物品。不会影响玩家拾取，也不会禁止箱子补给。只影响自己的呆猫。
+		}
+
+		MiningAssist: {
+			Label: 自动采矿
+			Tooltip: 空闲或慢速探索时寻找附近露出的矿石和宝石。参考你背包里最强的镐，未携带时用基础镐；镐力不足的矿物暂不挖掘。
+		}
+
+		DisplayName: 呆猫伙伴设置
+
+		Pickup: {
+			Label: 自动拾取
+			Tooltip: 吸取附近能装入呆猫背包的普通掉落物。带有特殊拾取效果的模组物品留给玩家。递交物品与钱币去向可在下方另行设置。
+		}
+
+		Combat: {
+			Label: 自动战斗
+			Tooltip: 呆猫使用装备的武器攻击敌人；武器格为空时使用铜短剑。关闭后仍会跟随和工作。
+		}
+
+		Torches: {
+			Label: 自动照明
+			Tooltip: 陆地优先使用火把，水下或缺少火把时使用荧光棒。使用你或呆猫背包中未收藏的物品；放置火把才消耗，手持照明不消耗。
+		}
+
+		Bridges: {
+			Label: 协助铺设平台
+			Tooltip: 连续铺设平台时帮忙延长，也会填补前方同高度、六格内有对岸的小缺口。优先用呆猫背包的材料，再用你的非收藏木平台。此选项随当前角色保存，新角色默认关闭。
+		}
+
+		AutoLogistics: {
+			Label: 使用获准的箱子
+			Tooltip: 你在附近、箱子未被打开时，呆猫存入同类物品并补充消耗品。先打开箱子，点击旁边的猫头像授予许可；可以允许多个箱子。
+		}
+
+		TrainingHints: {
+			Label: 提示装备与成长机会
+			Tooltip: 提醒制作工作台、装备支援／工作装备和使用升级道具。每条提示只出现一次；完整配方随时可在呆猫指南查看。
+		}
+	}
+
+	CoinDestinationMode: {
+		// Tooltip: ""
+		// Owner.Tooltip: ""
+		// Bank.Tooltip: ""
+		// Bag.Tooltip: ""
+	}
+}
+
+MemoryTwins: 双子魔眼
+
+Speech: {
+	BossEventGoblin: {
+		Line1: 老大，哥布林都跑到咱们这儿来了喵！
+		Line2: 他们怎么还带刺球的喵……老大，小心脚下！
+		Line3: 来这么多也没用，老大还有我喵！
+	}
+
+	BossEventSnowman: {
+		Line1: 老大，雪人拿着枪喵！这和我堆的不是一种吧？
+		Line2: 补药开枪喵！……老大，我躲你旁边一下。
+		Line3: 我堆的雪人怎么就不会帮忙打怪喵……
+	}
+
+	BossEventPirate: {
+		Line1: 老大，海盗上岸了喵！咱们的东西不能给他们。
+		Line2: 他们的鸟也来打架喵？老大，看上边！
+		Line3: 老大，他们是来抢东西的，咱们能抢回去吗喵？
+	}
+
+	BossEventMartian: {
+		Line1: 老大，天上那些家伙飞过来了喵！小心那道光！
+		Line2: 老大，他们坐着飞碟来的喵！咱们打下来一架好不好？
+		Line3: 喵？！这是什么怪物？老大，你认识吗？
+	}
+
+	BossEventBloodMoon: {
+		Line1: 老大，月亮红了喵……今晚我跟紧点。
+		Line2: 老大，外面闹成这样，今晚还睡不睡了喵？
+		Line3: 连月亮都红了……老大，我陪你守夜喵。
+	}
+
+	BossEventEclipse: {
+		Line1: 老大，天怎么突然黑了喵？……那些家伙可不像来睡觉的！
+		Line2: 明明是白天，怎么出来这么多怪家伙喵！
+		Line3: 老大，太阳没了喵！刚才还在的！
+	}
+
+	BossEventPumpkinMoon: {
+		Line1: 老大，南瓜怎么会追着人跑喵！窝以后还吃不吃南瓜了……
+		Line2: 老大，我只会摘南瓜，不会摘这种喵！
+		Line3: 老大，那个南瓜在看我们喵……它还笑！
+	}
+
+	BossEventFrostMoon: {
+		Line1: 老大，礼物盒在动喵！谁家礼物还会自己跑啊？
+		Line2: 老大，树也来打架了喵！斧头能管用吗？
+		Line3: 这跟说好的过节不一样喵！
+	}
+
+	BossEventArmy: {
+		Line1: 老大，他们冲水晶来了喵！窝也来守！
+		Line2: 老大，水晶旁边又来一群喵！我也去帮忙！
+		Line3: 想砸老大的水晶？先过我这关喵！
+	}
+
+	BossEventSlimeRain: {
+		Line1: 老大，下的不是雨，是史莱姆喵！
+		Line2: 天上掉果冻了喵……不对，不能吃！
+		Line3: 老大，小心头上喵！今天的雨会跳！
+	}
+
+	BossEventPillars: {
+		Line1: 老大，这根柱子旁边好多怪家伙喵……咱们一起过去。
+		Line2: 老大，这柱子是从哪儿冒出来的喵？
+		Line3: 老大，这边我没来过……你可别把我落下喵。
+	}
+
+	RestEventQuiet: {
+		Line1: 老大，打完了……窝饿啦喵。
+		Line2: 老大，给我看看，有没有伤到哪儿喵？
+		Line3: 终于安静了喵。刚才喊老大都快听不见了。
+	}
+
+	OwnerHurtDeath: {
+		Line1: 老大？……我看着东西，等你回来喵。
+		Line2: 老大……这次没护住你喵。
+		Line3: 老大，你回来咱们再打它喵……
+	}
+
+	WelcomeRevived: {
+		Line1: 老大！你回来啦喵，我刚才好担心。
+		Line2: 老大！让我看看，真的没事了喵？
+		Line3: 回来就好喵……刚才我都不知道怎么办了。
+	}
+
+	WorkingBagFull: {
+		Line1: 老大，包满啦，装不下了喵！
+		Line2: 装不进去喵……老大，帮我腾点地方吧。
+		Line3: 包都撑圆了喵……可窝还想捡！
+	}
+
+	DeliveredUpgrade: {
+		Line1: 老大，这个能让你更厉害，给你喵！
+		Line2: 窝捡到好东西啦，老大快收好喵！
+		Line3: 老大，这个留给你喵，快收好！
+	}
+
+	LootPlunder: {
+		Line1: 老大，多摸到一份{0}，赚啦喵！
+		Line2: 嘿嘿，还藏着{0}，被窝找到啦喵！
+		Line3: 老大，多一份{0}喵！嘿嘿，赚到啦。
+	}
+
+	BossRematchSlimeKing: {
+		Line1: 老大，大果冻又来了喵！
+		Line2: 又戴着皇冠来打架了喵。它是不是不服气？
+		Line3: 老大，这个咱们打赢过！不过它还是好大一坨喵。
+	}
+
+	BossRematchEye: {
+		Line1: 老大，又是那个大眼珠子喵！窝认得它。
+		Line2: 老大，就是它，上回打着打着长了嘴喵！
+		Line3: 又瞪我喵？老大，我们再打它一次！
+	}
+
+	BossRematchEater: {
+		Line1: 老大，那条长虫又钻出来了喵！
+		Line2: 这条虫咱们打过喵。打完一截，后面还有一大截！
+		Line3: 老大，脚底下又响了喵……是上回那种长虫！
+	}
+
+	BossRematchBrain: {
+		Line1: 老大，又是那个光长脑子的喵！
+		Line2: 那些小眼睛又来帮忙了喵。老大，我也来！
+		Line3: 又是它喵！上回变出那么多个，哪有这样打架的！
+	}
+
+	BossRematchBee: {
+		Line1: 老大，又是那只大蜜蜂喵！窝这回也没偷吃蜂蜜。
+		Line2: 还没看见就听见了喵。老大，是那只大蜜蜂！
+		Line3: 老大，又要打蜂王了喵？打完能分我点蜂蜜吗？
+	}
+
+	BossRematchSkeletron: {
+		Line1: 老大，又是那个大骷髅喵！两只手也都还在。
+		Line2: 老大，上回散成那样，它又拼回来了喵？
+		Line3: 又是它喵！没身子还这么能打。
+	}
+
+	BossRematchDeerclops: {
+		Line1: 老大，又是那只独眼怪喵！个头一点没小。
+		Line2: 老大，地上冒冰的那个又来了喵！
+		Line3: 上回咱们打赢它了喵，老大，这次也带我一个！
+	}
+
+	BossRematchWall: {
+		Line1: 老大，那堵会动的墙又来了喵！咱们边跑边打！
+		Line2: 老大，还是那堵墙喵！这回也不让人往回走。
+		Line3: 老大，又要跑那么远喵？等我一起！
+	}
+
+	BossRematchQueenSlime: {
+		Line1: 老大，又是亮晶晶的史莱姆喵！它还会飞来着。
+		Line2: 老大，我记得它会飞喵！可别只看地上。
+		Line3: 皇后又来了喵。打输了还要再来，跟老大一样。
+	}
+
+	BossRematchTwins: {
+		Line1: 老大，那两只铁眼睛又来了喵！
+		Line2: 老大，又是一个喷火、一个射激光喵！它们就不能一个一个来吗？
+		Line3: 这两只咱们打过喵！老大，今天还拆不拆？
+	}
+
+	BossRematchDestroyer: {
+		Line1: 老大，铁皮长虫又来了喵！
+		Line2: 老大，它还带着那些会飞的小眼睛喵！
+		Line3: 老大，我听见它从底下钻过来了喵！跟上回一样！
+	}
+
+	BossRematchPrime: {
+		Line1: 老大，又是那个好多手的骷髅喵！
+		Line2: 老大，它的锯子又响了喵！听着就牙酸。
+		Line3: 这个铁骷髅咱们赢过喵！这回也一起把它拆了。
+	}
+
+	BossRematchPlantera: {
+		Line1: 老大，那朵会追人的花又来了喵！
+		Line2: 这朵花咱们打过喵。待会儿它还要更凶的！
+		Line3: 老大，这回又是谁敲的花苞喵？
+	}
+
+	BossRematchGolem: {
+		Line1: 老大，又是庙里那个大石头喵！
+		Line2: 上回头都打掉了还在打喵。老大，这个可得打到底。
+		Line3: 老大，又来拆庙里的大石头了喵？
+	}
+
+	BossRematchDuke: {
+		Line1: 老大，又是那条长翅膀的大鱼喵！
+		Line2: 又是那条鱼喵！老大，这回还喂它松露虫吗？
+		Line3: 老大，咱们赢过它喵！不过它冲过来还是好快！
+	}
+
+	BossRematchEmpress: {
+		Line1: 老大，漂亮的那位又来了喵！就是打人特别疼的那位。
+		Line2: 又是满天的光喵……老大，上回我都快找不着你了。
+		Line3: 老大，我认得她喵！上次我们一起打赢的！
+	}
+
+	BossRematchCultist: {
+		Line1: 老大，又是那个戴兜帽的喵！
+		Line2: 这个咱们打过喵。他变出好几个的时候，可别认错了！
+		Line3: 老大，他又要变分身了喵？上回可把我骗惨了。
+	}
+
+	BossRematchMoonLord: {
+		Line1: 老大，又是那个天上来的大家伙喵……窝跟着你！
+		Line2: 老大，上次那么大的家伙都打赢了，这次也行喵！
+		Line3: 老大，月亮领主又来了喵。窝腿有点抖，不过不走！
+	}
+
+	BossRematchBetsy: {
+		Line1: 老大，那条喷火的龙又来了喵！
+		Line2: 老大，这次也把龙打下来喵！我帮你！
+		Line3: 又来烧老大的水晶了喵！上回还没打够吗？
+	}
+
+	RestMemory: {
+		Line1: 老大，还记得咱们打赢{0}那回吗？嘿嘿，窝可没忘喵。
+		Line2: 老大，咱们可是打赢过{0}的喵！
+		Line3: 老大，以后说起打{0}那回，可得提到我喵！
+	}
+
+	FirstMeet: {
+		Line1: 老大，打怪挖矿都带上我喵！
+		Line2: 你就是我的老大喵？那我以后就跟你走啦！
+		Line3: 老大老大，出发的时候记得带上我喵！
+		Line4: 东西都带上了喵！老大，咱们去哪儿？
+		Line5: 老大，我个头小，能装的东西可不少喵！
+		Line6: 老大，我也想跟你出去闯闯喵。
+	}
+
+	Welcome: {
+		Line1: 老大，今天去哪儿喵？
+		Line2: 老大老大，带上我带上我喵！
+		Line3: 又能跟老大一起出门了喵，嘿嘿。
+		Line4: 老大，包背好了，随时能走喵！
+		Line5: 老大，等你好久啦喵！
+		Line6: 老大来了，那我也不困了喵！
+	}
+
+	Heal: {
+		Line1: 咕嘟……老大，我喝过药了，还能跟上喵。
+		Line2: 药有点苦喵……我没吐，真的。
+		Line3: 老大，我喝药了喵，还能打！
+		Line4: 缓过来一点了喵，刚才那下好疼。
+		Line5: 老大，这药能不能掺点蜂蜜喵……
+		Line6: 咕嘟咕嘟……这可比挨打好多了喵。
+	}
+
+	Downed: {
+		Line1: 老大，我得躲一下……等我缓过来喵。
+		Line2: 补药打了喵！老大，我先撤下去啦！
+		Line3: 老大，我先撤了喵！马上回来帮你！
+		Line4: 打不动了喵……老大，让我歇一会儿。
+		Line5: 这回没撑住……老大，我会回来的喵。
+		Line6: 老大，窝还会回来的喵……别换掉我。
+	}
+
+	Recovered: {
+		Line1: 老大，我缓过来啦喵！
+		Line2: 我回来帮忙了喵，老大还好吧？
+		Line3: 老大，我没事啦喵！刚才那个家伙呢？
+		Line4: 又有力气了喵！老大，接着干！
+		Line5: 老大老大，我回来啦！有没有想我喵？
+		Line6: 老大，我又能帮忙了喵！
+	}
+
+	Tree: {
+		Line1: 老大，小树种回去啦喵！
+		Line2: 砍一棵，种一棵喵。
+		Line3: 这么小一棵，也能长那么大喵？
+		Line4: 小树快长，老大以后还要来呢喵。
+		Line5: 别踩到小树苗喵。
+		Line6: 种上啦喵！
+	}
+
+	Pet: {
+		Line1: 嘿嘿……老大的手好暖喵。
+		Line2: 再摸一下嘛，就一下喵～
+		Line3: 这里这里，再揉揉喵。
+		Line4: 耳朵还在的喵，轻一点轻一点。
+		Line5: 摸完我就去干活喵。再摸一下也行。
+		Line6: 呼噜……舒服喵。
+	}
+
+	Recall: {
+		Line1: 老大，我来了喵！
+		Line2: 老大叫我，我就回来喵。
+		Line3: 在这儿在这儿！没把我落下就好喵。
+		Line4: 老大，有什么事要我帮忙喵？
+		Line5: 听见了喵！老大，找我什么事？
+		Line6: 老大，我这不是来了吗喵！
+	}
+
+	Rest: {
+		Line1: 老大，我没睡着喵……就眯一会儿。
+		Line2: 我在想事情喵……刚才想到哪儿了？
+		Line3: 老大，要不要也坐一会儿喵？
+		Line4: 不着急走的话，我就再坐一小会儿喵。
+		Line5: 老大，给我挪点地方喵。
+		Line6: 呼噜……嗯？要走了喵？
+	}
+
+	OwnerHurt: {
+		Line1: 老大！刚才那下疼不疼喵？
+		Line2: 谁打我老大喵！
+		Line3: 老大，都这样了还要打喵？我陪你。
+		Line4: 老大，疼就说嘛，又不会笑你喵。
+		Line5: 老大，我过来帮你喵！
+		Line6: 老大！你没事吧喵？
+	}
+
+	Ore: {
+		Line1: 老大，这块矿挖下来啦喵！
+		Line2: 嘿嘿，挖到了喵！
+		Line3: 爪子都震麻了喵……
+		Line4: 嘿咻！敲下来啦喵！
+		Line5: 嘿咻……这块矿还挺硬喵。
+		Line6: 老大，又有矿啦喵！
+	}
+
+	Loot: {
+		Line1: 捡到东西啦喵！
+		Line2: 捡到了喵，收好收好。
+		Line3: 老大老大，包里又多一件宝贝喵！
+		Line4: 能带的都带上喵！
+		Line5: 收好啦喵。
+		Line6: 老大，东西我背着喵。
+	}
+
+	RouteRecovered: {
+		Line1: 老大，我回来啦。刚才那条路走不通喵。
+		Line2: 老大，还是你这边好走喵。
+		Line3: 我没走丢喵……就是绕远了一点。
+		Line4: 老大，那边过不去，我先回来找你喵。
+		Line5: 那边过不去喵……老大，等等我。
+		Line6: 老大！可算跟上你了喵。
+	}
+
+	Build: {
+		Line1: 老大，又接好一格了喵。
+		Line2: 嘿咻，这一格放好了喵！
+		Line3: 我也在帮老大铺路喵！
+		Line4: 接上了喵！
+		Line5: 这儿再添一格喵。
+		Line6: 嘿嘿，越铺越长啦喵。
+	}
+
+	FoundCrystal: {
+		Line1: 老大老大！{0}有生命水晶喵！
+		Line2: 老大，{0}那颗亮亮的，是生命水晶喵！
+		Line3: "{0}有生命水晶喵！老大，咱们拿上吧。"
+		Line4: 我找到生命水晶啦喵！老大，在{0}。
+		Line5: 老大，{0}藏着颗生命水晶喵，差点没看见！
+		Line6: 生命水晶在{0}喵！老大，是我先发现的！
+	}
+
+	FoundChest: {
+		Line1: 老大，{0}有宝箱喵！里面会是什么呢？
+		Line2: 老大老大，宝箱在{0}喵！
+		Line3: 宝箱！在{0}喵。我也想看看。
+		Line4: "{0}有个宝箱喵！老大，开的时候让我也看看。"
+		Line5: 找到宝箱啦，在{0}喵。老大去不去？
+		Line6: 老大，宝箱在{0}喵！不知道装着什么好东西。
+	}
+
+	FoundFruit: {
+		Line1: 老大，{0}有生命果喵！
+		Line2: 老大，{0}那颗是生命果喵，快看！
+		Line3: 老大老大，生命果在{0}，快看喵！
+		Line4: 老大，生命果找到了，在{0}喵！
+		Line5: 老大，{0}有生命果喵，这个留给你。
+		Line6: 叶子里藏着生命果喵，就在{0}。
+	}
+
+	FoundBulb: {
+		Line1: 老大，{0}有世纪之花的花苞喵，要打吗？
+		Line2: 花苞在{0}喵！老大，敲了可就要打架了。
+		Line3: "{0}有世纪之花花苞喵！要打的话叫上我。"
+		Line4: 老大，{0}那朵粉花会惹来大家伙喵。
+		Line5: 老大，世纪之花的花苞在{0}喵，咱们记住这儿吧。
+		Line6: 老大，世纪之花的花苞！就在{0}喵。
+	}
+
+	FoundRescue: {
+		Line1: 老大，{0}有人需要帮忙喵！
+		Line2: 那边有人喵！老大，在{0}。
+		Line3: 老大，去{0}看看吧，那个人好像遇到麻烦了喵。
+		Line4: 老大，{0}那个人好像走不了喵，去帮帮他吧？
+		Line5: 老大，{0}有人被困住了喵！
+		Line6: 老大，去{0}救人喵！
+	}
+
+	NoAmmo: {
+		Line1: 老大，没弹药啦喵！
+		Line2: 老大，补点弹药喵！
+		Line3: 喵？打不出来……没弹药了！
+		Line4: 老大，找不到能用的弹药喵！
+		Line5: 翻遍包也找不到弹药喵……
+		Line6: 老大，我不是在偷懒喵，是弹药没了。
+	}
+
+	NoMana: {
+		Line1: 没魔力了喵！
+		Line2: 使不出来了喵……等我攒点魔力。
+		Line3: 老大，魔力不够了喵，等我缓缓。
+		Line4: 老大，等我回点魔力喵。
+		Line5: 老大，法术放不出来了喵……让我歇歇。
+		Line6: 老大，有没有蓝药喵？我没魔力了。
+	}
+
+	ManaPotion: {
+		Line1: 咕嘟……魔力补回来了喵！
+		Line2: 老大，我喝过蓝药啦喵，接着帮忙。
+		Line3: 还好带了蓝药喵……咕嘟。
+		Line4: 咕嘟……有魔力啦喵！
+		Line5: 咕嘟咕嘟……好啦，又能打了喵！
+		Line6: 咕嘟……缓过来啦喵！
+	}
+
+	Boss: {
+		Line1: 老大，{0}来了喵！窝跟着你！
+		Line2: "{0}……老大，真要打这个喵？那我也上！"
+		Line3: 老大，{0}来找你打架了喵！我也算一个！
+		Line4: 个头大又怎样喵！老大，我们打{0}！
+		Line5: "{0}来了喵。老大，我有一点点怕，就一点点。"
+		Line6: 老大，{0}来了喵！看我的！
+	}
+
+	BossVictory: {
+		Line1: 老大，我们打赢{0}了喵！
+		Line2: 打赢{0}了喵！我就知道老大行！
+		Line3: 打过{0}啦喵！我也有出力的，对吧老大？
+		Line4: 老大，{0}打完了，你还好吧喵？
+		Line5: 嘿嘿，{0}也没打过我老大喵！
+		Line6: 老大，咱们把{0}打败了喵！今晚吃点好的吧？
+	}
+
+	Working: {
+		Line1: 老大，这边我来帮忙喵！
+		Line2: 嘿咻，开工啦喵。
+		Line3: 老大，这边交给我喵！
+		Line4: 我看见啦喵，这就去。
+		Line5: 轮到我出力了喵！
+		Line6: 老大看我的喵！
+	}
+
+	FishCaught: {
+		Line1: 老大，钓到{0}啦喵！
+		Line2: 咬钩了！是{0}喵！
+		Line3: 上来啦！是{0}喵。
+		Line4: 嘿嘿，{0}，到手喵！
+		Line5: 总算钓到{0}了喵。
+		Line6: 老大，{0}！没白等喵。
+	}
+
+	Delivered: {
+		Line1: 老大，给你带回来了，快收下喵！
+		Line2: 老大，接着喵！
+		Line3: 老大，给你喵！
+		Line4: 拿着嘛老大，给你捡的喵。
+		Line5: 我带来啦喵，老大用得上吧？
+		Line6: 老大看这边，给你的喵！
+	}
+
+	BossSlimeKing: {
+		Line1: 老大，史莱姆戴上皇冠就能当大王喵？那我也想试试。
+		Line2: 老大，好大一团喵！要是压下来，我就扁了！
+		Line3: 史莱姆王来了喵！老大，我踩它会不会陷进去？
+	}
+
+	BossVictorySlimeKing: {
+		Line1: 老大，史莱姆王打散了喵！皇冠可没保住它。
+		Line2: 老大，你说我戴皇冠会不会也这么威风喵？
+		Line3: 老大，打赢啦！我还是不当史莱姆王了喵。
+	}
+
+	BossEye: {
+		Line1: 老大，这只眼睛比我还大喵……它在看谁？
+		Line2: 大眼珠子冲过来了喵！
+		Line3: 老大，它一直瞪着咱们，也不眨眼喵！
+	}
+
+	BossVictoryEye: {
+		Line1: 呼……大眼睛倒了喵。我刚才连眨眼都不敢。
+		Line2: 老大，打赢啦喵！它刚才一张嘴，吓我一跳。
+		Line3: 老大，它的牙比我的还长喵……
+	}
+
+	BossEater: {
+		Line1: 老大，这条虫怎么还没到尾巴喵？！
+		Line2: 脚底下有大家伙喵！老大，小心那条长虫！
+		Line3: 老大，它连世界都想吃喵？这得饿成什么样啊。
+	}
+
+	BossVictoryEater: {
+		Line1: 老大，长虫总算打完了喵！累死我了。
+		Line2: 这回连尾巴都没了喵，老大真厉害！
+		Line3: 嘿嘿，吃不到我老大了吧喵！
+	}
+
+	BossBrain: {
+		Line1: 老大！它的脑子怎么在外面喵？！
+		Line2: 好多小眼睛围着一个大脑喵……老大，我有点看晕了。
+		Line3: 老大，它这么大个脑袋，会不会比我聪明喵？
+	}
+
+	BossVictoryBrain: {
+		Line1: 老大，脑子大也没打过我们喵！
+		Line2: 老大，那些小眼睛也打没了喵！好多好多只。
+		Line3: 脑袋大有什么用喵，还是老大厉害！
+	}
+
+	BossBee: {
+		Line1: 老大，这只蜜蜂的声音也太大了喵！
+		Line2: 蜂王来了喵！我没偷吃它的蜂蜜，真的！
+		Line3: 补药拿针扎我喵！老大，蜂王过来了！
+	}
+
+	BossVictoryBee: {
+		Line1: 嗡嗡声停了喵，老大，我们赢了！
+		Line2: 老大，打完蜂王了，咱们能吃蜂蜜了喵？
+		Line3: 老大，刚才那下我躲开了喵！你看见没有？
+	}
+
+	BossSkeletron: {
+		Line1: 老大，骷髅自己飘起来了喵……它的身子呢？
+		Line2: 这么大的手，摸一下肯定会疼喵！老大，小心！
+		Line3: 骷髅王来了喵！老大，它怎么笑得那么开心……
+	}
+
+	BossVictorySkeletron: {
+		Line1: 老大，骷髅王打倒了喵！那些手终于不乱抓了。
+		Line2: 老大，这么多骨头，都能拼好几个我了喵！
+		Line3: 老大，这下地牢能去看看了喵？我跟着你。
+	}
+
+	BossDeerclops: {
+		Line1: 老大，独眼的大块头来了喵，脚步好响！
+		Line2: 喵！地上的冰都扎过来了！
+		Line3: 地都在抖喵！老大，小心那个独眼的！
+	}
+
+	BossVictoryDeerclops: {
+		Line1: 老大，独眼的大块头倒啦喵！
+		Line2: 脚底下终于不晃了喵，老大，我们赢了！
+		Line3: 打赢了喵！我刚才发抖，肯定是因为冷。
+	}
+
+	BossWall: {
+		Line1: 老大，墙追过来了喵！跑啊！
+		Line2: 老大，墙上全是肉和眼睛喵……窝不想被挤扁！
+		Line3: 这堵墙怎么越走越近喵！老大，往前走往前走！
+	}
+
+	BossVictoryWall: {
+		Line1: 老大，墙没了喵！我们没被挤成一张饼！
+		Line2: 打过肉墙啦喵！老大，刚才可真够吓人的。
+		Line3: 老大，终于不用被墙撵着跑了喵。
+	}
+
+	BossQueenSlime: {
+		Line1: 老大，这团史莱姆亮晶晶的喵，像颗大宝石。
+		Line2: 史莱姆皇后来了喵！怎么它们也有这么多大王？
+		Line3: 老大，这么漂亮也要打喵？……啊，它先打过来了！
+	}
+
+	BossVictoryQueenSlime: {
+		Line1: 老大，亮晶晶的大史莱姆也打赢了喵！
+		Line2: 老大，我也想有那样一对翅膀喵。
+		Line3: 黏糊糊的喵……毛都粘一块儿了。
+	}
+
+	BossTwins: {
+		Line1: 老大，铁眼睛还带着武器喵！这也太犯规了！
+		Line2: 老大，这两只眼睛怎么还用铁做的喵？
+		Line3: 一个喷火一个发光，老大，它们比我会的还多喵！
+	}
+
+	BossVictoryTwins: {
+		Line1: 老大，铁眼睛这回全倒了喵！
+		Line2: 打完啦喵！老大，不会再从另一边飞一只出来吧？
+		Line3: 老大，两只都打掉了喵，一只也没跑！
+	}
+
+	BossDestroyer: {
+		Line1: 老大，这么长的铁虫子，谁造的喵？
+		Line2: 老大，它从我这边绕到你那边了喵！这也太长了！
+		Line3: 老大，铁虫子从地下来了喵！
+	}
+
+	BossVictoryDestroyer: {
+		Line1: 老大，铁虫子也散架了喵！
+		Line2: 打赢啦！老大，这么多铁皮得有多重喵？
+		Line3: 铁皮再厚也挡不住老大喵！
+	}
+
+	BossPrime: {
+		Line1: 老大，铁骷髅有四只手喵！我才两只！
+		Line2: 铁骷髅来了喵！老大，小心它手上的家伙！
+		Line3: 老大，它带这么多工具，是来打架还是拆家的喵？
+	}
+
+	BossVictoryPrime: {
+		Line1: 老大，铁骷髅打散了喵！手多也没用。
+		Line2: 四只手也没赢喵！老大，我两只就够用啦！
+		Line3: 老大，它那些家伙终于停下来了喵。
+	}
+
+	BossPlantera: {
+		Line1: 老大，花真的来找我们了喵！它还长着嘴！
+		Line2: 老大，这花可不能闻喵，它会咬回来的！
+		Line3: 花苞里怎么能装下这么大一朵喵？！老大小心！
+	}
+
+	BossVictoryPlantera: {
+		Line1: 老大，会咬人的大花打倒了喵！
+		Line2: 老大，这么凶的花，还是别带回家了喵。
+		Line3: 老大，以后送你花，我挑不会咬人的喵。
+	}
+
+	BossGolem: {
+		Line1: 老大，石头人动了喵！我刚才还以为它不会动。
+		Line2: 这个大石头还会挥拳喵！老大，当心！
+		Line3: 老大，打这个跟挖矿算一回事吗喵？
+	}
+
+	BossVictoryGolem: {
+		Line1: 老大，石头人这回真不动了喵！
+		Line2: 敲碎了喵！老大，这块石头可真费劲。
+		Line3: 老大，这么硬的家伙也被我们打倒了喵。
+	}
+
+	BossDuke: {
+		Line1: 老大，这条鱼怎么还长翅膀喵？！
+		Line2: 老大，它冲得这么快，哪像条鱼喵！
+		Line3: 老大，这条鱼够吃……喵？！它过来了！
+	}
+
+	BossVictoryDuke: {
+		Line1: 老大，大鱼打赢啦喵！可把我追累了。
+		Line2: 鱼长翅膀也没打过我们喵，嘿嘿！
+		Line3: 老大，这么大的鱼，要多大的锅喵？
+	}
+
+	BossEmpress: {
+		Line1: 老大，好漂亮喵……等一下，那些亮光是不是冲我们来的？
+		Line2: 老大，她这么漂亮，怎么打人这么疼喵！
+		Line3: 满天都是光喵！老大，你在哪边？
+	}
+
+	BossVictoryEmpress: {
+		Line1: 老大，我们赢了喵！我现在闭眼都还有亮光。
+		Line2: 漂亮归漂亮，打起来可真凶喵。老大好厉害！
+		Line3: 老大，她那对翅膀可真好看喵。
+	}
+
+	BossCultist: {
+		Line1: 老大，穿袍子的飞起来了喵！他连风筝都不用。
+		Line2: 老大，他朝这边放法术了喵！
+		Line3: 喵？！怎么一下飞那么高！
+	}
+
+	BossVictoryCultist: {
+		Line1: 老大，那个穿袍子的倒了喵……天上怎么怪怪的？
+		Line2: 打赢了喵！老大，先别收家伙，我觉得还没完。
+		Line3: 老大，他不念了喵，可我怎么更不放心了。
+	}
+
+	BossMoonLord: {
+		Line1: 老大，它个头再大，我也要帮你打喵！
+		Line2: 老大，它身上怎么到处都是眼睛喵！
+		Line3: 老大，我也来了喵！打这么大的可不能少了我！
+	}
+
+	BossVictoryMoonLord: {
+		Line1: 老大，我们连这个都打赢了喵！真的打赢了！
+		Line2: 老大你看，窝也没丢下你喵。我们赢啦！
+		Line3: 赢了喵……老大，回去以后能多摸摸我吗？
+	}
+
+	BossBetsy: {
+		Line1: 老大，这回是会喷火的大龙喵！
+		Line2: 老大，真有会喷火的龙喵！这回像狩猎啦！
+		Line3: 老大，让我也打一下龙喵！
+	}
+
+	BossVictoryBetsy: {
+		Line1: 大龙打下来啦喵！老大，击个掌！
+		Line2: 老大，我也打过龙了喵！嘿嘿。
+		Line3: 老大，喷火的大龙也没打过我们喵！
+	}
+
+	RestRain: {
+		Line1: 老大，雨什么时候停喵？
+		Line2: 听起来下得好大喵……老大，我们等雨停了再走好不好？
+		Line3: 老大，雨声听着好想睡喵。你走的时候叫我。
+	}
+
+	RestSnow: {
+		Line1: 老大，爪子有点凉喵。窝没有偷偷往你那边挪。
+		Line2: 老大，你冷不冷喵？
+		Line3: 这里连鼻子都凉了喵。
+	}
+
+	RestDesert: {
+		Line1: 老大，衣服里全是沙子喵……
+		Line2: 这里晒得我都想翻面了喵。
+		Line3: 老大，看起来都是沙子，怎么还分得清路喵？
+	}
+
+	RestJungle: {
+		Line1: 老大，你还能看见我吗喵？草都比我高了。
+		Line2: 这里虫子也大，花也大，怎么就我没长大喵？
+		Line3: 老大，你听，又有虫子在叫喵。
+	}
+
+	RestEvil: {
+		Line1: 老大，这地方住着不会做噩梦吗喵？
+		Line2: 窝只是靠老大近一点喵，没有害怕。
+		Line3: 这里连地都长得凶巴巴的喵。
+	}
+
+	RestUnderworld: {
+		Line1: 老大，我还没动就热了喵。
+		Line2: 这里可不能坐错地方喵，屁股会烫。
+		Line3: 老大，我不想变成烤团子喵。
+	}
+
+	RestOcean: {
+		Line1: 老大，好大一片水喵。里面得有多少鱼呀。
+		Line2: 老大，我想再看一会儿海喵。
+		Line3: 老大，海那边还有什么喵？我也想跟你去看。
+	}
+
+	RestMushroom: {
+		Line1: 老大，这些蘑菇晚上都不用点灯喵。
+		Line2: 老大，那朵蘑菇好大喵，像把伞。
+		Line3: 老大，我要是也会发光，你就不会找不到我了喵。
+	}
+
+	DeliveredLife: {
+		Line1: 老大，{0}带来了，快补补血喵！
+		Line2: 老大看这边，给你送{0}啦喵。
+		Line3: "{0}带来了喵！老大，还疼不疼？"
+	}
+
+	DeliveredMana: {
+		Line1: 老大，给你带{0}来了喵，补点魔力。
+		Line2: 老大，{0}给你，补点魔力喵！
+		Line3: 老大，补魔力的{0}在这儿喵。
+	}
+
+	FishCaughtCrate: {
+		Line1: 老大，钓上来的是{0}喵！宝箱也会咬钩吗？
+		Line2: 不是鱼，是{0}喵！老大，里面会装什么？
+		Line3: 老大老大，水里还有{0}喵！这趟没白等。
+	}
+
+	FishCaughtQuest: {
+		Line1: 老大，{0}钓到了喵！那个小渔夫要的是这个吧？
+		Line2: 是{0}喵！老大，告诉那个渔夫，这是我钓的。
+		Line3: 老大，任务要的{0}有啦喵！
+	}
+}
+
+TrainingSpeech: {
+	DeliveredUpgrade: {
+		Line1: 老大，这个能让你更厉害，给你喵！
+		Line2: 窝捡到好东西啦，老大快收好喵！
+		Line3: 老大，这个留给你喵，快收好！
+	}
+
+	LootPlunder: {
+		Line1: 老大，多摸到一份{0}，赚啦喵！
+		Line2: 嘿嘿，还藏着{0}，被窝找到啦喵！
+		Line3: 老大，多一份{0}喵！嘿嘿，赚到啦。
+	}
+
+	Ready: 老大，能做{0}啦喵！去工作台给我做一个吧。
+	Workbench: 老大，给窝做个工作台喵？指南里有配方！
+	PlaceBench: 老大，把工作台摆下来喵！右键就能看我能用的装备。
+	Equip: 老大，这件是给我的喵？放到我背包旁边的装备格就能用啦！
+	Belt: 老大，我想多带一件支援装备喵！指南里有扩容工具带的做法。
+	Improved: 老大，有神圣锭了喵！做个改良工具组给我用，装备就能升级啦。
+	Master: 老大，用灵气能做精工工具组喵！做一个给我用，我的装备还能再升级！
+}
+
+Discovery: {
+	Hint: "{0}约{1}格处"
+	Near: 附近
+	Left: 左边
+	Right: 右边
+	Up: 上方
+	Down: 下方
+	LeftUp: 左上方
+	RightUp: 右上方
+	LeftDown: 左下方
+	RightDown: 右下方
+}
+
+CatWorkbenchName: 呆猫工作台
+
+TrainingNames: {
+	HoneyCage: 蜜虫笼
+	GuardShield: 小盾牌
+	CleansingPot: 净化壶
+	CheerBell: 应援铃
+	BattleDrum: 战鼓
+	PiercingBoomerang: 破甲镖
+	UpdraftBag: 助跃袋
+	BombPot: 爆弹壶
+	PlunderKnife: 掠夺刀
+	MiningKit: 采矿工具
+	GardenKit: 丰收篮
+	ExpandedBelt: 扩容工具带
+	ImprovedTools: 改良工具组
+	MasterTools: 精工工具组
+	CatWorkbench: 呆猫工作台
+}
+
+Items: {
+	// HoneyCage.Tooltip: ""
+	// GuardShield.Tooltip: ""
+	// CleansingPot.Tooltip: ""
+	// CheerBell.Tooltip: ""
+	// BattleDrum.Tooltip: ""
+	// PiercingBoomerang.Tooltip: ""
+	// UpdraftBag.Tooltip: ""
+	// BombPot.Tooltip: ""
+	// PlunderKnife.Tooltip: ""
+	// MiningKit.Tooltip: ""
+	// GardenKit.Tooltip: ""
+	// ExpandedBelt.Tooltip: ""
+	// ImprovedTools.Tooltip: ""
+	// MasterTools.Tooltip: ""
+	// CatWorkbench.Tooltip: ""
+}
