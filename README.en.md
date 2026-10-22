@@ -12,9 +12,11 @@ A tModLoader mod inspired by Monster Hunter's Felynes. Give your Palico a weapon
 - **Equipment and inventory.** Save loadouts and let your companion carry supplies. Let it use selected chests to put items away alongside others of the same type and restock its supplies automatically.
 - **Your own Palico.** Choose a name, outfit color and dye. Your companion reacts to creatures and events, and remembers battles you've won together.
 
-![A player and Palico fighting together in the forest](docs/images/01-together-combat-en.png)
-
-![A Palico mining underground while holding a torch](docs/images/02-together-mining-en.png)
+| Fight side by side | Help underground |
+| --- | --- |
+| ![A player and Palico fighting together in the forest](docs/images/01-together-combat-en.png) | ![A Palico mining underground while holding a torch](docs/images/02-together-mining-en.png) |
+| **A well-earned head pat** | **A fishing trip** |
+| ![Petting your Palico at home](docs/images/03-together-petting-en.png) | ![A player and Palico fishing together by the ocean](docs/images/04-together-fishing-en.png) |
 
 ## Installation and first steps
 
