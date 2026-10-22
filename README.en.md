@@ -1,7 +1,7 @@
-<p align="center"><img src="icon_workshop.png" alt="Palico Companion" width="120"></p>
+<p align="center"><img src="docs/images/palico-companion.gif" alt="Palico Companion" width="240"></p>
 <h1 align="center">Palico Companion</h1>
 <p align="center">A Palico to share your Terraria adventures.</p>
-<p align="center"><a href="https://steamcommunity.com/sharedfiles/filedetails/?id=3824240391">Steam Workshop</a> · <a href="README.md">简体中文</a> · <a href="https://github.com/lbnandy/palico-companion/issues">Report an issue</a></p>
+<p align="center"><a href="https://steamcommunity.com/sharedfiles/filedetails/?id=3824240391">Steam Workshop</a> · <a href="https://youtu.be/_-t7rcjtvow">Watch on YouTube</a> · <a href="README.md">简体中文</a> · <a href="https://github.com/lbnandy/palico-companion/issues">Report an issue</a></p>
 
 A tModLoader mod inspired by Monster Hunter's Felynes. Give your Palico a weapon and fight side by side, or take it underground to help mine, hold a torch and pick up loot. There's time for a chat and a head pat between adventures, too.
 
