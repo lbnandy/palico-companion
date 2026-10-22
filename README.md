@@ -1,7 +1,7 @@
-<p align="center"><img src="icon_workshop.png" alt="呆猫伙伴" width="120"></p>
+<p align="center"><img src="docs/images/palico-companion.gif" alt="呆猫伙伴" width="240"></p>
 <h1 align="center">呆猫伙伴 · Palico Companion</h1>
 <p align="center">带上你的呆猫，一起去泰拉瑞亚冒险。</p>
-<p align="center"><a href="https://steamcommunity.com/sharedfiles/filedetails/?id=3824240391">Steam 创意工坊</a> · <a href="README.en.md">English</a> · <a href="https://github.com/lbnandy/palico-companion/issues">反馈问题</a></p>
+<p align="center"><a href="https://steamcommunity.com/sharedfiles/filedetails/?id=3824240391">Steam 创意工坊</a> · <a href="https://youtu.be/_-t7rcjtvow">演示视频（YouTube）</a> · <a href="README.en.md">English</a> · <a href="https://github.com/lbnandy/palico-companion/issues">反馈问题</a></p>
 
 一个以《怪物猎人》艾露猫为灵感的 tModLoader 模组。给呆猫一把武器，它会跟你一起打怪；带它下矿，它会挖矿、举火把、捡东西。闲下来还能摸摸它，听它念叨两句。
 
