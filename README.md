@@ -12,11 +12,13 @@
 - **装备与背包**：保存不同配装，携带补给和战利品。允许它使用指定箱子后，还能存放同类物品、补充消耗品。
 - **你的呆猫**：起名字、换衣服颜色、搭配染料。它会对遇到的怪物和事件作出反应，也会记住一起打赢的战斗。
 
-| 并肩战斗 | 下矿帮忙 |
-| --- | --- |
-| ![玩家与呆猫在森林中并肩战斗](docs/images/01-together-combat-zh.png) | ![呆猫在地下举火把、协助采矿](docs/images/02-together-mining-zh.png) |
-| **摸摸呆猫** | **一起钓鱼** |
-| ![在家里摸摸呆猫](docs/images/03-together-petting-zh.png) | ![玩家与呆猫在海边一起钓鱼](docs/images/04-together-fishing-zh.png) |
+<p>
+  <img src="docs/images/01-together-combat-zh.png" alt="玩家与呆猫在夜晚迎战恶魔眼" width="49%">
+  <img src="docs/images/02-together-mining-zh.png" alt="呆猫在地下举火把、协助采矿" width="49%">
+  <br>
+  <img src="docs/images/03-together-petting-zh.png" alt="在家里摸摸呆猫" width="49%">
+  <img src="docs/images/04-together-fishing-zh.png" alt="玩家与呆猫在海边一起钓鱼" width="49%">
+</p>
 
 ## 安装与上手
 
