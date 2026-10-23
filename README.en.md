@@ -1,7 +1,7 @@
 <p align="center"><img src="docs/images/palico-companion.gif" alt="Palico Companion" width="240"></p>
 <h1 align="center">Palico Companion</h1>
 <p align="center">A tModLoader companion mod inspired by Monster Hunter's Felynes.</p>
-<p align="center"><a href="https://steamcommunity.com/sharedfiles/filedetails/?id=3824240391">Steam Workshop</a> · <a href="https://youtu.be/7AmGCunn3ys">Watch on YouTube</a> · <a href="README.md">简体中文</a> · <a href="https://github.com/lbnandy/palico-companion/issues">Report an issue</a></p>
+<p align="center"><a href="https://steamcommunity.com/sharedfiles/filedetails/?id=3824240391">Steam Workshop</a> · <a href="https://youtu.be/M4Z2G2IP33w">Watch on YouTube</a> · <a href="README.md">简体中文</a> · <a href="https://github.com/lbnandy/palico-companion/issues">Report an issue</a></p>
 
 ## Adventure together
 
