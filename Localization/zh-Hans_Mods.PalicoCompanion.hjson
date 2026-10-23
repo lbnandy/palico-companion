@@ -54,9 +54,9 @@ UI: {
 	RecoverArmor: 取回
 	LegacyArmorHint: 旧版防具仅供取回，防御现在随玩家成长
 	Weapon: 武器
-	HealthHint: 呆猫的生命上限为玩家的 75%
+	HealthHint: 呆猫的生命上限为玩家的 {0}%
 	ManaHint: 呆猫的法力上限与玩家相同，至少为 20；独立消耗和恢复。缺蓝且没有可用蓝药时，回满后继续施法
-	DefenseHint: 呆猫的防御为玩家的 75%
+	DefenseHint: 呆猫的防御为玩家的 {0}%
 	HealthLabel: 生命
 	ManaLabel: 法力
 	MinionSlots: 仆从位
@@ -121,6 +121,62 @@ CoinChoices: {
 }
 
 Configs: {
+	CompanionBalanceConfig: {
+		DisplayName: 呆猫强度
+
+		Headers: {
+			Presets: "[palicohead:icon] 快速预设"
+			Strength: "[palicohead:icon] 战斗强度"
+			Movement: "[palicoitem:HermesBoots] 移动与闪避"
+		}
+
+		Preset: {
+			Label: 强度预设
+			Tooltip:
+				'''
+				选择预设会填入下方六项设置，保存后生效，也可以继续逐项调整
+				手动调整后不匹配任何预设时，显示为自定义
+				联机时由房主修改，同一服务器内的所有呆猫共用这套设置
+				'''
+		}
+
+		DamagePercent: {
+			Label: 伤害倍率（%）
+			Tooltip: 调整呆猫武器、召唤物、哨兵和攻击型支援道具的命中伤害。以呆猫原本造成的伤害为基准，100% 不额外调整，不是继承玩家伤害的比例。该倍率不用于中毒、燃烧等持续伤害。
+		}
+
+		HealthPercent: {
+			Label: 生命继承比例（%）
+			Tooltip: 呆猫的生命上限占主人生命上限的比例。调整时保留当前血量比例，不会让倒地的呆猫立即恢复。
+		}
+
+		DefensePercent: {
+			Label: 防御继承比例（%）
+			Tooltip: 呆猫的防御占主人防御的比例，不代表受到的伤害减少多少。
+		}
+
+		CombatMovementPercent: {
+			Label: 战斗移动速度（%）
+			Tooltip: 调整追敌、战斗飞行和闪避时的移动速度。实际速度仍会随加减速变化，100% 保持原有速度，不改变攻速或弹幕速度。
+		}
+
+		TravelMovementPercent: {
+			Label: 跟随与工作移速（%）
+			Tooltip: 调整跟随、采集和拾取时的移动速度，不改变挥镐、挥斧等动作速度。远距离返回主人时保留追赶速度，避免跟不上坐骑和翅膀。
+		}
+
+		Evasion: {
+			Label: 主动闪避
+			Tooltip:
+				'''
+				关闭：不主动预判攻击并侧移闪避
+				标准：临近受击时尝试闪避，间隔至少 1.5 秒
+				灵活：更早预判，间隔 0.75 秒；贴身时可跳过冷却尝试避让
+				闪避不会额外提供无敌时间；关闭后仍会正常调整攻击站位
+				'''
+		}
+	}
+
 	CompanionConfig: {
 		Headers: {
 			Companion: "[palicohead:icon] 陪伴与战斗"
@@ -330,6 +386,15 @@ Configs: {
 		// Owner.Tooltip: ""
 		// Bank.Tooltip: ""
 		// Bag.Tooltip: ""
+	}
+
+	// CompanionStrengthPreset.Tooltip: ""
+
+	CompanionEvasionMode: {
+		// Tooltip: ""
+		// Off.Tooltip: ""
+		// Standard.Tooltip: ""
+		// Agile.Tooltip: ""
 	}
 }
 
@@ -1173,4 +1238,49 @@ Items: {
 	// ImprovedTools.Tooltip: ""
 	// MasterTools.Tooltip: ""
 	// CatWorkbench.Tooltip: ""
+}
+
+EvasionChoices: {
+	Off: 关闭
+	Standard: 标准
+	Agile: 灵活
+}
+
+BalanceHostOnly: 联机时只有房主能修改呆猫强度；独立服务器请由管理员修改服务器配置。
+
+StrengthPresets: {
+	Assist: {
+		Label: 老大，加油喵（辅助）
+		Tooltip:
+			'''
+			主要自己打，呆猫帮忙支援和补刀
+			伤害 50%；生命、防御继承和战斗移动 75%
+			标准闪避；跟随与工作移速 100%
+			'''
+	}
+
+	Standard: {
+		Label: 老大，我来帮忙喵（标准）
+		Tooltip:
+			'''
+			一起打怪，也能让呆猫单独应付零星小怪（默认）
+			伤害、生命与防御继承、战斗移动均为 75%
+			标准闪避；跟随与工作移速 100%
+			'''
+	}
+
+	Strong: {
+		Label: 老大，交给我喵（强力）
+		Tooltip:
+			'''
+			想省些操作，让呆猫多承担日常清怪
+			伤害、生命与防御继承、战斗移动均为 100%
+			灵活闪避；跟随与工作移速 100%
+			'''
+	}
+
+	Custom: {
+		Label: 自定义
+		Tooltip: 当前数值不匹配任何预设，可以继续逐项调整
+	}
 }

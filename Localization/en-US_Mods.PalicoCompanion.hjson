@@ -54,9 +54,9 @@ UI: {
 	RecoverArmor: Retrieve
 	LegacyArmorHint: Legacy armor is withdrawal-only; defense now scales with the player
 	Weapon: Weapon
-	HealthHint: Maximum health is 75% of the player
+	HealthHint: Maximum health is {0}% of your maximum health
 	ManaHint: Maximum mana matches yours (minimum 20), with separate spending and recovery. When out of mana and unable to drink a mana potion, your Palico waits for a full refill before casting again
-	DefenseHint: Defense is 75% of the player
+	DefenseHint: Defense is {0}% of the player
 	HealthLabel: Life
 	ManaLabel: Mana
 	MinionSlots: Minion slots
@@ -116,6 +116,63 @@ CoinChoices: {
 }
 
 Configs: {
+	CompanionBalanceConfig: {
+		DisplayName: Companion balance
+
+		Headers: {
+			Presets: "[palicohead:icon] Quick presets"
+			Strength: "[palicohead:icon] Combat strength"
+			Movement: "[palicoitem:HermesBoots] Movement and evasion"
+		}
+
+		Preset: {
+			Label: Strength preset
+			Tooltip:
+				'''
+				Choose a preset to fill in the six settings below, then save to apply
+				You can still adjust each value; unmatched settings appear as Custom
+				All presets keep following and work movement at 100%
+				In multiplayer, only the host can change these settings in-game; they apply to every Palico on the server
+				'''
+		}
+
+		DamagePercent: {
+			Label: Damage (%)
+			Tooltip: Scales hits from your Palico's weapons, minions, sentries and offensive support gear. Based on the damage your Palico would otherwise deal, not your damage; 100% leaves it unchanged. Does not scale damage over time, such as poison or fire.
+		}
+
+		HealthPercent: {
+			Label: Health inherited (%)
+			Tooltip: Maximum health as a percentage of the owner's maximum health. Changing this preserves the current health percentage and does not revive a downed Palico.
+		}
+
+		DefensePercent: {
+			Label: Defense inherited (%)
+			Tooltip: Defense as a percentage of the owner's defense. This is not a percentage reduction in incoming damage.
+		}
+
+		CombatMovementPercent: {
+			Label: Combat movement speed (%)
+			Tooltip: Adjusts movement speed when chasing enemies, flying in combat and evading attacks. Your Palico still accelerates and slows down; 100% keeps the original speed. Does not change attack or projectile speed.
+		}
+
+		TravelMovementPercent: {
+			Label: Following and work movement (%)
+			Tooltip: Adjusts movement speed while following, gathering and picking up items, not how fast your Palico swings a pickaxe or axe. Long-distance return flight keeps its catch-up speed so fast mounts and wings do not leave your Palico behind.
+		}
+
+		Evasion: {
+			Label: Active evasion
+			Tooltip:
+				'''
+				Off: no predictive sidesteps
+				Standard: attempts to evade imminent hits, with at least 1.5 seconds between sidesteps
+				Agile: anticipates hits earlier, with a 0.75-second cooldown; body contact allows another attempt before the cooldown ends
+				Evasion adds no invincibility frames; normal combat positioning remains active when evasion is off
+				'''
+		}
+	}
+
 	CompanionConfig: {
 		Headers: {
 			Companion: "[palicohead:icon] Companion and combat"
@@ -325,6 +382,15 @@ Configs: {
 		Owner.Tooltip: ""
 		Bank.Tooltip: ""
 		Bag.Tooltip: ""
+	}
+
+	CompanionStrengthPreset.Tooltip: ""
+
+	CompanionEvasionMode: {
+		Tooltip: ""
+		Off.Tooltip: ""
+		Standard.Tooltip: ""
+		Agile.Tooltip: ""
 	}
 }
 
@@ -1168,4 +1234,49 @@ Items: {
 	ImprovedTools.Tooltip: ""
 	MasterTools.Tooltip: ""
 	CatWorkbench.Tooltip: ""
+}
+
+EvasionChoices: {
+	Off: Off
+	Standard: Standard
+	Agile: Agile
+}
+
+BalanceHostOnly: Only the host can change companion balance during multiplayer. Dedicated-server owners can edit the server configuration.
+
+StrengthPresets: {
+	Assist: {
+		Label: Go, Meowster! (Support)
+		Tooltip:
+			'''
+			Take the lead in combat, with your Palico lending a hand
+			Damage: 50%; inherited health/defense and combat movement: 75%
+			Standard evasion; following and work movement: 100%
+			'''
+	}
+
+	Standard: {
+		Label: Let me help, Meowster! (Standard)
+		Tooltip:
+			'''
+			Fight side by side, or let your Palico take care of the odd enemy (default)
+			Damage, inherited health/defense and combat movement: 75%
+			Standard evasion; following and work movement: 100%
+			'''
+	}
+
+	Strong: {
+		Label: Leave it to me, Meowster! (Strong)
+		Tooltip:
+			'''
+			For a more relaxed playthrough, with your Palico doing more of the fighting
+			Damage, inherited health/defense and combat movement: 100%
+			Agile evasion; following and work movement: 100%
+			'''
+	}
+
+	Custom: {
+		Label: Custom
+		Tooltip: These values do not match a preset; adjust individual settings as you like
+	}
 }

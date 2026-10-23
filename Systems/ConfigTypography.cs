@@ -19,8 +19,8 @@ namespace PalicoCompanion.Systems;
 // labels differ: our settings use the same ItemStack font and .8 scale as the
 // surrounding ConfigElement labels. tML does not expose a font option here.
 public sealed class ConfigTypography : ModSystem {
-    Hook bindHook, optionsHook;
-    PropertyInfo boundItem;
+    Hook bindHook, optionsHook, dropdownHook;
+    PropertyInfo boundItem, chooserPanel, optionChoice;
     delegate void Bind(ConfigElement self);
     delegate void BindDetour(Bind original, ConfigElement self);
     delegate List<UIAutoScaleTextTextPanel<string>> Options(ConfigElement self);
@@ -38,9 +38,14 @@ public sealed class ConfigTypography : ModSystem {
         }
         bindHook=new Hook(bind,(BindDetour)OnBind);
         optionsHook=new Hook(options,(OptionsDetour)CreateOptions);
+        var show=type.GetMethod("ShowDropdown",flags);
+        chooserPanel=type.GetProperty("ChooserPanel",flags);
+        optionChoice=type.GetProperty("OptionChoice",flags);
+        if(show!=null&&chooserPanel!=null&&optionChoice!=null)
+            dropdownHook=new Hook(show,(BindDetour)ShowDropdown);
     }
-    public override void Unload(){bindHook?.Dispose();optionsHook?.Dispose();boundItem=null;}
-    bool IsOurs(ConfigElement element)=>boundItem.GetValue(element) is CompanionConfig;
+    public override void Unload(){bindHook?.Dispose();optionsHook?.Dispose();dropdownHook?.Dispose();boundItem=chooserPanel=optionChoice=null;}
+    bool IsOurs(ConfigElement element)=>boundItem.GetValue(element) is CompanionConfig or CompanionBalanceConfig;
     void OnBind(Bind original,ConfigElement self) {
         original(self);
         if(IsOurs(self))foreach(var panel in self.Children.OfType<UIAutoScaleTextTextPanel<string>>())Apply(panel);
@@ -50,7 +55,29 @@ public sealed class ConfigTypography : ModSystem {
         if(IsOurs(self))foreach(var panel in options)Apply(panel);
         return options;
     }
-    static void Apply(UIAutoScaleTextTextPanel<string> panel) {
+    void ShowDropdown(Bind original,ConfigElement self) {
+        original(self);
+        if(!IsOurs(self))return;
+        var popup=(UIElement)chooserPanel.GetValue(self);
+        var choice=(UIElement)optionChoice.GetValue(self);
+        // The native popup is clipped by the settings list. Open above a row
+        // near its bottom instead of putting the choices outside the viewport.
+        float topLimit=float.NegativeInfinity,bottomLimit=float.PositiveInfinity;
+        for(var parent=popup.Parent;parent!=null;parent=parent.Parent) {
+            if(!parent.OverflowHidden)continue;
+            var viewport=parent.GetInnerDimensions();
+            topLimit=Math.Max(topLimit,viewport.Y);
+            bottomLimit=Math.Min(bottomLimit,viewport.Y+viewport.Height);
+        }
+        popup.Recalculate();
+        var box=popup.GetDimensions();
+        if(bottomLimit-topLimit>=box.Height && box.Y+box.Height>bottomLimit) {
+            float top=Math.Clamp(choice.GetDimensions().Y-box.Height-4,topLimit,bottomLimit-box.Height);
+            popup.Top.Pixels+=top-box.Y;
+            popup.Recalculate();
+        }
+    }
+    internal static void Apply(UIAutoScaleTextTextPanel<string> panel) {
         panel.TextColor=Color.Transparent;
         panel.Append(new ConfigChoiceLabel(panel));
     }
@@ -68,8 +95,9 @@ internal sealed class ConfigChoiceLabel : UIElement {
         var rect=choice.UseInnerDimensions?choice.GetInnerDimensions():choice.GetDimensions();
         var font=FontAssets.ItemStack.Value;
         float width=font.MeasureString(choice.Text).X*Scale;
-        // Match ConfigElement's eight-unit baseline inset. All native rows are 30 high.
-        var at=new Vector2(rect.X+(rect.Width-width)/2,rect.Y+8);
+        // Match the native 30-high config row, centering that same text area
+        // in taller controls such as the preset buttons.
+        var at=new Vector2(rect.X+(rect.Width-width)/2,rect.Y+(rect.Height-30)/2+8);
         ChatManager.DrawColorCodedStringWithShadow(batch,font,choice.Text,at,Color.White,0,Vector2.Zero,new Vector2(Scale));
     }
 }

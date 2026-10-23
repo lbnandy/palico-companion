@@ -19,12 +19,13 @@ public sealed class CompanionVitals {
     public void Sync(Player owner,Item[] gear) {
         // Native regeneration assumes at least the player's starting 20 mana.
         // Retain that floor for modded owners below the native starting value.
-        int health=Math.Clamp(owner.statLifeMax2,100,100000)*3/4,mana=Math.Clamp(owner.statManaMax2,20,100000);
+        var balance=CompanionBalanceConfig.Current;
+        int health=Math.Max(1,Math.Clamp(owner.statLifeMax2,100,100000)*balance.HealthRatio/100),mana=Math.Clamp(owner.statManaMax2,20,100000);
         // Preserve injury/resource fractions: swapping buffs or armor never refills us.
         if(health!=MaxHealth){Health=Downed?0:Math.Max(1,(int)((long)Health*health/Math.Max(1,MaxHealth)));MaxHealth=health;}
         if(mana!=MaxMana){Mana=MaxMana>0?(int)((long)Mana*mana/MaxMana):0;MaxMana=mana;}
         Health=Math.Clamp(Health,0,MaxHealth);Mana=Math.Clamp(Mana,0,MaxMana);
-        EffectiveDefense=Math.Clamp((int)owner.statDefense,0,10000)*3/4;
+        EffectiveDefense=Math.Clamp((int)owner.statDefense,0,10000)*balance.DefenseRatio/100;
     }
     public int AttackDamage(Item[] gear,int experience) => Attack(gear,experience);
     public bool Downed => Recovery>0;

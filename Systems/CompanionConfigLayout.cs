@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using Terraria;
 using Terraria.GameContent.UI.Elements;
@@ -7,6 +8,7 @@ using Terraria.Localization;
 using Terraria.ModLoader;
 using Terraria.ModLoader.Config;
 using Terraria.ModLoader.Config.UI;
+using Terraria.ModLoader.UI;
 using Terraria.UI;
 
 namespace PalicoCompanion.Systems;
@@ -24,7 +26,9 @@ public sealed class CompanionConfigLayout : ModSystem {
         ["StockHealing"]="HealingPotion",["StockMana"]="ManaPotion",["StockAmmo"]="WoodenArrow",["StockAcorns"]="Acorn",["StockBait"]="Worm",
         ["CompanionHud"]="head",["ShowActivityStatus"]="Stopwatch",["CompanionMarker"]="Compass",["Discoveries"]="MetalDetector",
         ["Chatter"]="Sign",["Emotes"]="WhoopieCushion",["CatSounds"]="Bell",["TrainingHints"]="Book",
-        ["RunInBackground"]="Stopwatch",["AdvancedOrders"]="Ruler"
+        ["RunInBackground"]="Stopwatch",["AdvancedOrders"]="Ruler",
+        ["Preset"]="head",["DamagePercent"]="GoldBroadsword",["HealthPercent"]="LifeCrystal",["DefensePercent"]="IronChainmail",
+        ["CombatMovementPercent"]="HermesBoots",["TravelMovementPercent"]="Aglet",["Evasion"]="MasterNinjaGear"
     };
     readonly Dictionary<string, FieldInfo> fields = new();
     readonly List<Action> restore = new();
@@ -33,7 +37,7 @@ public sealed class CompanionConfigLayout : ModSystem {
     public override void Load() {
         if (Main.dedServ) return;
         var editorType = typeof(ModConfig).Assembly.GetType("Terraria.ModLoader.Config.UI.UIModConfig", true);
-        foreach (string name in new[] { "modConfig", "mainConfigItems", "filterTextField", "headerTextPanel", "backButton", "saveConfigButton", "revertConfigButton", "restoreDefaultsConfigButton" })
+        foreach (string name in new[] { "modConfig", "pendingConfig", "mainConfigItems", "filterTextField", "headerTextPanel", "backButton", "saveConfigButton", "revertConfigButton", "restoreDefaultsConfigButton" })
             fields[name] = editorType.GetField(name, Private);
         MonoModHooks.Add(editorType.GetMethod("OnActivate"), (Action<Action<UIState>, UIState>)Activate);
     }
@@ -48,7 +52,8 @@ public sealed class CompanionConfigLayout : ModSystem {
     void Activate(Action<UIState> orig, UIState self) {
         Restore();
         orig(self);
-        if (Get<ModConfig>(self, "modConfig") is not CompanionConfig config) return;
+        var config=Get<ModConfig>(self,"modConfig");
+        if (config is not CompanionConfig && config is not CompanionBalanceConfig) return;
         Get<UITextPanel<string>>(self, "headerTextPanel").SetText(config.DisplayName.Value);
         // These controls belong to a shared singleton. Refresh our captions when
         // the language changes, then restore them before opening another config.
@@ -69,10 +74,27 @@ public sealed class CompanionConfigLayout : ModSystem {
         foreach (var pair in Get<List<Tuple<UIElement, UIElement>>>(self, "mainConfigItems")) {
             if (pair.Item2 is not ConfigElement control) continue;
             var field = (PropertyFieldWrapper)member.GetValue(control);
+            if(config is CompanionBalanceConfig && field.Name==nameof(CompanionBalanceConfig.Evasion))
+                SyncBalanceChoice(control,field,Get<ModConfig>(self,"pendingConfig"));
             if (!OptionIcons.TryGetValue(field.Name, out string icon)) continue;
             var original = (Func<string>)display.GetValue(control);
             string tag = icon == "head" ? "[palicohead:icon] " : $"[palicoitem:{icon}] ";
             display.SetValue(control, (Func<string>)(() => tag + original()));
         }
+    }
+
+    static void SyncBalanceChoice(ConfigElement control,PropertyFieldWrapper field,ModConfig pending) {
+        var choice=control.Children.OfType<UIAutoScaleTextTextPanel<string>>().FirstOrDefault();
+        if(choice==null)return;
+        object previous=null;
+        // A preset can change evasion without clicking its native dropdown.
+        control.OnUpdate+=_=>{
+            object current=field.GetValue(pending);
+            if(!Equals(current,previous)){
+                previous=current;
+                string key="Mods.PalicoCompanion.EvasionChoices."+current;
+                choice.SetText(Language.GetTextValue(Language.Exists(key)?key:"tModLoader.ModConfigUnknownEnum"));
+            }
+        };
     }
 }
