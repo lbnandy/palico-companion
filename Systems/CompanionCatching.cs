@@ -36,7 +36,7 @@ public sealed class CompanionCatching {
         bool Good(NPC n)=>n!=null&&Candidate(n,Tool)&&Vector2.DistanceSquared(n.Center,owner.Center)<240*240&&
             Vector2.DistanceSquared(n.Center,cat.Center)<240*240&&Reachability.Clear(cat.Center,n.Center)&&
             InventoryTransfer.HasRoom(new Item(n.catchItem),s.Bag);
-        if(!Good(target)||age>180)Cancel();
+        if(!Good(target)||age>CompanionWorkTiming.Timeout(180))Cancel();
         if(target==null&&clock%30==0) {
             float distance=float.MaxValue;
             foreach(var n in Main.npc)if(Good(n)){float d=Vector2.DistanceSquared(cat.Center,n.Center);if(d<distance){distance=d;target=n;}}
@@ -56,7 +56,7 @@ public sealed class CompanionCatching {
             return true;
         }
         goal=cat.Center;((CompanionCat)cat.ModProjectile).FaceWork(Target);
-        if(SwingTicks==0){Duration=Math.Clamp(Tool.useAnimation,12,60);SwingTicks=Duration;CompanionItemVisual.BeginUse(Tool,cat.Center);}
+        if(SwingTicks==0){Duration=CompanionWorkTiming.Ticks(Math.Clamp(Tool.useAnimation,12,60));SwingTicks=Duration;CompanionItemVisual.BeginUse(Tool,cat.Center);}
         if(--SwingTicks==Duration/3) {
             // Never replace a live player. Scope is synchronous and restored even on hook failure.
             int slot=CompanionNetwork.Server?owner.whoAmI:254;if(!CompanionNetwork.Server&&Main.player[slot].active){Cancel();return false;}

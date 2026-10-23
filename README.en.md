@@ -1,7 +1,7 @@
 <p align="center"><img src="docs/images/palico-companion.gif" alt="Palico Companion" width="240"></p>
 <h1 align="center">Palico Companion</h1>
 <p align="center">A tModLoader companion mod inspired by Monster Hunter's Felynes.</p>
-<p align="center"><a href="https://steamcommunity.com/sharedfiles/filedetails/?id=3824240391">Steam Workshop</a> · <a href="https://youtu.be/M4Z2G2IP33w">Watch on YouTube</a> · <a href="README.md">简体中文</a> · <a href="https://github.com/lbnandy/palico-companion/issues">Report an issue</a></p>
+<p align="center"><a href="https://steamcommunity.com/sharedfiles/filedetails/?id=3824240391">Steam Workshop</a> · <a href="https://youtu.be/9R5gHG-Hgbc">Watch on YouTube</a> · <a href="README.md">简体中文</a> · <a href="https://github.com/lbnandy/palico-companion/issues">Report an issue</a></p>
 
 ## Adventure together
 
@@ -31,13 +31,13 @@ By default, `P` opens the panel, `K` recalls your Palico, and holding `V` while 
 
 Gather materials to craft and upgrade your Palico’s gear. The in-game Palico Guide explains how to craft, use and upgrade equipment.
 
-## Choose your Palico’s strength
+## Customize your Palico’s abilities
 
-Choose **Support** if you want to take the lead in combat. Choose **Standard** to fight side by side. Choose **Strong** if you want to take it easy and let your Palico carry you.
+The **Companion abilities** settings offer three strength presets: choose **Support** if you want to take the lead in combat, **Standard** to fight side by side, or **Strong** if you want to take it easy and let your Palico carry you. Standard is the default.
 
-Standard is the default. The **Companion balance** config also lets you adjust your Palico’s damage, health, defense, movement speeds in and out of combat, and ability to dodge attacks individually.
+You can also fine-tune your Palico’s damage, health, defense, movement speeds in and out of combat, ability to dodge attacks, work speed and fishing speed individually.
 
-In multiplayer, the host or server administrator sets the balance options for every Palico on the server.
+In multiplayer, the host or server administrator manages these settings for every Palico on the server.
 
 ## Optional integrations
 

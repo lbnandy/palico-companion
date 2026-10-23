@@ -18,6 +18,10 @@ public sealed class DiggingIntent
     readonly List<Tuple<int,int>> skipped=new();
     int delay;
     bool awaiting;
+    Point firstStroke,lastStroke,strokeDirection;
+    int strokeCount;
+    ulong strokeAt;
+    bool building;
     public bool Active=>Remaining>0;
     // Classification, not a material whitelist: all solid pick-mined blocks,
     // including ores and modded blocks. Furniture/platforms/axe/hammer objects
@@ -28,11 +32,23 @@ public sealed class DiggingIntent
     public void Observe(Player p,Point cell,int type,Vector2? mouse=null) {
         if(!Allowed(type))return;
         var s=p.GetModPlayer<CompanionPlayer>();
-        if(s.Directive.Active)return;
+        if(s.Directive.Active||s.EnvironmentPaused||!s.Enabled||s.Paused||s.Vitals.Downed||p.dead||
+            !(CompanionNetwork.Server?s.NetDigging:ModContent.GetInstance<CompanionConfig>().DiggingAssist))return;
+        Point dir=Axis(cell.ToWorldCoordinates()-p.Center);
+        // Repeated hits on one repair block never count as forward excavation.
+        // Three adjacent targets distinguish a tunnel from an isolated correction.
+        if(Active&&Direction!=dir)Clear(s);
+        if(!Active) {
+            int dx=cell.X-lastStroke.X,dy=cell.Y-lastStroke.Y;
+            bool adjacent=Math.Abs(dx)+Math.Abs(dy)<=2&&dx*dir.X+dy*dir.Y>=0;
+            if(strokeCount==0||Main.GameUpdateCount-strokeAt>180||strokeDirection!=dir||!adjacent||cell!=lastStroke&&cell==firstStroke){strokeCount=1;firstStroke=cell;}
+            else if(cell!=lastStroke)strokeCount++;
+            lastStroke=cell;strokeDirection=dir;strokeAt=Main.GameUpdateCount;
+            if(strokeCount<3)return;
+        }
         s.Construction.Cancel();
         // A deliberate new terrain stroke takes priority over autonomous ore work.
         if(s.Mining.Active&&!s.Mining.Terrain)s.Mining.Cancel();
-        Point dir=Axis(cell.ToWorldCoordinates()-p.Center);
         bool redirect=!Active||Direction!=dir;
         if(redirect){delay=0;skipped.Clear();}
         else if(Origin!=cell){delay=0;skipped.Clear();}
@@ -49,26 +65,38 @@ public sealed class DiggingIntent
         snapshot.direction=p.direction;snapshot.gravDir=p.gravDir;snapshot.whoAmI=p.whoAmI;
     }
     public void Clear(CompanionPlayer s) {
-        Remaining=0;awaiting=false;
+        Remaining=0;awaiting=false;strokeCount=0;skipped.Clear();snapshot=null;
         if(s.Mining.Active&&s.Mining.Terrain)s.Mining.Cancel();
+    }
+    internal void ObserveConstruction(CompanionPlayer s) {
+        var p=s.Player;
+        bool usingBuildingItem=!p.mouseInterface&&(p.controlUseItem||p.itemAnimation>0)&&
+            (p.HeldItem.createTile>=0||p.HeldItem.createWall>0);
+        if(usingBuildingItem&&!building) {
+            Clear(s);
+            // Clients report only their own cancellation; no target or authority
+            // is borrowed from another player's inventory synchronization.
+            if(CompanionNetwork.Client)CompanionNetwork.StopDig();
+        }
+        building=usingBuildingItem;
     }
     public void Tick(Player p,CompanionPlayer s) {
         if(s.Directive.Active)return;
-        if(!Active)return;
+        if(!Active&&strokeCount==0)return;
         // Inventory clicks are not a new world action. The real PickTile hook
         // already rejects UI input; inspecting the panel must not cancel work.
         bool otherUse=!p.mouseInterface&&(p.controlUseItem||p.itemAnimation>0)&&p.HeldItem.pick<=0;
         // Match autonomous mining and combat selection: an enemy sealed behind
         // a cave wall must not repeatedly erase the owner's digging intention.
-        bool danger=CompanionThreat.WorkDanger(p,s.Cat?.Center??p.Center);
         // Jump is also wing/mount ascent. The real pick stroke remains valid
         // while airborne; distance, lifetime and a different tool end it.
-        if(Remaining<=0||!s.Enabled||s.Paused||s.Vitals.Downed||p.dead||otherUse||
-            !(CompanionNetwork.Server?s.NetDigging:ModContent.GetInstance<CompanionConfig>().DiggingAssist)||Vector2.DistanceSquared(anchor,p.Center)>80*80||
+        if(!s.Enabled||s.Paused||s.EnvironmentPaused||s.Vitals.Downed||p.dead||otherUse||
+            !(CompanionNetwork.Server?s.NetDigging:ModContent.GetInstance<CompanionConfig>().DiggingAssist)||Active&&Vector2.DistanceSquared(anchor,p.Center)>80*80||
             s.Order.Active||s.Order.HasPreview){Clear(s);return;}
+        if(!Active){if(strokeCount>0&&Main.GameUpdateCount-strokeAt>180)strokeCount=0;return;}
         // Combat pauses work but never refreshes the owner's finite intention.
-        if(danger)return;
-        Remaining--;
+        if(--Remaining<=0){Clear(s);return;}
+        if(CompanionThreat.WorkDanger(p,s.Cat?.Center??p.Center))return;
         if(awaiting&&!s.Mining.Active) {
             awaiting=false;
             // A bad face is not a cancelled owner command. Try another native

@@ -129,7 +129,7 @@ public sealed class CompanionFishing {
         }
         if(Bobber.ai[0]==0&&(!SafeBait(bait)||!s.Bag.Contains(bait))){Cancel();return false;}
         using(new Scope(this)){Actor.controlUseItem=false;Actor.ItemCheck();}
-        if(++age>3600||age>150&&!Bobber.wet&&Bobber.ai[0]==0){Cancel();return false;}
+        if(++age>CompanionWorkTiming.FishingTimeout(3600)||age>150&&!Bobber.wet&&Bobber.ai[0]==0){Cancel();return false;}
         // Negative localAI is a caught NPC, not an item. Release instead of
         // automatically bringing Blood Moon enemies or bosses onto the owner.
         if(Bobber.ai[1]<0&&Bobber.localAI[1]<0){Cancel();return false;}

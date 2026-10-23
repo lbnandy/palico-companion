@@ -24,8 +24,8 @@ public static class MiningTools
 
     // Same calculation used by stable Player.ApplyItemTime(item, pickSpeed).
     // This reads timing hooks without using the item or changing player input.
-    public static float ExactInterval(Player player,Item tool) => Math.Clamp(
-        CombinedHooks.TotalUseTime(tool.useTime*player.pickSpeed,player,tool)/player.GetModPlayer<CompanionPlayer>().Training.WorkSpeed(9),1,600);
+    public static float ExactInterval(Player player,Item tool) => CompanionWorkTiming.Exact(Math.Clamp(
+        CombinedHooks.TotalUseTime(tool.useTime*player.pickSpeed,player,tool)/player.GetModPlayer<CompanionPlayer>().Training.WorkSpeed(9),1,600));
     public static int Interval(Player player,Item tool) => (int)Math.Ceiling(ExactInterval(player,tool));
 
     // Vanilla's player/tool reach rectangle, plus two tiles of companion assistance.
@@ -54,7 +54,7 @@ public static class MiningTools
 internal sealed class MiningCadence {
     float credit, pending, period;
     internal int Begin(float exact){
-        exact=Math.Clamp(exact,1,600);
+        exact=Math.Clamp(exact,1,2400);
         if(Math.Abs(period-exact)>.0001f){credit=0;period=exact;}
         int ticks=Math.Max(1,(int)Math.Ceiling(exact-credit));
         pending=Math.Clamp(credit+ticks-exact,0,.999999f);return ticks;

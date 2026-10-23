@@ -11,6 +11,7 @@ public sealed class FieldAssist
 {
     public bool Active { get; private set; }
     public bool Terrain {get;private set;}
+    public bool OwnerRequested {get;private set;}
     public bool Failed {get;private set;}
     public string Status { get; private set; } = "No mining request";
     public Point Tile { get; private set; }
@@ -35,13 +36,13 @@ public sealed class FieldAssist
     public void UpdateVisual() { if(SwingTicks>0)SwingTicks--; }
 
 
-    public string Request(Player player, Vector2 mouseWorld, bool vein = false, Item observedTool = null, bool terrain = false, int veinLimit = 12)
+    public string Request(Player player, Vector2 mouseWorld, bool vein = false, Item observedTool = null, bool terrain = false, int veinLimit = 12, bool ownerRequested = false)
     {
         if (Active) return Status = "Cancel the current mining request first";
         if (Main.netMode == NetmodeID.MultiplayerClient || player == null || !player.active || player.dead)
             return Status = "Mining assistance requires a living single player";
         if (!float.IsFinite(mouseWorld.X) || !float.IsFinite(mouseWorld.Y)) return Status = "Invalid mining target";
-        Terrain=terrain;Failed=false;
+        Terrain=terrain;Failed=false;OwnerRequested=ownerRequested;
         Tile = new Point((int)(mouseWorld.X / 16), (int)(mouseWorld.Y / 16));
         if (!WorldGen.InWorld(Tile.X, Tile.Y, 10)) return Status = "Mining target touches the world boundary";
         if (!Main.tile[Tile.X, Tile.Y].HasTile || !(Terrain?DiggingIntent.Allowed(Main.tile[Tile.X, Tile.Y].TileType):AllowedOre(Main.tile[Tile.X, Tile.Y].TileType)))
@@ -91,7 +92,7 @@ public sealed class FieldAssist
             if(invalid!=null){Stop(invalid);return;}
             SwingTicks=cadence=0;Status=CompanionText.Message("FieldAssist.CombatPause");return;
         }
-        if (++elapsed > 600) { Stop("Mining stopped after 10 seconds; check reach or pickaxe power"); return; }
+        if (++elapsed > CompanionWorkTiming.Timeout(600)) { Stop("Mining stopped: check reach or pickaxe power"); return; }
         // Another miner can finish a queued tile. Skip it without claiming its work or drops.
         while (WorldGen.InWorld(Tile.X,Tile.Y,10) && !Main.tile[Tile.X,Tile.Y].HasTile) {
             if(pending.Count==0){Stop("Ore already cleared; remaining work finished",false);return;}
@@ -190,6 +191,7 @@ public sealed class FieldAssist
     {
         if (Main.netMode == NetmodeID.MultiplayerClient || player == null || !player.active || player.dead || player.whoAmI != owner)
             return "Mining stopped: owner unavailable or multiplayer";
+        if(!OwnerRequested&&player.GetModPlayer<CompanionPlayer>().EnvironmentPaused)return CompanionText.MessageFull("Mods.PalicoCompanion.UI.EnvironmentPaused");
         if (Main.ActiveWorldFileData.UniqueId.ToString() != world) return "Mining stopped: world changed";
         if (!HasTool(player,miningTool)) return "Mining stopped: working tool changed";
         if (!MiningTools.InRange(player,miningTool,Tile,!Terrain)) return CompanionText.Message("FieldAssist.OutOfReach");

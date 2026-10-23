@@ -1,6 +1,6 @@
 displayName = Palico Companion（呆猫伙伴）
 author = LBN
 homepage = https://github.com/lbnandy/palico-companion
-version = 1.0.4
+version = 1.0.5
 weakReferences = CalamityMod, MagicStorage, ImproveGame
 buildIgnore = *.csproj, *.user, *.cmd, *.bat, global.json, obj/*, bin/*, .git/*, .github/*, .local/*, .gitignore, .gitattributes, docs/*, tests/*, tools/*, references/*, *.md

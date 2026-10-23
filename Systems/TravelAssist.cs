@@ -59,7 +59,7 @@ public sealed class TravelAssist {
         Active=false;
         if(cooldown>0)cooldown--;
         Status="";
-        if(Vector2.DistanceSquared(p.Center,cat.Center)>160*160||p.itemAnimation>0)return;
+        if(s.EnvironmentPaused||Vector2.DistanceSquared(p.Center,cat.Center)>160*160||p.itemAnimation>0)return;
         Point target;int type;
         if(s.Ropes&&RopeTarget(p,out target))type=ItemID.Rope;
         else if(s.Bridges&&BridgeTarget(p,out target))type=ItemID.WoodPlatform;
@@ -86,7 +86,7 @@ public sealed class TravelAssist {
         }
         (cat.ModProjectile as CompanionCat)?.FaceWork(point);
         if(cooldown>0)return;
-        cooldown=15;
+        cooldown=CompanionWorkTiming.Ticks(15);
         Status=SafeConstruction.TryPlace(p,cat.Center,materials,target.X,target.Y,type);
         if(Status.StartsWith(SafeConstruction.SuccessPrefix)) {
             s.Expression.Say(s,cat,"Build",Terraria.GameContent.UI.EmoteID.EmoteHappiness);

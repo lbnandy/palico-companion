@@ -29,7 +29,7 @@ public sealed class GardenAssist {
     }
     static Item Seed(CompanionPlayer s,int style)=>Array.Find(s.Bag,i=>!i.IsAir&&!i.favorited&&i.type==Seeds[style]);
     public bool Tick(Player owner,CompanionPlayer s,Projectile cat,bool danger) {
-        if(Main.netMode==NetmodeID.MultiplayerClient||!(CompanionNetwork.Server?s.NetGarden:ModContent.GetInstance<CompanionConfig>().Gardening)||!s.Enabled||s.Paused||s.Vitals.Downed||s.Mining.Active||s.Order.Active||s.Order.HasPreview||s.Storage.Active||s.Trees.Active){Cancel();return false;}
+        if(Main.netMode==NetmodeID.MultiplayerClient||!(CompanionNetwork.Server?s.NetGarden:ModContent.GetInstance<CompanionConfig>().Gardening)||!s.Enabled||s.Paused||s.EnvironmentPaused||s.Vitals.Downed||s.Mining.Active||s.Order.Active||s.Order.HasPreview||s.Storage.Active||s.Trees.Active){Cancel();return false;}
         if(danger){workTicks=0;return false;}
         if(cooldown>0){cooldown--;return false;}
         if(!Active) {
@@ -46,13 +46,13 @@ public sealed class GardenAssist {
             if(!Active)return false;cooldown=0;elapsed=workTicks=0;
         }
         int current=Style(tile);
-        if(++elapsed>300||current<0||Vector2.DistanceSquared(s.WorkAnchor,Target)>224*224){Cancel();cooldown=120;return false;}
+        if(++elapsed>CompanionWorkTiming.Timeout(300)||current<0||Vector2.DistanceSquared(s.WorkAnchor,Target)>224*224){Cancel();cooldown=120;return false;}
         s.Status=CompanionText.MessageFull("Mods.PalicoCompanion.UI.GardenWalking");
         if(Vector2.DistanceSquared(cat.Center,Target)>40*40){workTicks=0;return true;}
         if(!Reachability.Clear(cat.Center,Target)){Cancel();cooldown=120;return false;}
         s.Status=CompanionText.MessageFull("Mods.PalicoCompanion.UI.GardenWorking");
         (cat.ModProjectile as CompanionCat)?.FaceWork(Target);
-        if(++workTicks<30)return true;
+        if(++workTicks<CompanionWorkTiming.Ticks(30))return true;
         // Terraria generates the normal herb/seed drops. Never fabricate inventory rewards.
         using var drops=new GardenHarvestDrops.Capture(tile);
         using(CompanionTileActions.Begin())using(new HarvestBasket(s))WorldGen.KillTile(tile.X,tile.Y);
@@ -73,7 +73,7 @@ public sealed class GardenAssist {
             }else s.Report(CompanionText.Message("GardenAssist.NoSeeds"));
         } else s.Report(CompanionText.MessageFull("Mods.PalicoCompanion.UI.GardenBlocked"));
         if(CompanionNetwork.Server)NetMessage.SendTileSquare(-1,tile.X-1,tile.Y-1,3,3);
-        Cancel();cooldown=120;return false;
+        Cancel();cooldown=CompanionWorkTiming.Ticks(120);return false;
     }
 }
 

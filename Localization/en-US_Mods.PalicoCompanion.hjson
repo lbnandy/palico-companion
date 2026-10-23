@@ -1,10 +1,16 @@
 Keybinds: {
+	Environment.DisplayName: Toggle automatic environment changes
 	Direct.DisplayName: Direct companion (hold and click)
 	Panel.DisplayName: Companion panel
 	Recall.DisplayName: Recall companion
 }
 
 UI: {
+	EnvironmentPause: Pause environment changes
+	EnvironmentResume: Resume environment changes
+	EnvironmentPaused: Automatic environment changes paused
+	EnvironmentResumed: Automatic environment changes resumed
+	EnvironmentHint: Toggles automatic digging, tree cutting, planting and building
 	NameEmpty: Enter a name to continue
 	DefaultName: Kit
 	DyeSlot: Dye
@@ -117,12 +123,13 @@ CoinChoices: {
 
 Configs: {
 	CompanionBalanceConfig: {
-		DisplayName: Companion balance
+		DisplayName: Companion abilities
 
 		Headers: {
 			Presets: "[palicohead:icon] Quick presets"
-			Strength: "[palicohead:icon] Combat strength"
+			Strength: "[palicohead:icon] Combat abilities"
 			Movement: "[palicoitem:HermesBoots] Movement and evasion"
+			WorkEfficiency: "[palicoitem:GoldPickaxe] Work efficiency"
 		}
 
 		Preset: {
@@ -159,6 +166,16 @@ Configs: {
 		TravelMovementPercent: {
 			Label: Following and work movement (%)
 			Tooltip: Adjusts movement speed while following, gathering and picking up items, not how fast your Palico swings a pickaxe or axe. Long-distance return flight keeps its catch-up speed so fast mounts and wings do not leave your Palico behind.
+		}
+
+		WorkSpeedPercent: {
+			Label: Work speed (%)
+			Tooltip: Adjusts how quickly your Palico digs, cuts trees, plants, catches critters and places blocks or items. 100% keeps the current speed, including tool and skill bonuses. Does not change movement, pickups, chest restocking or support cooldowns. Strength presets leave this setting unchanged.
+		}
+
+		FishingSpeedPercent: {
+			Label: Fishing speed (%)
+			Tooltip: Adjusts how quickly fish bite for your Palico. 100% keeps the current speed. Does not change fishing power, catch-quality rolls, bait consumption rules, or casting and reeling animations. Strength presets leave this setting unchanged.
 		}
 
 		Evasion: {
@@ -326,7 +343,7 @@ Configs: {
 
 		DiggingAssist: {
 			Label: Help you dig
-			Tooltip: Follows your pickaxe strikes for up to 8 seconds, including downward digging. Stops when you move away, jump, switch items or pause. Uses normal pickaxe power and mining rules.
+			Tooltip: Starts helping after consecutive pickaxe strikes on adjacent blocks, including downward digging. Uses normal pickaxe power and continues for up to 8 seconds after you stop. Moving away, building or using another tool ends the task. Opening the Palico inventory does not interrupt it.
 		}
 
 		MiningBlacklist: {
@@ -1242,7 +1259,7 @@ EvasionChoices: {
 	Agile: Agile
 }
 
-BalanceHostOnly: Only the host can change companion balance during multiplayer. Dedicated-server owners can edit the server configuration.
+BalanceHostOnly: Only the host can change companion abilities in multiplayer. Dedicated-server owners can edit the server configuration.
 
 StrengthPresets: {
 	Assist: {

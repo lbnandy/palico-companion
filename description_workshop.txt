@@ -13,8 +13,10 @@ Bring a Palico from Monster Hunter along on your Terraria adventures.
 
 [i]“I wasn't lost, Meowster! Just took the long way.”[/i]
 
-[h2]Choose your Palico’s strength[/h2]
-Choose [b]Support[/b] if you want to take the lead in combat. Choose [b]Standard[/b] to fight side by side. Choose [b]Strong[/b] if you want to take it easy and let your Palico carry you. Standard is the default. You can also adjust your Palico’s damage, health, defense, movement speeds and ability to dodge attacks individually in the mod settings.
+[h2]Customize your Palico’s abilities[/h2]
+The [b]Companion abilities[/b] settings offer three strength presets: choose [b]Support[/b] if you want to take the lead in combat, [b]Standard[/b] to fight side by side, or [b]Strong[/b] if you want to take it easy and let your Palico carry you. Standard is the default.
+
+You can also fine-tune your Palico’s damage, health, defense, movement speed, ability to dodge attacks, work speed and fishing speed individually.
 
 [h2]Equipment and inventory[/h2]
 Equip your Palico and save multiple loadouts to switch between.
@@ -29,7 +31,7 @@ Gather materials to craft and upgrade your Palico’s gear. The in-game Palico G
 [img]https://raw.githubusercontent.com/lbnandy/palico-companion/main/docs/images/05-guide-en-compact.png[/img]
 
 [h2]Bring your friends[/h2]
-Play solo or in multiplayer, [b]with existing characters and worlds[/b]. Each player has a Palico with separate equipment, inventory and upgrades. The host or server administrator sets shared balance options.
+Play solo or in multiplayer, [b]with existing characters and worlds[/b]. Each player has a Palico with separate equipment, inventory and upgrades. The host or server administrator manages the shared Companion abilities settings.
 
 [h2]Optional integrations[/h2]
 [list]

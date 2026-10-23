@@ -57,7 +57,7 @@ internal sealed class CompanionDirective {
         var selected=new List<Item>();
         switch(kind) {
             case DirectiveKind.Mine:
-                mining=new();message=mining.Request(s.Player,cell.ToWorldCoordinates(),true,veinLimit:2048);
+                mining=new();message=mining.Request(s.Player,cell.ToWorldCoordinates(),true,veinLimit:2048,ownerRequested:true);
                 if(!mining.Active)return false;break;
             case DirectiveKind.Tree:
                 message=CompanionText.Message("CompanionDirective.CannotChop");

@@ -9,11 +9,12 @@ namespace PalicoCompanion.Systems;
 
 // Server simulation; clients send commands and display confirmed snapshots.
 internal static partial class CompanionNetwork {
-    internal const byte Init=2,Snapshot=3,Command=4,Slot=5,SlotResult=6,Speech=7,Dig=8,Preferences=9,Identity=10,Effect=11,ChestAccess=12,Darkness=13,Bulk=14,BulkResult=15,Feedback=16,CloseRequest=17,CloseAck=18,PickupNotice=19,Resume=20,Chop=21,BuildStroke=22,TrainingNotice=23,TrainingUse=24;
+    internal const byte Init=2,Snapshot=3,Command=4,Slot=5,SlotResult=6,Speech=7,Dig=8,Preferences=9,Identity=10,Effect=11,ChestAccess=12,Darkness=13,Bulk=14,BulkResult=15,Feedback=16,CloseRequest=17,CloseAck=18,PickupNotice=19,Resume=20,Chop=21,BuildStroke=22,TrainingNotice=23,TrainingUse=24,StopDigging=35;
     internal static void TrainingEffect(CompanionPlayer s,byte kind,int value){var p=Packet(TrainingNotice);p.Write(kind);p.Write(value);p.Send(s.Player.whoAmI);}
     internal static void TrainingSpent(byte kind){var p=Packet(TrainingUse);p.Write(kind);p.Send();}
     internal static void BuiltAt(int x,int y,int type){var p=Packet(BuildStroke);p.Write(x);p.Write(y);p.Write(type);p.Send();}
     internal static void ChopAt(int x,int y){var p=Packet(Chop);p.Write(x);p.Write(y);p.Send();}
+    internal static void StopDig(){if(!Client)return;var p=Packet(StopDigging);p.Send();}
     internal static void DigAt(Point cell,int type,Vector2 aim){var p=Packet(Dig);p.Write(cell.X);p.Write(cell.Y);p.Write(type);p.Write(aim.X);p.Write(aim.Y);p.Send();}
     internal static void Say(CompanionPlayer s,string line,string context=""){var p=Packet(Speech);p.Write((byte)s.Player.whoAmI);p.Write(line);p.Write(context??"");p.Send(s.Player.whoAmI);}
     internal static bool Client=>Main.netMode==NetmodeID.MultiplayerClient;
@@ -45,7 +46,7 @@ internal static partial class CompanionNetwork {
         if(Client){
             if(s.Vitals.Immunity>0)s.Vitals.Immunity--;
             if(s.Player.whoAmI==Main.myPlayer&&!s.NetReady&&s.NetTicks++==0){
-                var p=Packet(Init);p.Write(s.NetSession);p.Write(s.CatName);p.Write(s.HoodColor);p.Write(s.Bonded);p.Write(s.Stowed);p.Write(s.Enabled);p.Write(s.Introduced);
+                var p=Packet(Init);p.Write(s.NetSession);p.Write(s.CatName);p.Write(s.HoodColor);p.Write(s.Bonded);p.Write(s.Stowed);p.Write(s.Enabled);p.Write(s.Introduced);p.Write(s.EnvironmentPaused);
                 Items(p,s.Bag);Items(p,s.Gear);Items(p,s.Dyes);s.Chests.Write(p);s.Dialogue.Write(p);Vitals(p,s.Vitals);WritePreferences(s,p);s.Training.Write(p);s.Loadouts.Write(p);p.Send();
             }
             if(s.Player.whoAmI==Main.myPlayer&&s.NetReady&&!CompanionSession.Closing&&++s.NetTicks%30==0&&s.Cat?.ModProjectile is CompanionCat visual){
@@ -67,7 +68,7 @@ internal static partial class CompanionNetwork {
         if(!Server||!s.NetReady)return;
         Cache(s);var p=Packet(Snapshot);WriteState(s,p);p.Send(to);if(to<0)equipmentState[s.Player.whoAmI]=EquipmentState(s);
     }
-    static void WriteState(CompanionPlayer s,BinaryWriter p){p.Write((byte)s.Player.whoAmI);p.Write(s.CatName);p.Write(s.HoodColor);p.Write(s.Bonded);p.Write(s.Stowed);p.Write(s.Enabled);p.Write(s.Paused);p.Write(s.Introduced);p.Write(s.Pickup);p.Write(s.Combat);p.Write(s.Torches);p.Write(s.Bridges);p.Write(s.Ropes);p.Write(s.AutoLogistics);p.Write(s.Vitals.EffectiveDefense);
+    static void WriteState(CompanionPlayer s,BinaryWriter p){p.Write((byte)s.Player.whoAmI);p.Write(s.CatName);p.Write(s.HoodColor);p.Write(s.Bonded);p.Write(s.Stowed);p.Write(s.Enabled);p.Write(s.Paused);p.Write(s.EnvironmentPaused);p.Write(s.Introduced);p.Write(s.Pickup);p.Write(s.Combat);p.Write(s.Torches);p.Write(s.Bridges);p.Write(s.Ropes);p.Write(s.AutoLogistics);p.Write(s.Vitals.EffectiveDefense);
         Vitals(p,s.Vitals);
         p.Write(s.Status??"");s.Chests.Write(p);Items(p,s.Bag);Items(p,s.Gear);Items(p,s.Dyes);s.Training.Write(p);s.Loadouts.Write(p);
         p.Write((ulong)Main.GameUpdateCount);p.Write(s.Enabled&&!s.Player.dead&&!s.NetLeaving&&s.Cat?.ModProjectile is CompanionCat cat?cat.NetworkInstance:0UL);s.Dialogue.Memories.Write(p);
@@ -75,7 +76,7 @@ internal static partial class CompanionNetwork {
     internal static void Action(byte action){if(!Client)return;var p=Packet(Command);p.Write(action);p.Send();}
     static void ReadState(BinaryReader r,bool transaction=false,CompanionPlayer destination=null,bool apply=true){
             int owner=r.ReadByte();if(owner>=Main.maxPlayers)return;var s=destination??Main.player[owner].GetModPlayer<CompanionPlayer>();
-            string name=r.ReadString();int hoodColor=CompanionPalette.Valid(r.ReadInt32());bool bonded=r.ReadBoolean(),stowed=r.ReadBoolean(),enabled=r.ReadBoolean(),paused=r.ReadBoolean();bool introduced=r.ReadBoolean();bool pickup=r.ReadBoolean(),combat=r.ReadBoolean(),torches=r.ReadBoolean(),bridges=r.ReadBoolean(),ropes=r.ReadBoolean(),logistics=r.ReadBoolean();int defense=r.ReadInt32();
+            string name=r.ReadString();int hoodColor=CompanionPalette.Valid(r.ReadInt32());bool bonded=r.ReadBoolean(),stowed=r.ReadBoolean(),enabled=r.ReadBoolean(),paused=r.ReadBoolean(),environmentPaused=r.ReadBoolean();bool introduced=r.ReadBoolean();bool pickup=r.ReadBoolean(),combat=r.ReadBoolean(),torches=r.ReadBoolean(),bridges=r.ReadBoolean(),ropes=r.ReadBoolean(),logistics=r.ReadBoolean();int defense=r.ReadInt32();
             var vitals=new CompanionVitals();Vitals(r,vitals);string status=r.ReadString();var permissions=ChestPermissions.Read(r);
             var bag=Items(r,256);var gear=Items(r,16);var dyes=Items(r,16);var training=CompanionTraining.Read(r);var loadouts=CompanionLoadouts.Read(r);
             ulong rosterTime=r.ReadUInt64(),rosterToken=r.ReadUInt64();var memories=new CompanionMemories();memories.Read(r);if(apply&&destination==null)CompanionRoster.Confirm(owner,rosterToken,rosterTime);
@@ -83,7 +84,7 @@ internal static partial class CompanionNetwork {
             // not discard a real victory. TCP preserves snapshot order.
             if(apply)s.Dialogue.Memories=memories;
             if(!apply||owner==Main.myPlayer&&Pending&&!transaction)return;
-            s.CatName=name;s.HoodColor=hoodColor;s.Bonded=bonded;s.Stowed=stowed;s.Enabled=enabled;s.Paused=paused;s.Status=status;
+            s.CatName=name;s.HoodColor=hoodColor;s.Bonded=bonded;s.Stowed=stowed;s.Enabled=enabled;s.Paused=paused;s.EnvironmentPaused=environmentPaused;s.Status=status;
             s.Pickup=pickup;s.Combat=combat;s.Torches=torches;s.Bridges=bridges;s.Ropes=ropes;s.AutoLogistics=logistics;s.Vitals=vitals;s.Vitals.EffectiveDefense=defense;s.Introduced=introduced;
             s.Training=training;s.Loadouts=loadouts;s.Bag=bag;s.Gear=gear;s.Dyes=dyes;s.Chests=permissions;s.NetReady=true;
         }
@@ -112,13 +113,13 @@ internal static partial class CompanionNetwork {
         var state=Main.player[sender].GetModPlayer<CompanionPlayer>();
         if(kind==Init){
             string session=r.ReadString();if(!Guid.TryParseExact(session,"N",out _))throw new InvalidDataException("Invalid session");
-            string name=r.ReadString();int hoodColor=CompanionPalette.Valid(r.ReadInt32());bool bonded=r.ReadBoolean(),stowed=r.ReadBoolean(),enabled=r.ReadBoolean();bool introduced=r.ReadBoolean();
+            string name=r.ReadString();int hoodColor=CompanionPalette.Valid(r.ReadInt32());bool bonded=r.ReadBoolean(),stowed=r.ReadBoolean(),enabled=r.ReadBoolean();bool introduced=r.ReadBoolean(),environmentPaused=r.ReadBoolean();
             var bag=Items(r,256);var gear=Items(r,16);var dyes=Items(r,16);
             var permissions=ChestPermissions.Read(r);
             var history=new CompanionDialogue();history.Read(r);var savedVitals=new CompanionVitals();Vitals(r,savedVitals);ReadPreferences(state,r);var training=CompanionTraining.Read(r);var loadouts=CompanionLoadouts.Read(r);
             if(state.NetReady||bag.Length<24||gear.Length<4||dyes.Length<1)return;
             state.NetSession=session;if(Restore(state)){var resume=Packet(Resume);WriteState(state,resume);resume.Send(sender);Send(state);return;}
-            CompanionNaming.Rename(state,name);state.HoodColor=hoodColor;state.Bonded=bonded;state.Introduced=introduced;state.Stowed=stowed;state.Enabled=enabled&&!stowed;state.Paused=false;
+            CompanionNaming.Rename(state,name);state.HoodColor=hoodColor;state.Bonded=bonded;state.Introduced=introduced;state.Stowed=stowed;state.Enabled=enabled&&!stowed;state.Paused=false;state.EnvironmentPaused=environmentPaused;
             state.Dialogue=history;state.Training=training;state.Loadouts=loadouts;state.NetLeaving=false;state.Chests=permissions;state.Bag=bag;state.Gear=gear;state.Dyes=dyes;state.NetReady=true;state.Vitals=savedVitals;state.Enabled=state.NetEnabled&&!stowed;state.Vitals.Sync(state.Player,gear);var ready=Packet(Resume);WriteState(state,ready);ready.Send(sender);Send(state);return;
         }
         // A light report may already be queued when the final save handshake
@@ -128,6 +129,7 @@ return;}
         if(!state.NetReady)return;
         if(kind==CloseRequest){state.NetLeaving=true;var ack=Packet(CloseAck);WriteState(state,ack);ack.Send(sender);return;}
         if(state.NetLeaving)return;
+        if(kind==StopDigging){state.Digging.Clear(state);return;}
         if(kind==ControlRequest){ReadControl(state,r);return;}
         if(kind==QuickTrash){ReadTrash(state,r);return;}
         if(kind==TrainingUse){byte skill=r.ReadByte();if(skill is 1 or 6 && state.Training.Use(state,skill,CompanionTraining.CooldownSeconds(skill),state.Player.Center))state.Expression.GearUsed(state,skill);Send(state);return;}

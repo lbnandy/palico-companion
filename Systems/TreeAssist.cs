@@ -11,10 +11,11 @@ public sealed class TreeAssist
 {
     Point root;
     int cooldown,elapsed,cadence,interval;
-    int replantTrunk,replantTicks;
+    int replantTrunk,replantTicks,replantWork;
     public bool ReplantPending=>replantTicks>0;
     Item axe;
     bool requested,requestedManual;
+    internal bool OwnerRequested=>requestedManual;
     int requestedType;
     public bool Requested => requested && (Active || ReplantPending);
     readonly Item basicAxe=new(ItemID.CopperAxe); // Companion-owned tool; never inserted into an inventory.
@@ -27,7 +28,7 @@ public sealed class TreeAssist
     public int SwingItemType {get;private set;}
     public Item SwingItem {get;private set;}
     public void UpdateVisual(){if(SwingTicks>0)SwingTicks--;}
-    public void Cancel(){Active=false;requested=false;requestedManual=false;SwingTicks=cadence=elapsed=replantTicks=0;cooldown=120;Status="";}
+    public void Cancel(){Active=false;requested=false;requestedManual=false;SwingTicks=cadence=elapsed=replantTicks=replantWork=0;cooldown=120;Status="";}
     public void Suspend(){SwingTicks=cadence=0;Status=CompanionText.Message("TreeAssist.CombatPause");}
     public static bool FindRoot(int x,int y,out Point at) {
         at=default;
@@ -37,7 +38,7 @@ public sealed class TreeAssist
     }
     public bool Assist(Player p,Point at,bool manual=false) {
         var s=p.GetModPlayer<CompanionPlayer>();
-        if(!manual&&s.Directive.Active||Main.netMode==NetmodeID.MultiplayerClient||!s.Enabled||s.Paused||s.Vitals.Downed||
+        if(!manual&&(s.Directive.Active||s.EnvironmentPaused)||Main.netMode==NetmodeID.MultiplayerClient||!s.Enabled||s.Paused||s.Vitals.Downed||
             !manual&&!(CompanionNetwork.Server?s.NetForestry:ModContent.GetInstance<CompanionConfig>().Forestry)||!Mature(at,out _))return false;
         if(requested&&Active&&root==at)return true; // Repeated axe hits must not reset the helper's swing.
         Cancel();root=at;requested=true;requestedManual=manual;requestedType=Main.tile[root].TileType;Active=true;cooldown=0;axe=BestAxe(p);
@@ -80,7 +81,7 @@ public sealed class TreeAssist
         return best<float.MaxValue;
     }
     public bool Tick(Player p,CompanionPlayer s,Projectile cat,bool danger) {
-        if(Main.netMode==NetmodeID.MultiplayerClient||!requestedManual&&!(CompanionNetwork.Server?s.NetForestry:ModContent.GetInstance<CompanionConfig>().Forestry)||!s.Enabled||s.Paused||s.Vitals.Downed||
+        if(Main.netMode==NetmodeID.MultiplayerClient||!requestedManual&&s.EnvironmentPaused||!requestedManual&&!(CompanionNetwork.Server?s.NetForestry:ModContent.GetInstance<CompanionConfig>().Forestry)||!s.Enabled||s.Paused||s.Vitals.Downed||
             s.Mining.Active||s.Order.Active||s.Order.HasPreview||s.Storage.Active||s.Garden.Active){if(Active||ReplantPending)Cancel();return false;}
         if(danger){if(Active||ReplantPending)Suspend();return false;}
         if(requested&&Active&&!ReplantPending&&!Main.tile[root].HasTile){
@@ -88,7 +89,7 @@ public sealed class TreeAssist
             // attempt a seed-backed replant; never credit a second tree harvest.
             Active=false;replantTrunk=requestedType;replantTicks=180;
         }
-        if(ReplantPending)return TryReplant(p,s,cat);
+        if(ReplantPending){bool result=TryReplant(p,s,cat);if(!ReplantPending)requestedManual=false;return result;}
         if(cooldown>0){cooldown--;return false;}
         if(!Active) {
             if(!CompanionWorkOpportunity.KeepingUp(p,cat)){Status="";return false;}
@@ -104,7 +105,7 @@ public sealed class TreeAssist
         }
         var current=BestAxe(p);
         if(!ReferenceEquals(axe,current)){axe=current;cadence=SwingTicks=0;}
-        if(++elapsed>600||axe==null||Vector2.DistanceSquared(p.Center,Target)>320*320||
+        if(++elapsed>CompanionWorkTiming.Timeout(600)||axe==null||Vector2.DistanceSquared(p.Center,Target)>320*320||
             !Mature(root,out int treeTopY)||(!requested&&Protected(p,root,treeTopY))) {Cancel();return false;}
         if(Vector2.DistanceSquared(cat.Center,Target)>56*56||!Reachability.Clear(cat.Center,Target)) {
             cadence=0;if(elapsed%15==0&&Stand(cat.Center,out var stand))MoveTarget=stand;
@@ -112,7 +113,7 @@ public sealed class TreeAssist
         }
         MoveTarget=cat.Center;Status=s.Status=CompanionText.Message("TreeAssist.Chopping");
         (cat.ModProjectile as CompanionCat)?.FaceWork(Target);
-        if(cadence==0)interval=Math.Clamp(CombinedHooks.TotalUseTime(axe.useTime,p,axe),1,300);
+        if(cadence==0)interval=CompanionWorkTiming.Ticks(Math.Clamp(CombinedHooks.TotalUseTime(axe.useTime,p,axe),1,300));
         int windup=Math.Max(1,(int)(interval*0.6f));cadence++;
         if(cadence==interval-windup+1){SwingDuration=Math.Max(1,(int)Math.Ceiling(windup/0.6f));SwingTicks=SwingDuration;SwingItemType=axe.type;SwingItem=axe;CompanionItemVisual.BeginUse(axe,cat.Center);}
         if(cadence<interval)return true;cadence=0;
@@ -128,17 +129,18 @@ public sealed class TreeAssist
         if(CompanionNetwork.Server)NetMessage.SendTileSquare(-1,root.X-4,treeTopY-2,9,root.Y-treeTopY+5);
         if(!Main.tile[root].HasTile) {
             s.Experience++;
-            Cancel();cooldown=300;replantTicks=180;
-            return TryReplant(p,s,cat);
+            bool manual=requestedManual;Cancel();requestedManual=manual;cooldown=CompanionWorkTiming.Ticks(300);replantTicks=180;
+            bool result=TryReplant(p,s,cat);if(!ReplantPending)requestedManual=false;return result;
         }
-        Cancel();cooldown=300;return false;
+        Cancel();cooldown=CompanionWorkTiming.Ticks(300);return false;
     }
     bool TryReplant(Player p,CompanionPlayer s,Projectile cat){
         Active=false;
         if(Vector2.DistanceSquared(p.Center,Target)>320*320){replantTicks=0;return false;}
         var seed=TreeSpecies.FindSeed(p,s,replantTrunk);
         if(seed!=null&&Vector2.DistanceSquared(cat.Center,Target)<=56*56&&Reachability.Clear(cat.Center,Target)){
-            replantTicks=0;
+            if(++replantWork<CompanionWorkTiming.ExtraDelay(CompanionActionVisual.Duration))return true;
+            replantTicks=0;replantWork=0;
             foreach(int x in new[]{root.X,root.X-1}){
                 if(!TreeSpecies.Plant(x,root.Y,seed))continue;
                 if(cat.ModProjectile is CompanionCat visual)visual.ActionVisual.Begin(visual,CompanionGesture.Plant,seed.type);
@@ -152,6 +154,7 @@ public sealed class TreeAssist
         // Give ordinary pickup a short chance to collect this tree's own drops.
         // No movement task while waiting for seeds. Once acquired, briefly
         // approach the stump; danger, player movement and higher jobs cancel it.
+        replantWork=0;
         if(--replantTicks==0){s.Report(seed==null?CompanionText.Message("TreeAssist.NoAcorn"):CompanionText.Message("TreeAssist.LeftTree"));return false;}
         if(seed!=null&&Stand(cat.Center,out var stand)){
             Active=true;MoveTarget=stand;Status=s.Status=CompanionText.Message("TreeAssist.Replanting");return true;

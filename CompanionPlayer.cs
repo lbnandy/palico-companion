@@ -45,6 +45,7 @@ public sealed class CompanionPlayer : ModPlayer
     internal int DeliveryTicks;
     public Item[] Bag = InventoryTransfer.Empty(24);
     public bool Enabled, Paused, Pickup=true, Combat=true, Torches=true, Bridges, Ropes;
+    public bool EnvironmentPaused;
     public bool AutoLogistics=true;
     public AutomaticLogistics Storage=new();
     public CompanionExpression Expression=new();
@@ -79,6 +80,7 @@ public sealed class CompanionPlayer : ModPlayer
         tag["dialogue"]=Dialogue.Save();
         tag["discoveries"]=Discovery.Save();
         tag["potionDelay"]=Vitals.PotionDelay; tag["autoLogistics"]=AutoLogistics; tag["schema"]=5; tag["maxHealth"]=Vitals.MaxHealth;tag["maxMana"]=Vitals.MaxMana;tag["mana"]=Vitals.Mana; tag["gear"]=Gear.Select(ItemIO.Save).ToList(); tag["health"]=Vitals.Health;tag["recovery"]=Vitals.Recovery; tag["bag"]=Bag.Select(ItemIO.Save).ToList();
+        tag["environmentPaused"]=EnvironmentPaused;
         tag["enabled"]=Enabled; tag["paused"]=Paused; tag["name"]=CatName;
         tag["pickup"]=Pickup; tag["combat"]=Combat; tag["torches"]=Torches; tag["bridges"]=Bridges; tag["ropes"]=Ropes;
         tag["xp"]=Experience; tag["fur"]=Fur; tag["home"]=Home; tag["homeWorld"]=HomeWorld;
@@ -112,6 +114,7 @@ public sealed class CompanionPlayer : ModPlayer
         // Preserve every saved slot if capacity ever shrinks in a future version.
         Bag=InventoryTransfer.Empty(Math.Max(24,items.Count));
         for(int i=0;i<items.Count;i++) Bag[i]=ItemIO.Load(items[i]);
+        EnvironmentPaused=tag.GetBool("environmentPaused");
         Enabled=tag.GetBool("enabled"); Paused=tag.GetBool("paused");
         CatName=tag.ContainsKey("name")?tag.GetString("name"):CompanionLife.L("DefaultName");
         Pickup=!tag.ContainsKey("pickup")||tag.GetBool("pickup"); Combat=!tag.ContainsKey("combat")||tag.GetBool("combat");
@@ -134,6 +137,7 @@ public sealed class CompanionPlayer : ModPlayer
         CompanionControlUI.Input(this);
         if(Main.inFancyUI||Terraria.GameInput.PlayerInput.WritingText) return;
         if(PalicoCompanion.PanelKey.JustPressed&&!Main.inFancyUI&&!Main.mapFullscreen) CompanionUIFlow.Toggle(this);
+        if(PalicoCompanion.EnvironmentKey.JustPressed&&!Main.mapFullscreen)CompanionEnvironment.RequestToggle(this);
         if(CompanionNetwork.Client){if(PalicoCompanion.RecallKey.JustPressed)CompanionNetwork.Action(1);return;}
         if(PalicoCompanion.RecallKey.JustPressed) Recall();
     }
@@ -144,7 +148,8 @@ public sealed class CompanionPlayer : ModPlayer
         if(CompanionControlUI.Aiming)return false;
         if(CompanionNetwork.Client&&CompanionNetwork.BlocksItemUse)return false;
         if(CompanionInteraction.Hovered&&Main.mouseRight||CompanionStatusBar.BlocksInput)return false;
-        if(Main.netMode==NetmodeID.SinglePlayer && Enabled && !Paused && !Vitals.Downed && ModContent.GetInstance<CompanionConfig>().MiningAssist)
+        Digging.ObserveConstruction(this);
+        if(Main.netMode==NetmodeID.SinglePlayer && Enabled && !Paused && !EnvironmentPaused && !Vitals.Downed && ModContent.GetInstance<CompanionConfig>().MiningAssist)
             MiningHelper.Observe(Player,new Point(Terraria.Player.tileTargetX,Terraria.Player.tileTargetY));
         return true;
     }

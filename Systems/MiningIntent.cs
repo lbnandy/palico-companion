@@ -12,6 +12,7 @@ public sealed class MiningIntent
     int preferenceTicks, scanDelay, clock;
     bool wasActive;
     readonly Dictionary<Point,int> deferred=new();
+    public void Clear(){preferenceTicks=scanDelay=clock=0;wasActive=false;deferred.Clear();}
     public void Observe(Player p,Point cell)
     {
         if(!p.active||p.dead||p.HeldItem.pick<=0||(p.itemAnimation<=0&&!p.controlUseItem)||p.mouseInterface||
@@ -22,9 +23,10 @@ public sealed class MiningIntent
     public void Tick(Player p,CompanionPlayer s)
     {
         if(s.Directive.Active)return;
+        if(s.EnvironmentPaused){if(s.Mining.Active&&!s.Mining.OwnerRequested)s.Mining.Cancel();Clear();return;}
         clock++;if(preferenceTicks>0)preferenceTicks--;
         if(Main.netMode==NetmodeID.MultiplayerClient||!(CompanionNetwork.Server?s.NetMining:ModContent.GetInstance<CompanionConfig>().MiningAssist)||!s.Enabled||s.Paused||s.Vitals.Downed||p.dead) {
-            if(s.Mining.Active&&!s.Mining.Terrain)s.Mining.Cancel();
+            if(s.Mining.Active&&!s.Mining.Terrain&&!s.Mining.OwnerRequested)s.Mining.Cancel();
             wasActive=false;return;
         }
         if(s.Digging.Active||s.Mining.Active&&s.Mining.Terrain){wasActive=false;return;}

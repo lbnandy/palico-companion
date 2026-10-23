@@ -18,7 +18,7 @@ public sealed class ConstructionAssist {
     public void Cancel(){left=streak=cadence=elapsed=0;type=0;}
     public void Observe(Player p,Point at,int itemType){
         var s=p.GetModPlayer<CompanionPlayer>();
-        if(s.Directive.Active||!s.Enabled||s.Paused||s.Vitals.Downed||!ContentSamples.ItemsByType.TryGetValue(itemType,out var item)||!Supported(item))return;
+        if(s.Directive.Active||!s.Enabled||s.Paused||s.EnvironmentPaused||s.Vitals.Downed||!ContentSamples.ItemsByType.TryGetValue(itemType,out var item)||!Supported(item))return;
         bool platform=TileID.Sets.Platforms[item.createTile];
         if(platform?!s.Bridges:!s.Ropes)return;
         var tile=Main.tile[at];if(!tile.HasTile||tile.TileType!=item.createTile)return;
@@ -34,12 +34,12 @@ public sealed class ConstructionAssist {
     }
     public bool Tick(Player p,CompanionPlayer s,Projectile cat,bool danger){
         if(!Active)return false;
-        if(s.Directive.Active||!s.Enabled||s.Paused||s.Vitals.Downed||p.dead||p.HeldItem.type!=type||s.Mining.Active||s.Digging.Active||s.Trees.Requested||s.Order.Active){Cancel();return false;}
+        if(s.Directive.Active||!s.Enabled||s.Paused||s.EnvironmentPaused||s.Vitals.Downed||p.dead||p.HeldItem.type!=type||s.Mining.Active||s.Digging.Active||s.Trees.Requested||s.Order.Active){Cancel();return false;}
         var sample=ContentSamples.ItemsByType[type];
         if(TileID.Sets.Platforms[sample.createTile]?!s.Bridges:!s.Ropes){Cancel();return false;}
         if(Vector2.DistanceSquared(p.Center,Target)>480*480){Cancel();return false;}
         if(danger){cadence=0;return false;}
-        if(++elapsed>600){Cancel();return false;}
+        if(++elapsed>CompanionWorkTiming.Timeout(600)){Cancel();return false;}
         while(left>0&&WorldGen.InWorld(next.X,next.Y,10)&&Main.tile[next].HasTile){
             if(Main.tile[next].TileType!=sample.createTile){Cancel();return false;}
             left--;next=new(next.X+step.X,next.Y+step.Y);
@@ -52,7 +52,7 @@ public sealed class ConstructionAssist {
         s.Status=CompanionText.Message("ConstructionAssist.HelpingBuild");
         if(!reachable){cadence=0;return true;}
         (cat.ModProjectile as CompanionCat)?.FaceWork(Target);
-        if(++cadence<Math.Max(4,(int)Math.Ceiling(CombinedHooks.TotalUseTime(material.useTime,p,material)/s.Training.WorkSpeed(12))))return true;
+        if(++cadence<CompanionWorkTiming.Ticks(Math.Max(4,CombinedHooks.TotalUseTime(material.useTime,p,material)/s.Training.WorkSpeed(12))))return true;
         cadence=0;
         string result=SafeConstruction.TryPlace(p,cat.Center,s.Bag,next.X,next.Y,type,ownerRequested:true);
         if(!result.StartsWith(SafeConstruction.SuccessPrefix,StringComparison.Ordinal)){Cancel();return false;}

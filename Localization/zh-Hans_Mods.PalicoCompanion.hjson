@@ -1,10 +1,16 @@
 Keybinds: {
+	Environment.DisplayName: 切换呆猫环境改动
 	Direct.DisplayName: 指挥呆猫（按住并左键选择）
 	Panel.DisplayName: 呆猫面板
 	Recall.DisplayName: 召回呆猫
 }
 
 UI: {
+	EnvironmentPause: 暂停环境改动
+	EnvironmentResume: 恢复环境改动
+	EnvironmentPaused: 已暂停自动改动环境
+	EnvironmentResumed: 已恢复自动改动环境
+	EnvironmentHint: 控制自动挖掘、砍树、种植和放置
 	NameEmpty: 请输入名字，再确认
 	DefaultName: 呆猫
 	DyeSlot: 染料
@@ -122,12 +128,13 @@ CoinChoices: {
 
 Configs: {
 	CompanionBalanceConfig: {
-		DisplayName: 呆猫强度
+		DisplayName: 呆猫能力
 
 		Headers: {
 			Presets: "[palicohead:icon] 快速预设"
-			Strength: "[palicohead:icon] 战斗强度"
+			Strength: "[palicohead:icon] 战斗能力"
 			Movement: "[palicoitem:HermesBoots] 移动与闪避"
+			WorkEfficiency: "[palicoitem:GoldPickaxe] 工作效率"
 		}
 
 		Preset: {
@@ -163,6 +170,16 @@ Configs: {
 		TravelMovementPercent: {
 			Label: 跟随与工作移速（%）
 			Tooltip: 调整跟随、采集和拾取时的移动速度，不改变挥镐、挥斧等动作速度。远距离返回主人时保留追赶速度，避免跟不上坐骑和翅膀。
+		}
+
+		WorkSpeedPercent: {
+			Label: 工作速度（%）
+			Tooltip: 调整挖掘、砍树、种植、抓小动物和放置的操作速度。100% 保持当前速度，工具与技能加成仍然有效。不改变移速、拾取、箱子补给或支援技能冷却。切换强度预设不会修改此项。
+		}
+
+		FishingSpeedPercent: {
+			Label: 钓鱼速度（%）
+			Tooltip: 调整呆猫等待鱼上钩的速度。100% 保持当前速度，不改变渔力、每次渔获的品质判定或鱼饵消耗规则，也不加速抛竿和收竿。切换强度预设不会修改此项。
 		}
 
 		Evasion: {
@@ -330,7 +347,7 @@ Configs: {
 
 		DiggingAssist: {
 			Label: 协助玩家挖掘
-			Tooltip: 沿你挥镐的方向接着挖，也支持竖直向下挖掘。使用当前可用的镐力；停手后最多继续约 8 秒，离开或改做其他事情时停止。打开呆猫背包不会中断协助。
+			Tooltip: 连续挖掘相邻方块后，沿你的方向接着挖，也支持竖直向下挖掘。使用正常镐力；停手后最多继续约 8 秒，离开或开始建造、使用其他工具时停止。打开呆猫背包不会中断协助。
 		}
 
 		MiningBlacklist: {
@@ -1246,7 +1263,7 @@ EvasionChoices: {
 	Agile: 灵活
 }
 
-BalanceHostOnly: 联机时只有房主能修改呆猫强度；独立服务器请由管理员修改服务器配置。
+BalanceHostOnly: 联机时只有房主能修改呆猫能力设置；独立服务器请由管理员修改服务器配置。
 
 StrengthPresets: {
 	Assist: {
