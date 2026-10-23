@@ -7,12 +7,15 @@ namespace PalicoCompanion.Systems;
 // Native owner target first; otherwise protect the owner and retain a viable
 // target unless another is meaningfully nearer. No extra command UI required.
 internal sealed class CompanionTargeting {
-    NPC current;int currentType;ulong lastSeen;
+    NPC current;int currentType;CompanionNpcEpoch currentEpoch;ulong lastSeen;
     internal const int SightGrace=45;
     internal bool Obscured {get;private set;}
-    internal bool Holding=>Obscured&&current is {active:true}&&current.type==currentType&&Main.GameUpdateCount-lastSeen<SightGrace;
-    internal void Clear(){current=null;Obscured=false;}
-    NPC Remember(NPC target){current=target;currentType=target?.type??0;Obscured=false;if(target!=null)lastSeen=Main.GameUpdateCount;return target;}
+    // An NPC slot can be reused for another monster of the very same type.
+    // Share the per-spawn identity already used by native hit cooldowns.
+    bool SameTarget=>current is {active:true}&&current.type==currentType&&ReferenceEquals(currentEpoch,current.GetGlobalNPC<CompanionNpcEpoch>());
+    internal bool Holding=>Obscured&&SameTarget&&Main.GameUpdateCount-lastSeen<SightGrace;
+    internal void Clear(){current=null;currentEpoch=null;Obscured=false;}
+    NPC Remember(NPC target){current=target;currentType=target?.type??0;currentEpoch=target?.GetGlobalNPC<CompanionNpcEpoch>();Obscured=false;if(target!=null)lastSeen=Main.GameUpdateCount;return target;}
     internal static bool Destructible(NPC npc)=>npc is {active:true,friendly:false,dontTakeDamage:false,immortal:false}&&npc.type>=NPCID.None&&NPCID.Sets.ProjectileNPC[npc.type];
     internal static bool Incoming(NPC npc,Vector2 point){
         if(!Destructible(npc)||npc.velocity.LengthSquared()<.1f)return false;
@@ -36,10 +39,10 @@ internal sealed class CompanionTargeting {
         NPC best=null;
         foreach(var n in Main.npc)if(Eligible(n)&&
             (best==null||Intercept(n)&&!Intercept(best)||Intercept(n)==Intercept(best)&&(Protect(n)&&!Protect(best)||Protect(n)==Protect(best)&&Distance(n)<Distance(best))))best=n;
-        if(current!=null&&current.type==currentType&&Eligible(current)&&best!=null&&Intercept(current)==Intercept(best)&&Protect(current)==Protect(best)&&Distance(current)<=Distance(best)+48)best=current;
+        if(SameTarget&&Eligible(current)&&best!=null&&Intercept(current)==Intercept(best)&&Protect(current)==Protect(best)&&Distance(current)<=Distance(best)+48)best=current;
         // A brief occlusion retains combat ownership, not permission to shoot
         // through a wall or track an unseen enemy's current position.
-        if(best==null&&current!=null&&current.type==currentType&&InReach(owner,cat,current)&&
+        if(best==null&&SameTarget&&InReach(owner,cat,current)&&
             !CompanionCombatReach.Clear(cat,current.Center)&&Main.GameUpdateCount-lastSeen<SightGrace){Obscured=true;return current;}
         return Remember(best);
     }

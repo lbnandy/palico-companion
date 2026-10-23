@@ -10,6 +10,7 @@ public sealed class CompanionCrossMod:ModSystem {
     internal static Action<Player,Vector2> PrepareActor;
     internal static ICompanionStorageProvider Storage;
     internal static Func<Item,Item,int> UsesPerMaterial;
+    internal static Func<Item,CompanionNativeUse,bool> ReleaseChannel;
     // Optional metadata only. Actual consumption remains in tML's item hooks.
     internal static Func<Item,int> InfiniteStack;
     internal static Action<Player,Point,int> MinedOre;
@@ -21,5 +22,5 @@ public sealed class CompanionCrossMod:ModSystem {
         var result=recipes.Call("AddItemCategory",Language.ActiveCulture.Name=="zh-Hans"?"呆猫装备":"Palico equipment","",icon,(Predicate<Item>)(item=>item.ModItem is TrainingItem));
         RecipeCategoryRegistered=result is string status&&status=="Success";
     }
-    public override void Unload(){PrepareActor=null;Storage=null;UsesPerMaterial=null;InfiniteStack=null;MinedOre=null;RecipeCategoryRegistered=false;CompanionRecovery.Unload();}
+    public override void Unload(){PrepareActor=null;Storage=null;UsesPerMaterial=null;ReleaseChannel=null;InfiniteStack=null;MinedOre=null;RecipeCategoryRegistered=false;CompanionRecovery.Unload();}
 }

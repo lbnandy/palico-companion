@@ -61,6 +61,8 @@ public sealed class CompanionFishing {
     internal int LineDraws;
     internal readonly System.Collections.Generic.List<Item> OverflowDrops=new();
     readonly List<Item> waitingOverflow=new();
+    readonly Queue<int> catchAnnouncements=new();
+    internal void Caught(Item item)=>catchAnnouncements.Enqueue(item.type);
     public bool Active=>Bobber is {active:true}&&CompanionFishingBobber.Of(Bobber)==this;
     public bool Available=>Cat is {active:true}&&State is {Enabled:true,Paused:false}&&!State.Vitals.Downed&&!State.Player.dead&&(RequestedWater.HasValue||CompanionNetwork.Client||CompanionNetwork.Server&&State.NetFishing||!CompanionNetwork.Server&&ModContent.GetInstance<CompanionConfig>().Fishing);
     public static Item BestRod(Player p) {
@@ -79,6 +81,14 @@ public sealed class CompanionFishing {
     internal void BindReplica(Projectile cat,Projectile bobber,int rod){Cat=cat;State=Main.player[CompanionCat.OwnerOf(cat)].GetModPlayer<CompanionPlayer>();Bobber=bobber;if(Rod?.type!=rod)Rod=new Item(rod);Actor.inventory[0]=Rod;Prepare();}
     public void Maintain(Player p,CompanionPlayer s,Projectile cat){
         Cat=cat;State=s;
+        // Native bobber callbacks temporarily replace Main.myPlayer with the
+        // fishing actor. Announce completed catches on the normal owner tick.
+        while(catchAnnouncements.TryDequeue(out int type)){
+            var item=ContentSamples.ItemsByType[type];
+            State.Expression.TrySay(State,Cat,"FishCaught",Terraria.GameContent.UI.EmoteID.EmoteHappiness,
+                context:CompanionText.MessageFull(Lang.GetItemName(type).Key),
+                variant:item.questItem?"Quest":ItemID.Sets.IsFishingCrate[type]?"Crate":null);
+        }
         if(!Available||s.Digging.Active||s.Mining.Active||s.Order.Active||s.Construction.Active||s.Storage.Active||s.Trees.Active||s.Garden.Active||
             Vector2.DistanceSquared(p.Center,Active?Aim:cat.Center)>640*640||CompanionThreat.WorkDanger(p,cat.Center))Cancel();
     }
@@ -92,7 +102,14 @@ public sealed class CompanionFishing {
             idle++;bool ownerFishing=OwnerFishing(p);
             if(!RequestedWater.HasValue&&!ownerFishing&&idle<120)return false;
             if(Approaching&&Vector2.DistanceSquared(MoveTarget,p.Center)>480*480)Approaching=false;
-            if(idle%(ownerFishing?15:30)!=0)return Approaching;
+            if(idle%(ownerFishing?15:30)!=0){
+                // A completed reel leaves a brief gap before the next cast.
+                // Keep the shore position during that gap while the owner fishes.
+                if(!Approaching&&ownerFishing&&Bobber is {active:false}&&bait is {IsAir:false}&&SafeBait(bait)&&s.Bag.Contains(bait)&&!WaitingForOverflow(s)){
+                    MoveTarget=cat.Center;((CompanionCat)cat.ModProjectile).FaceWork(Aim);HoldPosition(cat);return true;
+                }
+                return Approaching;
+            }
             bait=s.Bag.Where(SafeBait).OrderByDescending(i=>i.bait).FirstOrDefault();
             if(bait==null||WaitingForOverflow(s)){Approaching=false;return false;}
             Rod=BestRod(p).Clone();
@@ -256,8 +273,7 @@ public sealed class CompanionFishingHooks:ModSystem{
         // GetItem was redirected to the cat bag; keep its successful pickup
         // cue on the same authoritative feedback path as ordinary collection.
         if(moved>0)CompanionFeedback.Show(5,c.Cat.Center,item.IsACoin?1:0);
-        c.State.Expression.TrySay(c.State,c.Cat,"FishCaught",Terraria.GameContent.UI.EmoteID.EmoteHappiness,context:CompanionText.MessageFull(Lang.GetItemName(item.type).Key),
-            variant:item.questItem?"Quest":ItemID.Sets.IsFishingCrate[item.type]?"Crate":null);
+        c.Caught(item);
         return remainder; // Native GiveItemToPlayer drops any remainder, never discard it.
     }
     static void Update(On_Projectile.orig_Update orig,Projectile p,int index){

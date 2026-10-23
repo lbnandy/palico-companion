@@ -99,7 +99,10 @@ internal static partial class CompanionNetwork {
         if(kind==InstantTrail&&Client){ReadTrail(r);return;}
         if(kind==Feedback&&Client){byte what=r.ReadByte();var at=new Vector2(r.ReadSingle(),r.ReadSingle());int value=r.ReadInt32();string key=r.ReadString();if(float.IsFinite(at.X)&&float.IsFinite(at.Y))CompanionFeedback.Show(what,at,value,key);return;}
         if(kind==Effect&&Client){var point=new Vector2(r.ReadSingle(),r.ReadSingle());if(float.IsFinite(point.X)&&float.IsFinite(point.Y))CompanionTransitEffects.At(point);return;}
-        if(kind==Speech&&Client){int owner=r.ReadByte();string text=r.ReadString();string context=r.ReadString();if(owner==Main.myPlayer)Main.LocalPlayer.GetModPlayer<CompanionPlayer>().Dialogue.Observe(text);if(text.StartsWith("Mods.PalicoCompanion."))text=Terraria.Localization.Language.GetTextValue(text,CompanionMemories.Context(text,context));if(owner==Main.myPlayer){var s=Main.LocalPlayer.GetModPlayer<CompanionPlayer>();s.NetSpeechCount++;s.NetLastSpeech=text;if(ModContent.GetInstance<CompanionConfig>().Chatter)Main.NewText(s.CatName+"："+text,Color.SandyBrown);}return;}
+        if(kind==Speech&&Client){
+            int owner=r.ReadByte();string line=r.ReadString(),context=r.ReadString();
+            if(owner==Main.myPlayer){var s=Main.LocalPlayer.GetModPlayer<CompanionPlayer>();s.Expression.ReceiveSpeech(s,line,context);}return;
+        }
         if(kind==BulkResult&&Client){ReadBulkResult(r);return;}
         if(kind==QuickTrashResult&&Client){ReadTrashResult(r);return;}
         if(kind==SortResult&&Client){ReadSortResult(r);return;}
@@ -127,7 +130,7 @@ return;}
         if(state.NetLeaving)return;
         if(kind==ControlRequest){ReadControl(state,r);return;}
         if(kind==QuickTrash){ReadTrash(state,r);return;}
-        if(kind==TrainingUse){byte skill=r.ReadByte();if(skill is 1 or 6)state.Training.Use(state,skill,CompanionTraining.CooldownSeconds(skill),state.Player.Center);Send(state);return;}
+        if(kind==TrainingUse){byte skill=r.ReadByte();if(skill is 1 or 6 && state.Training.Use(state,skill,CompanionTraining.CooldownSeconds(skill),state.Player.Center))state.Expression.GearUsed(state,skill);Send(state);return;}
         if(kind==ExternalStorageAccess){var point=new Point(r.ReadInt32(),r.ReadInt32());bool grant=r.ReadBoolean();ExternalPermission(state,point,grant);return;}
         if(kind==ChestAccess){int index=r.ReadInt32();bool grant=r.ReadBoolean();if(index==state.Player.chest&&index>=0&&index<Main.maxChests&&Main.chest[index] is {} chest&&Logistics.At(chest.x,chest.y)==chest&&Vector2.DistanceSquared(state.Player.Center,Logistics.Center(chest))<240*240){if(grant)state.Chests.Grant(chest.x,chest.y);else state.Chests.Revoke(chest.x,chest.y);state.Storage.Cancel();Send(state);}return;}
         if(kind==DiscoveryBubble){state.Expression.DiscoveryBubble(state,r.ReadByte());return;}

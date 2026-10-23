@@ -337,3 +337,75 @@ BossEventCalamityBossRush: {
 	Line1: All of them in one go?! I haven't even eaten!
 	Line2: That's a lot of fighting! Remember to count my part too!
 }
+
+WorkingGearHoney: {
+	Line1: Vigorwasp delivery, Meowster!
+	Line2: Here, Meowster. A little healing for you.
+	Line3: Come on, little wasp! Meowster needs you!
+}
+
+WorkingGearGuard: {
+	Line1: I took some of that hit for you, Meowster!
+	Line2: Oof! Good thing I brought my shield!
+	Line3: My shield caught some of that, Meowster!
+}
+
+WorkingGearGuardSelf: {
+	Line1: Meow! Good thing I brought a shield!
+	Line2: Whew! Almost too slow with the shield there.
+	Line3: Thanks, little shield. I needed that.
+}
+
+WorkingGearCleanse: {
+	Line1: Cleaned that up for you, Meowster!
+	Line2: Feeling a little better, Meowster?
+	Line3: Does it still hurt, Meowster?
+}
+
+WorkingGearBell: {
+	Line1: A little more mana for you, Meowster!
+	Line2: Ding, ding! Keep those spells coming!
+	Line3: Not out of magic yet, Meowster!
+}
+
+WorkingGearBellSelf: {
+	Line1: Ding, ding... My mana is back!
+	Line2: Ready to cast again, Meowster!
+	Line3: Good thing I brought my bell!
+}
+
+WorkingGearDrum: {
+	Line1: That beat puts some spring in my paws!
+	Line2: Ba-dum! Here I come!
+	Line3: A little drumroll to get me going!
+}
+
+WorkingGearDart: {
+	Line1: Catch this!
+	Line2: Watch my aim, Meowster!
+	Line3: Hup! Hold still!
+}
+
+WorkingGearLift: {
+	Line1: A little higher, Meowster!
+	Line2: Hup! Let me give you a boost!
+	Line3: Up you go, Meowster!
+}
+
+WorkingGearBomb: {
+	Line1: Watch this bomb, Meowster!
+	Line2: Hup! Bomb away!
+	Line3: A present for you! The exploding kind!
+}
+
+WorkingGearEquippedWeapon: {
+	Line1: For me? Let me try it out!
+	Line2: This one today, Meowster? All right!
+	Line3: Got it, Meowster! Shall we go?
+}
+
+WorkingGearEquippedSupport: {
+	Line1: All packed, Meowster!
+	Line2: This is for me too? Got it!
+	Line3: All set! Let's try it out!
+}

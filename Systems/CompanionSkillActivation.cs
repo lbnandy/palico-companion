@@ -78,6 +78,7 @@ public sealed partial class CompanionTraining {
                 }
                 break;
         }
+        s.Expression.GearUsed(s,kind,kind==3&&manaTarget==1);
         message=CompanionText.Message("CompanionSkillActivation.Used" ,Terraria.Localization.Language.GetText("Mods.PalicoCompanion.TrainingNames."+TrainingCatalog.Entries[kind].Key));return true;
     }
 }

@@ -9,7 +9,7 @@
     <PathMap>$(MSBuildProjectDirectory)=/_/PalicoCompanion</PathMap>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Remove="tests/**/*.cs;tools/**/*.cs" />
+    <Compile Remove="tools/**/*.cs" />
     <Reference Include="CalamityMod" HintPath="$(ModReferencePath)/CalamityMod.dll" Private="false" />
     <Reference Include="MagicStorage" HintPath="$(ModReferencePath)/MagicStorage.dll" Private="false" />
     <Reference Include="ImproveGame" HintPath="$(ModReferencePath)/ImproveGame.dll" Private="false" />

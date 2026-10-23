@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.0.1 — 2026-10-23
+
+补充装备使用与换装台词，减少连续触发的重复发言。
+修正采矿拾取、收竿后的转向，以及拾取和存放物品时持续闭眼的问题。
+修正天顶剑剑光的位置，并改善敌人替换后的选敌与攻击距离判断。
+修正灾厄诘责、发条弓、麦格纳炮蓄力后不释放的问题。
+
+Added equipment reactions and reduced chatter during repeated actions.
+Fixed pickup while mining, turning after reeling in a catch, and prolonged eye closing after collecting or storing items.
+Corrected Zenith trail positioning and target tracking when an NPC slot is reused.
+Fixed charged attacks with Calamity's Condemnation, Clockwork Bow and Magna Cannon.
+
 ## 1.0.0 — 2026-10-22
 
 首次发布：呆猫伙伴。

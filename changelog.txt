@@ -1,7 +1,11 @@
-1.0.0 — 首次发布 / First release
+1.0.1 · 更新 / Update
 
-带上呆猫，一起战斗、采集和探索。搭配武器、支援与工作装备，管理背包，设置名字和衣服颜色。
-支持单人、多人、简体中文和英文；可选魔法存储、更好的体验与灾厄联动。
+补充装备使用与换装台词，减少连续触发的重复发言。
+修正采矿拾取、收竿后的转向，以及拾取和存放物品时持续闭眼的问题。
+修正天顶剑剑光的位置，并改善敌人替换后的选敌与攻击距离判断。
+修正灾厄诘责、发条弓、麦格纳炮蓄力后不释放的问题。
 
-Bring a Palico along to fight, gather and explore. Choose its weapons, support and work gear, manage its backpack, and customize its name and outfit.
-Supports single-player, multiplayer, English and Simplified Chinese, with optional Magic Storage, Quality of Terraria and Calamity integrations.
+Added equipment reactions and reduced chatter during repeated actions.
+Fixed pickup while mining, turning after reeling in a catch, and prolonged eye closing after collecting or storing items.
+Corrected Zenith trail positioning and target tracking when an NPC slot is reused.
+Fixed charged attacks with Calamity's Condemnation, Clockwork Bow and Magna Cannon.
