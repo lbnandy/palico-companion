@@ -22,7 +22,6 @@ internal sealed class CompanionReplica {
     internal bool Ready=>poses.Count>0;
     internal Vector2 Position {get;private set;}
     internal double Elapsed {get;private set;}
-    internal int Resets {get;private set;}
     internal void Clear(){poses.Clear();clock=arrival=Elapsed=0;recovering=false;}
     internal bool Receive(CompanionPose pose,double localTick) {
         if(Ready&&(pose.Time<poses[^1].Time||pose.Time==poses[^1].Time&&pose.Epoch==poses[^1].Epoch))return false;
@@ -34,7 +33,7 @@ internal sealed class CompanionReplica {
             float possible=96+(float)gap*Math.Max(16,last.Velocity.Length());
             reset|=Vector2.DistanceSquared(last.Position,pose.Position)>possible*possible;
         }
-        if(reset){poses.Clear();clock=pose.Time-Delay;recovering=false;Position=pose.Position;Resets++;}
+        if(reset){poses.Clear();clock=pose.Time-Delay;recovering=false;Position=pose.Position;}
         poses.Add(pose);arrival=localTick;
         if(poses.Count>32)poses.RemoveAt(0);
         return reset;

@@ -63,13 +63,13 @@ public static class CompanionStatusBar {
         NativeLabelText.Draw(Main.spriteBatch,amount,new Rectangle(r.X+76,r.Y+47,64,22),new Color(220,227,242),amountScale);
         float scale=Math.Min(chinese?DetailTextScale:amountScale,82/Math.Max(1,font.MeasureString(state).X));
         if(chinese){
-            // Preserve the accepted Chinese status size and visual position.
+            // Keep Chinese status text aligned to its visible glyph bounds.
             var ink=CenteredButtonText.MeasureInk(state);
             Utils.DrawBorderString(Main.spriteBatch,state,new Vector2(r.X+228-ink.Z*scale,r.Y+58-(ink.Y+ink.W)*scale/2),new Color(182,198,224),scale);
         }else NativeLabelText.Draw(Main.spriteBatch,state,new Rectangle(r.X+146,r.Y+47,82,22),new Color(182,198,224),scale,1);
     }
     static SpriteBatch pixelBatch;
-    public static int BarDraws {get;private set;}
+    static bool pixelLayerFailed;
     // Native-resolution head exported from the mod icon.
     public static readonly Rectangle PortraitSource=new(0,0,27,24);
     internal static Rectangle FitPortraitPixels(Rectangle bounds,float scale){
@@ -89,12 +89,21 @@ public static class CompanionStatusBar {
     // select native UI filtering separately within this layer.
     public static bool DrawPixelLayer(){
         if(!Visible)return true;
-        pixelBatch??=new SpriteBatch(Main.graphics.GraphicsDevice);
-        pixelBatch.Begin(SpriteSortMode.Immediate,BlendState.AlphaBlend,SamplerState.PointClamp,null,null,null,Matrix.Identity);
-        DrawPixels(pixelBatch,Main.LocalPlayer.GetModPlayer<CompanionPlayer>(),Main.UIScale,Vector2.Zero);
-        pixelBatch.End();return true;
+        try {
+            pixelBatch??=new SpriteBatch(Main.graphics.GraphicsDevice);
+            pixelBatch.Begin(SpriteSortMode.Immediate,BlendState.AlphaBlend,SamplerState.PointClamp,null,null,null,Matrix.Identity);
+            try {DrawPixels(pixelBatch,Main.LocalPlayer.GetModPlayer<CompanionPlayer>(),Main.UIScale,Vector2.Zero);}
+            finally {pixelBatch.End();}
+            pixelLayerFailed=false;
+        } catch(Exception error) {
+            // A failed HUD pass must not cancel later interface layers, including
+            // the cursor. Report once per failure streak and retry next frame.
+            if(!pixelLayerFailed)ModContent.GetInstance<PalicoCompanion>().Logger.Error("Unable to draw the companion status card portrait or skill icons.",error);
+            pixelLayerFailed=true;
+        }
+        return true;
     }
-    public static void Release(){var old=pixelBatch;pixelBatch=null;Main.QueueMainThreadAction(()=>{old?.Dispose();TrainingHud.Release();});}
+    public static void Release(){var old=pixelBatch;pixelBatch=null;pixelLayerFailed=false;Main.QueueMainThreadAction(()=>{old?.Dispose();TrainingHud.Release();});}
     public static float BarFraction(CompanionPlayer s)=>Math.Clamp(s.Vitals.Downed?s.Vitals.RecoveryProgress/(float)Math.Max(1,s.Vitals.RecoveryTotal):s.Vitals.Health/(float)Math.Max(1,s.Vitals.MaxHealth),0,1);
     public static int PixelUnit(float scale)=>Math.Max(1,(int)MathF.Round(2*scale));
     public static Rectangle BarPixels(Player p,float scale,Vector2 offset){
@@ -136,7 +145,6 @@ public static class CompanionStatusBar {
         Rounded(edge,edge,width,innerHeight,color);
         Rect(edge*2,edge,width-edge*2,edge,Color.Lerp(color,Color.White,.25f));
         Rect(edge*2,bar.Height-edge*2,width-edge*2,edge,Color.Lerp(color,Color.Black,.22f));
-        BarDraws++;
         // Health geometry keeps nearest-neighbour sampling.
         // Item slots use the same LinearClamp sampler as vanilla inventory UI.
         batch.End();

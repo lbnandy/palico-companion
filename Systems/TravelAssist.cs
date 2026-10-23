@@ -7,8 +7,6 @@ namespace PalicoCompanion.Systems;
 public sealed class TravelAssist {
     int cooldown;
     public string Status {get;private set;}="";
-    public int Platforms {get;private set;}
-    public int Ropes {get;private set;}
     public bool Active {get;private set;}
     public Vector2 MoveTarget {get;private set;}
     public void ClearGoal()=>Active=false;
@@ -91,7 +89,6 @@ public sealed class TravelAssist {
         cooldown=15;
         Status=SafeConstruction.TryPlace(p,cat.Center,materials,target.X,target.Y,type);
         if(Status.StartsWith(SafeConstruction.SuccessPrefix)) {
-            if(type==ItemID.Rope)Ropes++;else Platforms++;
             s.Expression.Say(s,cat,"Build",Terraria.GameContent.UI.EmoteID.EmoteHappiness);
         }
     }

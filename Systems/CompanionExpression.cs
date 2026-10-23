@@ -28,10 +28,6 @@ public sealed partial class CompanionExpression {
     readonly CompanionSpeechPacing pacing=new();
     public int Chats {get;private set;}
     internal void AdvancePresentation()=>tick++;
-    public int Bubbles {get;private set;}
-    public string LastChatKey {get;private set;}="";
-    internal string LastLineKey {get;private set;}="";
-    public string FirstChatKey {get;private set;}="";
     enum Channel { Flavor, Work, Discovery, Interaction, Important }
     static int BubblePriority(Channel channel)=>channel switch {Channel.Important=>3,Channel.Interaction=>2,Channel.Discovery=>1,_=>0};
     internal void ClearPendingWork(){pendingGear=null;equipmentPending=0;}
@@ -140,7 +136,7 @@ public sealed partial class CompanionExpression {
         }
         if(!CompanionNetwork.Server){visualAnchor=new Projectile();UpdateAnchor(cat);}else visualAnchor=null;
         ownedBubble=EmoteBubble.NewBubble(emote,new WorldUIAnchor(CompanionNetwork.Server?cat:visualAnchor),120);
-        bubbleAt=tick+180;bubbleUntil=tick+120;bubblePriority=priority;Bubbles++;
+        bubbleAt=tick+180;bubbleUntil=tick+120;bubblePriority=priority;
     }
     void UpdateAnchor(Projectile cat) {
         // Use the native Entity anchor formula and flip, but measure the drawn hood
@@ -181,7 +177,6 @@ public sealed partial class CompanionExpression {
         if(canChat) {
             string lineKey=s.Dialogue.Next(key,variant);string line=Language.GetTextValue(lineKey,CompanionMemories.Context(lineKey,context));
             if(CompanionNetwork.Server)CompanionNetwork.Say(s,lineKey,context);else Main.NewText(s.CatName+"："+line,Color.SandyBrown);Chats++;saidLine=true;
-            LastChatKey=key;LastLineKey=lineKey;if(FirstChatKey.Length==0)FirstChatKey=key;
             nextEvent[repeatKey]=tick+repeatDelay;
             pacing.Spoken(tick,priority);
             flavorAt=tick+1800;

@@ -54,11 +54,6 @@ public sealed class CompanionFishing {
     public bool Gesture=>Active&&gesture>0;
     public float GestureProgress=>gestureMax>0?1-gesture/(float)gestureMax:0;
     Item bait;
-    public int Casts {get;private set;}
-    public int Catches {get;internal set;}
-    public int BaitConsumed {get;private set;}
-    public int Draws {get;private set;}
-    internal int LineDraws;
     internal readonly System.Collections.Generic.List<Item> OverflowDrops=new();
     readonly List<Item> waitingOverflow=new();
     readonly Queue<int> catchAnnouncements=new();
@@ -130,7 +125,7 @@ public sealed class CompanionFishing {
                 if(id>=Main.maxProjectiles)return false;
                 Bobber=Main.projectile[id];Bobber.GetGlobalProjectile<CompanionFishingBobber>().Context=this;
             }
-            age=biteDelay=0;gesture=gestureMax=24;Casts++;CompanionItemVisual.BeginUse(Rod,from);
+            age=biteDelay=0;gesture=gestureMax=24;CompanionItemVisual.BeginUse(Rod,from);
         }
         if(Bobber.ai[0]==0&&(!SafeBait(bait)||!s.Bag.Contains(bait))){Cancel();return false;}
         using(new Scope(this)){Actor.controlUseItem=false;Actor.ItemCheck();}
@@ -140,9 +135,9 @@ public sealed class CompanionFishing {
         if(Bobber.ai[1]<0&&Bobber.localAI[1]<0){Cancel();return false;}
         if(Bobber.ai[0]==0&&Bobber.ai[1]<0&&Bobber.localAI[1]>0){
             if(++biteDelay>=12){
-                int before=bait.stack;Prepare();
+                Prepare();
                 using(new Scope(this))Reel(Actor,true);gesture=gestureMax=18;
-                BaitConsumed+=Math.Max(0,before-(bait.IsAir?0:bait.stack));biteDelay=0;
+                biteDelay=0;
             }
         }else biteDelay=0;
         ((CompanionCat)cat.ModProjectile).FaceWork(Aim);
@@ -210,7 +205,6 @@ public sealed class CompanionFishing {
         Vector2 shift=DrawShift(light);
         foreach(var entry in cache){var draw=entry;draw.position+=shift;draw.Draw(Main.spriteBatch);}
         CompanionItemVisual.DrawGrip(Main.spriteBatch,Cat.Bottom+new Vector2(0,Cat.gfxOffY)-Main.screenPosition,c.Animation.SpriteFrame,Cat.direction,light);
-        Draws++;
     }
     internal void PrepareVisual(){
         // Remote replicas do not run ItemCheck, which can reel/consume bait.
@@ -261,14 +255,14 @@ public sealed class CompanionFishingHooks:ModSystem{
     public override void Unload(){On_Projectile.Update-=Update;On_Main.DrawProjDirect-=Draw;On_Player.GetItem-=GetItem;On_Main.DrawProj_FishingLine-=Line;}
     static void Line(On_Main.orig_DrawProj_FishingLine orig,Projectile p,ref float x,ref float y,Vector2 center){
         var c=CompanionFishingBobber.Of(p);
-        if(c!=null&&c.Available){center+=c.DrawShift(Lighting.GetColor(c.Cat.Center.ToTileCoordinates()));c.LineDraws++;}
+        if(c!=null&&c.Available){center+=c.DrawShift(Lighting.GetColor(c.Cat.Center.ToTileCoordinates()));}
         orig(p,ref x,ref y,center);
     }
     static Item GetItem(On_Player.orig_GetItem orig,Player p,int who,Item item,GetItemSettings settings){
         var c=CompanionFishing.Current;
         if(c==null||p!=c.Actor)return orig(p,who,item,settings);
 
-        var remainder=item.Clone();int moved=((CompanionCat)c.Cat.ModProjectile).Pickup.Receive(remainder,c.State,c.Cat);c.Catches++;
+        var remainder=item.Clone();int moved=((CompanionCat)c.Cat.ModProjectile).Pickup.Receive(remainder,c.State,c.Cat);
         TrainingWorkFeedback.Trigger(c.State,10);
         // GetItem was redirected to the cat bag; keep its successful pickup
         // cue on the same authoritative feedback path as ordinary collection.

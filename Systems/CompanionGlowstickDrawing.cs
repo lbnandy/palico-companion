@@ -14,8 +14,6 @@ public sealed class CompanionGlowstickDrawing {
     static readonly Action<Player,Item> NativeLight=typeof(Player).GetMethod("ItemCheck_EmitHeldItemLight",BindingFlags.Instance|BindingFlags.Public|BindingFlags.NonPublic)!.CreateDelegate<Action<Player,Item>>();
     readonly Player proxy=new();
     readonly List<DrawData> cache=new();
-    public int Emissions {get;private set;}
-    public int Draws {get;private set;}
     void Prepare(Projectile cat,Item item) {
         proxy.position=cat.position;proxy.width=cat.width;proxy.height=cat.height;
         proxy.direction=cat.direction;proxy.gravDir=1;proxy.velocity=Vector2.Zero;proxy.wet=cat.wet;
@@ -23,7 +21,7 @@ public sealed class CompanionGlowstickDrawing {
     }
     public void Emit(Projectile cat,Item item,Vector2 lightPoint) {
         Prepare(cat,item);proxy.itemLocation=lightPoint-new Vector2(cat.direction<0?-16:6,-14);
-        NativeLight(proxy,item);Emissions++;
+        NativeLight(proxy,item);
     }
     public void Draw(Projectile cat,Item item,int pose,Color light) {
         Prepare(cat,item);cache.Clear();
@@ -35,6 +33,6 @@ public sealed class CompanionGlowstickDrawing {
         if(cache.Count==0)return;
         Vector2 shift=hand-Main.screenPosition-CompanionGrip.DrawnGrip(cache[0]);
         foreach(var entry in cache){var draw=entry;draw.position+=shift;draw.Draw(Main.spriteBatch);}
-        CompanionItemVisual.DrawGrip(Main.spriteBatch,(cat.Bottom+new Vector2(0,cat.gfxOffY)-Main.screenPosition).Floor(),pose,cat.direction,light,true);Draws++;
+        CompanionItemVisual.DrawGrip(Main.spriteBatch,(cat.Bottom+new Vector2(0,cat.gfxOffY)-Main.screenPosition).Floor(),pose,cat.direction,light,true);
     }
 }

@@ -18,8 +18,6 @@ public sealed class GardenAssist {
     Point tile; int cooldown,elapsed,workTicks;
     public bool Active {get;private set;}
     public Vector2 Target=>tile.ToWorldCoordinates();
-    public int Harvests {get;private set;}
-    public int Replants {get;private set;}
     public void Cancel(){Active=false;workTicks=elapsed=0;}
     static int Style(Point at) {
         if(!WorldGen.InWorld(at.X,at.Y,10))return -1;
@@ -59,7 +57,7 @@ public sealed class GardenAssist {
         using var drops=new GardenHarvestDrops.Capture(tile);
         using(CompanionTileActions.Begin())using(new HarvestBasket(s))WorldGen.KillTile(tile.X,tile.Y);
         if(!Main.tile[tile].HasTile) {
-            Harvests++;s.Experience++;
+            s.Experience++;
             var seed=Seed(s,current)??drops.Items.FirstOrDefault(i=>i.active&&!i.IsAir&&!i.favorited&&i.type==Seeds[current]&&
                 (i.playerIndexTheItemIsReservedFor==255||i.playerIndexTheItemIsReservedFor==owner.whoAmI));
             if(seed!=null){
@@ -70,7 +68,7 @@ public sealed class GardenAssist {
                     int ground=Array.IndexOf(Main.item,seed);
                     CompanionConsumption.Consume(s,seed);if(seed.IsAir&&ground>=0)seed.active=false;
                     if(ground>=0&&CompanionNetwork.Server)NetMessage.SendData(MessageID.SyncItem,-1,-1,null,ground);
-                    Replants++;s.Report(CompanionText.MessageFull("Mods.PalicoCompanion.UI.GardenDone"));
+                    s.Report(CompanionText.MessageFull("Mods.PalicoCompanion.UI.GardenDone"));
                 }else s.Report(CompanionText.MessageFull("Mods.PalicoCompanion.UI.GardenReplantBlocked"));
             }else s.Report(CompanionText.Message("GardenAssist.NoSeeds"));
         } else s.Report(CompanionText.MessageFull("Mods.PalicoCompanion.UI.GardenBlocked"));

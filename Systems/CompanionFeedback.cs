@@ -28,8 +28,6 @@ public sealed class CompanionFeedback {
             case 4:if(ContentSamples.ItemsByType.TryGetValue(value,out var item))CompanionItemVisual.BeginUse(item,at);break;
         }
     }
-    public int HurtEvents {get;private set;}
-    public int VoiceEvents {get;private set;}
     // Native Meowmere has two built-in cat vocal variants; no bundled recordings.
     public static SoundStyle VoiceStyle(string key) => SoundID.Meowmere with {
         Identifier="PalicoCompanion/Voice",Volume=key=="Pet"?.14f:.20f,
@@ -42,7 +40,7 @@ public sealed class CompanionFeedback {
     public bool Voice(Projectile cat,string key) {
         if(!CompanionNetwork.Server&&!ModContent.GetInstance<CompanionConfig>().CatSounds||Main.GameUpdateCount<voiceAt)return false;
         if(key=="Pet"||key!="Hurt"&&Array.IndexOf(CompanionDialogue.Events,key)<0)return false;
-        Show(3,cat.Center,0,key);voiceAt=Main.GameUpdateCount+240;VoiceEvents++;return true;
+        Show(3,cat.Center,0,key);voiceAt=Main.GameUpdateCount+240;return true;
     }
     public bool Hurt(CompanionPlayer state,Projectile cat,int damage,bool boss,float penetration=0) {
         if(damage<=0||state.Vitals.Downed||state.Vitals.Immunity>0)return false;
@@ -53,7 +51,7 @@ public sealed class CompanionFeedback {
         int lost=before-state.Vitals.Health;
         Show(0,cat.Center,lost);
         // Native town-cat damage sound, with a restrained vocal response.
-        Voice(cat,state.Vitals.Downed?"Downed":"Hurt");HurtEvents++;
+        Voice(cat,state.Vitals.Downed?"Downed":"Hurt");
         return true;
     }
     public static Color ImmuneTint(Color light,int immunity,bool downed) => !downed&&immunity>0&&immunity%12<6 ? light*0.55f : light;

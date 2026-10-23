@@ -11,18 +11,22 @@ namespace PalicoCompanion.Systems;
 
 public sealed class CompanionControlUI:ModSystem {
     static bool previousLeft;
+    static bool directHeld;
     static string result="";
     static int resultTicks;
     static readonly UIPanel toast=new();
     internal static void Notify(string text){if(Main.dedServ)return;result=text;resultTicks=180;}
-    public override void PostUpdateInput(){if(resultTicks>0)resultTicks--;}
-    internal static bool Aiming=>!Main.gameMenu&&!Main.dedServ&&!Main.inFancyUI&&!Main.mapFullscreen&&!PlayerInput.WritingText&&PalicoCompanion.DirectKey?.Current==true;
+    public override void PostUpdateInput(){directHeld=false;if(resultTicks>0)resultTicks--;}
+    internal static bool Aiming=>!Main.gameMenu&&!Main.dedServ&&!Main.inFancyUI&&!Main.mapFullscreen&&!PlayerInput.WritingText&&directHeld;
     internal static Vector2 WorldPointer(){
         int mx=Main.mouseX,my=Main.mouseY,lx=Main.lastMouseX,ly=Main.lastMouseY,sw=Main.screenWidth,sh=Main.screenHeight;
         try{PlayerInput.SetZoom_Unscaled();PlayerInput.SetZoom_MouseInWorld();return Main.MouseWorld;}
         finally{Main.mouseX=mx;Main.mouseY=my;Main.lastMouseX=lx;Main.lastMouseY=ly;Main.screenWidth=sw;Main.screenHeight=sh;}
     }
     internal static void Input(CompanionPlayer s) {
+        // Called from ProcessTriggers, after tModLoader prepares mod keybinds.
+        // Drawing can run before that first input update (e.g. while unfocused).
+        directHeld=PalicoCompanion.DirectKey?.Current==true;
         bool click=Main.mouseLeft&&!previousLeft;previousLeft=Main.mouseLeft;
         if(!Aiming)return;
         if(s.Player.mouseInterface)return;
@@ -33,7 +37,8 @@ public sealed class CompanionControlUI:ModSystem {
             else Notify(CompanionText.Get("CompanionControlUI.AimHint"));
         }
     }
-    public override void OnWorldLoad(){previousLeft=true;resultTicks=0;}
+    public override void OnWorldLoad(){directHeld=false;previousLeft=true;resultTicks=0;}
+    public override void OnWorldUnload()=>directHeld=false;
     public override void ModifyInterfaceLayers(List<GameInterfaceLayer> layers) {
         int index=layers.FindIndex(l=>l.Name=="Vanilla: Mouse Text");
         if(index>=0)layers.Insert(index,new LegacyGameInterfaceLayer("PalicoCompanion: Direction",()=>{

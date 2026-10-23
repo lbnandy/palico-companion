@@ -23,7 +23,6 @@ public sealed class FieldAssist
     private Item miningTool;
     int ReachBonus=>16*Main.player[owner].GetModPlayer<CompanionPlayer>().Training.MiningReach;
     readonly Queue<Point> pending = new();
-    public int TotalCompleted {get;private set;}
     public int Completed { get; private set; }
     public int Planned { get; private set; }
     public int SwingTicks { get; private set; }
@@ -139,7 +138,7 @@ public sealed class FieldAssist
         Terraria.Tile result = Main.tile[Tile.X, Tile.Y];
         if (!result.HasTile) {
             if(AllowedOre(originalType))CompanionCrossMod.MinedOre?.Invoke(player,Tile,originalType);
-            Completed++;TotalCompleted++;
+            Completed++;
             if(!Terrain&&pending.Count==0) {
                 var state=player.GetModPlayer<CompanionPlayer>();
                 state.Expression.Say(state,state.Cat,"Ore",Terraria.GameContent.UI.EmoteID.EmoteHappiness);

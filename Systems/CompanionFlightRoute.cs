@@ -12,8 +12,6 @@ internal sealed class CompanionFlightRoute {
     readonly List<Vector2> route=new();
     Vector2 target,failedFrom;
     ulong retryAt,expires;
-    public int Searches {get;private set;}
-    public int Detours {get;private set;}
     public int LastExpanded {get;private set;}
     public void Clear(){route.Clear();retryAt=expires=0;}
     public bool Next(Vector2 from,Vector2 goal,out Vector2 next) {
@@ -32,10 +30,10 @@ internal sealed class CompanionFlightRoute {
         if(!changed&&Vector2.DistanceSquared(from,failedFrom)<32*32&&Main.GameUpdateCount<retryAt)return false;
         target=goal;failedFrom=from;retryAt=Main.GameUpdateCount+30;expires=Main.GameUpdateCount+120;
         if(!Search(from,goal))return false;
-        Detours++;next=route[0];return true;
+        next=route[0];return true;
     }
     bool Search(Vector2 from,Vector2 goal) {
-        Searches++;LastExpanded=0;
+        LastExpanded=0;
         var open=new PriorityQueue<Point,float>();
         var cost=new Dictionary<Point,float>{{Point.Zero,0}};
         var parent=new Dictionary<Point,Point>();

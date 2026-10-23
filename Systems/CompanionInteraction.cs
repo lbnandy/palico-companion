@@ -12,7 +12,6 @@ using Terraria.GameContent;
 namespace PalicoCompanion.Systems;
 
 public sealed class CompanionInteraction:ModSystem {
-    public static int HintDraws {get;private set;}
     public static bool Hovered {get;private set;}
     public static Vector2 WorldCursor(Vector2 raw,Vector2 screen,Matrix view)=>Vector2.Transform(raw,Matrix.Invert(view))+screen;
     // Main.HoverOverNPCs uses this player-centered tile-range rectangle,
@@ -93,12 +92,10 @@ public sealed class CompanionInteraction:ModSystem {
         Main.spriteBatch.Draw(texture,point,null,new Color(pulse,pulse,pulse,pulse),0,Vector2.Zero,1,effects,0);
         Main.spriteBatch.End();
         Main.spriteBatch.Begin(SpriteSortMode.Deferred,BlendState.AlphaBlend,SamplerState.LinearClamp,null,null,null,Main.UIScaleMatrix);
-        HintDraws++;
     }
 }
 // The supported vanilla overlay pipeline handles zoom, clipping and all three map modes.
 public sealed class CompanionMapLayer:ModMapLayer {
-    public int Draws {get;private set;}
     Texture2D head;int headColor=-1;
     NPCHeadDrawRenderTargetContent outlined;
     internal Texture2D Head {
@@ -142,6 +139,6 @@ public sealed class CompanionMapLayer:ModMapLayer {
         outlined.UseColor(Main.GetPlayerHeadBordersColor(s.Player));outlined.Request();
         if(!outlined.IsReady)return;
         var result=context.Draw(outlined.GetTarget(),cat.Center/16f,s.Vitals.Downed?Color.LightCoral:Color.White,new SpriteFrame(1,1),1f,Main.mapFullscreen?1.5f:1f,Alignment.Center);
-        Draws++;if(result.IsMouseOver)text=s.CatName+" · "+(s.Vitals.Downed?CompanionLife.L("RecoveryWait"):CompanionLife.L("Following"));
+        if(result.IsMouseOver)text=s.CatName+" · "+(s.Vitals.Downed?CompanionLife.L("RecoveryWait"):CompanionLife.L("Following"));
     }
 }

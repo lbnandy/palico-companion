@@ -11,7 +11,6 @@ namespace PalicoCompanion.Systems;
 public sealed class DiggingIntent
 {
     public int Remaining {get;private set;}
-    public int Completed {get;private set;}
     public Point Origin {get;private set;}
     public Point Direction {get;private set;}
     Vector2 anchor,aim;
@@ -35,7 +34,7 @@ public sealed class DiggingIntent
         if(s.Mining.Active&&!s.Mining.Terrain)s.Mining.Cancel();
         Point dir=Axis(cell.ToWorldCoordinates()-p.Center);
         bool redirect=!Active||Direction!=dir;
-        if(redirect){Completed=0;delay=0;skipped.Clear();}
+        if(redirect){delay=0;skipped.Clear();}
         else if(Origin!=cell){delay=0;skipped.Clear();}
         // Consecutive strokes down the same shaft renew the owner's intention;
         // they must not restart the helper's wind-up on every new target tile.
@@ -71,7 +70,7 @@ public sealed class DiggingIntent
         if(danger)return;
         Remaining--;
         if(awaiting&&!s.Mining.Active) {
-            Completed+=s.Mining.Completed;awaiting=false;
+            awaiting=false;
             // A bad face is not a cancelled owner command. Try another native
             // selector candidate while retaining the priority over loose drops.
             if(s.Mining.Failed){

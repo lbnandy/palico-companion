@@ -45,14 +45,7 @@ public sealed partial class CompanionNativeUse {
         }
         public void Dispose(){if(use==null)return;var actor=use.Actor;actor.direction=direction;actor.itemAnimation=animation;actor.itemAnimationMax=maximum;actor.itemRotation=rotation;actor.channel=channel;actor.itemLocation=location;}
     }
-    public int Uses {get;private set;}
-    public int Shots {get;set;}
     public int Hits {get;set;}
-    public int ManaSpent {get;private set;}
-    public int ThrowablesSpent {get;private set;}
-    public int ThrownHits {get;set;}
-    public int ManaPotions {get;private set;}
-    public int ManaRestored {get;private set;}
     internal float ReachFactor {get;private set;}=1;
     internal float FlailRange=100;
     int reachTarget=-1,missTicks,lastReachHits;
@@ -228,21 +221,18 @@ public sealed partial class CompanionNativeUse {
         PressedThisTick=wants&&(!Actor.controlUseItem||Actor.itemAnimation==0);
         Actor.controlUseItem=wants;Actor.releaseUseItem=Actor.itemAnimation==0;Actor.controlUseTile=false;
         if(!wants)Actor.channel=false;
-        int manaBefore=Actor.statMana;
-        int restoredBefore=ManaRestored;
         int stackBefore=Actor.HeldItem.stack;
         try {using(new Scope(this)){Actor.UpdateMeleeHitCooldowns();if(Actor.attackCD>0)Actor.attackCD--;Actor.ItemCheck();}}
         finally {
             if(materials)for(int i=0;i<Math.Min(state.Bag.Length,49);i++)if(!state.Bag[i].favorited)state.Bag[i]=Actor.inventory[i+1];
-            int spent=Math.Max(0,manaBefore+ManaRestored-restoredBefore-Actor.statMana);
-            ManaSpent+=spent;state.Vitals.ManaDelay=Math.Max(0,(int)Math.Ceiling(Actor.manaRegenDelay));state.Vitals.Mana=Math.Clamp(Actor.statMana,0,state.Vitals.MaxMana);
+            state.Vitals.ManaDelay=Math.Max(0,(int)Math.Ceiling(Actor.manaRegenDelay));state.Vitals.Mana=Math.Clamp(Actor.statMana,0,state.Vitals.MaxMana);
             if(weapon.consumable) {
                 int consumed=Math.Clamp(stackBefore-Actor.HeldItem.stack,0,weapon.stack);
-                ThrowablesSpent+=consumed;if(!ReferenceEquals(weapon,Actor.HeldItem))weapon.stack-=consumed;
+                if(!ReferenceEquals(weapon,Actor.HeldItem))weapon.stack-=consumed;
                 if(weapon.stack<=0){weapon.TurnToAir();depletedThrow=true;}
             }
         }
-        if(Actor.itemAnimation==Actor.itemAnimationMax&&Actor.itemAnimation>0){Uses++;if(CompanionNetwork.Server)CompanionNetwork.FeedbackAt(4,cat.Center,weapon.type);}
+        if(CompanionNetwork.Server&&Actor.itemAnimation==Actor.itemAnimationMax&&Actor.itemAnimation>0)CompanionNetwork.FeedbackAt(4,cat.Center,weapon.type);
         // Projectile.Update totals minion slots again as each minion updates.
         // Feeding it the pre-use census would double-count and sacrifice pets.
         Actor.slotsMinions=0;Actor.numMinions=0;
@@ -357,15 +347,14 @@ public sealed partial class CompanionNativeUse {
         int restored=Drink(true,required,out int potion);
         if(restored==0)return;
         WaitingForMana=false;
-        ManaPotions++;ManaRestored+=restored;Actor.statMana=State.Vitals.Mana;
+        Actor.statMana=State.Vitals.Mana;
         Actor.GetDamage(DamageClass.Magic)=StatModifier.Default*State.Vitals.MagicMultiplier;
         (Cat.ModProjectile as CompanionCat)?.ActionVisual.Begin((CompanionCat)Cat.ModProjectile,CompanionGesture.Drink,potion);
         CompanionFeedback.Show(2,Cat.Center,restored,NativeDrink&&!CompanionNetwork.Server?"skill":"");
         State.Expression.Say(State,Cat,"ManaPotion",Terraria.GameContent.UI.EmoteID.ItemManaPotion);
     }
-    internal void CommitProjectileMana(int before,int restoredBefore) {
-        int spent=Math.Max(0,before+ManaRestored-restoredBefore-Actor.statMana);
-        ManaSpent+=spent;State.Vitals.ManaDelay=Math.Max(0,(int)Math.Ceiling(Actor.manaRegenDelay));
+    internal void CommitProjectileMana() {
+        State.Vitals.ManaDelay=Math.Max(0,(int)Math.Ceiling(Actor.manaRegenDelay));
         State.Vitals.Mana=Math.Clamp(Actor.statMana,0,State.Vitals.MaxMana);
     }
 }
@@ -406,7 +395,6 @@ public sealed class CompanionOwnedShot : GlobalProjectile {
     }
     public override void OnHitNPC(Projectile projectile,NPC target,NPC.HitInfo hit,int damageDone) {
         if(Context!=null&&damageDone>0)Context.Hits++;
-        if(Context!=null&&Thrown&&damageDone>0)Context.ThrownHits++;
     }
     public override void ModifyHitNPC(Projectile projectile,NPC target,ref NPC.HitModifiers modifiers) {
         if(Context!=null)modifiers.FinalDamage*=CompanionBalanceConfig.Current.DamageScale;
@@ -420,7 +408,6 @@ public sealed class CompanionOwnedShot : GlobalProjectile {
         // not this local spawn hook. Do not Kill(): that could spawn more shots.
         if(CompanionNetwork.Client&&Context!=null){p.active=false;return;}
         Thrown=Context!=null&&(Context.Actor.HeldItem.consumable||source is EntitySource_Parent parentShot&&parentShot.Entity is Projectile from&&from.GetGlobalProjectile<CompanionOwnedShot>().Thrown);
-        if(Context!=null)Context.Shots++;
     }
 }
 public sealed class CompanionNativeMeleeHit : GlobalNPC {
@@ -506,7 +493,6 @@ public sealed class CompanionNativeHooks : ModSystem {
         // A child's packet can arrive before its cat's binding. Repair the
         // native link once binding succeeds, before the child executes its AI.
         if(tag.PendingNativeLinkRepair)p.ProjectileFixDesperation();
-        int manaBefore=context.Actor.statMana,restoredBefore=context.ManaRestored;
         var trail=instant&&CompanionNetwork.Server?p.GetGlobalProjectile<CompanionInstantShot>():null;
         trail?.Begin(p);
         float previousRotation=context.Actor.itemRotation;
@@ -516,7 +502,7 @@ public sealed class CompanionNativeHooks : ModSystem {
             // Native DirectionFrom then has no direction; retain the last arm
             // angle instead of letting NaN enter drawing or network snapshots.
             if(!float.IsFinite(context.Actor.itemRotation))context.Actor.itemRotation=float.IsFinite(previousRotation)?previousRotation:0;
-            if(!CompanionNetwork.Client)context.CommitProjectileMana(manaBefore,restoredBefore);trail?.End(p);
+            if(!CompanionNetwork.Client)context.CommitProjectileMana();trail?.End(p);
         }
     }
     static void DrawShot(On_Main.orig_DrawProjDirect orig,Main self,Projectile projectile) {

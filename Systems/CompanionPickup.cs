@@ -31,11 +31,7 @@ public sealed class CompanionPickup {
     // A short working-radius bonus, not a larger roaming/search radius.
     public static int GrabRange=>Player.defaultItemGrabRange+24;
     internal int Range(Item item){int range=GrabRange;ItemLoader.GrabRange(item,anchor,ref range);return Math.Max(0,range);}
-    public int Collected {get;private set;}
-    public int Popups {get;private set;}
-    public int SoundBatches {get;private set;}
     public int PulledThisTick {get;private set;}
-    public int DeferredTargets {get;private set;}
     Item tracked;float bestDistance;int stalled;
     bool fullReported;
     readonly Dictionary<int,(Item Item,int Type,Vector2 Position,ulong Until)> deferred=new();
@@ -84,7 +80,7 @@ public sealed class CompanionPickup {
         if(moved>0){
             display.Center=cat.Center;display.stack=moved;
             if(CompanionNetwork.Server)CompanionNetwork.PickupEffect(state,display,cat.Center);
-            else if(PopupText.NewText(PopupTextContext.RegularItemPickup,display,moved)>=0)Popups++;
+            else PopupText.NewText(PopupTextContext.RegularItemPickup,display,moved);
         }
         return moved;
     }
@@ -122,7 +118,7 @@ public sealed class CompanionPickup {
                 if(item.IsAir)item.active=false;
                 if(moved>0) {
                     if(CompanionNetwork.Server)NetMessage.SendData(MessageID.SyncItem,-1,-1,null,slot);
-                    Collected+=moved;took=true;coin|=isCoin;valuable|=isValuable;
+                    took=true;coin|=isCoin;valuable|=isValuable;
                     state.Experience++;
                 }
                 if(!item.active||!InventoryTransfer.HasRoom(item,state.Bag))continue;
@@ -142,7 +138,7 @@ public sealed class CompanionPickup {
         }
         if(!blocked)fullReported=false;
         else if(!fullReported)fullReported=state.Expression.TrySay(state,cat,"Working",Terraria.GameContent.UI.EmoteID.EmoteConfused,variant:"BagFull");
-        if(took){CompanionFeedback.Show(5,cat.Center,coin?1:0);SoundBatches++;if(valuable)state.Expression.Say(state,cat,"Loot",Terraria.GameContent.UI.EmoteID.EmoteHappiness);}
+        if(took){CompanionFeedback.Show(5,cat.Center,coin?1:0);if(valuable)state.Expression.Say(state,cat,"Loot",Terraria.GameContent.UI.EmoteID.EmoteHappiness);}
         // Finish the trailing items only after there is no next unswept pile.
         bool finishing=target<0;
         if(finishing)target=trailing;
@@ -153,7 +149,7 @@ public sealed class CompanionPickup {
             if(item.noGrabDelay>0)stalled=0;
             if(++stalled>=120) {
                 deferred[target]=(item,item.type,item.Center,Main.GameUpdateCount+600);
-                DeferredTargets++;tracked=null;stalled=0;state.Status=CompanionText.Message("CompanionPickup.LootBlocked");
+                tracked=null;stalled=0;state.Status=CompanionText.Message("CompanionPickup.LootBlocked");
                 return -1;
             }
             goal=finishing?cat.Center:item.Center;

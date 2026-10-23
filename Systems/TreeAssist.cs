@@ -10,22 +10,18 @@ namespace PalicoCompanion.Systems;
 public sealed class TreeAssist
 {
     Point root;
-    int cooldown,quiet,elapsed,cadence,interval;
+    int cooldown,elapsed,cadence,interval;
     int replantTrunk,replantTicks;
     public bool ReplantPending=>replantTicks>0;
     Item axe;
     bool requested,requestedManual;
     int requestedType;
     public bool Requested => requested && (Active || ReplantPending);
-    public int ObservedFinishes {get;private set;}
     readonly Item basicAxe=new(ItemID.CopperAxe); // Companion-owned tool; never inserted into an inventory.
     public bool Active {get;private set;}
     public Vector2 Target=>root.ToWorldCoordinates();
     public Vector2 MoveTarget {get;private set;}
-    public int Harvests {get;private set;}
-    public int Replants {get;private set;}
     public string Status {get;private set;}="";
-    internal string Diagnostics=> $"active={Active} quiet={quiet} cooldown={cooldown} elapsed={elapsed} root={root} stand={MoveTarget} status={Status}";
     public int SwingTicks {get;private set;}
     public int SwingDuration {get;private set;}=20;
     public int SwingItemType {get;private set;}
@@ -85,12 +81,12 @@ public sealed class TreeAssist
     }
     public bool Tick(Player p,CompanionPlayer s,Projectile cat,bool danger) {
         if(Main.netMode==NetmodeID.MultiplayerClient||!requestedManual&&!(CompanionNetwork.Server?s.NetForestry:ModContent.GetInstance<CompanionConfig>().Forestry)||!s.Enabled||s.Paused||s.Vitals.Downed||
-            s.Mining.Active||s.Order.Active||s.Order.HasPreview||s.Storage.Active||s.Garden.Active){if(Active||ReplantPending)Cancel();quiet=0;return false;}
-        if(danger){if(Active||ReplantPending)Suspend();quiet=0;return false;}
+            s.Mining.Active||s.Order.Active||s.Order.HasPreview||s.Storage.Active||s.Garden.Active){if(Active||ReplantPending)Cancel();return false;}
+        if(danger){if(Active||ReplantPending)Suspend();return false;}
         if(requested&&Active&&!ReplantPending&&!Main.tile[root].HasTile){
             // The owner or another helper finished it. Keep real drops, and only
             // attempt a seed-backed replant; never credit a second tree harvest.
-            Active=false;replantTrunk=requestedType;replantTicks=180;ObservedFinishes++;
+            Active=false;replantTrunk=requestedType;replantTicks=180;
         }
         if(ReplantPending)return TryReplant(p,s,cat);
         if(cooldown>0){cooldown--;return false;}
@@ -131,7 +127,7 @@ public sealed class TreeAssist
         // on clients and paints unrelated tile data beside the felled tree.
         if(CompanionNetwork.Server)NetMessage.SendTileSquare(-1,root.X-4,treeTopY-2,9,root.Y-treeTopY+5);
         if(!Main.tile[root].HasTile) {
-            Harvests++;s.Experience++;
+            s.Experience++;
             Cancel();cooldown=300;replantTicks=180;
             return TryReplant(p,s,cat);
         }
@@ -146,7 +142,7 @@ public sealed class TreeAssist
             foreach(int x in new[]{root.X,root.X-1}){
                 if(!TreeSpecies.Plant(x,root.Y,seed))continue;
                 if(cat.ModProjectile is CompanionCat visual)visual.ActionVisual.Begin(visual,CompanionGesture.Plant,seed.type);
-                CompanionConsumption.Consume(s,seed);Replants++;
+                CompanionConsumption.Consume(s,seed);
                 if(CompanionNetwork.Server)NetMessage.SendTileSquare(-1,x-1,root.Y-2,4,4);
                 s.Expression.Say(s,cat,"Tree",Terraria.GameContent.UI.EmoteID.EmoteHappiness);
                 s.Report(CompanionText.Message("TreeAssist.Replanted"));return false;

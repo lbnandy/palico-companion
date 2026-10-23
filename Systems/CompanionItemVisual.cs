@@ -12,11 +12,10 @@ namespace PalicoCompanion.Systems;
 // Labor has its own timed tile action. Combat uses CompanionNativeUse's isolated
 // Player executor; neither path calls ItemCheck on the human player's object.
 public static class CompanionItemVisual {
-    public static int SoundsStarted {get;private set;}
     public static void BeginUse(Item item,Vector2 at) {
         if(CompanionNetwork.Server){CompanionNetwork.FeedbackAt(4,at,item.type);return;}
         if(item.UseSound.HasValue&&!ItemID.Sets.SkipsInitialUseSound[item.type]) {
-            SoundEngine.PlaySound(item.UseSound,at);SoundsStarted++;
+            SoundEngine.PlaySound(item.UseSound,at);
         }
     }
     // Vanilla swing spans 3.5 radians. Anchor contact at our real mining hit

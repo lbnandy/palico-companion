@@ -29,8 +29,6 @@ public sealed class TrainingPanel:ModSystem {
         return new Rectangle(left,Bounds.Y+54,CompanionButtonLayout.ContentWidth(CategoryLabel(index)),32);
     }
     UIScrollbar bodyScroll;bool scrollDragging;float scrollOffset;
-    internal int ScrollLine {get=>scrollLine;set=>scrollLine=value;}
-    internal int RowCount {get;private set;}
     static readonly string[] TopicKeys=["TrainingPanel.Progress", "TrainingPanel.Meet", "TrainingPanel.Combat", "TrainingPanel.Mining", "TrainingPanel.Exploring", "TrainingPanel.Fishing", "TrainingPanel.Storage", "TrainingPanel.Equipment", "TrainingPanel.Multiplayer"];
     static string Topic(int index)=>CompanionText.Get(TopicKeys[index]);
     internal static void OpenGuide(){Open=true;Main.LocalPlayer.GetModPlayer<CompanionPlayer>().PanelOpen=false;Main.playerInventory=true;}
@@ -162,7 +160,6 @@ public sealed class TrainingPanel:ModSystem {
                 if(status!=CompanionText.Get("TrainingPanel.MissingMaterials")){Wrapped("");Wrapped(status,Color.LightSkyBlue);}
             }
         }
-        RowCount=rows.Count;
         int visibleRows=legend?10:14;
         scrollLine=Math.Clamp(scrollLine,0,Math.Max(0,rows.Count-visibleRows));
         if(rows.Count>visibleRows){
