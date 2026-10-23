@@ -4,13 +4,18 @@ using Terraria;
 
 namespace PalicoCompanion.Systems;
 
-internal enum CompanionControlOp:byte { Direct, Skill, SwitchLoadout }
+internal enum CompanionControlOp:byte { Direct, Skill, SwitchLoadout, Environment }
 
 internal static class CompanionControl {
     internal static bool Execute(CompanionPlayer s,CompanionControlOp op,int index,Point cell,string name,out string message) {
         message=CompanionText.Message("CompanionControl.Unavailable");
         if(CompanionNetwork.Client||s.Player.dead||s.NetLeaving)return false;
         switch(op) {
+            case CompanionControlOp.Environment:
+                if(index is not (0 or 1))return false;
+                CompanionEnvironment.SetPaused(s,index==1);
+                message=CompanionText.MessageFull("Mods.PalicoCompanion.UI."+(s.EnvironmentPaused?"EnvironmentPaused":"EnvironmentResumed"));
+                return true;
             case CompanionControlOp.Direct:return s.Directive.Request(s,(DirectiveKind)index,cell,out message);
             case CompanionControlOp.Skill:return s.Training.Activate(s,index,true,out message);
             case CompanionControlOp.SwitchLoadout:return s.Loadouts.Switch(s,index,out message);

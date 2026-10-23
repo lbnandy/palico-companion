@@ -52,7 +52,7 @@ public static class CompanionStatusBar {
         string amount=s.Vitals.Downed?$"{(int)(BarFraction(s)*100)}%":$"{s.Vitals.Health} / {s.Vitals.MaxHealth}";
         DrawDetails(s,r,amount);
         string skillHint=TrainingHud.HoverText(s,r);
-        if(hover){s.Player.mouseInterface=true;Main.instance.MouseText(skillHint??(CompanionText.Get("CompanionStatusBar.Vitals",s.CatName,s.Vitals.Health,s.Vitals.MaxHealth,s.Vitals.Mana,s.Vitals.MaxMana)+"\n"+CompanionLife.L("HudHint")));if(clicked){int skill=TrainingHud.HitSkill(s,r);if(skill>=0)CompanionControl.Request(s,CompanionControlOp.Skill,skill);else if(skillHint==null)CompanionUIFlow.Toggle(s);}}
+        if(hover){s.Player.mouseInterface=true;Main.instance.MouseText(skillHint??(CompanionText.Get("CompanionStatusBar.Vitals",s.CatName,s.Vitals.Health,s.Vitals.MaxHealth,s.Vitals.Mana,s.Vitals.MaxMana)+"\n"+CompanionLife.L("HudHint")+(s.EnvironmentPaused?"\n"+CompanionLife.L("EnvironmentPaused"):"")));if(clicked){int skill=TrainingHud.HitSkill(s,r);if(skill>=0)CompanionControl.Request(s,CompanionControlOp.Skill,skill);else if(skillHint==null)CompanionUIFlow.Toggle(s);}}
     }
     internal static void DrawDetails(CompanionPlayer s,Rectangle r,string amount){
         string state=State(s);var font=FontAssets.MouseText.Value;

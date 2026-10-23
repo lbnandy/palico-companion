@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.0.5 — 2026-10-24
+
+- 新增暂停环境改动按钮及可自定义快捷键，建房时可暂停呆猫的自动挖掘、采集和放置行为。
+- 调整挖掘协助的触发判断，开始建造时停止旧的挖掘任务，减少修补房屋时的误拆。
+- 新增工作速度、钓鱼速度的独立设置，默认均为 100%，不随强度预设改变。
+- 将设置分类统一为「呆猫能力」「战斗能力」，更新中英文说明。
+
+- Added an environment-work toggle and an optional keybind to pause automatic digging, planting and block placement while building.
+- Refined digging-assistance detection. Starting construction now cancels stale digging tasks, reducing unwanted excavation during repairs.
+- Added separate work-speed and fishing-speed settings, both defaulting to 100% and independent of strength presets.
+- Renamed the settings categories to Companion abilities and Combat abilities, with updated English and Simplified Chinese descriptions.
+
 ## 1.0.4 — 2026-10-24
 
 - 修复与积分商店同时启用时，购买商品可能扣除积分却无法获得物品的问题。

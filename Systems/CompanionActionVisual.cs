@@ -18,32 +18,35 @@ internal sealed class CompanionActionVisual {
     internal uint Sequence {get;private set;}
     ulong start;
     internal const int Duration=36;
-    internal int Age=>(int)Math.Min((ulong)Duration,Main.GameUpdateCount>=start?Main.GameUpdateCount-start:0);
-    internal bool Active=>Sequence!=0&&Kind!=CompanionGesture.None&&Age<Duration;
+    int duration=Duration;
+    internal int Age=>(int)Math.Min((ulong)duration,Main.GameUpdateCount>=start?Main.GameUpdateCount-start:0);
+    internal bool Active=>Sequence!=0&&Kind!=CompanionGesture.None&&Age<duration;
     internal void Begin(CompanionCat cat,CompanionGesture kind,int item){
         if(CompanionNetwork.Client||kind==CompanionGesture.None||item<=0||item>=ItemLoader.ItemCount)return;
         Kind=kind;ItemType=item;start=Main.GameUpdateCount;Sequence++;if(Sequence==0)Sequence=1;
+        duration=kind is CompanionGesture.Plant or CompanionGesture.Harvest?CompanionWorkTiming.Ticks(Duration):Duration;
         cat.PendingPresentation=true;
     }
-    internal void Write(BinaryWriter w){w.Write(Sequence);w.Write((byte)Kind);w.Write(ItemType);w.Write((byte)Age);}
+    internal void Write(BinaryWriter w){w.Write(Sequence);w.Write((byte)Kind);w.Write(ItemType);w.Write((byte)Age);w.Write((byte)duration);}
     internal void Read(BinaryReader r,bool newInstance){
-        uint seq=r.ReadUInt32();byte kind=r.ReadByte();int item=r.ReadInt32();int age=Math.Min(Duration,(int)r.ReadByte());
+        uint seq=r.ReadUInt32();byte kind=r.ReadByte();int item=r.ReadInt32();int age=r.ReadByte();int length=Math.Clamp((int)r.ReadByte(),18,144);
         if(!newInstance&&seq<=Sequence)return;
         Sequence=seq;Kind=kind<=(byte)CompanionGesture.RecoveryDeliver?(CompanionGesture)kind:CompanionGesture.None;
+        duration=length;
         ItemType=item>0&&item<ItemLoader.ItemCount?item:0;
         // Local clock is unrelated to the dedicated server's update count.
         start=Main.GameUpdateCount>=(ulong)age?Main.GameUpdateCount-(ulong)age:0;
-        if(ItemType==0||age>=Duration)Kind=CompanionGesture.None;
+        if(ItemType==0||age>=duration)Kind=CompanionGesture.None;
     }
     internal bool Visible(CompanionCat cat,CompanionPlayer s)=>Active&&!s.Vitals.Downed&&!s.Paused&&!cat.Fishing.Active&&cat.Weapons.Actor.itemAnimation<=0&&cat.Animation.Motion is not (CatMotion.Attack or CatMotion.Mine or CatMotion.Thrust);
-    internal int Frame=>Age<8?CompanionSpriteLayout.WorkRecover:Age<27?(Kind==CompanionGesture.Drink?CompanionSpriteLayout.WorkWindup:CompanionSpriteLayout.WorkStrike):CompanionSpriteLayout.WorkRecover;
+    internal int Frame=>Age*Duration/duration<8?CompanionSpriteLayout.WorkRecover:Age*Duration/duration<27?(Kind==CompanionGesture.Drink?CompanionSpriteLayout.WorkWindup:CompanionSpriteLayout.WorkStrike):CompanionSpriteLayout.WorkRecover;
     internal void Draw(SpriteBatch sb,Vector2 feet,int direction,Color light){
         // Delivery already shows the real world drop until native pickup.
         // Keep the hand gesture, but never draw a second prop after handing it off.
         if(!Active||ItemType<=0||Kind==CompanionGesture.RecoveryDeliver)return;
         Main.instance.LoadItem(ItemType);var texture=TextureAssets.Item[ItemType].Value;
         var source=Main.itemAnimations[ItemType]?.GetFrame(texture)??texture.Frame();
-        float pulse=MathF.Sin(MathHelper.Pi*Age/(Duration-1f));
+        float pulse=MathF.Sin(MathHelper.Pi*Age/(duration-1f));
         var hand=CompanionSpriteLayout.MainHand[Frame];hand.X*=direction;
         // Bottle neck tilts inward toward the mouth. Planting reaches down;
         // the paw is drawn over the prop.

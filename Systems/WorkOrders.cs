@@ -70,14 +70,14 @@ public sealed class WorkOrders
         if (paused || danger) { Status = paused ? "Construction paused" : "Construction waiting for danger to pass"; return; }
         Vector2 target = CurrentTarget;
         if (Vector2.DistanceSquared(player.Center, target) > 480 * 480) { Stop("Construction stopped: owner is more than 30 tiles away"); return; }
-        if (++approachTicks > 600) { Stop("Construction stopped: tile unreachable for 10 seconds"); return; }
+        if (++approachTicks > 600 + CompanionWorkTiming.ExtraDelay(45)) { Stop("Construction stopped: tile unreachable"); return; }
         if (!float.IsFinite(catCenter.X) || !float.IsFinite(catCenter.Y)) { Stop("Construction stopped: invalid cat position"); return; }
         Vector2 reachPoint = ItemType == ItemID.WoodPlatform ? target - new Vector2(0, 9) : target;
         if (Vector2.DistanceSquared(catCenter, target) > 64 * 64 || !Reachability.Clear(catCenter, reachPoint)) {
             Status = $"Walking to construction tile {Completed + 1}/{Length}"; cadence = 0; return;
         }
         Status = $"Working on tile {Completed + 1}/{Length}";
-        if (++cadence < 45) return;
+        if (++cadence < CompanionWorkTiming.Ticks(45)) return;
         cadence = 0;
         int x = Start.X + Step.X * Completed, y = Start.Y + Step.Y * Completed;
         string result = SafeConstruction.TryPlace(player, catCenter, bag, x, y, ItemType);

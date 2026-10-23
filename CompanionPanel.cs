@@ -80,7 +80,7 @@ public sealed class CompanionPanel : ModSystem
         Main.spriteBatch.End();
     }
     public override void Load() => On_Main.DrawInventory += DrawVanillaInventory;
-    public override void Unload() {On_Main.DrawInventory -= DrawVanillaInventory;weaponPlaceholder?.Dispose();weaponPlaceholder=null;}
+    public override void Unload() {On_Main.DrawInventory -= DrawVanillaInventory;weaponPlaceholder?.Dispose();weaponPlaceholder=null;CompanionEnvironmentButton.Unload();}
     void DrawVanillaInventory(On_Main.orig_DrawInventory orig,Main self) {
         int mx=Main.mouseX,my=Main.mouseY;
         var state=Main.LocalPlayer.GetModPlayer<CompanionPlayer>();
@@ -131,7 +131,7 @@ public sealed class CompanionPanel : ModSystem
             Text(L(targeting==1?"MineTarget":"BuildTarget"),176,218,Ink,0.8f,screenW-190);
             if(Main.mouseRight||Main.keyState.IsKeyDown(Keys.Escape)){targeting=0;s.PanelOpen=true;return true;}
             if(clicked && mouse.Y>250) {
-                if(targeting==1){s.Order.Cancel();s.Status=s.Mining.Request(Main.LocalPlayer,Main.MouseWorld,mineVein);}
+                if(targeting==1){s.Order.Cancel();s.Status=s.Mining.Request(Main.LocalPlayer,Main.MouseWorld,mineVein,ownerRequested:true);}
                 else s.Status=s.Order.Preview(Main.LocalPlayer,Main.MouseWorld,direction==0?ItemID.Rope:ItemID.WoodPlatform,direction,direction==0?1:0,length,s.Bag);
                 s.Report(s.Status);targeting=0;s.PanelOpen=true;
             }
@@ -153,16 +153,19 @@ public sealed class CompanionPanel : ModSystem
         var headerArea=area;
         var guideButton=CompanionPanelHeader.ButtonBounds(headerArea,CompanionButtonLayout.ContentWidth(CompanionText.Get("CompanionPanel.Guide")));
         int nameX=(int)MathF.Ceiling(portrait.Right/Main.UIScale)+8;
-        var title=new Rectangle(nameX,y+3,guideButton.X-8-nameX,38);
+        var title=new Rectangle(nameX,y+3,guideButton.X-16-CompanionEnvironmentButton.Size-nameX,38);
         var namePosition=CompanionPanelHeader.TitlePosition(s.CatName,headerArea);
         Text(s.CatName,nameX,namePosition.Y,Accent,1f,title.Width);
-        int identityRight=Math.Min(title.Right,nameX+(int)Math.Ceiling(FontAssets.MouseText.Value.MeasureString(s.CatName).X)+8);
+        int nameRight=Math.Min(title.Right,nameX+(int)Math.Ceiling(FontAssets.MouseText.Value.MeasureString(s.CatName).X));
+        int identityRight=nameRight+4;
+        var environmentButton=new Rectangle(nameRight+8,y+8,CompanionEnvironmentButton.Size,CompanionEnvironmentButton.Size);
         var identity=new Rectangle(x+12,y,identityRight-x-12,48);
         if(identity.Contains(mouse)) {
             Main.instance.MouseText(CompanionAppearance.L("AppearanceEntry"));
             if(clicked&&Main.mouseItem.IsAir){dragging=false;CompanionAppearance.Open(s);return true;}
         }
-        else if(title.Contains(mouse)&&Main.mouseLeft&&!dragging&&Main.mouseItem.IsAir){dragging=true;dragOffset=new Vector2(mouse.X,mouse.Y)-position;}
+        else if(!environmentButton.Contains(mouse)&&title.Contains(mouse)&&Main.mouseLeft&&!dragging&&Main.mouseItem.IsAir){dragging=true;dragOffset=new Vector2(mouse.X,mouse.Y)-position;}
+        CompanionEnvironmentButton.Draw(sb,s,environmentButton,mouse,clicked);
         Button(CompanionText.Get("CompanionPanel.Guide"),guideButton.X,guideButton.Y,guideButton.Width,TrainingPanel.OpenGuide);
         if(CenteredButtonText.Close(sb,CompanionPanelHeader.CloseBounds(headerArea),mouse,clicked))s.PanelOpen=false;
         y+=16;

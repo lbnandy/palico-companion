@@ -10,7 +10,7 @@ internal static partial class CompanionNetwork {
     // Use ItemIO, including GlobalItem/ModItem data; never fingerprint just type/stack.
     internal static byte[] EquipmentState(CompanionPlayer s){
         using var memory=new MemoryStream();using var w=new BinaryWriter(memory);
-        w.Write(s.CatName);w.Write(s.HoodColor);w.Write(s.Bonded);w.Write(s.Introduced);w.Write(s.Pickup);w.Write(s.Combat);w.Write(s.Torches);w.Write(s.Bridges);w.Write(s.Ropes);w.Write(s.AutoLogistics);
+        w.Write(s.CatName);w.Write(s.HoodColor);w.Write(s.Bonded);w.Write(s.Introduced);w.Write(s.Pickup);w.Write(s.Combat);w.Write(s.Torches);w.Write(s.Bridges);w.Write(s.Ropes);w.Write(s.AutoLogistics);w.Write(s.EnvironmentPaused);
         s.Chests.Write(w);Items(w,s.Bag);Items(w,s.Gear);Items(w,s.Dyes);Items(w,s.Training.Slots);w.Write(s.Training.Tier);w.Write(s.Training.Expanded);s.Loadouts.Write(w);
         return memory.ToArray();
     }

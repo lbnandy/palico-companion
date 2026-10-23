@@ -30,7 +30,7 @@ public sealed class CompanionCommand : ModCommand
                 s.AuthorizeChest();break;
             case "store": Logistics.Store(caller.Player,s);break;
             case "supply": Logistics.Supply(caller.Player,s);break;
-            case "mine": s.Order.Cancel();s.Status=s.Mining.Request(caller.Player,Main.MouseWorld,args.Length>1&&args[1]=="vein");break;
+            case "mine": s.Order.Cancel();s.Status=s.Mining.Request(caller.Player,Main.MouseWorld,args.Length>1&&args[1]=="vein",ownerRequested:true);break;
             case "plan":
                 if(args.Length<3 || !int.TryParse(args[2],out int length)) {s.Status=CompanionText.Get("CompanionCommand.PlanUsage");break;}
                 bool rope=args[1]=="down";

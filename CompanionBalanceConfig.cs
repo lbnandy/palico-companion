@@ -56,6 +56,13 @@ public sealed class CompanionBalanceConfig : ModConfig {
     [DefaultValue(100),Range(25,150),Increment(5),Slider] public int TravelMovementPercent { get; set; } = 100;
     [DefaultValue(CompanionEvasionMode.Standard),Dropdown] public CompanionEvasionMode Evasion { get; set; } = CompanionEvasionMode.Standard;
 
+    [Header("WorkEfficiency")]
+    [DefaultValue(100),Range(25,200),Increment(5),Slider] public int WorkSpeedPercent { get; set; } = 100;
+    [DefaultValue(100),Range(25,200),Increment(5),Slider] public int FishingSpeedPercent { get; set; } = 100;
+
+    internal float WorkScale => Math.Clamp(WorkSpeedPercent,25,200)/100f;
+    internal float FishingScale => Math.Clamp(FishingSpeedPercent,25,200)/100f;
+
     internal static CompanionBalanceConfig Current => ModContent.GetInstance<CompanionBalanceConfig>();
     internal float DamageScale => Math.Clamp(DamagePercent,10,200)/100f;
     internal int HealthRatio => Math.Clamp(HealthPercent,10,200);

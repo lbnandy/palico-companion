@@ -28,7 +28,7 @@ public sealed class CompanionConfigLayout : ModSystem {
         ["Chatter"]="Sign",["Emotes"]="WhoopieCushion",["CatSounds"]="Bell",["TrainingHints"]="Book",
         ["RunInBackground"]="Stopwatch",["AdvancedOrders"]="Ruler",
         ["Preset"]="head",["DamagePercent"]="GoldBroadsword",["HealthPercent"]="LifeCrystal",["DefensePercent"]="IronChainmail",
-        ["CombatMovementPercent"]="HermesBoots",["TravelMovementPercent"]="Aglet",["Evasion"]="MasterNinjaGear"
+        ["CombatMovementPercent"]="HermesBoots",["TravelMovementPercent"]="Aglet",["Evasion"]="MasterNinjaGear",["WorkSpeedPercent"]="GoldPickaxe",["FishingSpeedPercent"]="WoodFishingPole"
     };
     readonly Dictionary<string, FieldInfo> fields = new();
     readonly List<Action> restore = new();

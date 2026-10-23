@@ -61,9 +61,9 @@ public sealed class CompanionLighting {
             bool existing=HasVisibleLight(cat.Center);
             Holding=CompanionNetwork.Server?s.NetDark:WantsLight(cat.Center,Holding);
             if(!Holding)Status="";
-            if(Holding&&!existing&&Available(HeldItem)&&clock%60==0&&cooldown==0&&!danger&&Vector2.DistanceSquared(cat.Center,p.Center)<160*160) {
+            if(!s.EnvironmentPaused&&Holding&&!existing&&Available(HeldItem)&&clock%60==0&&cooldown==0&&!danger&&Vector2.DistanceSquared(cat.Center,p.Center)<160*160) {
                 Status=TryNearby(p,s,cat.Center,HeldItem);
-                if(Status.StartsWith(SafeConstruction.SuccessPrefix)){Holding=false;cooldown=120;}
+                if(Status.StartsWith(SafeConstruction.SuccessPrefix)){Holding=false;cooldown=CompanionWorkTiming.Ticks(120);}
             }
         }
         if(HoldingGlowstick){Glow.Emit(cat,HeldItem,Flame(cat));Status=CompanionText.Message("CompanionLighting.HoldingGlowstick");}
@@ -82,6 +82,7 @@ public sealed class CompanionLighting {
         return false;
     }
     public static string TryNearby(Player p,CompanionPlayer s,Vector2 center,Item selected=null) {
+        if(s.EnvironmentPaused)return CompanionText.MessageFull("Mods.PalicoCompanion.UI.EnvironmentPaused");
         var materials=Materials(p,s);
         selected??=materials==null?null:Array.Find(materials,Available);
         if(materials==null||!Available(selected)||Array.IndexOf(materials,selected)<0)return CompanionText.Message("CompanionLighting.NoTorch");
