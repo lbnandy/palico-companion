@@ -1,7 +1,5 @@
-1.0.3 · 修复 / Fixes
+1.0.4 · 修复 / Fixes
 
-- 修复部分情况下界面绘制异常导致鼠标指针消失、状态卡无法恢复显示的问题。
-- 修正进入世界和切换窗口时的指令快捷键状态处理。
+- 修复与积分商店同时启用时，购买商品可能扣除积分却无法获得物品的问题。
 
-- Fixed interface rendering errors that could hide the cursor and prevent the status card from recovering.
-- Fixed command hotkey state handling when entering a world or switching windows.
+- Fixed purchases deducting points without granting items when used with Point Shop.

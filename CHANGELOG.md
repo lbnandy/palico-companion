@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.4 — 2026-10-24
+
+- 修复与积分商店同时启用时，购买商品可能扣除积分却无法获得物品的问题。
+
+- Fixed purchases deducting points without granting items when used with Point Shop.
+
 ## 1.0.3 — 2026-10-24
 
 - 修复部分情况下界面绘制异常导致鼠标指针消失、状态卡无法恢复显示的问题。
