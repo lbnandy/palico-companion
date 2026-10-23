@@ -65,7 +65,7 @@ internal static partial class CompanionNetwork {
     }
     internal static void Send(CompanionPlayer s,int to=-1) {
         if(!Server||!s.NetReady)return;
-        Cache(s);var p=Packet(Snapshot);WriteState(s,p);p.Send(to);if(to<0)equipmentState[s.Player.whoAmI]=EquipmentState(s);FullSnapshots++;
+        Cache(s);var p=Packet(Snapshot);WriteState(s,p);p.Send(to);if(to<0)equipmentState[s.Player.whoAmI]=EquipmentState(s);
     }
     static void WriteState(CompanionPlayer s,BinaryWriter p){p.Write((byte)s.Player.whoAmI);p.Write(s.CatName);p.Write(s.HoodColor);p.Write(s.Bonded);p.Write(s.Stowed);p.Write(s.Enabled);p.Write(s.Paused);p.Write(s.Introduced);p.Write(s.Pickup);p.Write(s.Combat);p.Write(s.Torches);p.Write(s.Bridges);p.Write(s.Ropes);p.Write(s.AutoLogistics);p.Write(s.Vitals.EffectiveDefense);
         Vitals(p,s.Vitals);

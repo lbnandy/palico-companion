@@ -12,8 +12,6 @@ public sealed class CompanionSupplies {
     bool carrying; Vector2 lastCat;
     public bool Active=>item!=null;
     public bool Carrying=>carrying;
-    public int Carried {get;private set;}
-    public int Delivered {get;private set;}
     public static bool Needed(Item i,Player p)=>i.type is ItemID.Heart or ItemID.CandyApple or ItemID.CandyCane
         ?p.statLife<p.statLifeMax2:i.type is ItemID.Star or ItemID.SoulCake or ItemID.SugarPlum?p.statMana<p.statManaMax2:false;
     bool Same=>slot>=0&&ReferenceEquals(Main.item[slot],item)&&item.active&&item.type==type&&!item.IsAir;
@@ -45,7 +43,7 @@ public sealed class CompanionSupplies {
         if(!carrying){
             if(!CompanionPickup.FlightApproach(cat,item,out goal)){Cancel();return false;}
             if(Vector2.DistanceSquared(cat.Center,item.Center)>32*32){s.Status=CompanionText.Message("CompanionSupplies.CollectingSupply");return true;}
-            carrying=true;lastCat=cat.Center;Carried++;
+            carrying=true;lastCat=cat.Center;
             item.GetGlobalItem<CompanionCarriedItem>().Attach((CompanionCat)cat.ModProjectile);
             if(CompanionNetwork.Server)NetMessage.SendData(MessageID.SyncItem,-1,-1,null,slot);
         }
@@ -59,7 +57,6 @@ public sealed class CompanionSupplies {
             Cancel();
             if(CompanionNetwork.Server)NetMessage.SendData(MessageID.ItemOwner,-1,-1,null,deliveredSlot);
             if(cat.ModProjectile is CompanionCat visual)visual.ActionVisual.Begin(visual,CompanionGesture.RecoveryDeliver,type);
-            Delivered++;
             bool life=deliveredItem.type is ItemID.Heart or ItemID.CandyApple or ItemID.CandyCane;
             s.Expression.TrySay(s,cat,"Delivered",life?Terraria.GameContent.UI.EmoteID.ItemLifePotion:Terraria.GameContent.UI.EmoteID.ItemManaPotion,context:CompanionText.MessageFull(Lang.GetItemName(deliveredItem.type).Key),variant:life?"Life":"Mana");
             return false;

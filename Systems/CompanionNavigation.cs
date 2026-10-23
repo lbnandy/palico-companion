@@ -21,12 +21,10 @@ public sealed class CompanionNavigation
         // a cave wall. Reaching it must not count as successfully following.
         return Math.Abs(owner.Center.Y-catCenter.Y)>48||!Fits(behind)||!Reachability.Clear(behind,owner.Center)?owner.Center:behind;
     }
-    public int Jumps { get; private set; }
-    public int Recoveries { get; private set; }
     public bool Riding { get; private set; }
     public bool WorkFlying {get;private set;}
     internal void HoldFishingPosition(Projectile cat){
-        if(!Riding&&!Supported(cat.position,cat.width,cat.height)&&Fits(cat.Center)){Riding=true;RideEntries++;Puff(cat.Center);}
+        if(!Riding&&!Supported(cat.position,cat.width,cat.height)&&Fits(cat.Center)){Riding=true;Puff(cat.Center);}
         if(Riding){WorkFlying=true;cat.tileCollide=true;DropThrough=false;cat.velocity*=.5f;if(cat.velocity.LengthSquared()<.01f)cat.velocity=Vector2.Zero;}
         else cat.velocity.X*=.5f;
     }
@@ -42,7 +40,7 @@ public sealed class CompanionNavigation
         if(!working){WorkFlying=false;WorkRoute.Clear();return false;}
         if(!Riding&&!WorkFlying&&noProgress<45&&goal.Y>=cat.Center.Y-48)return false;
         if(Vector2.DistanceSquared(goal,owner.Center)>480*480||!WorkRoute.Next(cat.Center,goal,out var next))return false;
-        if(!Riding){Riding=true;RideEntries++;Puff(cat.Center);}
+        if(!Riding){Riding=true;Puff(cat.Center);}
         WorkFlying=true;cat.tileCollide=true;DropThrough=false;noProgress=0;
         Vector2 desired=(next-cat.Center)*0.2f;
         float speed=6*CompanionBalanceConfig.Current.MovementScale(false);
@@ -54,7 +52,6 @@ public sealed class CompanionNavigation
         if(Math.Abs(cat.velocity.X)>0.5f)cat.direction=Math.Sign(cat.velocity.X);
         return true;
     }
-    public int RideEntries { get; private set; }
     int rideTicks,ownerGroundTicks;
     // Cattiva supplies the shoulder destination. AI_026 pets / AI_067's generic
     // return and ExampleSimpleMinion supply the complete velocity-based approach.
@@ -63,7 +60,7 @@ public sealed class CompanionNavigation
         WorkFlying=false;
         Vector2 separation=owner.Center-cat.Center;
         if(!Riding&&(separation.LengthSquared()>500*500||Math.Abs(separation.Y)>300||noProgress>=120)) {
-            Riding=true;RideEntries++;rideTicks=ownerGroundTicks=0;Puff(cat.Center);
+            Riding=true;rideTicks=ownerGroundTicks=0;Puff(cat.Center);
         }
         if(!Riding){cat.tileCollide=true;return false;}
         cat.tileCollide=false;rideTicks++;
@@ -87,7 +84,7 @@ public sealed class CompanionNavigation
         if(separation.LengthSquared()>2000*2000) {
             // Vanilla pets retain an emergency relocation for multi-screen gaps.
             // Normal catch-up, direction changes and landing never use this path.
-            CompanionTransitEffects.Move(cat,destination);Recoveries++;
+            CompanionTransitEffects.Move(cat,destination);
         }
         bool landed=Math.Abs(owner.velocity.Y)<0.6f&&Supported(owner.position,owner.width,owner.height);
         ownerGroundTicks=landed?ownerGroundTicks+1:0;
@@ -199,7 +196,7 @@ public sealed class CompanionNavigation
                 if(score<best-12){best=score;jump=impulse;}
             }
             jumpCooldown=30;
-            if(jump!=0){cat.velocity.Y=jump;Jumps++;}
+            if(jump!=0){cat.velocity.Y=jump;}
         }
         cat.velocity.Y=Math.Min(10,cat.velocity.Y+0.35f);
         bool far=Vector2.DistanceSquared(owner.Center,cat.Center)>900*900;
@@ -216,7 +213,7 @@ public sealed class CompanionNavigation
                 if(Vector2.DistanceSquared(safe,cat.Center)<24*24&&!blocked&&!far)continue;
                 CompanionTransitEffects.Move(cat,safe);
                 cat.velocity=Vector2.Zero;noProgress=0;bestDistance=float.MaxValue;
-                recoveryCooldown=180;Recoveries++;return true;
+                recoveryCooldown=180;return true;
             }
         }
         return false;

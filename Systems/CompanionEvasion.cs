@@ -8,7 +8,6 @@ namespace PalicoCompanion.Systems;
 public sealed class CompanionEvasion {
     int cooldown,remaining;Vector2 chosen;
     CompanionEvasionMode lastStyle=CompanionEvasionMode.Standard;
-    public int Dodges {get;private set;}
     static float Exposure(Vector2 origin,Vector2 velocity,int width,int height,Vector2 cat,Vector2 motion,int cw,int ch,int horizon){
         float risk=0;
         for(int t=1;t<=horizon;t++){
@@ -69,6 +68,6 @@ public sealed class CompanionEvasion {
         Vector2[] options=flying?new[]{new Vector2(-speed,0),new Vector2(speed,0),new Vector2(0,-speed),new Vector2(0,speed),Vector2.Zero}:new[]{new Vector2(-speed,0),new Vector2(speed,0),Vector2.Zero};
         foreach(var v in options)if(Safe(cat,v,flying)){float risk=Risk(cat,v,horizon);if(risk<score){score=risk;best=v;}}
         if(score>=baseline)return;
-        chosen=best;remaining=9;cooldown=agile?45:90;Dodges++;cat.velocity.X=best.X;if(flying)cat.velocity.Y=best.Y;cat.netUpdate=true;
+        chosen=best;remaining=9;cooldown=agile?45:90;cat.velocity.X=best.X;if(flying)cat.velocity.Y=best.Y;cat.netUpdate=true;
     }
 }

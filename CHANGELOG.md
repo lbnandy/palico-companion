@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.0.3 — 2026-10-24
+
+- 修复部分情况下界面绘制异常导致鼠标指针消失、状态卡无法恢复显示的问题。
+- 修正进入世界和切换窗口时的指令快捷键状态处理。
+
+- Fixed interface rendering errors that could hide the cursor and prevent the status card from recovering.
+- Fixed command hotkey state handling when entering a world or switching windows.
+
 ## 1.0.2 — 2026-10-23
 
 - 新增辅助、标准和强力三档预设，也可分别调整伤害、生命与防御继承、战斗移速、跟随与工作移速、主动闪避。

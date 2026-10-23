@@ -68,8 +68,6 @@ public sealed class CompanionCat : ModProjectile
         if(CompanionNetwork.Client&&CompanionRoster.Observe(this,(ulong)pose.Time)){if(previousInstance!=instance)replica.Clear();replica.Receive(pose,Main.GameUpdateCount);Projectile.position=replica.Position;}
 
     }
-    public int RetreatBursts {get;private set;}
-    public int ReturnBursts {get;private set;}
     Vector2 workFacing,attackFacing;
     int workFacingTicks;
     public void FaceWork(Vector2 target) {workFacing=target;workFacingTicks=12;}
@@ -147,7 +145,7 @@ public sealed class CompanionCat : ModProjectile
         if(state.Vitals.Downed) {
             CancelTransitWork(state);Weapons.Cancel();Navigation.HoldReturn(Projectile);
             if(CompanionRestVisual.Hidden(state.Vitals)){
-                if(!retreated&&state.Vitals.RecoveryProgress<=CompanionRestVisual.StunTicks+2){CompanionRestVisual.DustPuff(Projectile);RetreatBursts++;}
+                if(!retreated&&state.Vitals.RecoveryProgress<=CompanionRestVisual.StunTicks+2){CompanionRestVisual.DustPuff(Projectile);}
                 retreated=true;Projectile.tileCollide=false;Projectile.velocity=Vector2.Zero;
             }
             else Projectile.velocity.X=0;
@@ -158,7 +156,7 @@ public sealed class CompanionCat : ModProjectile
         }
         if(retreated){
             retreated=false;Projectile.Center=owner.Center;Projectile.velocity=Vector2.Zero;
-            Navigation.HoldReturn(Projectile);CompanionRestVisual.DustPuff(Projectile,true);ReturnBursts++;
+            Navigation.HoldReturn(Projectile);CompanionRestVisual.DustPuff(Projectile,true);
         }
         if(!state.Paused&&(CompanionNetwork.Server?state.NetAutoHeal:ModContent.GetInstance<CompanionConfig>().AutoHeal)) {
             int healed=Weapons.Heal(owner,state,Projectile,out int potion);

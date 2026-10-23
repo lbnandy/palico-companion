@@ -11,8 +11,6 @@ namespace PalicoCompanion.Systems;
 public sealed class ConstructionAssist {
     Point last,step,next;int type,streak,left,cadence,elapsed;ulong lastPlacement;
     public bool Active=>left>0;
-    public int Placed {get;private set;}
-    public string LastStop {get;private set;}="";
     public Vector2 Target=>next.ToWorldCoordinates();
     public Vector2 MoveTarget {get;private set;}
     public static bool Supported(Item item)=>item.createTile>=TileID.Dirt&&item.createTile<Main.tileRope.Length&&
@@ -57,8 +55,8 @@ public sealed class ConstructionAssist {
         if(++cadence<Math.Max(4,(int)Math.Ceiling(CombinedHooks.TotalUseTime(material.useTime,p,material)/s.Training.WorkSpeed(12))))return true;
         cadence=0;
         string result=SafeConstruction.TryPlace(p,cat.Center,s.Bag,next.X,next.Y,type,ownerRequested:true);
-        if(!result.StartsWith(SafeConstruction.SuccessPrefix,StringComparison.Ordinal)){LastStop=result;Cancel();return false;}
-        Placed++;left--;elapsed=0;next=new(next.X+step.X,next.Y+step.Y);return Active;
+        if(!result.StartsWith(SafeConstruction.SuccessPrefix,StringComparison.Ordinal)){Cancel();return false;}
+        left--;elapsed=0;next=new(next.X+step.X,next.Y+step.Y);return Active;
     }
 }
 

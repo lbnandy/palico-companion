@@ -9,7 +9,6 @@ namespace PalicoCompanion.Systems;
 // Existing Terraria assets, shaped at the actual recipient/impact position.
 // One authoritative cue per event; clients never echo a predicted cast.
 internal static class TrainingFeedback {
-    internal static readonly int[] Casts=new int[8],Impacts=new int[8];
     internal static SoundStyle Sound(int kind,bool impact)=>kind switch {
         0=>SoundID.Item4,1=>SoundID.Item37,2=>SoundID.Item4,
         3=>new SoundStyle(SoundID.Item35.SoundPath){Volume=SoundID.Item35.Volume,PitchVariance=0},4=>SoundID.DrumTomLow,
@@ -19,7 +18,6 @@ internal static class TrainingFeedback {
     internal static void Draw(int kind,Vector2 at,string phase){
         if(kind<0||kind>=8)return;
         bool impact=phase=="impact";
-        if(impact)Impacts[kind]++;else Casts[kind]++;
         // Bell follows Player.ItemCheck's Bell (507); lift follows vanilla's
         // DoubleJump. Item29 is a mana crystal, Item16 a whoopie cushion.
         SoundStyle sound=Sound(kind,impact);

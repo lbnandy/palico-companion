@@ -13,7 +13,6 @@ public sealed class CompanionCatching {
     public int Duration {get;private set;}=30;
     public Item Tool {get;private set;}
     public Vector2 Target {get;private set;}
-    public int Caught {get;private set;}
     public bool Active=>target!=null;
     static Item basic;
     public static Item Best(Player owner) {
@@ -66,7 +65,7 @@ public sealed class CompanionCatching {
             var rect=new Rectangle((int)cat.Center.X-56,(int)cat.Center.Y-56,112,112);
             try {
                 Main.player[slot]=actor; // Keep the real local owner for native drop reservation.
-                if(Good(target)&&NPC.CheckCatchNPC(target,rect,Tool,actor,ItemID.Sets.LavaproofCatchingTool[Tool.type]))Caught++;
+                if(Good(target))NPC.CheckCatchNPC(target,rect,Tool,actor,ItemID.Sets.LavaproofCatchingTool[Tool.type]);
             } finally {Main.player[slot]=backup;Main.myPlayer=mine;actor.active=false;}
             // Captured item is a real native ground drop at the cat, collected by
             // the existing transactional path. No invented catch item/duplicate.

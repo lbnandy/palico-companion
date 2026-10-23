@@ -13,7 +13,7 @@ internal static class TrainingHud {
     const float TimerInset=2f;
     // Skill state has a stable palette across loadouts. Tint the native slot
     // background only; its silhouette, texture detail and item draw stay native.
-    // Shift the accepted grey-violet slightly toward purple, retaining S/V.
+    // Tint the slot background toward purple while retaining saturation and brightness.
     static readonly Color SkillTint=new(109,84,148);
     // Vanilla InventoryBack edge/fill ratio, normalized for tint multiplication:
     // (18/63,18/65,38/151)*255. SkillTint then produces about (31,23,37).
