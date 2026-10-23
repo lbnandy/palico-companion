@@ -15,7 +15,7 @@ public sealed class CompanionDropCourtesy:GlobalItem {
     internal ulong until;
     internal int Remaining=>(int)Math.Min((ulong)Duration,until>Main.GameUpdateCount?until-Main.GameUpdateCount:0);
     internal static bool Protected(Item item)=>item.TryGetGlobalItem<CompanionDropCourtesy>(out var tag)&&tag.Remaining>0;
-    public override void OnSpawn(Item item,IEntitySource source){until=source.Context=="ThrowItem"?Main.GameUpdateCount+Duration:0;}
+    public override void OnSpawn(Item item,IEntitySource source){until=source?.Context=="ThrowItem"?Main.GameUpdateCount+Duration:0;}
     // Courtesy is only a ground-item policy, not inventory identity. Do not
     // carry a ticking field into subsequent cursor/equipment transactions.
     public override bool OnPickup(Item item,Player player){until=0;return true;}
@@ -32,7 +32,7 @@ public sealed class CompanionDropCourtesyHooks:ModSystem {
         // Observe the actual throw, after vanilla has selected cursor/inventory
         // and handled favorites. DropSelectedItem replaces the spawned clone
         // with this original object before sending it, so both must be marked.
-        if(source.Context=="ThrowItem"&&item is {IsAir:false})
+        if(source?.Context=="ThrowItem"&&item is {IsAir:false})
             item.GetGlobalItem<CompanionDropCourtesy>().until=Main.GameUpdateCount+CompanionDropCourtesy.Duration;
         return orig(source,x,y,width,height,item,type,stack,noBroadcast,prefix,noGrabDelay,reverseLookup);
     }
