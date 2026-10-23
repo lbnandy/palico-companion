@@ -1,7 +1,7 @@
 <p align="center"><img src="docs/images/palico-companion.gif" alt="呆猫伙伴" width="240"></p>
 <h1 align="center">呆猫伙伴 · Palico Companion</h1>
 <p align="center">一个以《怪物猎人》艾露猫为灵感的 tModLoader 伙伴模组。</p>
-<p align="center"><a href="https://steamcommunity.com/sharedfiles/filedetails/?id=3824240391">Steam 创意工坊</a> · <a href="https://youtu.be/7AmGCunn3ys">演示视频（YouTube）</a> · <a href="README.en.md">English</a> · <a href="https://github.com/lbnandy/palico-companion/issues">反馈问题</a></p>
+<p align="center"><a href="https://steamcommunity.com/sharedfiles/filedetails/?id=3824240391">Steam 创意工坊</a> · <a href="https://www.bilibili.com/video/BV141np6YECi/">演示视频（B站）</a> · <a href="README.en.md">English</a> · <a href="https://github.com/lbnandy/palico-companion/issues">反馈问题</a></p>
 
 ## 一起冒险
 
