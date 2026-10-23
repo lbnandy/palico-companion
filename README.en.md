@@ -1,16 +1,13 @@
 <p align="center"><img src="docs/images/palico-companion.gif" alt="Palico Companion" width="240"></p>
 <h1 align="center">Palico Companion</h1>
-<p align="center">A Palico to share your Terraria adventures.</p>
-<p align="center"><a href="https://steamcommunity.com/sharedfiles/filedetails/?id=3824240391">Steam Workshop</a> · <a href="https://youtu.be/_-t7rcjtvow">Watch on YouTube</a> · <a href="README.md">简体中文</a> · <a href="https://github.com/lbnandy/palico-companion/issues">Report an issue</a></p>
-
-A tModLoader mod inspired by Monster Hunter's Felynes. Give your Palico a weapon and fight side by side, or take it underground to help mine, hold a torch and pick up loot. There's time for a chat and a head pat between adventures, too.
+<p align="center">A tModLoader companion mod inspired by Monster Hunter's Felynes.</p>
+<p align="center"><a href="https://steamcommunity.com/sharedfiles/filedetails/?id=3824240391">Steam Workshop</a> · <a href="https://youtu.be/7AmGCunn3ys">Watch on YouTube</a> · <a href="README.md">简体中文</a> · <a href="https://github.com/lbnandy/palico-companion/issues">Report an issue</a></p>
 
 ## Adventure together
 
-- **Combat and support.** Equip your Palico with a weapon and support gear such as the Vigorwasp Cage or Shield for healing and protection.
-- **Gathering and exploring.** Mine ore, chop and replant trees, tend herbs, fish and pick up items. Your Palico can also point out nearby chests and Life Crystals.
-- **Equipment and inventory.** Save loadouts and let your companion carry supplies. Let it use selected chests to put items away alongside others of the same type and restock its supplies automatically.
-- **Your own Palico.** Choose a name, outfit color and dye. Your companion reacts to creatures and events, and remembers battles you've won together.
+- **Combat and support.** Give your Palico a weapon and fight side by side. Equip the mod's new support gear for extra help in combat. When you're hurt, it can bring you nearby Hearts, too.
+- **Gathering and exploring.** Your Palico can mine ore, chop and replant trees, tend herbs, fish, catch critters and collect items. It can also light up dark areas and point out nearby chests and Life Crystals.
+- **Your own Palico.** Choose a name, outfit color and dye. Your Palico chats with you and reacts with emotes. You can pet it, too.
 
 <p>
   <img src="docs/images/01-together-combat-en.png" alt="A player and Palico fighting a Demon Eye at night" width="49%">
@@ -20,13 +17,27 @@ A tModLoader mod inspired by Monster Hunter's Felynes. Give your Palico a weapon
   <img src="docs/images/04-together-fishing-en.png" alt="A player and Palico fishing together by the ocean" width="49%">
 </p>
 
+## Equipment and inventory
+
+Equip your Palico and save multiple loadouts to switch between.
+
+Your Palico has its own backpack for supplies and loot. Give it access to selected chests, and it can put items away alongside others of the same type and restock its supplies.
+
 ## Installation and first steps
 
 Subscribe on the [Steam Workshop](https://steamcommunity.com/sharedfiles/filedetails/?id=3824240391), enable the mod and enter a world to meet your Palico. Requires **tModLoader 1.4.4**. Supports English, Simplified Chinese, single-player and multiplayer, including existing characters and worlds.
 
-By default, `P` opens the panel, `K` recalls your Palico, and holding `V` while left-clicking assigns a work target. Rebind these in the game's control settings. Automatic tasks, pickup preferences and chatter can be adjusted in the mod configuration.
+By default, `P` opens the panel, `K` recalls your Palico, and holding `V` while left-clicking assigns a work target. Rebind these in the game's control settings.
 
-The in-game Palico Guide explains what each piece of gear does, how to craft it and how to give your Palico work orders. It also tracks upgrades and shows what you can craft next.
+Gather materials to craft and upgrade your Palico’s gear. The in-game Palico Guide explains how to craft, use and upgrade equipment.
+
+## Choose your Palico’s strength
+
+Choose **Support** if you want to take the lead in combat. Choose **Standard** to fight side by side. Choose **Strong** if you want to take it easy and let your Palico carry you.
+
+Standard is the default. The **Companion balance** config also lets you adjust your Palico’s damage, health, defense, movement speeds in and out of combat, and ability to dodge attacks individually.
+
+In multiplayer, the host or server administrator sets the balance options for every Palico on the server.
 
 ## Optional integrations
 

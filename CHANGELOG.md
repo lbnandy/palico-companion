@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.0.2 — 2026-10-23
+
+- 新增辅助、标准和强力三档预设，也可分别调整伤害、生命与防御继承、战斗移速、跟随与工作移速、主动闪避。
+- 默认命中伤害和战斗移速调整为原来的 75%，主动闪避改为标准；生命与防御仍默认继承玩家的 75%。跟随与工作移速保持不变。
+- 联机时共用服务器的强度设置，房主可在游戏内修改。调整生命上限保留当前血量比例，不会复活倒地的呆猫。
+- 统一设置下拉框和预设按钮的文字样式，并补充中英文说明。
+
+- Added Support, Standard and Strong presets, with individual controls for damage, inherited health and defense, combat movement, following and work movement, and active evasion.
+- Default hit damage and combat movement are now 75% of their previous values, with Standard evasion. Health and defense still default to 75% of the player's values; following and work movement are unchanged.
+- Multiplayer uses shared server balance settings, editable in-game by the host. Changing maximum health preserves the current health percentage and does not revive a downed Palico.
+- Unified dropdown and preset-button typography, with updated English and Simplified Chinese descriptions.
+
 ## 1.0.1 — 2026-10-23
 
 补充装备使用与换装台词，减少连续触发的重复发言。

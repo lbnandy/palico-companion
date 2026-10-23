@@ -45,7 +45,8 @@ public sealed class CompanionNavigation
         if(!Riding){Riding=true;RideEntries++;Puff(cat.Center);}
         WorkFlying=true;cat.tileCollide=true;DropThrough=false;noProgress=0;
         Vector2 desired=(next-cat.Center)*0.2f;
-        if(desired.LengthSquared()>36)desired=desired.SafeNormalize(Vector2.Zero)*6;
+        float speed=6*CompanionBalanceConfig.Current.MovementScale(false);
+        if(desired.LengthSquared()>speed*speed)desired=desired.SafeNormalize(Vector2.Zero)*speed;
         cat.velocity=Vector2.Lerp(cat.velocity,desired,0.2f);
         // Brake away from a corner instead of carrying lateral inertia into it.
         if(!ClearFlight(cat.Center,cat.Center+cat.velocity*2))cat.velocity=desired*0.2f;
@@ -109,6 +110,9 @@ public sealed class CompanionNavigation
         // Include owner motion so a fast wing user cannot outrun the return.
         Vector2 delta=destination-cat.Center;
         float speed=Math.Max(10,owner.velocity.Length()+4);
+        // Combat approach is adjustable; returning to a distant owner must
+        // still be able to catch up with mounts and wings.
+        if(engage)speed*=CompanionBalanceConfig.Current.MovementScale(true);
         Vector2 desired=delta*0.2f+(engage?(obscured?Vector2.Zero:combatTarget.velocity):owner.velocity);
         if(desired.LengthSquared()>speed*speed)desired=desired.SafeNormalize(Vector2.Zero)*speed;
         cat.velocity=Vector2.Lerp(cat.velocity,desired,engage?0.3f:0.15f);
@@ -178,6 +182,7 @@ public sealed class CompanionNavigation
         float dx=goal.X-cat.Center.X;
         float desired=Math.Abs(dx)> (working?6:20)?Math.Sign(dx)*(working?3.8f:FollowSpeed(owner.velocity.X)):0;
         if(combat)desired=Math.Clamp(dx*.25f,-FollowSpeed(owner.velocity.X),FollowSpeed(owner.velocity.X));
+        desired*=CompanionBalanceConfig.Current.MovementScale(combat);
         bool ground=Grounded(cat);
         cat.velocity.X=MathHelper.Lerp(cat.velocity.X,desired,combat?0.3f:0.18f);
         if(Math.Abs(dx)>8)cat.direction=Math.Sign(dx);

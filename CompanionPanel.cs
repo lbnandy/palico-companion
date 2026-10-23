@@ -55,7 +55,7 @@ public sealed class CompanionPanel : ModSystem
         return new Rectangle((int)MathF.Round((area.X+16)*scale),
             (int)MathF.Round((area.Y+24)*scale-height/2f),width,height);
     }
-    string L(string key) => Language.GetTextValue("Mods.PalicoCompanion.UI." + key);
+    string L(string key,params object[] args) => Language.GetTextValue("Mods.PalicoCompanion.UI." + key,args);
     public override void OnWorldLoad() { targeting = 0; dragging = false; previousMouse = true; }
     public override void UpdateUI(GameTime gameTime) {
         if(!Main.gameMenu&&!Main.dedServ){
@@ -291,9 +291,9 @@ public sealed class CompanionPanel : ModSystem
             if(s.Dyes[0].IsAir&&new Rectangle(equipmentLeft,top+26+SlotOffset(3),SlotSize,SlotSize).Contains(mouse))Main.instance.MouseText(L("DyeHint"));
 
             // Attributes stay in a four-row column under equipment, values right aligned.
-            Stat(L("HealthLabel"),$"{s.Vitals.Health} / {s.Vitals.MaxHealth}",328,width-32,top+230,s.Vitals.Health<=s.Vitals.MaxHealth/4?Color.LightCoral:Ink,L("HealthHint"));
+            Stat(L("HealthLabel"),$"{s.Vitals.Health} / {s.Vitals.MaxHealth}",328,width-32,top+230,s.Vitals.Health<=s.Vitals.MaxHealth/4?Color.LightCoral:Ink,L("HealthHint",CompanionBalanceConfig.Current.HealthRatio));
             Stat(L("ManaLabel"),$"{s.Vitals.Mana} / {s.Vitals.MaxMana}",328,width-32,top+256,s.Vitals.Mana<=s.Vitals.MaxMana/4?Color.LightSkyBlue:Ink,L("ManaHint"));
-            Stat(L("Defense"),$"{s.Vitals.EffectiveDefense}",328,width-32,top+282,Ink,L("DefenseHint"));
+            Stat(L("Defense"),$"{s.Vitals.EffectiveDefense}",328,width-32,top+282,Ink,L("DefenseHint",CompanionBalanceConfig.Current.DefenseRatio));
             bool sentry=CompanionWeaponPolicy.Sentry(CompanionWeapons.Active(s.Gear));
             var use=(s.Cat?.ModProjectile as CompanionCat)?.Weapons;
             float slots=sentry?use?.SentryCount??0:use?.SummonSlots??0;

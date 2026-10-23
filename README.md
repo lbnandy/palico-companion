@@ -1,16 +1,13 @@
 <p align="center"><img src="docs/images/palico-companion.gif" alt="呆猫伙伴" width="240"></p>
 <h1 align="center">呆猫伙伴 · Palico Companion</h1>
-<p align="center">带上你的呆猫，一起去泰拉瑞亚冒险。</p>
-<p align="center"><a href="https://steamcommunity.com/sharedfiles/filedetails/?id=3824240391">Steam 创意工坊</a> · <a href="https://youtu.be/_-t7rcjtvow">演示视频（YouTube）</a> · <a href="README.en.md">English</a> · <a href="https://github.com/lbnandy/palico-companion/issues">反馈问题</a></p>
-
-一个以《怪物猎人》艾露猫为灵感的 tModLoader 模组。给呆猫一把武器，它会跟你一起打怪；带它下矿，它会挖矿、举火把、捡东西。闲下来还能摸摸它，听它念叨两句。
+<p align="center">一个以《怪物猎人》艾露猫为灵感的 tModLoader 伙伴模组。</p>
+<p align="center"><a href="https://steamcommunity.com/sharedfiles/filedetails/?id=3824240391">Steam 创意工坊</a> · <a href="https://youtu.be/7AmGCunn3ys">演示视频（YouTube）</a> · <a href="README.en.md">English</a> · <a href="https://github.com/lbnandy/palico-companion/issues">反馈问题</a></p>
 
 ## 一起冒险
 
-- **战斗与支援**：使用你交给它的武器，搭配蜜虫笼、小盾牌等装备，帮你回血、挡伤害。
-- **采集与探索**：挖矿、砍树补种、照料药草、钓鱼、拾取物品，发现附近的宝箱和生命水晶也会提醒你。
-- **装备与背包**：保存不同配装，携带补给和战利品。允许它使用指定箱子后，还能存放同类物品、补充消耗品。
-- **你的呆猫**：起名字、换衣服颜色、搭配染料。它会对遇到的怪物和事件作出反应，也会记住一起打赢的战斗。
+- **战斗与支援**：给呆猫一把武器，它就会跟你一起战斗。搭配模组新增的支援装备，还能提供多种辅助效果。你受伤时，它也会把附近的红心送过来。
+- **采集与探索**：挖矿、砍树补种、照料药草、钓鱼、抓小动物、捡东西，它都能搭把手。还会在暗处帮你照明，发现附近的宝箱、生命水晶也会提醒你。
+- **你的呆猫**：给它起名字、换衣服颜色、搭配染料。它会跟你搭话，头顶也会冒出表情。闲下来可以摸摸它。
 
 <p>
   <img src="docs/images/01-together-combat-zh.png" alt="玩家与呆猫在夜晚迎战恶魔眼" width="49%">
@@ -20,13 +17,27 @@
   <img src="docs/images/04-together-fishing-zh.png" alt="玩家与呆猫在海边一起钓鱼" width="49%">
 </p>
 
+## 装备与背包
+
+给呆猫搭配装备，也能保存多套配装，随时切换。
+
+呆猫有自己的背包，能携带补给和战利品。你还可以允许它使用指定箱子，帮你存放同类物品、补充消耗品。
+
 ## 安装与上手
 
 在 [Steam 创意工坊](https://steamcommunity.com/sharedfiles/filedetails/?id=3824240391)订阅并启用，进入世界即可遇到呆猫。适用于 **tModLoader 1.4.4**，支持简体中文、英文、单人和多人；已有角色与世界也能直接使用。
 
-默认 `P` 打开面板、`K` 召回，按住 `V` 并左键指定工作目标。按键可在游戏控件设置中修改，自动工作、拾取偏好和台词可在模组配置中调整。
+默认 `P` 打开面板、`K` 召回，按住 `V` 并左键指定工作目标。按键可在游戏控件设置中修改。
 
-游戏内的「呆猫指南」可以查装备效果、合成配方和工作指令，也会显示当前升级进度及接下来能制作的装备。
+收集材料，为呆猫制作新装备，也能强化已有装备。装备怎么做、怎么用、还能怎样升级，都能在游戏内的「呆猫指南」里查到。
+
+## 按你的喜好调整呆猫强度
+
+想自己当主力，可以选**辅助**；想和呆猫并肩作战，可以选**标准**；想轻松些、让呆猫带飞，可以选**强力**。
+
+默认使用标准档，也能在「呆猫强度」设置中单独调整呆猫的伤害、生命、防御、战斗移速、跟随与工作移速和闪避能力。
+
+联机时，强度设置由房主或服务器管理员统一配置，对服务器内的所有呆猫生效。
 
 ## 可选联动
 

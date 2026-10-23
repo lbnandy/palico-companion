@@ -408,6 +408,9 @@ public sealed class CompanionOwnedShot : GlobalProjectile {
         if(Context!=null&&damageDone>0)Context.Hits++;
         if(Context!=null&&Thrown&&damageDone>0)Context.ThrownHits++;
     }
+    public override void ModifyHitNPC(Projectile projectile,NPC target,ref NPC.HitModifiers modifiers) {
+        if(Context!=null)modifiers.FinalDamage*=CompanionBalanceConfig.Current.DamageScale;
+    }
     public override void OnSpawn(Projectile p,IEntitySource source) {
         Context=!p.hostile&&p.owner==CompanionNativeUse.Current?.Actor.whoAmI?CompanionNativeUse.Current:null;
         if(Context==null&&!p.hostile&&source is EntitySource_Parent parent&&parent.Entity is Projectile ancestor&&ancestor.owner==p.owner)Context=CompanionOwnedShot.Of(ancestor);
@@ -421,6 +424,10 @@ public sealed class CompanionOwnedShot : GlobalProjectile {
     }
 }
 public sealed class CompanionNativeMeleeHit : GlobalNPC {
+    public override void ModifyHitByItem(NPC npc,Player player,Item item,ref NPC.HitModifiers modifiers) {
+        var use=CompanionNativeUse.Current;
+        if(use!=null&&ReferenceEquals(player,use.Actor))modifiers.FinalDamage*=CompanionBalanceConfig.Current.DamageScale;
+    }
     public override void OnHitByItem(NPC npc,Player player,Item item,NPC.HitInfo hit,int damageDone) {
         var use=CompanionNativeUse.Current;
         if(use!=null&&ReferenceEquals(player,use.Actor)&&damageDone>0)use.Hits++;

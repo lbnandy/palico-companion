@@ -5,35 +5,40 @@ Bring a Palico from Monster Hunter along on your Terraria adventures.
 
 [h2]Meet your Palico[/h2]
 
-[b]A helping paw in combat.[/b] Give your Palico a weapon and fight side by side. Add support gear such as the Vigorwasp Cage or Shield for healing and protection. When you're hurt, it can also bring you nearby Hearts.
+[b]A helping paw in combat.[/b] Give your Palico a weapon and fight side by side. Equip the mod's new support gear for extra help in combat. When you're hurt, it can bring you nearby Hearts, too.
 
-[b]Help with the daily work.[/b] Your Palico can mine ore, chop and replant trees, tend herbs, fish, catch critters with a Bug Net and collect items. Underground, it can carry a torch and point out nearby chests and Life Crystals.
+[b]Help with the daily work.[/b] Your Palico can mine ore, chop and replant trees, tend herbs, fish, catch critters and collect items. It can also light up dark areas and point out nearby chests and Life Crystals.
 
-[b]Make it your own.[/b] Choose a name, outfit color and dye. Your Palico chats about what you encounter and reacts with emotes. You can pet it, too.
+[b]Make it your own.[/b] Choose a name, outfit color and dye. Your Palico chats with you and reacts with emotes. You can pet it, too.
 
 [i]“I wasn't lost, Meowster! Just took the long way.”[/i]
 
-[h2]Getting started[/h2]
-Subscribe and enable the mod, then enter a world to meet your Palico. Press P to open its panel and equip weapons and tools. P is the default key; you can change it in the game's Controls menu.
+[h2]Choose your Palico’s strength[/h2]
+Choose [b]Support[/b] if you want to take the lead in combat. Choose [b]Standard[/b] to fight side by side. Choose [b]Strong[/b] if you want to take it easy and let your Palico carry you. Standard is the default. You can also adjust your Palico’s damage, health, defense, movement speeds and ability to dodge attacks individually in the mod settings.
 
 [h2]Equipment and inventory[/h2]
-Mix and match weapons, support gear and work gear, then save loadouts to switch between them.
-Your Palico has its own backpack for supplies and loot. Let it use selected chests, and it will put items away in chests that already contain them and restock its supplies automatically.
+Equip your Palico and save multiple loadouts to switch between.
+
+Your Palico has its own backpack for supplies and loot. Give it access to selected chests, and it can put items away alongside others of the same type and restock its supplies.
 
 [img]https://raw.githubusercontent.com/lbnandy/palico-companion/main/docs/images/04-equipment-en-compact.png[/img]
 
 [h2]Upgrades and the Palico Guide[/h2]
-Unlock new gear as you progress, and improve your equipment with Improved and Masterwork Toolkits.
-The in-game Palico Guide explains what each piece of gear does, how to craft it and how to give your Palico work orders. It also tracks upgrades and shows what you can craft next.
-Automatic tasks and pickup preferences can be adjusted in the mod settings.
+Gather materials to craft and upgrade your Palico’s gear. The in-game Palico Guide explains how to craft, use and upgrade equipment.
 
 [img]https://raw.githubusercontent.com/lbnandy/palico-companion/main/docs/images/05-guide-en-compact.png[/img]
 
 [h2]Bring your friends[/h2]
-Play solo or in multiplayer. Each player gets their own Palico, with separate equipment, inventory and upgrades. [b]Works with existing characters and worlds—no fresh start needed.[/b]
+Play solo or in multiplayer, [b]with existing characters and worlds[/b]. Each player has a Palico with separate equipment, inventory and upgrades. The host or server administrator sets shared balance options.
 
-If you use [url=https://steamcommunity.com/sharedfiles/filedetails/?id=2563309347]Magic Storage[/url], let your Palico use your storage to put items away and restock its supplies. It also follows [url=https://steamcommunity.com/sharedfiles/filedetails/?id=2797518634]Quality of Terraria[/url]'s rules for unlimited ammo and has dialogue for [url=https://steamcommunity.com/sharedfiles/filedetails/?id=2824688072]Calamity[/url] encounters. None of these mods are required.
+[h2]Optional integrations[/h2]
+[list]
+[*][url=https://steamcommunity.com/sharedfiles/filedetails/?id=2563309347]Magic Storage[/url]: give your Palico access to store items and restock supplies.
+[*][url=https://steamcommunity.com/sharedfiles/filedetails/?id=2797518634]Quality of Terraria[/url]: its unlimited ammo settings apply to your Palico, too.
+[*][url=https://steamcommunity.com/sharedfiles/filedetails/?id=2824688072]Calamity[/url]: extra dialogue for its creatures and events.
+[/list]
+None of these mods are required.
 
-Questions and suggestions are welcome in the comments or on [url=https://github.com/lbnandy/palico-companion/issues]GitHub[/url]. For bug reports, please include steps to reproduce the issue and your other enabled mods.
+Questions or suggestions? Leave a comment or visit [url=https://github.com/lbnandy/palico-companion/issues]GitHub[/url]. For bugs, include your game and mod versions, other mods, solo or multiplayer, and steps to reproduce.
 
 [url=https://github.com/lbnandy/palico-companion]Source code[/url]
