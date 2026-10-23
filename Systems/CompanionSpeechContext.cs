@@ -22,6 +22,9 @@ internal static class CompanionSpeechContext {
         map["DeliveredLife"]=map["DeliveredMana"]=map["DeliveredUpgrade"]="Delivered";
         map["LootPlunder"]="Loot";
         map["FishCaughtCrate"]=map["FishCaughtQuest"]="FishCaught";
+        // Equipment reactions share the existing saved work cursor and wire
+        // layout; each variant still has its own repeat cooldown.
+        foreach(string gear in new[]{"Honey","Guard","GuardSelf","Cleanse","Bell","BellSelf","Drum","Dart","Lift","Bomb","EquippedWeapon","EquippedSupport"})map["WorkingGear"+gear]="Working";
         return map;
     }
     internal static IEnumerable<string> Pools=>CompanionDialogue.Events.Concat(variants.Keys).Concat(CompanionSpeechContent.Pools.Keys);

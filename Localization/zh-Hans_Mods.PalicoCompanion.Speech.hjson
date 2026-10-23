@@ -337,3 +337,75 @@ BossEventCalamityBossRush: {
 	Line1: 老大，要一口气打这么多喵？！我饭还没吃呢！
 	Line2: 老大，这回可有得打了喵！我也要算战功！
 }
+
+WorkingGearHoney: {
+	Line1: 老大，蜜虫来啦喵！
+	Line2: 老大，先补点血喵！
+	Line3: 蜜虫蜜虫，快帮帮老大喵！
+}
+
+WorkingGearGuard: {
+	Line1: 老大，这下我帮你挡着喵！
+	Line2: 嘿咻！盾牌还挺结实喵！
+	Line3: 老大，我也挡了一下喵！
+}
+
+WorkingGearGuardSelf: {
+	Line1: 喵！还好带了盾牌！
+	Line2: 吓我一跳喵……差点没举起来。
+	Line3: 呼，盾牌帮大忙了喵。
+}
+
+WorkingGearCleanse: {
+	Line1: 老大，我帮你清掉啦喵！
+	Line2: 这下好点了吧，老大喵？
+	Line3: 老大，还难受吗喵？
+}
+
+WorkingGearBell: {
+	Line1: 老大，魔力给你补上啦喵！
+	Line2: 叮铃铃！老大，又能使法术啦喵！
+	Line3: 老大，别急，我这儿还有魔力喵！
+}
+
+WorkingGearBellSelf: {
+	Line1: 叮铃铃……我又有魔力啦喵！
+	Line2: 老大，我缓过来啦，接着打喵！
+	Line3: 还好带着铃铛喵！
+}
+
+WorkingGearDrum: {
+	Line1: 嘿咻！越敲越有劲喵！
+	Line2: 咚咚咚！轮到我上啦喵！
+	Line3: 给自己鼓鼓劲喵！
+}
+
+WorkingGearDart: {
+	Line1: 吃我一镖喵！
+	Line2: 老大，看我扔得准不准喵！
+	Line3: 嘿咻！别躲喵！
+}
+
+WorkingGearLift: {
+	Line1: 老大，再往上一点喵！
+	Line2: 嘿咻！我帮你一把喵！
+	Line3: 老大，接着往上喵！
+}
+
+WorkingGearBomb: {
+	Line1: 老大，看我的爆弹喵！
+	Line2: 嘿咻，扔过去啦喵！
+	Line3: 这个给你！会炸的那种喵！
+}
+
+WorkingGearEquippedWeapon: {
+	Line1: 给我的喵？那我可要试试了！
+	Line2: 老大，这次用这个打喵？好！
+	Line3: 拿好啦喵！老大，咱们走？
+}
+
+WorkingGearEquippedSupport: {
+	Line1: 老大，我带上啦喵！
+	Line2: 这个也给我喵？我收好啦。
+	Line3: 装好啦喵，待会儿试试！
+}

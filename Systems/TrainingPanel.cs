@@ -200,6 +200,6 @@ public sealed class TrainingGuide:ModPlayer {
         else if((seen&16)==0&&s.Training.Tier==0&&Has(ItemID.HallowedBar)){bit=16;line="Improved";}
         else if((seen&32)==0&&s.Training.Tier==1&&Has(ItemID.Ectoplasm)){bit=32;line="Master";}
         if(line==null&&(seen&64)==0){int ready=Enumerable.Range(0,11).FirstOrDefault(id=>TrainingCatalog.Current(id)&&TrainingProgress.Recipes(id).Any(r=>TrainingProgress.Materials(Player,r)),-1);if(ready>=0){bit=64;line="Ready";context=TrainingCatalog.Entries[ready].Name;}}
-        if(line!=null){seen|=bit;quietUntil=timer+1800;Main.NewText(s.CatName+"："+Language.GetTextValue("Mods.PalicoCompanion.TrainingSpeech."+line,context),Color.SandyBrown);}
+        if(line!=null&&s.Expression.TryHint(s,line,context)){seen|=bit;quietUntil=timer+1800;}
     }
 }

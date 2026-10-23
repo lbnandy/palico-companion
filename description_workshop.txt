@@ -5,13 +5,16 @@ Bring a Palico from Monster Hunter along on your Terraria adventures.
 
 [h2]Meet your Palico[/h2]
 
-[b]A helping paw in combat.[/b] Give your Palico a weapon and fight side by side. Add support gear such as the Vigorwasp Cage or Shield for healing and protection.
+[b]A helping paw in combat.[/b] Give your Palico a weapon and fight side by side. Add support gear such as the Vigorwasp Cage or Shield for healing and protection. When you're hurt, it can also bring you nearby Hearts.
 
-[b]Help with the daily work.[/b] Your Palico can mine ore, chop and replant trees, tend herbs, fish and collect items. Underground, it can carry a torch and point out nearby chests and Life Crystals.
+[b]Help with the daily work.[/b] Your Palico can mine ore, chop and replant trees, tend herbs, fish, catch critters with a Bug Net and collect items. Underground, it can carry a torch and point out nearby chests and Life Crystals.
 
 [b]Make it your own.[/b] Choose a name, outfit color and dye. Your Palico chats about what you encounter and reacts with emotes. You can pet it, too.
 
 [i]“I wasn't lost, Meowster! Just took the long way.”[/i]
+
+[h2]Getting started[/h2]
+Subscribe and enable the mod, then enter a world to meet your Palico. Press P to open its panel and equip weapons and tools. P is the default key; you can change it in the game's Controls menu.
 
 [h2]Equipment and inventory[/h2]
 Mix and match weapons, support gear and work gear, then save loadouts to switch between them.

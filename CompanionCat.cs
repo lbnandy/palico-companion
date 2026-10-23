@@ -173,6 +173,11 @@ public sealed class CompanionCat : ModProjectile
             CancelTransitWork(state);Navigation.HoldReturn(Projectile);
             Light.Update(owner,state,Projectile,true);state.Status=state.Paused?"Paused":CompanionText.Message("CompanionCat.Recovering");return;
         }
+        // Directed mining returns below, so collect nearby drops before either
+        // work branch takes ownership of movement. Pickup never changes its goal.
+        if(!state.Paused&&!state.Vitals.Downed&&state.Pickup&&(state.Digging.Active||state.Mining.Active)) {
+            targetItem=-1;Vector2 nearby=Projectile.Center;Pickup.Tick(owner,state,Projectile,ref nearby,false);
+        }
         if(state.Directive.Active&&!state.Paused) {
             bool danger=FindThreat(owner)!=null;
             if(state.Directive.Tick(state,this,danger,out var directedGoal)) {
@@ -181,11 +186,6 @@ public sealed class CompanionCat : ModProjectile
                 if(state.Mining.Active)FaceWork(state.Mining.Target);else if(state.Trees.Active)FaceWork(state.Trees.Target);
                 if(Fishing.Active)CompanionFishing.HoldPosition(Projectile);else Move(directedGoal,owner,state);return;
             }
-        }
-        // Collect within the native grab range while digging, without choosing a
-        // competing movement destination or interrupting the current tool stroke.
-        if(!state.Paused&&!state.Vitals.Downed&&state.Pickup&&(state.Digging.Active||state.Mining.Active)) {
-            targetItem=-1;Vector2 nearby=Projectile.Center;Pickup.Tick(owner,state,Projectile,ref nearby,false);
         }
         // An existing cast owns the shore position, not the owner's movement.
         // Real digging/construction/recall cancels it in Maintain; loose drops
@@ -350,7 +350,7 @@ public sealed class CompanionCat : ModProjectile
             Flight.Update(networkFlying&&!Diving.InWater,s.Paused,s.Vitals.Downed,Projectile.velocity.X);
             Light.Update(owner,s,Projectile,true);
             if(Light.Holding&&!Light.HoldingGlowstick)Light.Glow.Emit(Projectile,Light.HeldItem,Light.Flame(Projectile)-new Vector2(2,2));
-            if(owner.whoAmI==Main.myPlayer){s.Expression.AdvancePresentation();s.Discovery.Tick(s,Projectile);}return;
+            if(owner.whoAmI==Main.myPlayer){s.Expression.AdvancePresentation();s.Expression.ObserveEquipment(s,Projectile);s.Discovery.Tick(s,Projectile);}return;
         }
         Evasion.Update(owner,s,Projectile,Navigation);
         Flight.Update(Navigation.Riding&&!Diving.InWater,s.Paused,s.Vitals.Downed,Projectile.velocity.X);

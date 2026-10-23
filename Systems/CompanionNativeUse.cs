@@ -56,10 +56,12 @@ public sealed partial class CompanionNativeUse {
     internal float ReachFactor {get;private set;}=1;
     internal float FlailRange=100;
     int reachTarget=-1,missTicks,lastReachHits;
+    CompanionNpcEpoch reachEpoch;
     internal bool PressedThisTick {get;private set;}
     void ObserveReach(Item weapon,NPC target,bool attacking) {
         int id=target?.whoAmI??-1;
-        if(id!=reachTarget){reachTarget=id;ReachFactor=1;missTicks=0;lastReachHits=Hits;}
+        var epoch=target?.GetGlobalNPC<CompanionNpcEpoch>();
+        if(id!=reachTarget||!ReferenceEquals(epoch,reachEpoch)){reachTarget=id;reachEpoch=epoch;ReachFactor=1;missTicks=0;lastReachHits=Hits;}
         if(Hits!=lastReachHits){lastReachHits=Hits;missTicks=0;}
         // Unknown/modded attacks can have shorter reach than their metadata.
         // Retry closer after complete unsuccessful cycles, preserving native
@@ -320,7 +322,7 @@ public sealed partial class CompanionNativeUse {
             // Sampling here covers ItemCheck, projectile AI and drawing on all
             // peers without advancing time per projectile, extra update or draw.
             if(use.State?.Player is {} owner)use.Actor.miscCounter=owner.miscCounter;
-            if(use.Cat is {active:true})use.Actor.Center=CompanionSprite.Hand(use.Cat);
+            if(use.Cat is {active:true})use.LocateActor(use.Cat);
             // Optional adapters run before swapping global state, so an adapter
             // failure cannot leave the human player replaced by an actor.
             CompanionCrossMod.PrepareActor?.Invoke(use.Actor,use.Aim);
@@ -332,7 +334,7 @@ public sealed partial class CompanionNativeUse {
             context=use;previous=Current;backup=Main.player[use.slot];myPlayer=Main.myPlayer;mouseX=Main.mouseX;mouseY=Main.mouseY;
             blockMouse=Main.blockMouse;
             mouseLeft=Main.mouseLeft;mouseLeftRelease=Main.mouseLeftRelease;mouseRight=Main.mouseRight;mouseRightRelease=Main.mouseRightRelease;
-            if(use.Cat is {active:true})use.Actor.Center=CompanionSprite.Hand(use.Cat);
+            if(use.Cat is {active:true})use.LocateActor(use.Cat);
             Main.player[use.slot]=use.Actor;use.Actor.active=true;Main.myPlayer=CompanionNetwork.Client?myPlayer:use.slot;Current=use;
             Main.mouseX=(int)(use.Aim.X-Main.screenPosition.X);Main.mouseY=(int)(use.Aim.Y-Main.screenPosition.Y);
             Main.mouseLeft=use.Actor.controlUseItem;Main.mouseLeftRelease=use.PressedThisTick;

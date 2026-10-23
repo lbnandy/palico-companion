@@ -48,7 +48,7 @@ public sealed class AutomaticLogistics
         (cat.ModProjectile as CompanionCat)?.FaceWork(Target);
         if(++working<45)return true;
         int stored=Logistics.Store(player,state,chest),supplied=Logistics.Supply(player,state,chest);
-        if(stored+supplied>0){Visits++;state.Report(CompanionText.MessageFull("Mods.PalicoCompanion.UI.StorageDone",stored,supplied));cat.ai[1]=45;}
+        if(stored+supplied>0){Visits++;state.Report(CompanionText.MessageFull("Mods.PalicoCompanion.UI.StorageDone",stored,supplied));}
         Active=false;elapsed=working=0;cooldown=300;
         return true;
     }
@@ -60,7 +60,7 @@ public sealed class AutomaticLogistics
         state.Status=CompanionText.MessageFull("Mods.PalicoCompanion.UI.StorageWorking");(cat.ModProjectile as CompanionCat)?.FaceWork(Target);
         if(++working<45)return true;
         var result=external.Transfer(state);
-        if(result.Stored+result.Supplied>0){Visits++;state.Report(CompanionText.MessageFull("Mods.PalicoCompanion.UI.StorageDone",result.Stored,result.Supplied));cat.ai[1]=45;}
+        if(result.Stored+result.Supplied>0){Visits++;state.Report(CompanionText.MessageFull("Mods.PalicoCompanion.UI.StorageDone",result.Stored,result.Supplied));}
         external=null;Active=false;elapsed=working=0;cooldown=300;return true;
     }
     static bool InUse(Player player,Chest chest)=>Main.player.Any(p=>p.active&&p.chest>=0&&p.chest<Main.maxChests&&ReferenceEquals(Main.chest[p.chest],chest));

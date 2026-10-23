@@ -11,6 +11,7 @@ internal static class CompanionWeaponPolicy {
     internal static bool Sentry(Item item)=>item.sentry||CompanionCombatReach.Sample(item)?.sentry==true;
     internal static bool Plan(Item item,CompanionNativeUse use,NPC target,ref Vector2 aim) {
         if(target==null)return true;
+        if(item.channel&&CompanionCrossMod.ReleaseChannel?.Invoke(item,use)==true)return false;
         if(item.type==ItemID.ChargedBlasterCannon){
             // Keep native small/large energy shots, then release before the
             // beam starts at 180. AI_075 handles its own normal cancellation.

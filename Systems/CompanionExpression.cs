@@ -7,8 +7,8 @@ using Terraria.Localization;
 using Terraria.GameContent.UI;
 namespace PalicoCompanion.Systems;
 
-public sealed class CompanionExpression {
-    int tick,flavorAt,workAt,discoveryAt,bubbleAt,bubbleUntil;
+public sealed partial class CompanionExpression {
+    int tick,flavorAt,bubbleAt,bubbleUntil;
     bool wasDown;
     int ownedBubble=-1;
     int bubblePriority;
@@ -25,7 +25,7 @@ public sealed class CompanionExpression {
     public CompanionExpression(bool greeting=true){this.greeting=greeting;}
     readonly Dictionary<string,int> nextEvent=new();
     readonly Dictionary<string,int> nextBubble=new();
-    readonly Dictionary<string,(int emote,string context,string variant,int expires)> pendingWork=new();
+    readonly CompanionSpeechPacing pacing=new();
     public int Chats {get;private set;}
     internal void AdvancePresentation()=>tick++;
     public int Bubbles {get;private set;}
@@ -34,9 +34,9 @@ public sealed class CompanionExpression {
     public string FirstChatKey {get;private set;}="";
     enum Channel { Flavor, Work, Discovery, Interaction, Important }
     static int BubblePriority(Channel channel)=>channel switch {Channel.Important=>3,Channel.Interaction=>2,Channel.Discovery=>1,_=>0};
-    internal void ClearPendingWork()=>pendingWork.Clear();
+    internal void ClearPendingWork(){pendingGear=null;equipmentPending=0;}
     internal void OwnerDied(CompanionPlayer s,Projectile cat){
-        pendingWork.Clear();ownerReturning=s.Introduced;
+        ClearPendingWork();ownerReturning=s.Introduced;
         TrySay(s,cat,"OwnerHurt",EmoteID.EmoteSadness,variant:"Death");
     }
     // Dialogue is a personal report. Remote cat visuals must not advance another
@@ -53,9 +53,9 @@ public sealed class CompanionExpression {
     };
     static int RepeatDelay(string key)=>Kind(key) switch {
         Channel.Discovery=>0, // Discovery owns object/world identity and persistence.
-        Channel.Work=>600,
+        Channel.Work=>1800,
         Channel.Interaction=>180,
-        Channel.Important=>key is "NoAmmo" or "NoMana" or "ManaPotion"?1800:120,
+        Channel.Important=>key is "NoAmmo" or "NoMana" or "ManaPotion" or "Heal"?3600:120,
         _=>3600
     };
     public void Tick(CompanionPlayer s,Projectile cat) {
@@ -69,7 +69,7 @@ public sealed class CompanionExpression {
             UpdateAnchor(cat);
             if(tick>=bubbleUntil)visualAnchor=null;
         }
-        if(s.Vitals.Downed){pendingWork.Clear();}
+        if(s.Vitals.Downed||s.Player.dead||s.Paused){ClearPendingWork();}
         if(s.Vitals.Downed&&!wasDown)Say(s,cat,"Downed",EmoteID.EmoteSadness);
         if(!s.Vitals.Downed&&wasDown)Say(s,cat,"Recovered",EmoteID.EmoteHappiness);
         wasDown=s.Vitals.Downed;
@@ -84,8 +84,6 @@ public sealed class CompanionExpression {
                 int before=Chats;TrySay(s,cat,key,EmoteID.EmoteHappiness);
                 if(Chats>before){s.Introduced=true;greeted=true;}
             }
-            if(previousOwnerHealth>0&&previousOwnerHealth-s.Player.statLife>=System.Math.Max(10,s.Player.statLifeMax2/10))
-                Say(s,cat,"OwnerHurt",EmoteID.ItemLifePotion);
             if(tick%30==0){
                 bossNearby=bosses.Tick(this,s,cat,tick);
                 if(!CompanionNetwork.Client){
@@ -93,18 +91,19 @@ public sealed class CompanionExpression {
                     eventNearby|=extraReactions.Tick(this,s,cat,tick,bossNearby||eventNearby);
                 }
             }
+            SpeakGear(s,cat);
+            // If help already arrived this update, do not first ask whether the
+            // owner is hurt and then announce that same help a moment later.
+            if(previousOwnerHealth>0&&previousOwnerHealth-s.Player.statLife>=System.Math.Max(10,s.Player.statLifeMax2/10))
+                Say(s,cat,"OwnerHurt",EmoteID.ItemLifePotion);
             bool working=s.Mining.Active||s.Trees.Active||s.Garden.Active||(cat.ModProjectile is CompanionCat worker&&(worker.Catching.Active||worker.Fishing.Active));
             if(working&&!workingLast)Say(s,cat,"Working",EmoteID.EmoteNote);
             workingLast=working;
         }
         previousOwnerHealth=s.Player.statLife;
-        // Coalesce short bursts of work by event. These are completed actions,
-        // unlike discoveries, which are re-scanned rather than queued with stale positions.
-        foreach(string key in new List<string>(pendingWork.Keys)) {
-            var pending=pendingWork[key];
-            if(tick>=pending.expires){pendingWork.Remove(key);continue;}
-            if(TrySay(s,cat,key,pending.emote,context:pending.context,variant:pending.variant)){pendingWork.Remove(key);break;}
-        }
+        // Routine work is sampled when it happens, never replayed as a backlog.
+        // Discoveries keep their existing rescan/remember-on-delivery behaviour.
+        ObserveEquipment(s,cat);
         if(!s.Paused&&!s.Vitals.Downed&&!bossNearby&&!eventNearby&&cat.ModProjectile is CompanionCat c&&c.Animation.Motion==CatMotion.Rest&&tick%1800==0&&!CompanionThreat.WorkDanger(s.Player,cat.Center))
             Rest(s,cat);
     }
@@ -160,22 +159,21 @@ public sealed class CompanionExpression {
         if(localChat&&chat&&chatter&&greeting&&!s.Introduced&&key!="FirstMeet")return false;
         bool lifeEvent=key=="OwnerHurt"&&variant=="Death"||key=="Welcome"&&variant=="Revived";
         bool bagFull=key=="Working"&&variant=="BagFull";
-        var channel=lifeEvent||bagFull?Channel.Important:Kind(key);
-        string repeatKey=key is "Boss" or "BossVictory"?CompanionSpeechContext.Pool(key,variant)+":"+context:lifeEvent||bagFull?key+variant:key;
-        int repeatDelay=bagFull?3600:lifeEvent?120:RepeatDelay(key);
+        bool gear=variant!=null&&variant.StartsWith("Gear");
+        var priority=CompanionSpeechPacing.For(key,variant);
+        var channel=lifeEvent||bagFull||priority==CompanionSpeechPacing.Priority.Support?Channel.Important:Kind(key);
+        string repeatKey=key is "Boss" or "BossVictory"?CompanionSpeechContext.Pool(key,variant)+":"+context:lifeEvent||bagFull||gear?key+variant:key;
+        int repeatDelay=gear?3600:bagFull?3600:lifeEvent?120:RepeatDelay(key);
         // Boss Rush still records every genuine victory; text gets one shared
         // budget so rapid stages do not fill the owner's chat.
         if(key=="BossVictory"&&CompanionSpeechContent.BossMarathon?.Invoke()==true){repeatKey="BossMarathonVictory";repeatDelay=900;}
         bool repeatReady=!nextEvent.TryGetValue(repeatKey,out int next)||tick>=next;
-        bool channelReady=channel switch {Channel.Flavor=>tick>=flavorAt,Channel.Work=>tick>=workAt,Channel.Discovery=>tick>=discoveryAt,_=>true};
+        bool channelReady=gear||channel!=Channel.Flavor||tick>=flavorAt;
+        channelReady&=pacing.Ready(tick,priority);
         bool canChat=localChat&&chat&&chatter&&repeatReady&&channelReady;
-        if(localChat&&chat&&chatter&&channel==Channel.Work&&repeatReady&&!channelReady&&!requireChat){
-            int expires=pendingWork.TryGetValue(key,out var oldPending)?oldPending.expires:tick+600;
-            pendingWork[key]=(emote,context,variant,expires);
-        }
         if(requireChat&&chatter&&!canChat)return false;
         bool delivered=false,saidLine=false;
-        if(!CompanionNetwork.Client&&emotes&&(tick>=bubbleAt||BubblePriority(channel)>bubblePriority)&&(!nextBubble.TryGetValue(repeatKey,out int nextEmote)||tick>=nextEmote)) {
+        if(!CompanionNetwork.Client&&emotes&&(!chat||!chatter||canChat)&&(tick>=bubbleAt||BubblePriority(channel)>bubblePriority)&&(!nextBubble.TryGetValue(repeatKey,out int nextEmote)||tick>=nextEmote)) {
             StartBubble(cat,emote,BubblePriority(channel));
             nextBubble[repeatKey]=tick+System.Math.Max(180,repeatDelay);
             delivered=true;
@@ -185,10 +183,8 @@ public sealed class CompanionExpression {
             if(CompanionNetwork.Server)CompanionNetwork.Say(s,lineKey,context);else Main.NewText(s.CatName+"："+line,Color.SandyBrown);Chats++;saidLine=true;
             LastChatKey=key;LastLineKey=lineKey;if(FirstChatKey.Length==0)FirstChatKey=key;
             nextEvent[repeatKey]=tick+repeatDelay;
+            pacing.Spoken(tick,priority);
             flavorAt=tick+1800;
-            if(channel==Channel.Work)workAt=tick+180;
-            if(channel==Channel.Discovery)discoveryAt=tick+120;
-            pendingWork.Remove(key);
             delivered=true;
         }
         if(CompanionNetwork.Client&&channel==Channel.Discovery&&emotes&&(saidLine||!chatter)&&tick>=bubbleAt){
