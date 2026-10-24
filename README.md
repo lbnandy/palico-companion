@@ -56,3 +56,7 @@
 [构建与开发](docs/DEVELOPMENT.md) · [参与修改](CONTRIBUTING.md) · [更新记录](CHANGELOG.md) · [第三方许可](ThirdParty/README.md)
 
 作者：[LBN](https://github.com/lbnandy)。采用 [MIT 许可证](LICENSE)。
+
+## 交流与反馈
+
+想交流玩法、提建议或反馈 Bug，可以加入「呆猫伙伴」QQ 交流群：**974761337**。遇到问题时，也方便发送日志，帮助排查。
