@@ -3,7 +3,7 @@
 | 文件 | 用途 / Purpose |
 | --- | --- |
 | `Assets/Palico.png` | 31 × 28 像素一帧，22 帧纵向排列 / 22 vertically stacked 31 × 28 frames |
-| `Assets/Palico-head.png` | 27 × 24 的 UI 头像 / 27 × 24 UI portrait |
+| `Assets/Palico-head.png` | 31 × 26 的 UI 头像 / 31 × 26 UI portrait |
 | `Assets/FlightKite.png` | 飞行风筝 / Flight kite |
 | `Assets/Training/` | 装备与工作台贴图 / Equipment and workbench sprites |
 | `Assets/GripOffsets.csv` | 投射物类型、朝向、握持偏移 X/Y / Projectile type, direction, grip offset X/Y |

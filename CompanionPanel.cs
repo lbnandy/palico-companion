@@ -51,7 +51,8 @@ public sealed class CompanionPanel : ModSystem
     internal static Rectangle HeaderPortraitPixels(Rectangle area,float scale){
         // Scale continuously with the header, retaining its shared centre at
         // 24 and eight UI pixels of space above the portrait.
-        int width=(int)MathF.Round(36*scale),height=(int)MathF.Round(32*scale);
+        var source=CompanionStatusBar.PortraitSource;
+        int width=(int)MathF.Round(36*scale),height=(int)MathF.Round(36*scale*source.Height/source.Width);
         return new Rectangle((int)MathF.Round((area.X+16)*scale),
             (int)MathF.Round((area.Y+24)*scale-height/2f),width,height);
     }
