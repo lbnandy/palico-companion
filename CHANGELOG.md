@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.0.6 — 2026-10-24
+
+- 更新呆猫形象、界面头像与模组图标。
+- 刷新工坊封面及展示图片。
+
+- Updated the Palico sprites, UI portrait and mod icons.
+- Refreshed the Workshop cover and gallery images.
+
 ## 1.0.5 — 2026-10-24
 
 - 新增暂停环境改动按钮及可自定义快捷键，建房时可暂停呆猫的自动挖掘、采集和放置行为。

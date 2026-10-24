@@ -71,7 +71,7 @@ public static class CompanionStatusBar {
     static SpriteBatch pixelBatch;
     static bool pixelLayerFailed;
     // Native-resolution head exported from the mod icon.
-    public static readonly Rectangle PortraitSource=new(0,0,27,24);
+    public static Rectangle PortraitSource=>CompanionSprite.Head?.Bounds??new Rectangle(0,0,31,26);
     internal static Rectangle FitPortraitPixels(Rectangle bounds,float scale){
         float zoom=Math.Min(bounds.Width*scale/PortraitSource.Width,bounds.Height*scale/PortraitSource.Height);
         int width=(int)MathF.Round(PortraitSource.Width*zoom),height=(int)MathF.Round(PortraitSource.Height*zoom);
@@ -81,8 +81,9 @@ public static class CompanionStatusBar {
         var r=Bounds(p);
         // Fit continuously with UI scale, like native UI images. Compensate
         // for the transparent source margin to retain the visible left edge.
-        float width=44*scale,height=width*24/27;
-        return new Rectangle(TrainingHud.LeftEdge(p.GetModPlayer<CompanionPlayer>(),scale,offset)+(int)MathF.Round(4*scale-width/27),
+        var source=PortraitSource;
+        float width=44*scale,height=width*source.Height/source.Width;
+        return new Rectangle(TrainingHud.LeftEdge(p.GetModPlayer<CompanionPlayer>(),scale,offset)+(int)MathF.Round(4*scale-width/source.Width),
             (int)MathF.Round((r.Y+38)*scale+offset.Y-height/2f),(int)MathF.Round(width),(int)MathF.Round(height));
     }
     // Keep health-bar geometry on physical pixels. Portraits and skill slots
