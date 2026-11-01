@@ -42,15 +42,31 @@ public sealed class CompanionNavigation
         if(Vector2.DistanceSquared(goal,owner.Center)>480*480||!WorkRoute.Next(cat.Center,goal,out var next))return false;
         if(!Riding){Riding=true;Puff(cat.Center);}
         WorkFlying=true;cat.tileCollide=true;DropThrough=false;noProgress=0;
+        MoveFlight(cat,next,goal,6*CompanionBalanceConfig.Current.MovementScale(false));
+        return true;
+    }
+    internal bool ApproachLanding(Projectile cat,Vector2 goal,CompanionFlightRoute route){
+        if(!route.Next(cat.Center,goal,out var next))return false;
+        if(!Riding){Riding=true;Puff(cat.Center);}
+        WorkFlying=false;cat.tileCollide=true;DropThrough=false;noProgress=0;
+        MoveFlight(cat,next,goal,Math.Clamp(6*CompanionBalanceConfig.Current.MovementScale(true),2,6));
+        // Flight brakes short of its waypoint. A landing must instead finish
+        // the last few pixels under gravity and let native collision stop it.
+        var remaining=goal-cat.Center;
+        if(Math.Abs(remaining.X)<4&&remaining.Y>=-2&&remaining.Y<8){
+            cat.velocity.X*=.7f;
+            cat.velocity.Y=Math.Clamp(cat.velocity.Y+.35f,.35f,2);
+        }
+        return true;
+    }
+    static void MoveFlight(Projectile cat,Vector2 next,Vector2 goal,float speed){
         Vector2 desired=(next-cat.Center)*0.2f;
-        float speed=6*CompanionBalanceConfig.Current.MovementScale(false);
         if(desired.LengthSquared()>speed*speed)desired=desired.SafeNormalize(Vector2.Zero)*speed;
         cat.velocity=Vector2.Lerp(cat.velocity,desired,0.2f);
         // Brake away from a corner instead of carrying lateral inertia into it.
         if(!ClearFlight(cat.Center,cat.Center+cat.velocity*2))cat.velocity=desired*0.2f;
         if(Vector2.DistanceSquared(cat.Center,goal)<4&&cat.velocity.LengthSquared()<0.25f)cat.velocity=Vector2.Zero;
         if(Math.Abs(cat.velocity.X)>0.5f)cat.direction=Math.Sign(cat.velocity.X);
-        return true;
     }
     int rideTicks,ownerGroundTicks;
     // Cattiva supplies the shoulder destination. AI_026 pets / AI_067's generic
@@ -76,14 +92,15 @@ public sealed class CompanionNavigation
         }
         bool engage=weapon!=null&&combatTarget!=null&&(obscured||cautious||!CompanionCombatReach.Distance(weapon)||
             Vector2.DistanceSquared(destination,combatTarget.Hitbox.ClosestPointInRect(destination))>MathF.Pow(CompanionCombatReach.EffectiveRange(weapon,cat,combatTarget)*.8f,2)||
-            combatTarget.Hitbox.Intersects(new Rectangle((int)destination.X-cat.width/2,(int)destination.Y-cat.height/2,cat.width,cat.height)))&&Vector2.DistanceSquared(combatTarget.Center,owner.Center)<700*700&&
-            separation.LengthSquared()<900*900&&(obscured||CompanionCombatReach.Clear(cat.Center,combatTarget.Center));
+            combatTarget.Hitbox.Intersects(new Rectangle((int)destination.X-cat.width/2,(int)destination.Y-cat.height/2,cat.width,cat.height)))&&Vector2.DistanceSquared(combatTarget.Center,owner.Center)<CompanionCombatReach.TrackingRange*CompanionCombatReach.TrackingRange&&
+            separation.LengthSquared()<CompanionCombatReach.TrackingRange*CompanionCombatReach.TrackingRange&&(obscured||CompanionCombatReach.Clear(cat.Center,combatTarget.Center));
         if(engage) {
             destination=obscured?cat.Center:CompanionCombatReach.Stand(weapon,cat,combatTarget,cautious);
         }
-        if(separation.LengthSquared()>2000*2000) {
+        if(!engage&&separation.LengthSquared()>2000*2000) {
             // Vanilla pets retain an emergency relocation for multi-screen gaps.
-            // Normal catch-up, direction changes and landing never use this path.
+            // A valid combat approach may exceed this gap with a wider targeting
+            // setting; keep flying until combat ends or its tracking leash breaks.
             CompanionTransitEffects.Move(cat,destination);
         }
         bool landed=Math.Abs(owner.velocity.Y)<0.6f&&Supported(owner.position,owner.width,owner.height);
@@ -118,6 +135,9 @@ public sealed class CompanionNavigation
         else if(delta.LengthSquared()<48*48)cat.direction=owner.direction;
         // Even the landing tick is transit-only; resume jobs on the next tick.
         return true;
+    }
+    internal void ResumeFlight(Projectile cat) {
+        WorkRoute.Clear();WorkFlying=false;Riding=true;rideTicks=ownerGroundTicks=noProgress=0;DropThrough=false;cat.tileCollide=false;
     }
     public void HoldReturn(Projectile cat) {
         WorkRoute.Clear();

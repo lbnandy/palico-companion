@@ -7,6 +7,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.GameContent;
+using Terraria.GameInput;
 using Terraria.ID;
 using Terraria.ModLoader;
 
@@ -101,6 +102,23 @@ public sealed partial class CompanionNativeUse {
     }
     internal void ReleaseActorSlot(){Cancel(preserveSkills:false);CompanionActorSlots.Release(this,slot);slot=-1;}
     bool initialized;
+    bool ResetEffects(){
+        // On a server both the projectile actor and Main.myPlayer use 255.
+        // ModPlayer resets must not mistake that sentinel for a local human
+        // and touch client UI. Borrow the existing non-player slot allocator
+        // for this synchronous reset; keep network projectile ownership intact.
+        int previousSlot=Actor.whoAmI;
+        bool borrow=previousSlot==Main.myPlayer;
+        int resetSlot=borrow?CompanionActorSlots.Acquire(this):previousSlot;
+        if(resetSlot<0)return false;
+        var previous=Main.player[resetSlot];
+        try {Actor.whoAmI=resetSlot;Main.player[resetSlot]=Actor;Actor.ResetEffects();}
+        finally {
+            Main.player[resetSlot]=previous;Actor.whoAmI=previousSlot;
+            if(borrow)CompanionActorSlots.Release(this,resetSlot);
+        }
+        return true;
+    }
     bool actorLocated;
     uint actorLocationTick;
     Vector2 lastActorPosition;
@@ -123,24 +141,24 @@ public sealed partial class CompanionNativeUse {
     internal static bool SwingArm(Item item)=>item.useStyle==ItemUseStyleID.Swing;
     internal bool Present=>Cat is {active:true}&&Cat.ModProjectile is CompanionCat c&&ReferenceEquals(c.Weapons,this)&&State is {Enabled:true,Paused:false}&&!State.Vitals.Downed&&!State.Player.dead;
     public bool Available=>Present&&State.Combat;
-    internal bool CanMaintainShot(Projectile p)=>Present&&(State.Combat||p.ModProjectile is TrainingDart or TrainingBomb);
+    internal bool CanMaintainShot(Projectile p)=>Present&&(State.Combat||p.ModProjectile is TrainingDart or TrainingBomb or TrainingBarrelBlast);
     internal void BindReplica(Player owner,CompanionPlayer state,Projectile cat){
         Cat=cat;State=state;EnsureActorSlot();
         if(!initialized){Actor.inventory=InventoryTransfer.Empty(59);initialized=true;}
         var item=CompanionWeapons.Active(state.Gear);if(Actor.inventory[0].type!=item.type||Actor.inventory[0].prefix!=item.prefix)Actor.inventory[0]=item.Clone();
         // ResetEffects clears the projectile caches too. Match Player.Update's
         // order: reset, rebuild caches, then update buffs which maintain minions.
-        Actor.ResetEffects();CountOwnedProjectiles();
+        if(!ResetEffects())return;CountOwnedProjectiles();
         using(new Scope(this))Actor.UpdateBuffs(Actor.whoAmI);Actor.maxMinions=MinionLimit(owner);Actor.maxTurrets=SentryLimit(owner);
         Actor.slotsMinions=0;Actor.numMinions=0;
         Actor.selectedItem=0;LocateActor(cat);ApplyReplicaPose();Actor.dead=false;
         Actor.statMana=state.Vitals.Mana;Actor.statManaMax2=state.Vitals.MaxMana;Actor.statLife=state.Vitals.Health;
         Actor.itemLocation=Actor.Center+ReplicaItemOffset;Actor.lastVisualizedSelectedItem=Actor.HeldItem.Clone();
     }
-    public void Tick(Player owner,CompanionPlayer state,Projectile cat,NPC target,bool allowAttack) {
+    public void Tick(Player owner,CompanionPlayer state,Projectile cat,NPC target,bool allowAttack,bool allowSupport=false) {
         Cat=cat;State=state;
         if(!EnsureActorSlot()){Cancel();return;}
-        if(!initialized){Actor.inventory=InventoryTransfer.Empty(59);Actor.whoAmI=slot;Actor.ResetEffects();initialized=true;}
+        if(!initialized){Actor.inventory=InventoryTransfer.Empty(59);Actor.whoAmI=slot;if(!ResetEffects())return;initialized=true;}
         if(!Available){Cancel();return;}
         Item weapon=CompanionWeapons.Active(state.Gear);
         CompanionRestock.Maintain(state);
@@ -157,7 +175,7 @@ public sealed partial class CompanionNativeUse {
         LocateActor(cat);
         // Rebuild temporary effects before applying buffs, as Player.Update
         // does. Additive effects must not accumulate on a persistent actor.
-        Actor.ResetEffects();
+        if(!ResetEffects()){Cancel();return;}
         // Repeated AI attacks use vanilla's hold-to-repeat policy. ItemCheck
         // owns cadence, reuse delay and CanAutoReuseItem overrides; manually
         // waiting for animation zero introduces a blank frame between casts.
@@ -176,13 +194,16 @@ public sealed partial class CompanionNativeUse {
         Actor.GetDamage(DamageClass.Magic)=StatModifier.Default*state.Vitals.MagicMultiplier;
         // Map only the cat's bag. Mod weapons may consume materials rather than
         // ammo (for example Wulfrum scrap); never borrow the human inventory.
+        // Like native ChooseAmmo/QuickHeal, favorites remain usable. Transfer
+        // and trash protection belong to the inventory operations instead.
         for(int i=1;i<59;i++)Actor.inventory[i]=Empty;
         bool materials=weapon.ModItem!=null||CompanionWeaponPolicy.Sentry(weapon);
-        for(int i=0;i<Math.Min(state.Bag.Length,49);i++)if(!state.Bag[i].favorited&&(materials||state.Bag[i].ammo>0))Actor.inventory[i+1]=state.Bag[i];
+        for(int i=0;i<Math.Min(state.Bag.Length,49);i++)if(materials||state.Bag[i].ammo>0)Actor.inventory[i+1]=state.Bag[i];
         // Follow native limit changes and DD2 persistence in this cat's scope.
         using(new Scope(this))Actor.UpdateMaxTurrets();
         CountOwnedProjectiles();
         using(new Scope(this))Actor.UpdateBuffs(slot);
+        CompanionCrossMod.UpdateResources?.Invoke(this);
         Actor.tileSpeed=1/Math.Clamp(Actor.tileSpeed,1,3);
         Actor.wallSpeed=1/Math.Clamp(Actor.wallSpeed,1,3);
         Actor.slotsMinions=SummonSlots;
@@ -200,6 +221,13 @@ public sealed partial class CompanionNativeUse {
         // Release the input as soon as a persistent projectile is in flight.
         wants&=planned;
         if(target!=null&&!CompanionCombatReach.Clear(cat.Center,target.Center))wants=false;
+        if(CompanionWeapons.Support(weapon)){
+            var ally=allowSupport?CompanionCrossMod.SupportTarget?.Invoke(this):null;
+            wants=ally!=null;
+            if(ally!=null)Aim=ally.Center;
+        }
+        CompanionCrossMod.PlanUse?.Invoke(this);
+        if(CompanionCrossMod.ResourceReady?.Invoke(this)==false)wants=false;
         if(target!=null)Actor.MinionAttackTargetNPC=target.whoAmI;else Actor.MinionAttackTargetNPC=-1;
         // Finish a natural refill after running dry. Native regeneration speeds
         // up as the bar fills; restarting early discards that faster portion and
@@ -217,14 +245,14 @@ public sealed partial class CompanionNativeUse {
                 if(cost>Actor.statMana){wants=false;WaitForMana();}
             }
         }
-        if(target!=null&&wants){cat.direction=target.Center.X<cat.Center.X?-1:1;Actor.direction=cat.direction;}
+        if(wants){cat.direction=Aim.X<cat.Center.X?-1:1;Actor.direction=cat.direction;}
         PressedThisTick=wants&&(!Actor.controlUseItem||Actor.itemAnimation==0);
         Actor.controlUseItem=wants;Actor.releaseUseItem=Actor.itemAnimation==0;Actor.controlUseTile=false;
         if(!wants)Actor.channel=false;
         int stackBefore=Actor.HeldItem.stack;
         try {using(new Scope(this)){Actor.UpdateMeleeHitCooldowns();if(Actor.attackCD>0)Actor.attackCD--;Actor.ItemCheck();}}
         finally {
-            if(materials)for(int i=0;i<Math.Min(state.Bag.Length,49);i++)if(!state.Bag[i].favorited)state.Bag[i]=Actor.inventory[i+1];
+            if(materials)for(int i=0;i<Math.Min(state.Bag.Length,49);i++)state.Bag[i]=Actor.inventory[i+1];
             state.Vitals.ManaDelay=Math.Max(0,(int)Math.Ceiling(Actor.manaRegenDelay));state.Vitals.Mana=Math.Clamp(Actor.statMana,0,state.Vitals.MaxMana);
             if(weapon.consumable) {
                 int consumed=Math.Clamp(stackBefore-Actor.HeldItem.stack,0,weapon.stack);
@@ -248,7 +276,7 @@ public sealed partial class CompanionNativeUse {
         WaitingForMana=false;
         Actor.controlUseItem=Actor.channel=false;Actor.itemAnimation=Actor.itemTime=Actor.reuseDelay=0;Actor.heldProj=-1;
         foreach(var p in Main.projectile)if(p.active&&CompanionOwnedShot.Of(p)==this) {
-            if(preserveSkills&&Present&&p.ModProjectile is TrainingDart or TrainingBomb)continue;
+            if(preserveSkills&&Present&&p.ModProjectile is TrainingDart or TrainingBomb or TrainingBarrelBlast)continue;
             // The final thrown grenade must keep flying/exploding after its
             // real stack reaches zero. Explicit pause/swap still cancels all.
             if(preserveReleased&&!p.minion)continue;
@@ -294,7 +322,7 @@ public sealed partial class CompanionNativeUse {
         }
         foreach(var data in drawCache)data.Draw(Main.spriteBatch);
         var companion=(CompanionCat)Cat.ModProjectile;
-        if(!nativeCasting)CompanionItemVisual.DrawGrip(Main.spriteBatch,(Cat.Bottom+new Vector2(0,Cat.gfxOffY)-Main.screenPosition).Floor(),companion.Animation.SpriteFrame,Cat.direction,light);
+        if(!nativeCasting)CompanionItemVisual.DrawHeldItemForeground(Main.spriteBatch,(Cat.Bottom+new Vector2(0,Cat.gfxOffY)-Main.screenPosition).Floor(),companion.Animation.SpriteFrame,Cat.direction,light);
     }
     public sealed class Scope : IDisposable {
         readonly CompanionNativeUse context,previous;
@@ -302,6 +330,8 @@ public sealed partial class CompanionNativeUse {
         readonly int myPlayer,mouseX,mouseY;
         readonly bool blockMouse;
         readonly bool mouseLeft,mouseLeftRelease,mouseRight,mouseRightRelease;
+        readonly TriggersSet triggers;
+        readonly bool triggerLeft,triggerRight;
         readonly bool actorActive;
         readonly int actorSlot;readonly CompanionProjectileScope projectiles;
         readonly IDisposable hitCooldowns;readonly bool healthScope;readonly int healthBefore;
@@ -324,11 +354,16 @@ public sealed partial class CompanionNativeUse {
             context=use;previous=Current;backup=Main.player[use.slot];myPlayer=Main.myPlayer;mouseX=Main.mouseX;mouseY=Main.mouseY;
             blockMouse=Main.blockMouse;
             mouseLeft=Main.mouseLeft;mouseLeftRelease=Main.mouseLeftRelease;mouseRight=Main.mouseRight;mouseRightRelease=Main.mouseRightRelease;
+            triggers=PlayerInput.Triggers.Current;triggerLeft=triggers.MouseLeft;triggerRight=triggers.MouseRight;
             if(use.Cat is {active:true})use.LocateActor(use.Cat);
             Main.player[use.slot]=use.Actor;use.Actor.active=true;Main.myPlayer=CompanionNetwork.Client?myPlayer:use.slot;Current=use;
             Main.mouseX=(int)(use.Aim.X-Main.screenPosition.X);Main.mouseY=(int)(use.Aim.Y-Main.screenPosition.Y);
             Main.mouseLeft=use.Actor.controlUseItem;Main.mouseLeftRelease=use.PressedThisTick;
             Main.mouseRight=use.Actor.controlUseTile;Main.mouseRightRelease=false;
+            // Held weapons may read the native input bindings instead of Main's
+            // mouse state (for example InnoVault's PressKey). Scope both to the
+            // actor, so firing never depends on the human player's mouse.
+            triggers.MouseLeft=use.Actor.controlUseItem;triggers.MouseRight=use.Actor.controlUseTile;
         }
         public void Dispose() {
             try {if(healthScope)CompanionWeaponRecovery.End(context,healthBefore);}
@@ -336,6 +371,7 @@ public sealed partial class CompanionNativeUse {
             projectiles.Dispose();Main.player[actorSlot]=backup;Main.myPlayer=myPlayer;Main.mouseX=mouseX;Main.mouseY=mouseY;Current=previous;
             Main.blockMouse=blockMouse;
             Main.mouseLeft=mouseLeft;Main.mouseLeftRelease=mouseLeftRelease;Main.mouseRight=mouseRight;Main.mouseRightRelease=mouseRightRelease;
+            triggers.MouseLeft=triggerLeft;triggers.MouseRight=triggerRight;
             context.Actor.active=actorActive;
             if(context.Cat==null){CompanionActorSlots.Release(context,actorSlot);context.slot=-1;}
             }}
@@ -424,8 +460,8 @@ public sealed class CompanionCombatTerrain : GlobalTile {
     public override bool CanExplode(int i,int j,int type)=>CompanionNativeUse.Current==null;
 }
 public sealed class CompanionNativeHooks : ModSystem {
-    public override void Load(){IL_Player.ItemCheck_Shoot+=HeadlessShoot;IL_Player.ItemCheck_ApplyUseStyle_Inner+=HeadlessGeometry;IL_Player.ItemCheck_GetMeleeHitbox+=HeadlessGeometry;On_Item.GetDrawHitbox+=DrawHitbox;On_Player.GetItemDrawFrame+=ItemFrame;On_NetMessage.SendData+=SendNative;On_Player.ItemCheck_PlayInstruments+=Instruments;On_Projectile.Update+=UpdateShot;On_Main.DrawProjDirect+=DrawShot;On_Player.ItemCheck_CutTiles+=CutTiles;On_Main.GetPlayerArmPosition+=ArmPosition;On_NPC.PlayerInteraction+=Interaction;On_Player.HealEffect+=Heal;On_Player.ManaEffect+=ManaFeedback;}
-    public override void Unload(){IL_Player.ItemCheck_Shoot-=HeadlessShoot;IL_Player.ItemCheck_ApplyUseStyle_Inner-=HeadlessGeometry;IL_Player.ItemCheck_GetMeleeHitbox-=HeadlessGeometry;On_Item.GetDrawHitbox-=DrawHitbox;On_Player.GetItemDrawFrame-=ItemFrame;On_NetMessage.SendData-=SendNative;On_Player.ItemCheck_PlayInstruments-=Instruments;On_Projectile.Update-=UpdateShot;On_Main.DrawProjDirect-=DrawShot;On_Player.ItemCheck_CutTiles-=CutTiles;On_Main.GetPlayerArmPosition-=ArmPosition;On_NPC.PlayerInteraction-=Interaction;On_Player.HealEffect-=Heal;On_Player.ManaEffect-=ManaFeedback;}
+    public override void Load(){IL_Player.ItemCheck_Shoot+=HeadlessShoot;IL_Player.ItemCheck_ApplyUseStyle_Inner+=HeadlessGeometry;IL_Player.ItemCheck_GetMeleeHitbox+=HeadlessGeometry;On_Item.GetDrawHitbox+=DrawHitbox;On_Player.GetItemDrawFrame+=ItemFrame;On_NetMessage.SendData+=SendNative;On_Player.ItemCheck_PlayInstruments+=Instruments;On_Projectile.Update+=UpdateShot;On_Main.DrawProj_Inner+=DrawShot;On_Player.ItemCheck_CutTiles+=CutTiles;On_Main.GetPlayerArmPosition+=ArmPosition;On_NPC.PlayerInteraction+=Interaction;On_Player.HealEffect+=Heal;On_Player.ManaEffect+=ManaFeedback;}
+    public override void Unload(){IL_Player.ItemCheck_Shoot-=HeadlessShoot;IL_Player.ItemCheck_ApplyUseStyle_Inner-=HeadlessGeometry;IL_Player.ItemCheck_GetMeleeHitbox-=HeadlessGeometry;On_Item.GetDrawHitbox-=DrawHitbox;On_Player.GetItemDrawFrame-=ItemFrame;On_NetMessage.SendData-=SendNative;On_Player.ItemCheck_PlayInstruments-=Instruments;On_Projectile.Update-=UpdateShot;On_Main.DrawProj_Inner-=DrawShot;On_Player.ItemCheck_CutTiles-=CutTiles;On_Main.GetPlayerArmPosition-=ArmPosition;On_NPC.PlayerInteraction-=Interaction;On_Player.HealEffect-=Heal;On_Player.ManaEffect-=ManaFeedback;}
     // These two native methods contain server early-outs for human rendering.
     // Their geometry is also used by melee hits and replicated held weapons.
     // Override only the branch value during the companion actor scope; never
@@ -505,15 +541,21 @@ public sealed class CompanionNativeHooks : ModSystem {
             if(!CompanionNetwork.Client)context.CommitProjectileMana();trail?.End(p);
         }
     }
-    static void DrawShot(On_Main.orig_DrawProjDirect orig,Main self,Projectile projectile) {
+    // DrawProjDirect is a thin wrapper that optimized callers can inline before
+    // hooks load. Scope the actual draw body so global projectile hooks always
+    // see the companion actor, including cached/held-projectile draw paths.
+    static void DrawShot(On_Main.orig_DrawProj_Inner orig,Main self,Projectile projectile) {
         var context=CompanionOwnedShot.Of(projectile);
         if(context==null){orig(self,projectile);return;}
         if(!context.CanMaintainShot(projectile)||!context.EnsureActorSlot()||!projectile.active)return;
         using(new CompanionNativeUse.ReplicaDrawScope(context))
-        using(new CompanionNativeUse.Scope(context))orig(self,projectile);
+        using(new CompanionNativeUse.Scope(context)) {
+            self.PrepareDrawnProjectileDrawing(projectile);
+            orig(self,projectile);
+        }
         if(context.Available&&context.Actor.heldProj==projectile.whoAmI) {
             var cat=context.Cat;var companion=(CompanionCat)cat.ModProjectile;
-            CompanionItemVisual.DrawGrip(Main.spriteBatch,(cat.Bottom+new Vector2(0,cat.gfxOffY)-Main.screenPosition).Floor(),companion.Animation.SpriteFrame,cat.direction,Lighting.GetColor(cat.Center.ToTileCoordinates()));
+            CompanionItemVisual.DrawHeldItemForeground(Main.spriteBatch,(cat.Bottom+new Vector2(0,cat.gfxOffY)-Main.screenPosition).Floor(),companion.Animation.SpriteFrame,cat.direction,Lighting.GetColor(cat.Center.ToTileCoordinates()));
         }
     }
 }

@@ -27,7 +27,7 @@ public sealed class GardenAssist {
         if(t.IsActuated||below.IsActuated)return -1;
         return style;
     }
-    static Item Seed(CompanionPlayer s,int style)=>Array.Find(s.Bag,i=>!i.IsAir&&!i.favorited&&i.type==Seeds[style]);
+    static Item Seed(CompanionPlayer s,int style)=>Array.Find(s.Bag,i=>!i.IsAir&&i.type==Seeds[style]);
     public bool Tick(Player owner,CompanionPlayer s,Projectile cat,bool danger) {
         if(Main.netMode==NetmodeID.MultiplayerClient||!(CompanionNetwork.Server?s.NetGarden:ModContent.GetInstance<CompanionConfig>().Gardening)||!s.Enabled||s.Paused||s.EnvironmentPaused||s.Vitals.Downed||s.Mining.Active||s.Order.Active||s.Order.HasPreview||s.Storage.Active||s.Trees.Active){Cancel();return false;}
         if(danger){workTicks=0;return false;}

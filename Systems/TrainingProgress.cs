@@ -36,9 +36,9 @@ internal static class TrainingProgress {
     };
     internal static IEnumerable<int> Suggestions(CompanionPlayer s){
         if(!s.Player.GetModPlayer<TrainingGuide>().KnowsBench&&!Has(s,19)&&!s.Player.adjTile[ModContent.TileType<CatWorkbenchTile>()])yield return 19;
-        var candidates=Enumerable.Range(0,16).Where(TrainingCatalog.Current).Where(id=>!Complete(s,id)&&(!Has(s,id)||id is >=13 and <=15)&&!(id==15&&s.Training.Tier==0));
+        var candidates=Enumerable.Range(0,TrainingCatalog.Entries.Length).Where(id=>id!=19).Where(TrainingCatalog.Current).Where(id=>!Complete(s,id)&&(!Has(s,id)||id is >=13 and <=15)&&!(id==15&&s.Training.Tier==0));
         double Prepared(int id)=>Recipes(id).Select(r=>r.requiredItem.Where(i=>!i.IsAir).Average(i=>Math.Min(1,Owned(s.Player,r,i)/(double)i.stack))).DefaultIfEmpty(0).Max();
-        int[] order=[1,9,10,0,7,3,2,6,4,5,8,13,14,15];
+        int[] order=[1,9,10,0,7,20,3,2,6,4,5,8,13,14,15];
         foreach(int id in candidates.OrderByDescending(id=>id is >=13 and <=15&&Has(s,id))
             .ThenByDescending(id=>Recipes(id).Any(Available)).ThenByDescending(id=>Recipes(id).Any(r=>Materials(s.Player,r)))
             .ThenByDescending(id=>id is >=13 and <=15&&Recipes(id).Any(r=>Available(r)||Materials(s.Player,r)))

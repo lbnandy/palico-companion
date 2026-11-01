@@ -25,7 +25,8 @@ public sealed class CompanionGlowstickDrawing {
     }
     public void Draw(Projectile cat,Item item,int pose,Color light) {
         Prepare(cat,item);cache.Clear();
-        var hand=CompanionSprite.Hand(cat,true)+CompanionLighting.GripOffset(cat);
+        var offset=CompanionSpriteLayout.OffHand[pose];
+        var hand=cat.Bottom+new Vector2(offset.X*(cat.direction<0?-1:1),offset.Y+cat.gfxOffY)+CompanionLighting.GripOffset(cat);
         proxy.itemLocation=hand;
         var info=new PlayerDrawSet{drawPlayer=proxy,heldItem=item,DrawDataCache=cache,Position=proxy.position,ItemLocation=hand,
             itemColor=light,itemEffect=cat.direction<0?SpriteEffects.FlipHorizontally:SpriteEffects.None};
@@ -33,6 +34,6 @@ public sealed class CompanionGlowstickDrawing {
         if(cache.Count==0)return;
         Vector2 shift=hand-Main.screenPosition-CompanionGrip.DrawnGrip(cache[0]);
         foreach(var entry in cache){var draw=entry;draw.position+=shift;draw.Draw(Main.spriteBatch);}
-        CompanionItemVisual.DrawGrip(Main.spriteBatch,(cat.Bottom+new Vector2(0,cat.gfxOffY)-Main.screenPosition).Floor(),pose,cat.direction,light,true);
+        CompanionItemVisual.DrawHeldItemForeground(Main.spriteBatch,(cat.Bottom+new Vector2(0,cat.gfxOffY)-Main.screenPosition).Floor(),pose,cat.direction,light);
     }
 }

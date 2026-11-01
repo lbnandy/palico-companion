@@ -13,16 +13,16 @@ internal static class TrainingFeedback {
         0=>SoundID.Item4,1=>SoundID.Item37,2=>SoundID.Item4,
         3=>new SoundStyle(SoundID.Item35.SoundPath){Volume=SoundID.Item35.Volume,PitchVariance=0},4=>SoundID.DrumTomLow,
         5=>impact?SoundID.Dig:SoundID.Item1,
-        6=>SoundID.DoubleJump,7=>impact?SoundID.Item14:SoundID.Item1,_=>SoundID.Item4
+        6=>SoundID.DoubleJump,7 or TrainingCatalog.Barrel=>impact?SoundID.Item14:SoundID.Item1,_=>SoundID.Item4
     };
     internal static void Draw(int kind,Vector2 at,string phase){
-        if(kind<0||kind>=8)return;
+        if(!TrainingCatalog.Support(kind))return;
         bool impact=phase=="impact";
         // Bell follows Player.ItemCheck's Bell (507); lift follows vanilla's
         // DoubleJump. Item29 is a mana crystal, Item16 a whoopie cushion.
         SoundStyle sound=Sound(kind,impact);
         SoundEngine.PlaySound(sound with {Volume=sound.Volume*.6f,MaxInstances=3},at);
-        if(kind==7&&impact){Explosion(at);return;}
+        if((kind==7||kind==TrainingCatalog.Barrel)&&impact){Explosion(at,kind==7?TrainingBomb.BlastSize:CompanionBarrelCharge.BlastSize);return;}
         int count=kind==5?(impact?6:3):kind==7?3:kind==1?18:10;
         int dust=kind switch {0=>DustID.Honey,1=>DustID.SilverCoin,2=>DustID.MagicMirror,3=>DustID.MagicMirror,4=>DustID.Torch,5=>DustID.SilverCoin,6=>DustID.Cloud,7=>DustID.Smoke,_=>DustID.MagicMirror};
         for(int i=0;i<count;i++){
@@ -33,15 +33,17 @@ internal static class TrainingFeedback {
             d.velocity=kind switch {0=>new Vector2(direction.X*.6f,-1.2f),1=>direction*.5f,2=>direction*1.2f,3=>new Vector2(direction.X,-1.5f),4=>new Vector2(direction.X,-.8f),6=>new Vector2(direction.X*1.8f,1),_=>direction*(impact?2.5f:.6f)};
         }
     }
-    static void Explosion(Vector2 at){
+    static void Explosion(Vector2 at,int size){
         // Establish the blast's visible extent immediately, while its damage is
         // active. Later drifting smoke is only aftermath, not a growing hitbox.
-        float radius=TrainingBomb.BlastSize*.5f;
-        for(int i=0;i<72;i++){
-            bool edge=i<24;
-            float angle=edge?MathHelper.TwoPi*(i+Main.rand.NextFloat(-.35f,.35f))/24:Main.rand.NextFloat(MathHelper.TwoPi);
+        float radius=size*.5f;
+        bool large=size>TrainingBomb.BlastSize;
+        int edgeCount=(int)MathF.Ceiling(24f*size/TrainingBomb.BlastSize);
+        for(int i=0;i<edgeCount+48;i++){
+            bool edge=i<edgeCount;
+            float angle=edge?MathHelper.TwoPi*(i+Main.rand.NextFloat(-.35f,.35f))/edgeCount:Main.rand.NextFloat(MathHelper.TwoPi);
             var direction=angle.ToRotationVector2();
-            float distance=radius*(edge?Main.rand.NextFloat(.72f,.84f):MathF.Sqrt(Main.rand.NextFloat())*.65f);
+            float distance=radius*(edge?Main.rand.NextFloat(large?.88f:.72f,large?.98f:.84f):MathF.Sqrt(Main.rand.NextFloat())*.65f);
             var d=Dust.NewDustPerfect(at+direction*distance,DustID.Torch);
             d.noGravity=true;d.scale=edge?Main.rand.NextFloat(1.5f,2f):Main.rand.NextFloat(2f,3f);
             d.velocity=direction*(edge?.45f:1.2f);

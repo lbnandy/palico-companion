@@ -5,23 +5,17 @@
 
 ## Adventure together
 
-- **Combat and support.** Give your Palico a weapon and fight side by side. Equip the mod's new support gear for extra help in combat. When you're hurt, it can bring you nearby Hearts, too.
+- **Combat and support.** Give your Palico a weapon and fight side by side. Support gear can heal, shield, clear debuffs, throw pot bombs or send your Palico charging into a group with a Giga Barrel Bomb. When you're hurt, it can bring you nearby Hearts, too.
 - **Gathering and exploring.** Your Palico can mine ore, chop and replant trees, tend herbs, fish, catch critters and collect items. It can also light up dark areas and point out nearby chests and Life Crystals.
-- **Your own Palico.** Choose a name, outfit color and dye. Your Palico chats with you and reacts with emotes. You can pet it, too.
-
-<p>
-  <img src="docs/images/01-together-combat-en.png" alt="A player and Palico fighting a Demon Eye at night" width="49%">
-  <img src="docs/images/02-together-mining-en.png" alt="A Palico mining underground while holding a torch" width="49%">
-  <br>
-  <img src="docs/images/03-together-petting-en.png" alt="Petting your Palico at home" width="49%">
-  <img src="docs/images/04-together-fishing-en.png" alt="A player and Palico fishing together by the ocean" width="49%">
-</p>
+- **Your own Palico.** Choose a name, outfit color and dye. Your Palico chats with you and reacts with emotes. You can pet it, feed it or fly it as a kite, too.
 
 ## Equipment and inventory
 
 Equip your Palico and save multiple loadouts to switch between.
 
-Your Palico has its own backpack for supplies and loot. Give it access to selected chests, and it can put items away alongside others of the same type and restock its supplies.
+Your Palico has its own backpack for supplies and loot. Favorited items remain usable and stay in its backpack when you retrieve everything else. Give it access to selected chests, and it can put items away alongside others of the same type and restock its supplies.
+
+![Equipment and inventory](docs/images/04-equipment-en-compact.png)
 
 ## Installation and first steps
 
@@ -31,11 +25,15 @@ By default, `P` opens the panel, `K` recalls your Palico, and holding `V` while 
 
 Gather materials to craft and upgrade your Palico’s gear. The in-game Palico Guide explains how to craft, use and upgrade equipment.
 
+![Palico Guide](docs/images/05-guide-en-compact.png)
+
 ## Customize your Palico’s abilities
 
 The **Companion abilities** settings offer three strength presets: choose **Support** if you want to take the lead in combat, **Standard** to fight side by side, or **Strong** if you want to take it easy and let your Palico carry you. Standard is the default.
 
-You can also fine-tune your Palico’s damage, health, defense, movement speeds in and out of combat, ability to dodge attacks, work speed and fishing speed individually.
+You can also fine-tune your Palico’s damage, health, defense, targeting range, movement speeds in and out of combat, ability to dodge attacks, work speed and fishing speed individually. Targeting range is adjustable from 50% to 150% (default 100%); it does not change the weapon's own reach and is unaffected by strength presets.
+
+An optional boss health bonus adds a little more challenge when fighting together. It is off by default.
 
 In multiplayer, the host or server administrator manages these settings for every Palico on the server.
 
@@ -46,6 +44,7 @@ None of these mods are required:
 - [Magic Storage](https://steamcommunity.com/sharedfiles/filedetails/?id=2563309347): let your Palico use your storage to put items away and restock its supplies.
 - [Quality of Terraria](https://steamcommunity.com/sharedfiles/filedetails/?id=2797518634): your Palico follows its rules for unlimited ammo and other consumable items.
 - [Calamity](https://steamcommunity.com/sharedfiles/filedetails/?id=2824688072): your Palico has dialogue for its biomes and bosses, and can use some of its special weapon mechanics.
+- [Thorium](https://steamcommunity.com/sharedfiles/filedetails/?id=2909886416): class support for instruments, healing tools and throwing weapons, including separate inspiration, ally healing and throwing exhaustion. See the compatibility notes below for special-input limits.
 
 See [compatibility notes](docs/COMPATIBILITY.md#english) for weapon support and known limits.
 
@@ -55,4 +54,4 @@ When [reporting a bug](https://github.com/lbnandy/palico-companion/issues), plea
 
 [Building and development](docs/DEVELOPMENT.md#english) · [Contributing](CONTRIBUTING.md#english) · [Changelog](CHANGELOG.md) · [Third-party licenses](ThirdParty/README.md)
 
-Created by [LBN](https://github.com/lbnandy). Licensed under the [MIT License](LICENSE).
+Created by [LBN](https://github.com/lbnandy). Code and text documentation use the [MIT License](LICENSE). Artwork is excluded from MIT; see the [artwork license](ART_LICENSE.txt). Third-party content retains its own licenses.

@@ -63,9 +63,12 @@ public static class SafeConstruction
             if (npc.active && npc.townNPC && Vector2.DistanceSquared(npc.Center, target) < 160 * 160)
                 return CompanionText.Message("SafeConstruction.TownNpc");
         }
+        // Borrowed player supplies keep their transfer protection; the cat may
+        // consume favorites already in its own bag, just like native item use.
+        bool borrowed = ReferenceEquals(bag, player.inventory);
         Item material = null;
         foreach (Item item in bag)
-            if (item != null && !item.IsAir && item.type == itemType && item.stack > 0 && !item.favorited)
+            if (item != null && !item.IsAir && item.type == itemType && item.stack > 0 && (!borrowed || !item.favorited))
             {
                 material = item;
                 break;

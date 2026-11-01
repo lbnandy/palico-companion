@@ -8,6 +8,13 @@ namespace PalicoCompanion.Systems;
 
 public sealed class CompanionCrossMod:ModSystem {
     internal static Action<Player,Vector2> PrepareActor;
+    internal static Func<Item,bool> SupportTool,SafeThrow;
+    internal static Action<CompanionNativeUse> UpdateResources;
+    internal static Func<CompanionNativeUse,Player> SupportTarget;
+    internal static Func<CompanionNativeUse,bool> ResourceReady;
+    internal static Action<CompanionNativeUse> PlanUse;
+    internal static Func<Item,float?> WeaponReach;
+    internal static Action<CompanionNativeUse,int,byte,byte,float> WeaponEffect;
     internal static ICompanionStorageProvider Storage;
     internal static Func<Item,Item,int> UsesPerMaterial;
     internal static Func<Item,CompanionNativeUse,bool> ReleaseChannel;
@@ -22,5 +29,5 @@ public sealed class CompanionCrossMod:ModSystem {
         var result=recipes.Call("AddItemCategory",Language.ActiveCulture.Name=="zh-Hans"?"呆猫装备":"Palico equipment","",icon,(Predicate<Item>)(item=>item.ModItem is TrainingItem));
         RecipeCategoryRegistered=result is string status&&status=="Success";
     }
-    public override void Unload(){PrepareActor=null;Storage=null;UsesPerMaterial=null;ReleaseChannel=null;InfiniteStack=null;MinedOre=null;RecipeCategoryRegistered=false;CompanionRecovery.Unload();}
+    public override void Unload(){PrepareActor=null;SupportTool=null;SafeThrow=null;UpdateResources=null;SupportTarget=null;ResourceReady=null;PlanUse=null;WeaponReach=null;WeaponEffect=null;Storage=null;UsesPerMaterial=null;ReleaseChannel=null;InfiniteStack=null;MinedOre=null;RecipeCategoryRegistered=false;CompanionRecovery.Unload();}
 }

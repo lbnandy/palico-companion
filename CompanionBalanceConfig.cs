@@ -50,6 +50,7 @@ public sealed class CompanionBalanceConfig : ModConfig {
     [DefaultValue(75),Range(10,200),Increment(5),Slider] public int DamagePercent { get; set; } = 75;
     [DefaultValue(75),Range(10,200),Increment(5),Slider] public int HealthPercent { get; set; } = 75;
     [DefaultValue(75),Range(0,200),Increment(5),Slider] public int DefensePercent { get; set; } = 75;
+    [DefaultValue(100),Range(50,150),Increment(5),Slider] public int TargetingRangePercent { get; set; } = 100;
 
     [Header("Movement")]
     [DefaultValue(75),Range(25,150),Increment(5),Slider] public int CombatMovementPercent { get; set; } = 75;
@@ -60,8 +61,13 @@ public sealed class CompanionBalanceConfig : ModConfig {
     [DefaultValue(100),Range(25,200),Increment(5),Slider] public int WorkSpeedPercent { get; set; } = 100;
     [DefaultValue(100),Range(25,200),Increment(5),Slider] public int FishingSpeedPercent { get; set; } = 100;
 
+    [Header("BossHealth")]
+    [DefaultValue(false)] public bool BossHealthBoost { get; set; }
+    [DefaultValue(35),Range(0,100),Increment(5),Slider] public int BossHealthPercent { get; set; } = 35;
+
     internal float WorkScale => Math.Clamp(WorkSpeedPercent,25,200)/100f;
     internal float FishingScale => Math.Clamp(FishingSpeedPercent,25,200)/100f;
+    internal float TargetingRangeScale => Math.Clamp(TargetingRangePercent,50,150)/100f;
 
     internal static CompanionBalanceConfig Current => ModContent.GetInstance<CompanionBalanceConfig>();
     internal float DamageScale => Math.Clamp(DamagePercent,10,200)/100f;

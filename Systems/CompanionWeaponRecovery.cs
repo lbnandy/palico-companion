@@ -21,6 +21,9 @@ internal static class CompanionWeaponRecovery {
         if(CompanionNetwork.Client||!use.Available)return;
         var v=use.State.Vitals;
         v.LifeSteal=Math.Clamp(use.Actor.lifeSteal,-100000,Main.expertMode?70:80);
+        // Native mod weapons can pay life as well as mana. Keep that payment;
+        // the native CanUseItem hook remains responsible for affordability.
+        if(use.Actor.statLife<before)v.Health=Math.Max(1,v.Health-(before-use.Actor.statLife));
         int healed=Math.Clamp(use.Actor.statLife-before,0,v.MaxHealth-v.Health);
         if(healed<=0)return;
         v.Health+=healed;CompanionFeedback.Show(1,use.Cat.Center,healed,"skill");

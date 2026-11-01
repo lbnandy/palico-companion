@@ -10,12 +10,19 @@ namespace PalicoCompanion;
 public sealed class CompanionCat : ModProjectile
 {
     public override string Texture => "Terraria/Images/Projectile_0";
+    public override void SetStaticDefaults() {
+        // Use vanilla's contact-switch opt-out for the companion body only.
+        // Weapon projectiles keep their own plate detection and damage rules.
+        ProjectileID.Sets.ForcePlateDetection[Type]=false;
+    }
     int tick, targetItem=-1, attackCooldown, workCooldown;
     public readonly CompanionNavigation Navigation=new();
     public readonly CompanionNativeUse Weapons=new();
     public readonly CompanionPickup Pickup=new();
     public readonly CompanionFeedback Feedback=new();
     internal readonly CompanionActionVisual ActionVisual=new();
+    internal readonly CompanionBarrelCharge Barrel=new();
+    internal readonly CompanionKite Kite=new();
     public readonly CompanionCatching Catching=new();
     public readonly CompanionSupplies Supplies=new();
     public readonly CompanionEvasion Evasion=new();
@@ -40,7 +47,7 @@ public sealed class CompanionCat : ModProjectile
     int networkTool;float networkToolProgress;Vector2 networkToolAim;
     public override void SendExtraAI(System.IO.BinaryWriter w){
         w.Write(NetworkInstance);
-        w.Write(Projectile.direction);w.Write(Animation.SpriteFrame);w.Write(Navigation.Riding);
+        w.Write(Projectile.direction);w.Write(Animation.SpriteFrame);w.Write(Navigation.Riding||Kite.Active);
         w.Write(Weapons.Actor.direction);w.Write(Weapons.Actor.itemAnimation);w.Write(Weapons.Actor.itemAnimationMax);w.Write(Weapons.Actor.itemRotation);w.Write(Weapons.Actor.channel);
         ushort count=0;for(int i=0;i<Weapons.Actor.buffType.Length;i++)if(Weapons.Actor.buffType[i]>0&&Weapons.Actor.buffTime[i]>0)count++;
         w.Write(count);for(int i=0;i<Weapons.Actor.buffType.Length;i++)if(Weapons.Actor.buffType[i]>0&&Weapons.Actor.buffTime[i]>0){w.Write(Weapons.Actor.buffType[i]);w.Write(Weapons.Actor.buffTime[i]);}
@@ -52,7 +59,7 @@ public sealed class CompanionCat : ModProjectile
         var aim=Catching.SwingTicks>0?Catching.Target:mine?s.Mining.SwingTarget:s.Trees.Target;w.Write(aim.X);w.Write(aim.Y);
         w.Write((ulong)Main.GameUpdateCount);w.Write(PresentationEpoch);w.Write((byte)Animation.Motion);w.Write(Animation.IdleTicks);w.Write(Animation.StateTicks);w.Write(Animation.WalkPhase);
         w.Write(Catching.SwingTicks>0?Catching.Duration:mine?s.Mining.SwingDuration:s.Trees.SwingDuration);
-        ActionVisual.Write(w);
+        ActionVisual.Write(w);Barrel.Write(w);Kite.Write(w);
     }
     public override void ReceiveExtraAI(System.IO.BinaryReader r){
         ulong previousInstance=NetworkInstance,instance=r.ReadUInt64();if(CompanionNetwork.Client)NetworkInstance=instance;
@@ -64,7 +71,7 @@ public sealed class CompanionCat : ModProjectile
             Position=Projectile.position,Velocity=Projectile.velocity,Direction=Projectile.direction,Frame=networkFrame,Flying=networkFlying,
             ItemDirection=itemDirection,ItemAnimation=itemAnimation,ItemMax=itemMax,ItemRotation=itemRotation,Channel=channel,ItemOffset=itemOffset,
             Tool=networkTool,ToolProgress=networkToolProgress,ToolAim=networkToolAim,WeaponAim=weaponAim};
-        ActionVisual.Read(r,previousInstance!=instance);
+        ActionVisual.Read(r,previousInstance!=instance);Barrel.Read(r,previousInstance!=instance);Kite.Read(r);
         if(CompanionNetwork.Client&&CompanionRoster.Observe(this,(ulong)pose.Time)){if(previousInstance!=instance)replica.Clear();replica.Receive(pose,Main.GameUpdateCount);Projectile.position=replica.Position;}
 
     }
@@ -106,7 +113,7 @@ public sealed class CompanionCat : ModProjectile
     public override bool? CanCutTiles()=>false;
     public override bool TileCollideStyle(ref int width,ref int height,ref bool fallThrough,ref Vector2 hitboxCenterFrac) {
         var owner=Main.player[OwnerIndex];var state=owner.GetModPlayer<CompanionPlayer>();
-        fallThrough=!state.Paused&&!state.Vitals.Downed&&Navigation.DropThrough;
+        fallThrough=!Barrel.Active&&!state.Paused&&!state.Vitals.Downed&&Navigation.DropThrough;
         return true;
     }
     public override void AI() {
@@ -127,22 +134,19 @@ public sealed class CompanionCat : ModProjectile
         if(workFacingTicks>0)workFacingTicks--;
         state.Travel.ClearGoal();
         if(attackVisualTicks>0)attackVisualTicks--;
-        if(state.Paused||state.Vitals.Downed){attackVisualTicks=0;Weapons.Cancel();}
+        if(state.Paused||state.Vitals.Downed){attackVisualTicks=0;Weapons.Cancel();Barrel.Cancel(this);}
         state.Mining.UpdateVisual();state.Trees.UpdateVisual();
         if(state.Paused||state.Vitals.Downed||state.Construction.Active||state.Digging.Active||state.Mining.Active||state.Trees.Active||state.Garden.Active||state.Order.Active||state.Storage.Active){Catching.Cancel();Supplies.Cancel();}
         Projectile.timeLeft=2; tick++; if(attackCooldown>0)attackCooldown--; if(workCooldown>0)workCooldown--;
         if(Projectile.ai[1]>0)Projectile.ai[1]--;
         Vector2 goal=state.Digging.Active?Projectile.Center:CompanionNavigation.FollowGoal(owner,Projectile.Center);
         if(!state.Paused && !state.Vitals.Downed) {
-            bool bossNearby=CompanionIncomingDamage.BossNear(owner);
-            foreach(var enemy in Main.npc) {
-                if(enemy.active&&!enemy.friendly&&enemy.damage>0&&!enemy.dontTakeDamage&&enemy.Hitbox.Intersects(Projectile.Hitbox))
-                    Feedback.Hurt(state,Projectile,enemy.damage,bossNearby);
-            }
+            CompanionIncomingDamage.Contact(this,state);
             // Hostile shots are handled at their real native Damage pass, not
             // a second rectangular collision approximation here.
         }
         if(state.Vitals.Downed) {
+            Kite.Stop(this);
             CancelTransitWork(state);Weapons.Cancel();Navigation.HoldReturn(Projectile);
             if(CompanionRestVisual.Hidden(state.Vitals)){
                 if(!retreated&&state.Vitals.RecoveryProgress<=CompanionRestVisual.StunTicks+2){CompanionRestVisual.DustPuff(Projectile);}
@@ -158,6 +162,8 @@ public sealed class CompanionCat : ModProjectile
             retreated=false;Projectile.Center=owner.Center;Projectile.velocity=Vector2.Zero;
             Navigation.HoldReturn(Projectile);CompanionRestVisual.DustPuff(Projectile,true);
         }
+        if(Kite.Tick(state,this)){attackVisualTicks=workFacingTicks=0;return;}
+        if(Barrel.Tick(state,this)){attackVisualTicks=workFacingTicks=0;Light.Update(owner,state,Projectile,true);return;}
         if(!state.Paused&&(CompanionNetwork.Server?state.NetAutoHeal:ModContent.GetInstance<CompanionConfig>().AutoHeal)) {
             int healed=Weapons.Heal(owner,state,Projectile,out int potion);
             if(healed>0) {
@@ -167,6 +173,7 @@ public sealed class CompanionCat : ModProjectile
                 state.Expression.Say(state,Projectile,"Heal",Terraria.GameContent.UI.EmoteID.ItemLifePotion);
             }
         }
+        if(CompanionFeeding.Hold(state,this))return;
         if(Navigation.Riding&&(state.Paused||state.Vitals.Downed)) {
             CancelTransitWork(state);Navigation.HoldReturn(Projectile);
             Light.Update(owner,state,Projectile,true);state.Status=state.Paused?"Paused":CompanionText.Message("CompanionCat.Recovering");return;
@@ -262,10 +269,11 @@ public sealed class CompanionCat : ModProjectile
             else if(airborneTarget!=null){SuspendWorkForCombat(state);state.Mining.Tick(owner,Projectile.Center,false,true);}
             targetItem=-1;
             var airTarget=airborneTarget??FindThreat(owner);
-            Weapons.Tick(owner,state,Projectile,airTarget,state.Combat&&(CompanionNativeUse.Summoning(airWeapon)||CompanionCombatReach.CanUse(airWeapon,Projectile,airTarget)));
+            Weapons.Tick(owner,state,Projectile,airTarget,state.Combat&&(CompanionNativeUse.Summoning(airWeapon)||CompanionCombatReach.CanUse(airWeapon,Projectile,airTarget)),allowSupport:true);
             animationThreat=airTarget!=null;attackThrust=!CompanionNativeUse.SwingArm(airWeapon);
             attackVisualTicks=Weapons.Actor.itemAnimation;attackVisualDuration=Math.Max(1,Weapons.Actor.itemAnimationMax);
-            if(airTarget!=null)attackFacing=airTarget.Center;
+            if(CompanionWeapons.Support(airWeapon)&&Weapons.Busy)attackFacing=Weapons.Aim;
+            else if(airTarget!=null)attackFacing=airTarget.Center;
             // Holding light is fine; placement is forbidden while carried.
             Light.Update(owner,state,Projectile,true);state.Status=HoldingThreat?CompanionText.Message("CompanionCat.WatchingEnemies"):airTarget!=null?(tactics.Cautious?CompanionText.Message("CompanionCat.KeepingDistance"):"Guarding"):CompanionText.Message("CompanionCat.CatchingUp");return;
         }
@@ -286,11 +294,12 @@ public sealed class CompanionCat : ModProjectile
         if(target is {} npc) {
             state.Status=HoldingThreat?CompanionText.Message("CompanionCat.WatchingEnemies"):tactics.Cautious?CompanionText.Message("CompanionCat.KeepingDistance"):"Guarding";targetItem=-1;
             Item weapon=CompanionWeapons.Active(state.Gear);
-            if(state.Combat)goal=HoldingThreat?Projectile.Center:CompanionCombatReach.Stand(weapon,Projectile,npc,tactics.Cautious);
+            if(state.Combat&&!CompanionWeapons.Support(weapon))goal=HoldingThreat?Projectile.Center:CompanionCombatReach.Stand(weapon,Projectile,npc,tactics.Cautious);
             attackFacing=npc.Center;
         }
         Item activeWeapon=CompanionWeapons.Active(state.Gear);
-        Weapons.Tick(owner,state,Projectile,target,state.Combat&&(CompanionNativeUse.Summoning(activeWeapon)||CompanionCombatReach.CanUse(activeWeapon,Projectile,target)));
+        Weapons.Tick(owner,state,Projectile,target,state.Combat&&(CompanionNativeUse.Summoning(activeWeapon)||CompanionCombatReach.CanUse(activeWeapon,Projectile,target)),allowSupport:true);
+        if(CompanionWeapons.Support(activeWeapon)&&Weapons.Busy)attackFacing=Weapons.Aim;
         attackThrust=!CompanionNativeUse.SwingArm(activeWeapon);
         attackVisualTicks=Weapons.Actor.itemAnimation;attackVisualDuration=Math.Max(1,Weapons.Actor.itemAnimationMax);
 
@@ -347,21 +356,22 @@ public sealed class CompanionCat : ModProjectile
         if(CompanionNetwork.Client){
             Flight.Update(networkFlying&&!Diving.InWater,s.Paused,s.Vitals.Downed,Projectile.velocity.X);
             Light.Update(owner,s,Projectile,true);
-            if(Light.Holding&&!Light.HoldingGlowstick)Light.Glow.Emit(Projectile,Light.HeldItem,Light.Flame(Projectile)-new Vector2(2,2));
+            if(!Barrel.Active&&!ActionVisual.Eating&&Light.Holding&&!Light.HoldingGlowstick)Light.Glow.Emit(Projectile,Light.HeldItem,Light.Flame(Projectile)-new Vector2(2,2));
             if(owner.whoAmI==Main.myPlayer){s.Expression.AdvancePresentation();s.Expression.ObserveEquipment(s,Projectile);s.Discovery.Tick(s,Projectile);}return;
         }
-        Evasion.Update(owner,s,Projectile,Navigation);
-        Flight.Update(Navigation.Riding&&!Diving.InWater,s.Paused,s.Vitals.Downed,Projectile.velocity.X);
+        if(!Barrel.Active&&!Kite.Active)Evasion.Update(owner,s,Projectile,Navigation);
+        Flight.Update((Navigation.Riding||Kite.Active)&&!Diving.InWater,s.Paused,s.Vitals.Downed,Projectile.velocity.X);
         // A nearly zero vertical speed at the jump apex is not ground contact.
         bool drop=!s.Paused&&!s.Vitals.Downed&&Navigation.DropThrough;
-        bool grounded=!Navigation.Riding&&Navigation.Grounded(Projectile);
-        bool busy=s.Construction.Active||Fishing.Active||Supplies.Active||Catching.Active||s.Mining.Active||s.Order.Active||s.Storage.Active||s.Garden.Active||s.Trees.Active||targetItem>=0||Light.Holding;
+        bool grounded=!Kite.Active&&!Navigation.Riding&&Navigation.Grounded(Projectile);
+        bool busy=Kite.Active||Barrel.Active||ActionVisual.Eating||s.Construction.Active||Fishing.Active||Supplies.Active||Catching.Active||s.Mining.Active||s.Order.Active||s.Storage.Active||s.Garden.Active||s.Trees.Active||targetItem>=0||Light.Holding;
         bool toolSwing=Fishing.Gesture||s.Mining.SwingTicks>0||s.Trees.SwingTicks>0||Catching.SwingTicks>0;
         float toolProgress=Fishing.Gesture?Fishing.GestureProgress:Catching.SwingTicks>0?1-Catching.SwingTicks/(float)Catching.Duration:s.Mining.SwingTicks>0?1-s.Mining.SwingTicks/(float)s.Mining.SwingDuration:1-s.Trees.SwingTicks/(float)s.Trees.SwingDuration;
         Animation.Update(Projectile.velocity.X,Projectile.velocity.Y,s.Vitals.Downed,s.Paused,
             toolSwing,attackVisualTicks>0,s.PetCooldown>510,animationThreat,busy,
             Vector2.DistanceSquared(s.WorkAnchor,Projectile.Center)<120*120&&Math.Abs(owner.velocity.X)<0.2f,grounded,
-            toolSwing?toolProgress:1-attackVisualTicks/(float)attackVisualDuration,Navigation.Riding,attackThrust,Diving.Submerged&&!grounded);
+            toolSwing?toolProgress:1-attackVisualTicks/(float)attackVisualDuration,Navigation.Riding||Kite.Active,attackThrust,Diving.Submerged&&!grounded,
+            Weapons.Actor.HeldItem.useStyle==ItemUseStyleID.Shoot&&Weapons.Actor.HeldItem.CountsAsClass(DamageClass.Ranged));
         if(!s.Paused&&!s.Vitals.Downed) {
             if(attackVisualTicks>0)Projectile.direction=Facing(Projectile.Center,attackFacing,Projectile.direction);
             else if(!animationThreat) {
@@ -374,7 +384,7 @@ public sealed class CompanionCat : ModProjectile
         s.Discovery.Tick(s,Projectile);
         Supplies.UpdateCarried(Projectile);
         // Native chance, scale, velocity, gravity and TorchID light colour.
-        if(Light.Holding&&!Light.HoldingGlowstick)Light.Glow.Emit(Projectile,Light.HeldItem,Light.Flame(Projectile)-new Vector2(2,2));
+        if(!Barrel.Active&&!ActionVisual.Eating&&Light.Holding&&!Light.HoldingGlowstick)Light.Glow.Emit(Projectile,Light.HeldItem,Light.Flame(Projectile)-new Vector2(2,2));
         bool sendMotion=tick%6==0;
         // Preserve the actual start/end of held-item visibility. A one-tick
         // native pause must not become a whole six-tick snapshot interval.
@@ -391,8 +401,9 @@ public sealed class CompanionCat : ModProjectile
     }
     readonly CompanionCombatTactics tactics=new();
     internal bool HoldingThreat=>targeting.Holding;
+    internal NPC EngagedTarget=>animationThreat?targeting.VisibleTarget:null;
     internal bool Cautious=>tactics.Cautious;
-    public void StopWork(CompanionPlayer s){targeting.Clear();tactics.Update(s,false);CancelTransitWork(s);Weapons.Cancel();}
+    public void StopWork(CompanionPlayer s){Kite.Stop(this);targeting.Clear();tactics.Update(s,false);CancelTransitWork(s);Weapons.Cancel();}
     // Ground and flight share the same interruption contract: preserve pending
     // world work and its progress, relinquish movement and transient tool use.
     void SuspendWorkForCombat(CompanionPlayer s) {
@@ -422,7 +433,7 @@ public sealed class CompanionCat : ModProjectile
                 Vector2 hand=CompanionSprite.Hand(Projectile);float angle=CompanionItemVisual.SwingAngle((networkToolAim-hand).ToRotation(),networkToolProgress,Projectile.direction);
                 var tool=new Item(networkTool);
                 CompanionItemVisual.DrawSwing(Main.spriteBatch,tool,hand-Main.screenPosition,angle,Projectile.direction,light,tick,CompanionItemVisual.ToolRotation(tool,networkToolProgress,Projectile.direction));
-                CompanionItemVisual.DrawGrip(Main.spriteBatch,(Projectile.Bottom+new Vector2(0,Projectile.gfxOffY)-Main.screenPosition).Floor(),Animation.SpriteFrame,Projectile.direction,light);
+                CompanionItemVisual.DrawHeldItemForeground(Main.spriteBatch,(Projectile.Bottom+new Vector2(0,Projectile.gfxOffY)-Main.screenPosition).Floor(),Animation.SpriteFrame,Projectile.direction,light);
             }return;
         }
         if((state.Mining.SwingTicks>0||state.Trees.SwingTicks>0||Catching.SwingTicks>0)&&!state.Paused&&!state.Vitals.Downed) {
@@ -433,16 +444,17 @@ public sealed class CompanionCat : ModProjectile
             float aim=((Catching.SwingTicks>0?Catching.Target:mine?state.Mining.SwingTarget:state.Trees.Target)-hand).ToRotation();
             float angle=CompanionItemVisual.SwingAngle(aim,progress,Projectile.direction);
             CompanionItemVisual.DrawSwing(Main.spriteBatch,tool,hand-Main.screenPosition,angle,Projectile.direction,light,tick,CompanionItemVisual.ToolRotation(tool,progress,Projectile.direction));
-            CompanionItemVisual.DrawGrip(Main.spriteBatch,(Projectile.Bottom+new Vector2(0,Projectile.gfxOffY)-Main.screenPosition).Floor(),Animation.SpriteFrame,Projectile.direction,light);
+            CompanionItemVisual.DrawHeldItemForeground(Main.spriteBatch,(Projectile.Bottom+new Vector2(0,Projectile.gfxOffY)-Main.screenPosition).Floor(),Animation.SpriteFrame,Projectile.direction,light);
         }
     }
     public override bool PreDraw(ref Color lightColor) {
         var state=Main.player[OwnerIndex].GetModPlayer<CompanionPlayer>();
         if(CompanionRestVisual.Hidden(state.Vitals))return false;
+        Kite.Draw(this);
         using var dyeScope=new CompanionDye.Scope(Projectile);
         lightColor=CompanionFeedback.ImmuneTint(lightColor,state.Vitals.Immunity,state.Vitals.Downed);
         var carried=CompanionCarriedItem.Find(this);
-        bool gesture=carried==null&&ActionVisual.Visible(this,state);
+        bool gesture=!Barrel.Active&&carried==null&&ActionVisual.Visible(this,state);
         int pose=state.Vitals.Downed?CompanionRestVisual.Frame(state.Vitals):carried!=null?CompanionCarriedItem.Frame:gesture?ActionVisual.Frame:Animation.SpriteFrame;
         var texture=CompanionSprite.Atlas;
         if(texture is null)return false;
@@ -453,18 +465,19 @@ public sealed class CompanionCat : ModProjectile
         if(!Diving.InWater)Flight.Draw(Main.spriteBatch,position,Projectile.direction,lightColor,
             Lighting.GetColor((Projectile.Bottom+new Vector2(-8*Projectile.direction,-42)).ToTileCoordinates()));
         if(state.Vitals.Downed)position.Y+=CompanionRestVisual.BreathOffset(state.Vitals);
-        bool riding=!state.Vitals.Downed&&(CompanionNetwork.Client?networkFlying:Navigation.Riding);
-        bool swimming=Diving.Submerged&&!state.Vitals.Downed&&(riding||!Navigation.Grounded(Projectile));
-        CompanionSprite.DrawBody(Main.spriteBatch,position,pose,Projectile.direction,lightColor,riding,swimming?Diving.Phase:-1);
-        if(face.Closed)CompanionFace.Draw(Main.spriteBatch,position,pose,Projectile.direction,lightColor);
+        if(Barrel.Presenting&&!state.Vitals.Downed)Barrel.Draw(Main.spriteBatch,position,this,lightColor);
+        else CompanionSprite.DrawBody(Main.spriteBatch,position,pose,Projectile.direction,lightColor);
+        if(!Barrel.Active&&face.Closed)CompanionFace.Draw(Main.spriteBatch,position,pose,Projectile.direction,lightColor);
         if(Diving.Submerged)CompanionDivingVisual.DrawGoggles(Main.spriteBatch,position,pose,Projectile.direction,lightColor);
-        if(Light.HoldingGlowstick)Light.Glow.Draw(Projectile,Light.HeldItem,pose,lightColor);
-        else if(Light.Holding)
-            CompanionTorchDrawing.Draw(Main.spriteBatch,texture,position,pose,Projectile.direction,lightColor,Lighting.GetColor(Light.Hand(Projectile).ToTileCoordinates()),tick,item:Light.HeldItem);
-        DrawTools(state,lightColor);
-        Weapons.Draw(lightColor);Fishing.Draw(lightColor);
-        if(gesture)ActionVisual.Draw(Main.spriteBatch,position,Projectile.direction,lightColor);
-        if(carried!=null)CompanionCarriedItem.Draw(carried,Projectile,position,lightColor);
+        using(new CompanionItemVisual.HeldItemScope(Main.spriteBatch,position,pose,Projectile.direction,lightColor)) {
+            if(!Barrel.Active){DrawTools(state,lightColor);Weapons.Draw(lightColor);Fishing.Draw(lightColor);}
+            if(gesture)ActionVisual.Draw(Main.spriteBatch,position,Projectile.direction,lightColor,Weapons.Actor);
+            if(carried!=null)CompanionCarriedItem.Draw(carried,Projectile,position,lightColor);
+            // The light belongs to the near hand, in front of far-hand props.
+            if(!Barrel.Active&&!ActionVisual.Eating&&Light.HoldingGlowstick)Light.Glow.Draw(Projectile,Light.HeldItem,pose,lightColor);
+            else if(!Barrel.Active&&!ActionVisual.Eating&&Light.Holding)
+                CompanionTorchDrawing.Draw(Main.spriteBatch,position,pose,Projectile.direction,lightColor,Lighting.GetColor(Light.Hand(Projectile).ToTileCoordinates()),tick,item:Light.HeldItem);
+        }
         if(state.Vitals.Downed) {
             Main.instance.DrawHealthBar(Projectile.Center.X,Projectile.Bottom.Y+10+Projectile.gfxOffY,Math.Max(1,state.Vitals.RecoveryProgress),state.Vitals.RecoveryTotal,1f,1f);
             Utils.DrawBorderString(Main.spriteBatch,$"{(state.Vitals.Recovery+59)/60}s",Projectile.Bottom-Main.screenPosition+new Vector2(0,18),Color.LightGoldenrodYellow,.65f,.5f);

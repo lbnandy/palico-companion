@@ -12,6 +12,28 @@ namespace PalicoCompanion.Systems;
 // Labor has its own timed tile action. Combat uses CompanionNativeUse's isolated
 // Player executor; neither path calls ItemCheck on the human player's object.
 public static class CompanionItemVisual {
+    static Foreground pendingForeground;
+    struct Foreground {
+        public bool Active,Requested;
+        public SpriteBatch Batch;
+        public Vector2 Feet;
+        public int Pose,Direction;
+        public Color Light;
+    }
+    // Like CompanionDye.Scope, this is a draw-only, allocation-free scope.
+    // All attachments request the same foreground paw, which is drawn once,
+    // after both hands' items, using the pose actually drawn for the body.
+    public readonly struct HeldItemScope:IDisposable {
+        readonly Foreground previous;
+        public HeldItemScope(SpriteBatch batch,Vector2 feet,int pose,int direction,Color light){
+            previous=pendingForeground;
+            pendingForeground=new Foreground{Active=true,Batch=batch,Feet=feet,Pose=pose,Direction=direction,Light=light};
+        }
+        public void Dispose(){
+            var current=pendingForeground;pendingForeground=previous;
+            if(current.Requested)DrawForeground(current.Batch,current.Feet,current.Pose,current.Direction,current.Light);
+        }
+    }
     public static void BeginUse(Item item,Vector2 at) {
         if(CompanionNetwork.Server){CompanionNetwork.FeedbackAt(4,at,item.type);return;}
         if(item.UseSound.HasValue&&!ItemID.Sets.SkipsInitialUseSound[item.type]) {
@@ -77,12 +99,33 @@ public static class CompanionItemVisual {
     }
     public static void DrawGrip(SpriteBatch batch,Vector2 feet,int pose,int direction,Color light,bool offhand=false) {
         var atlas=CompanionSprite.Atlas;if(atlas is null)return;
+        var regions=CompanionSpriteLayout.GripRegions(pose,offhand);
+        if(regions!=null){
+            foreach(var region in regions)DrawGripRegion(batch,feet,pose,direction,light,region);
+            return;
+        }
         var offset=offhand?CompanionSpriteLayout.OffHand[pose]:CompanionSpriteLayout.MainHand[pose];
         var point=CompanionSpriteLayout.Origin+offset/CompanionSpriteLayout.Scale;
         int x=(int)point.X-1,y=(int)point.Y;
-        var source=new Rectangle(x,pose*CompanionSpriteLayout.Height+y,3,2);
-        float left=direction<0?CompanionSpriteLayout.Origin.X-x-source.Width:x-CompanionSpriteLayout.Origin.X;
-        var at=feet+new Vector2(left,y-CompanionSpriteLayout.Origin.Y)*CompanionSpriteLayout.Scale;
+        DrawGripRegion(batch,feet,pose,direction,light,new Rectangle(x,y,3,2));
+    }
+    public static void DrawHeldItemForeground(SpriteBatch batch,Vector2 feet,int pose,int direction,Color light) {
+        if(pendingForeground.Active){pendingForeground.Requested=true;return;}
+        DrawForeground(batch,feet,pose,direction,light);
+    }
+    static void DrawForeground(SpriteBatch batch,Vector2 feet,int pose,int direction,Color light) {
+        if(CompanionSprite.Atlas is null)return;
+        var regions=CompanionSpriteLayout.NearHandRegions(pose);
+        if(regions==null){DrawGrip(batch,feet,pose,direction,light);return;}
+        // The body already contains the far paw. Only the near paw passes
+        // over the held item; never promote a paw simply because it holds it.
+        foreach(var region in regions)DrawGripRegion(batch,feet,pose,direction,light,region);
+    }
+    static void DrawGripRegion(SpriteBatch batch,Vector2 feet,int pose,int direction,Color light,Rectangle region) {
+        var atlas=CompanionSprite.Atlas;
+        var source=new Rectangle(region.X,pose*CompanionSpriteLayout.Height+region.Y,region.Width,region.Height);
+        float left=direction<0?CompanionSpriteLayout.Origin.X-region.Right:region.X-CompanionSpriteLayout.Origin.X;
+        var at=feet+new Vector2(left,region.Y-CompanionSpriteLayout.Origin.Y)*CompanionSpriteLayout.Scale;
         CompanionDye.Draw(batch,new Terraria.DataStructures.DrawData(atlas,at,source,light,0,Vector2.Zero,CompanionSpriteLayout.Scale,direction<0?SpriteEffects.FlipHorizontally:SpriteEffects.None));
     }
 }

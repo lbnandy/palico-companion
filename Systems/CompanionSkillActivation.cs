@@ -7,7 +7,7 @@ using Terraria.ModLoader;
 namespace PalicoCompanion.Systems;
 
 public sealed partial class CompanionTraining {
-    internal static bool ManualSkill(int kind)=>kind is 0 or 2 or 3 or 4 or 5 or 7;
+    internal static bool ManualSkill(int kind)=>kind is 0 or 2 or 3 or 4 or 5 or 7 or TrainingCatalog.Barrel;
     internal void ReconcileEffects(CompanionPlayer s) {
         if(Find(s,4)<0)Drum=0;
         if(Find(s,3)<0)ManaDance=0;
@@ -21,6 +21,12 @@ public sealed partial class CompanionTraining {
         message=CompanionText.Message("CompanionSkillActivation.Unavailable");if(!Active(s))return false;
         message=CompanionText.Message("CompanionSkillActivation.Cooldown");if(!Ready(s,kind))return false;
         var p=s.Player;var cat=CatFor(s);var use=(cat.ModProjectile as CompanionCat)?.Weapons;
+        if(kind==TrainingCatalog.Barrel){
+            if(cat.ModProjectile is CompanionCat busyCarrier&&busyCarrier.Barrel.Active){message=CompanionText.Message(busyCarrier.Barrel.Preparing?"CompanionBarrelCharge.Landing":"CompanionBarrelCharge.Busy");return false;}
+            if(cat.ModProjectile is not CompanionCat carrier||!carrier.Barrel.TryStart(s,carrier,manual)){message=CompanionText.Message("CompanionBarrelCharge.NoRoute");return false;}
+            message=carrier.Barrel.Preparing?CompanionText.Message("CompanionBarrelCharge.Landing"):CompanionText.Message("CompanionSkillActivation.Used",TrainingCatalog.Entries[kind].Name);return true;
+        }
+        if(kind is 5 or 7&&cat.ModProjectile is CompanionCat busy&&busy.Barrel.Active){message=CompanionText.Message("CompanionBarrelCharge.Busy");return false;}
         int debuff=0,manaTarget=0;NPC target=null;
         switch(kind) {
             case 0:

@@ -29,7 +29,7 @@ public sealed class CompanionControlUI:ModSystem {
         directHeld=PalicoCompanion.DirectKey?.Current==true;
         bool click=Main.mouseLeft&&!previousLeft;previousLeft=Main.mouseLeft;
         if(!Aiming)return;
-        if(s.Player.mouseInterface)return;
+        if(s.Player.mouseInterface||CompanionStatusBar.BlocksInput)return;
         s.Player.controlUseItem=false;s.Player.controlUseTile=false;
         if(click&&Main.mouseItem.IsAir) {
             var kind=CompanionDirective.Identify(s,WorldPointer(),out var cell);

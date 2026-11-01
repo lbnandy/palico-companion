@@ -81,7 +81,12 @@ public sealed class CompanionPanel : ModSystem
         Main.spriteBatch.End();
     }
     public override void Load() => On_Main.DrawInventory += DrawVanillaInventory;
-    public override void Unload() {On_Main.DrawInventory -= DrawVanillaInventory;weaponPlaceholder?.Dispose();weaponPlaceholder=null;CompanionEnvironmentButton.Unload();}
+    public override void Unload() {
+        On_Main.DrawInventory -= DrawVanillaInventory;
+        var placeholder=weaponPlaceholder;weaponPlaceholder=null;
+        if(placeholder!=null)Main.QueueMainThreadAction(placeholder.Dispose);
+        CompanionEnvironmentButton.Unload();
+    }
     void DrawVanillaInventory(On_Main.orig_DrawInventory orig,Main self) {
         int mx=Main.mouseX,my=Main.mouseY;
         var state=Main.LocalPlayer.GetModPlayer<CompanionPlayer>();
@@ -302,6 +307,7 @@ public sealed class CompanionPanel : ModSystem
             var use=(s.Cat?.ModProjectile as CompanionCat)?.Weapons;
             float slots=sentry?use?.SentryCount??0:use?.SummonSlots??0;
             Stat(L(sentry?"SentrySlots":"MinionSlots"),$"{slots:0.#} / {(sentry?CompanionNativeUse.SentryLimit(s.Player):CompanionNativeUse.MinionLimit(s.Player))}",328,width-32,top+308,Ink,L(sentry?"SentrySlotsHint":"MinionSlotsHint"));
+            CompanionFoodDisplay.Draw(sb,s,new Rectangle(x+16,top+278,283,32));
 
             int legacy=s.Gear.Skip(1).Any(i=>!i.IsAir)?68:0;
             for(int i=1;i<4;i++) {
@@ -339,7 +345,7 @@ public sealed class CompanionPanel : ModSystem
             string budget=L("WorkHint");
             if(s.Order.HasPreview||s.Order.Active) {
                 int required=s.Order.Length-s.Order.Completed;
-                int available=s.Bag.Where(i=>!i.IsAir&&!i.favorited&&i.type==s.Order.ItemType).Sum(i=>i.stack);
+                int available=s.Bag.Where(i=>!i.IsAir&&i.type==s.Order.ItemType).Sum(i=>i.stack);
                 budget=$"{Lang.GetItemNameValue(s.Order.ItemType)}: {L("Required")} {required} / {L("Available")} {available}";
             }
             Text(budget,x+14,y+343,Muted,0.8f,480);

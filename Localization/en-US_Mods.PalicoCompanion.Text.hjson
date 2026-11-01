@@ -84,7 +84,7 @@ CompanionLighting: {
 	NeedGlowstick: Underwater lighting needs a Glowstick
 	NeedLight: Needs a Torch or Glowstick
 	HoldingGlowstick: Lighting the way with a Glowstick
-	NoTorch: No unfavorited Torch available
+	NoTorch: No usable Torch available
 	NoSupport: No safe place for a Torch; holding it instead
 	LightingPrefix: "Lighting: "
 }
@@ -174,7 +174,7 @@ SafeConstruction: {
 	Furniture: Leaving storage furniture intact
 	Chest: Leaving the area within eight tiles of a chest intact
 	TownNpc: Building site is too close to a town NPC
-	NoMaterials: Not enough materials in the Palico inventory; favorites are not consumed
+	NoMaterials: Not enough materials in the Palico inventory
 	ModBlocked: Another mod prevents placement here
 	Changed: The building site or materials have changed
 	PlacementFailed: Cannot place here; no materials consumed
@@ -265,8 +265,8 @@ TrainingStatus: {
 }
 
 TravelAssist: {
-	NoRope: No unfavorited Rope in either inventory
-	NoPlatform: No unfavorited Wood Platforms in either inventory
+	NoRope: No Rope in the Palico inventory or unfavorited Rope in yours
+	NoPlatform: No Wood Platforms in the Palico inventory or unfavorited Wood Platforms in yours
 	Approaching: Approaching the building site
 	NoFooting: No reachable place to stand near the building site
 }
@@ -285,14 +285,15 @@ TreeAssist: {
 }
 
 Catalog: {
+	GigaBarrelBomb: Hoists a large barrel and charges nearby ground enemies, dealing 240 / 960 / 2400 damage in an 18×18-tile area; 30-second cooldown. Before upgrading, base damage rises to 480 in Hardmode. Automatically targets groups or grounded bosses; manual use also targets single enemies. Requires a safe ground route. Airborne use first finds a safe place to land; this can also happen automatically during combat. Cancelled charges do not spend the full cooldown. Does not damage tiles, players or your Palico.
 	HoneyCage: Restores 15 / 30 / 50 life to you immediately, then another 5 / 10 / 15 life over 5 seconds. Triggers at 70% life or below when you are missing at least 20 / 40 / 65 life. 60-second cooldown. Works during Potion Sickness.
-	GuardShield: Blocks one heavy hit against you, preventing up to 15 / 30 / 40 damage. 60-second cooldown. When you are above 70% life, it can instead protect your Palico at 35% life or below, or from a lethal hit. Both uses share a cooldown.
+	GuardShield: Blocks one heavy hit against you, preventing up to 15 / 30 / 40 damage. 45-second cooldown. When you are above 70% life, it can instead protect your Palico at 35% life or below, or from a lethal hit. Both uses share a cooldown.
 	CleansingPot: Removes one common debuff from you, such as Poisoned, On Fire! or Slow, prioritizing more harmful effects. Grants immunity to that debuff for 2 / 3 / 4 seconds afterward. 40-second cooldown. Minor debuffs about to expire do not trigger it. Does not remove Potion Sickness or Mana Sickness.
 	CheerBell: Restores 20 / 40 / 60 mana to you or your Palico and reduces the recipient's mana cost by 10% / 15% / 20% for 6 seconds. 35-second cooldown. Prioritizes you when casting below half mana; otherwise helps your Palico while casting or waiting for mana. The recipient must be missing at least the restoration amount or half their maximum mana, whichever is lower.
 	BattleDrum: Triggers when your Palico starts attacking: +20% / 25% / 30% damage and +10% / 15% / 20% attack speed for 10 seconds. 45-second cooldown. During the effect, your Palico's summons deal +25% / 35% / 45% damage.
-	PiercingBoomerang: On hit, you and your Palico gain 4 / 8 / 12 armor penetration against the target for 15 / 18 / 20 seconds. 35-second cooldown. Prioritizes stronger enemies and avoids targets with plenty of time left on this effect. Multiple applications do not stack.
+	PiercingBoomerang: On hit, you and your Palico gain 4 / 8 / 12 armor penetration against the target for 15 / 18 / 20 seconds. 25-second cooldown. Prioritizes stronger enemies and avoids targets with plenty of time left on this effect. Multiple applications do not stack.
 	UpdraftBag: While you are airborne, unmounted and holding Jump with little flight time left, restores 0.6 / 0.9 / 1.2 seconds of flight. Without wings, gives you a small upward boost instead. 30-second cooldown.
-	BombPot: Your Palico throws a bomb dealing 120 / 480 / 1200 area damage in a 10×10-tile area. 18-second cooldown. Does not destroy blocks. Aims ahead of moving targets and prioritizes nearby groups of visible enemies.
+	BombPot: Your Palico throws a bomb dealing 120 / 480 / 1200 area damage in a 10×10-tile area. Before upgrading, base damage rises to 240 in Hardmode. 18-second cooldown. Does not destroy blocks. Aims ahead of moving targets and prioritizes nearby groups of visible enemies.
 	PlunderKnife: Enemies damaged by you or your Palico can drop extra loot on defeat, regardless of the distance between you. Normal enemies have a 10% / 12% / 15% chance to drop 1 extra stackable loot item. Vanilla boss materials yield an average of 5% / 7.5% / 10% extra. Excludes Treasure Bags, unstackable items, coins, Hearts, Stars, biome keys, and normal enemies' Cyan-rarity or higher items. Does not trigger on friendly creatures or statue-spawned enemies. With multiple players, normal enemies use only the highest tier; boss bag materials are checked separately for each player.
 	MiningKit: Your Palico mines 20% / 25% / 30% faster. Ore detection, digging assistance and pickaxe reach each extend by 1 / 2 / 3 tiles. Does not increase pickaxe power or change your own mining stats.
 	GardenKit: Chopping trees or harvesting mature herbs with either you or your Palico yields extra resources, regardless of the distance between you. Average extra yield: 8% / 12% / 16% wood and 20% / 30% / 40% herbs, awarded at random. Does not increase seeds, gems or furniture drops, or apply to placed wood blocks. Your Palico gains 5 / 10 / 15 fishing power.
@@ -372,7 +373,7 @@ Guide: {
 	Storage:
 		'''
 		[Quick transfer]
-		With the Palico inventory open, Shift-click items in your inventory or a chest to transfer them. Favorited items stay put.
+		With the Palico inventory open, Shift-click items in your inventory or a chest to transfer them. Favorited items stay put during quick transfers; your Palico can still use and consume them from its own inventory.
 
 		[Supply chests]
 		Open a chest and click the cat icon to allow access. You can allow several chests. While you are nearby and the chest is closed, your Palico stores matching items and restocks consumables.
@@ -382,6 +383,7 @@ Guide: {
 		[Fishing]
 		Give your Palico bait, then linger by water, cast your own line or direct them to a pool.
 		Uses the best rod you carry and inherits your fishing bonuses, but consumes their own bait. Never uses Truffle Worms. Lava fishing still requires suitable gear or bait.
+		Prefers stronger bait from its own inventory. Catches use native rolls with your biome, luck and Crate Potion effects. Quest fish already in the Palico inventory are not caught again.
 		If the inventory is full, catches land on the ground. Clear them or make room to continue.
 
 		[Critters]
@@ -404,7 +406,7 @@ Guide: {
 
 
 		[Logging and herbs]
-		Chops mature trees and harvests blooming herbs. Replants when seeds and space are available; gathering still works without seeds. Favorited materials are never consumed.
+		Chops mature trees and harvests blooming herbs. Replants when seeds and space are available; gathering still works without seeds. Favorited materials in the Palico inventory remain usable.
 
 		[Building assistance]
 		Can extend the platforms or ropes you are placing. Enable each in settings.
@@ -433,6 +435,14 @@ Guide: {
 
 		With Quality of Terraria infinite ammo enabled, restocking accounts for the required stack size.
 		'''
+	Thorium:
+		'''
+
+		[Thorium class weapons]
+		Instruments use the Palico's own inspiration, with a maximum based on your permanent upgrades. They recover when depleted, and nearby allies receive the instrument's native empowerments.
+		Healing tools prioritize the injured owner and can heal nearby teammates. Self-healing spells heal the Palico. Bonus healing follows the owner; mana comes from the Palico.
+		Throwing weapons retain their native consumption and exhaustion. The Palico rests when exhausted. Life-cost weapons spend the Palico's health.
+		'''
 	Combat:
 		'''
 		Support skills activate automatically. You can also click a status-card icon to use one; the Shield and Updraft Pouch are automatic only.
@@ -444,6 +454,9 @@ Guide: {
 		'''
 		point at ore, a tree, dropped items or water and left-click.
 		Tasks pause during combat. Recall cancels them; moving away resumes following.
+
+		[Feeding]
+		Hold vanilla food, such as cooked fish or fruit, and right-click your Palico nearby to feed one serving. Out-of-combat health regeneration increases by 25% for the food's usual duration. Feeding again does not stack the effect or add to its duration.
 
 		[Fainting]
 		Your Palico retreats when defeated and returns after recovering.
@@ -477,6 +490,12 @@ Storage: {
 }
 
 ItemTooltips: {
+	GigaBarrelBomb:
+		'''
+		Charges ground enemies with a barrel, dealing {0} damage in an 18×18-tile area
+		Automatically targets groups or grounded bosses; can also be used manually
+		Safe for tiles, players and your Palico; 30-second cooldown
+		'''
 	HoneyCage:
 		'''
 		Heals you for {0} life, then another {1} over 5 seconds
@@ -487,7 +506,7 @@ ItemTooltips: {
 		'''
 		Blocks up to {0} damage from one heavy hit
 		Can protect your Palico instead when you are healthy
-		60-second shared cooldown
+		45-second shared cooldown
 		'''
 	CleansingPot:
 		'''
@@ -509,9 +528,9 @@ ItemTooltips: {
 		'''
 	PiercingBoomerang:
 		'''
-		Grants you and your Palico {0} armor penetration against the target
-		Lasts {1} seconds; does not stack
-		35-second cooldown
+		You and your Palico gain {0} armor penetration against the target hit
+		Lasts {1} seconds; multiple applications do not stack
+		25-second cooldown
 		'''
 	UpdraftBag:
 		'''
@@ -563,4 +582,10 @@ ItemTooltips: {
 		Used to craft Palico gear and upgrades
 		Right-click to open the Palico Guide
 		'''
+}
+
+CompanionBarrelCharge: {
+	Landing: Landing to prepare a barrel charge
+	NoRoute: Needs a nearby ground enemy and a safe route
+	Busy: Barrel charge in progress
 }

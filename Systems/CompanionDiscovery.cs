@@ -104,7 +104,7 @@ public sealed class CompanionDiscovery {
         if(rescue!=null) {
             Vector2 offset=rescue.Center-s.Player.Center;
             string context=Language.GetTextValue("Mods.PalicoCompanion.Discovery.Hint",Language.GetTextValue("Mods.PalicoCompanion.Discovery."+Direction(offset)),(int)Math.Ceiling(offset.Length()/16));
-            if(Notify("FoundRescue",EmoteID.EmoteConfused,context)) {
+            if(Notify("FoundRescue",EmoteID.EmotionAlert,context)) {
                 Remember(Key(world,Point.Zero,-rescue.type));DiscoveryIndicator.Emit(s,Mark(Point.Zero,rescue.type,rescue),4);Reports++;s.Report(context+"："+rescue.FullName);
             }
             return;

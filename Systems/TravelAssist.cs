@@ -15,10 +15,10 @@ public sealed class TravelAssist {
     static bool Rope(int x,int y)=>WorldGen.InWorld(x,y,12)&&Main.tile[x,y].HasTile&&Main.tileRope[Main.tile[x,y].TileType];
     static bool Empty(int x,int y)=>WorldGen.InWorld(x,y,12)&&!Main.tile[x,y].HasTile;
     public static Item[] Materials(Player p,CompanionPlayer s,int type) {
-        bool Available(Item i)=>!i.IsAir&&!i.favorited&&i.type==type;
+        bool Available(Item i)=>!i.IsAir&&i.type==type;
         if(Array.Exists(s.Bag,Available))return s.Bag;
         if(CompanionNetwork.Server){CompanionNetwork.RequestMaterial(s,type);return null;}
-        for(int i=0;i<50;i++)if(Available(p.inventory[i]))return p.inventory;
+        for(int i=0;i<50;i++)if(!p.inventory[i].favorited&&Available(p.inventory[i]))return p.inventory;
         return null;
     }
     // Bounded, same-height short crossing only. Never fills a shaft without a bank.

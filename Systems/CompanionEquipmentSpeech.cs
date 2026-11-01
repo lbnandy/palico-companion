@@ -22,17 +22,25 @@ public sealed partial class CompanionExpression {
         string variant=kind switch {
             0=>"GearHoney",1=>self?"GearGuardSelf":"GearGuard",2=>"GearCleanse",
             3=>self?"GearBellSelf":"GearBell",4=>"GearDrum",5=>"GearDart",
-            6=>"GearLift",7=>"GearBomb",_=>null
+            6=>"GearLift",7=>"GearBomb",TrainingCatalog.Barrel=>"GearBarrel",_=>null
         };
         if(variant==null)return;
         bool urgent=CompanionSpeechPacing.For("Working",variant)==CompanionSpeechPacing.Priority.Support;
         if(pendingGear is {} pending&&tick<pending.expires&&
            CompanionSpeechPacing.For("Working",pending.variant)==CompanionSpeechPacing.Priority.Support&&!urgent)return;
-        pendingGear=(variant,kind==0?EmoteID.ItemLifePotion:kind is 3 or 4?EmoteID.EmoteNote:EmoteID.EmoteHappiness,tick+240);
+        int emote=kind switch {
+            0=>EmoteID.ItemLifePotion,
+            3 or 4=>EmoteID.EmoteNote,
+            TrainingCatalog.Barrel=>EmoteID.EmotionAnger,
+            _=>EmoteID.EmoteHappiness
+        };
+        pendingGear=(variant,emote,tick+240);
     }
     void SpeakGear(CompanionPlayer s,Projectile cat) {
         if(pendingGear is not {} pending)return;
         if(tick>=pending.expires||!ChatEnabled(s)&&!EmotesEnabled(s)){pendingGear=null;return;}
+        // The charge's cue belongs to the lift, not a delayed post-explosion reaction.
+        if(pending.variant=="GearBarrel"&&!(cat.ModProjectile is CompanionCat companion&&companion.Barrel.Lifting)){pendingGear=null;return;}
         if(TrySay(s,cat,"Working",pending.emote,variant:pending.variant))pendingGear=null;
     }
 
@@ -73,6 +81,7 @@ public sealed partial class CompanionExpression {
         if(!lineKey.StartsWith(prefix,StringComparison.Ordinal))return;
         int end=lineKey.LastIndexOf('.');if(end<=prefix.Length)return;
         string pool=lineKey[prefix.Length..end],key=CompanionSpeechContext.Event(pool);
+        if(pool=="OwnerHurtDeath"&&s.Player.GetModPlayer<CompanionCartPlayer>().ReplacesDeathSpeech)return;
         string variant=pool.Length>key.Length?pool[key.Length..]:null;
         var priority=CompanionSpeechPacing.For(key,variant);
         // Server notices remain authoritative. Routine packets also respect

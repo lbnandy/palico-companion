@@ -24,7 +24,7 @@ public static class TreeSpecies {
     }
     public static Item FindSeed(Player p,CompanionPlayer s,int trunk){
         int type=SeedType(trunk);if(type==0)return null;
-        foreach(var i in s.Bag)if(!i.IsAir&&!i.favorited&&i.type==type)return i;
+        foreach(var i in s.Bag)if(!i.IsAir&&i.type==type)return i;
         if(CompanionNetwork.Server){CompanionNetwork.RequestMaterial(s,type);return null;}
         for(int n=0;n<50;n++){var i=p.inventory[n];if(!i.IsAir&&!i.favorited&&i.type==type)return i;}
         return null;

@@ -22,7 +22,7 @@ internal static class TrainingHud {
     internal static Texture2D SlotBackground {
         get {Shape(Main.graphics.GraphicsDevice,TextureAssets.InventoryBack13.Width(),TextureAssets.InventoryBack13.Height());return slotBackground;}
     }
-    static readonly Color CooldownVeil=new Color(13,15,26)*.64f;
+    internal static readonly Color CooldownVeil=new Color(13,15,26)*.64f;
     static readonly Color ActiveEdge=new(222,190,117);
     static readonly Dictionary<(int width,int height),(Texture2D fill,Texture2D edge)> Shapes=new();
     // Keep the native inventory silhouette instead of approximating its stepped
@@ -102,7 +102,7 @@ internal static class TrainingHud {
         }
     }
     internal static IEnumerable<int> Slots(CompanionPlayer s){
-        for(int i=0;i<4;i++)if((i==3||i<s.Training.Count(s.Player))&&TrainingCatalog.Id(s.Training.Slots[i]) is >=0 and <=10)yield return i;
+        for(int i=0;i<4;i++)if((i==3||i<s.Training.Count(s.Player))&&TrainingCatalog.Equipment(TrainingCatalog.Id(s.Training.Slots[i])))yield return i;
     }
     internal static bool HasEquipment(CompanionPlayer s){foreach(int _ in Slots(s))return true;return false;}
     // Supports pack from the left; work gear stays anchored to the right even

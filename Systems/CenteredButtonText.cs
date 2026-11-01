@@ -11,7 +11,7 @@ namespace PalicoCompanion.Systems;
 // glyph bounds so Chinese and Latin labels both sit at the visual centre.
 internal static class CenteredButtonText {
     static readonly System.Collections.Generic.Dictionary<(Texture2D,Rectangle),Rectangle> inkBounds=new();
-    static UIText nativeButtonText;
+    static NativeTextLine nativeButtonText;
     static ReLogic.Graphics.DynamicSpriteFont measuredFont;
     internal static void Clear(){inkBounds.Clear();measuredFont=null;nativeButtonText=null;}
     // Run during update, outside every UI SpriteBatch. Decode compressed native
@@ -89,13 +89,11 @@ internal static class CenteredButtonText {
     internal static void Draw(SpriteBatch batch,string text,Rectangle box,Color color,float maxScale=.85f) {
         // UIText positions the baseline 10 scaled units above the box centre
         // (half its 16-unit line plus its 2-unit offset). Correct only that Y.
-        var ui=nativeButtonText??=new UIText(""){TextOriginX=.5f,TextOriginY=.5f};
+        var ui=nativeButtonText??=new NativeTextLine();
         float textWidth=Terraria.UI.Chat.ChatManager.GetStringSize(FontAssets.MouseText.Value,text,Vector2.One).X;
         float scale=Math.Min(maxScale,Math.Min((box.Width-16)/Math.Max(1,textWidth),(box.Height-8)/16f));
-        ui.SetPadding(0);ui.SetText(text,scale,false);ui.TextColor=color;
         float verticalOffset=NativeVerticalOffset(text,scale);
-        ui.Left.Set(box.X,0);ui.Top.Set(box.Y+verticalOffset,0);ui.Width.Set(box.Width,0);ui.Height.Set(box.Height,0);
-        ui.Recalculate();ui.Draw(batch);
+        ui.Draw(batch,text,box,color,scale,.5f,verticalOffset);
     }
 }
 
@@ -116,12 +114,26 @@ internal static class CompanionButtonLayout {
 // Native single-line placement for paired labels and values. A common line
 // box preserves the baseline even when one word contains g, p or y.
 internal static class NativeLabelText {
-    static readonly UIText label=new(""){TextOriginY=.5f};
+    static readonly NativeTextLine label=new();
     internal static void Draw(SpriteBatch batch,string text,Rectangle box,Color color,float scale,float align=0){
         scale=Math.Min(scale,box.Width/Math.Max(1,Terraria.UI.Chat.ChatManager.GetStringSize(FontAssets.MouseText.Value,text,Vector2.One).X));
-        label.TextOriginX=align;label.SetPadding(0);label.SetText(text,scale,false);label.TextColor=color;
-        label.Left.Set(box.X,0);label.Top.Set(box.Y,0);label.Width.Set(box.Width,0);label.Height.Set(box.Height,0);
-        label.Recalculate();label.Draw(batch);
+        label.Draw(batch,text,box,color,scale,align);
+    }
+}
+
+// Keep native labels in a real UI hierarchy, including our immediate-mode
+// panels. UI extensions can inspect Parent while UIText retains its own font,
+// snippet handling and baseline. The host has no padding or visuals.
+internal sealed class NativeTextLine:Terraria.UI.UIElement {
+    readonly UIText label=new(""){TextOriginY=.5f};
+    internal NativeTextLine(){
+        SetPadding(0);label.SetPadding(0);
+        label.Width.Set(0,1);label.Height.Set(0,1);Append(label);
+    }
+    internal void Draw(SpriteBatch batch,string text,Rectangle box,Color color,float scale,float align,float offsetY=0){
+        Left.Set(box.X,0);Top.Set(box.Y+offsetY,0);Width.Set(box.Width,0);Height.Set(box.Height,0);
+        label.TextOriginX=align;label.SetText(text,scale,false);label.TextColor=color;
+        Recalculate();Draw(batch);
     }
 }
 

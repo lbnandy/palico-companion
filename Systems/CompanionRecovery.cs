@@ -16,10 +16,10 @@ public static class CompanionRecovery {
             type.GetMethod(nameof(ModItem.OnConsumeItem))?.DeclaringType==typeof(ModItem)&&type.GetMethod(nameof(ModItem.UseItem))?.DeclaringType==typeof(ModItem);
         return supported;
     }
-    public static bool ManaPotion(Item i)=>!i.IsAir&&!i.favorited&&i.stack>0&&
+    public static bool ManaPotion(Item i)=>!i.IsAir&&i.stack>0&&
         (i.type is ItemID.LesserManaPotion or ItemID.ManaPotion or ItemID.GreaterManaPotion or ItemID.SuperManaPotion||OrdinaryModPotion(i)&&i.healMana>0&&i.healLife==0&&!i.potion);
     // Supported potions use QuickHeal/QuickMana on the isolated actor.
     // Buff foods, mixed potions and projectile consumables are separate behavior.
-    public static bool Supported(Item i)=>!i.IsAir&&!i.favorited&&i.stack>0&&
+    public static bool Supported(Item i)=>!i.IsAir&&i.stack>0&&
         (i.type is ItemID.LesserHealingPotion or ItemID.HealingPotion or ItemID.GreaterHealingPotion or ItemID.SuperHealingPotion or ItemID.RestorationPotion||OrdinaryModPotion(i)&&i.potion&&i.healLife>0&&i.healMana==0);
 }

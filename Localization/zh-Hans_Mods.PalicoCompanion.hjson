@@ -1,4 +1,5 @@
 Keybinds: {
+	Hud.DisplayName: 显示／隐藏呆猫状态卡
 	Environment.DisplayName: 切换呆猫环境改动
 	Direct.DisplayName: 指挥呆猫（按住并左键选择）
 	Panel.DisplayName: 呆猫面板
@@ -6,6 +7,27 @@ Keybinds: {
 }
 
 UI: {
+	KiteHint: 右键放飞呆猫
+	KiteHelp: 按住左键放线，右键收线；切换物品结束
+	KiteStatus: 放风筝中
+	KiteUnavailable: 现在不能放飞呆猫
+	KiteNeedItem: 先拿起一个原版风筝
+	KiteCloser: 再靠近呆猫一点
+	KiteBusy: 等呆猫忙完当前动作再试试
+	KiteReelFirst: 先收起正在放的风筝
+	HudMoveHint: 按住 Alt 拖动状态卡可调整位置
+	FeedHint: 右键投喂{0}
+	FeedHelp: 每次一份 · 脱战生命恢复 +25%
+	FeedBuffName: 吃饱了
+	FeedEffect: 呆猫脱战后的生命恢复速度提高 25%（剩余 {0}）
+	FeedUnavailable: 现在不能投喂
+	FeedStatus: 正在吃东西
+	FeedEating: 等它吃完再喂
+	FeedCloser: 再靠近一点投喂
+	FeedBusy: 呆猫正在忙，等它空下来再喂
+	FeedInvalid: 这种物品不能投喂
+	FeedChanged: 物品已变化，这次没有投喂
+	FeedAccepted: 呆猫接过了食物
 	EnvironmentPause: 暂停环境改动
 	EnvironmentResume: 恢复环境改动
 	EnvironmentPaused: 已暂停自动改动环境
@@ -51,7 +73,7 @@ UI: {
 	GardenReplantBlocked: 药草已采收，当前位置暂时无法补种
 	GardenBlocked: 暂时无法采收，种子未消耗
 	QuickStack: 快捷堆叠
-	NativeBagHint: 面板打开时，玩家或箱子中的 Shift 点击会转入呆猫背包；收藏物品不会快捷转移。
+	NativeBagHint: 面板打开时，玩家或箱子中的 Shift 点击会转入呆猫背包；收藏物品不会快捷转移，但呆猫仍可使用和消耗自己背包中的收藏物品。
 	Transferred: 转移了 {0} 件物品
 	Recovering: 正在恢复，{0} 秒后回来帮忙
 	GearHint: 投掷武器可整叠装备；弹药放入呆猫背包
@@ -118,6 +140,7 @@ Projectiles: {
 	CompanionCat.DisplayName: 呆猫
 	TrainingBomb.DisplayName: 呆猫爆弹
 	TrainingDart.DisplayName: 贯通回旋镖
+	TrainingBarrelBlast.DisplayName: 特大桶爆弹
 }
 
 CoinChoices: {
@@ -135,13 +158,14 @@ Configs: {
 			Strength: "[palicohead:icon] 战斗能力"
 			Movement: "[palicoitem:HermesBoots] 移动与闪避"
 			WorkEfficiency: "[palicoitem:GoldPickaxe] 工作效率"
+			BossHealth: "[palicoitem:SuspiciousLookingEye] Boss 生命增强"
 		}
 
 		Preset: {
 			Label: 强度预设
 			Tooltip:
 				'''
-				选择预设会填入下方六项设置，保存后生效，也可以继续逐项调整
+				选择预设会调整伤害、生命、防御、两项移速和闪避，保存后生效，也可以继续逐项调整
 				手动调整后不匹配任何预设时，显示为自定义
 				联机时由房主修改，同一服务器内的所有呆猫共用这套设置
 				'''
@@ -160,6 +184,17 @@ Configs: {
 		DefensePercent: {
 			Label: 防御继承比例（%）
 			Tooltip: 呆猫的防御占主人防御的比例，不代表受到的伤害减少多少。
+		}
+
+		TargetingRangePercent: {
+			Label: 索敌范围（%）
+			Tooltip:
+				'''
+				调整呆猫发现和追踪敌人的距离，不改变武器本身的射程
+				100% 时在 75 格内发现敌人，已交战或用仆从指令标记的目标可追踪到 100 格
+				距离以主人和呆猫为准，不随屏幕大小变化；墙壁仍会阻挡视线
+				切换强度预设不会修改此项，联机时由房主统一设置
+				'''
 		}
 
 		CombatMovementPercent: {
@@ -182,6 +217,16 @@ Configs: {
 			Tooltip: 调整呆猫等待鱼上钩的速度。100% 保持当前速度，不改变渔力、每次渔获的品质判定或鱼饵消耗规则，也不加速抛竿和收竿。切换强度预设不会修改此项。
 		}
 
+		BossHealthBoost: {
+			Label: 呆猫参战时增强 Boss 生命
+			Tooltip: 开战时根据附近玩家和出战呆猫的数量增加 Boss 血量，不改变伤害、防御和招式。改动从下一场战斗生效，切换强度预设不会修改此项。默认关闭。
+		}
+
+		BossHealthPercent: {
+			Label: Boss 生命增幅（%）
+			Tooltip: 开启生命增强后生效。附近每名玩家都带一只出战呆猫时，在 Boss 原有血量上增加此比例。设为 35% 时，两人一猫增加 17.5%，两人两猫增加 35%。增幅在本场战斗中保持不变，呆猫倒地也不会改变。
+		}
+
 		Evasion: {
 			Label: 主动闪避
 			Tooltip:
@@ -201,6 +246,7 @@ Configs: {
 			Building: "[palicoitem:Torch] 照明与施工"
 			Deliveries: "[palicoitem:GoldCoin] 递交给玩家"
 			Restocking: "[palicoitem:Chest] 箱子补给与储备"
+			Appearance: "[palicoitem:BlueDye] 外观与染料"
 			Display: "[palicoitem:Goggles] 界面与提示"
 			Advanced: "[palicoitem:Wrench] 其他选项"
 		}
@@ -210,6 +256,16 @@ Configs: {
 			Tooltip: 靠近你时，将新捡的物品补入你已有的堆叠；你仍可使用的生命水晶等会优先递交。先留下呆猫需要的补给，不递交手动放入或收藏的物品。
 		}
 
+		DyeClothesOnly: {
+			Label: 染料仅作用于服装
+			Tooltip: 开启后，装备的染料只影响呆猫的头套、衣服和背后的剑袋，包含服装描边；脸、眼睛和手脚保留原色。UI 头像同步生效，风筝由下方开关单独控制。联机时队友也会看到你的选择。
+		}
+
+		DyeKite: {
+			Label: 风筝参与染色
+			Tooltip: 让呆猫的风筝跟随装备的染料变色。与「染料仅作用于服装」独立；关闭后风筝保留原色。适用于飞行跟随和放风筝。
+		}
+
 		CoinDestination: {
 			Label: 新拾取的钱币去向
 			Tooltip: 只处理呆猫新捡的钱币，不移动你原有的钱币。小猪存钱罐装不下的余款留在呆猫背包；装备钱币枪时会保留弹药。
@@ -217,32 +273,32 @@ Configs: {
 
 		StockTorches: {
 			Label: 火把储备数量
-			Tooltip: 呆猫可用存量低于目标约三分之一时，从获准的箱子补足。设为 0 时不主动补充，已有物品仍可使用；收藏物品不计入存量，也不会被消耗。
+			Tooltip: 呆猫可用存量低于目标约三分之一时，从获准的箱子补足。设为 0 时不主动补充，已有物品仍可使用；呆猫背包中的收藏物品计入存量，仍可正常使用；不会取走获准储物中的收藏物品。
 		}
 
 		StockGlowsticks: {
 			Label: 荧光棒储备数量
-			Tooltip: 呆猫可用存量低于目标约三分之一时，从获准的箱子补足。设为 0 时不主动补充，已有物品仍可使用；收藏物品不计入存量，也不会被消耗。
+			Tooltip: 呆猫可用存量低于目标约三分之一时，从获准的箱子补足。设为 0 时不主动补充，已有物品仍可使用；呆猫背包中的收藏物品计入存量，仍可正常使用；不会取走获准储物中的收藏物品。
 		}
 
 		StockPlatforms: {
 			Label: 木平台储备数量
-			Tooltip: 呆猫可用存量低于目标约三分之一时，从获准的箱子补足。设为 0 时不主动补充，已有物品仍可使用；收藏物品不计入存量，也不会被消耗。
+			Tooltip: 呆猫可用存量低于目标约三分之一时，从获准的箱子补足。设为 0 时不主动补充，已有物品仍可使用；呆猫背包中的收藏物品计入存量，仍可正常使用；不会取走获准储物中的收藏物品。
 		}
 
 		StockRopes: {
 			Label: 绳索储备数量
-			Tooltip: 呆猫可用存量低于目标约三分之一时，从获准的箱子补足。设为 0 时不主动补充，已有物品仍可使用；收藏物品不计入存量，也不会被消耗。
+			Tooltip: 呆猫可用存量低于目标约三分之一时，从获准的箱子补足。设为 0 时不主动补充，已有物品仍可使用；呆猫背包中的收藏物品计入存量，仍可正常使用；不会取走获准储物中的收藏物品。
 		}
 
 		StockHealing: {
 			Label: 治疗药水储备数量
-			Tooltip: 呆猫可用存量低于目标约三分之一时，从获准的箱子补足。设为 0 时不主动补充，已有物品仍可使用；收藏物品不计入存量，也不会被消耗。
+			Tooltip: 呆猫可用存量低于目标约三分之一时，从获准的箱子补足。设为 0 时不主动补充，已有物品仍可使用；呆猫背包中的收藏物品计入存量，仍可正常使用；不会取走获准储物中的收藏物品。
 		}
 
 		StockMana: {
 			Label: 魔力药水储备数量
-			Tooltip: 呆猫可用存量低于目标约三分之一时，从获准的箱子补足。设为 0 时不主动补充，已有物品仍可使用；收藏物品不计入存量，也不会被消耗。
+			Tooltip: 呆猫可用存量低于目标约三分之一时，从获准的箱子补足。设为 0 时不主动补充，已有物品仍可使用；呆猫背包中的收藏物品计入存量，仍可正常使用；不会取走获准储物中的收藏物品。
 		}
 
 		StockAmmo: {
@@ -252,12 +308,17 @@ Configs: {
 
 		StockAcorns: {
 			Label: 橡实储备数量
-			Tooltip: 呆猫可用存量低于目标约三分之一时，从获准的箱子补足。设为 0 时不主动补充，已有物品仍可使用；收藏物品不计入存量，也不会被消耗。
+			Tooltip: 呆猫可用存量低于目标约三分之一时，从获准的箱子补足。设为 0 时不主动补充，已有物品仍可使用；呆猫背包中的收藏物品计入存量，仍可正常使用；不会取走获准储物中的收藏物品。
 		}
 
 		StockBait: {
 			Label: 鱼饵储备数量
-			Tooltip: 呆猫可用存量低于目标约三分之一时，从获准的箱子补足。设为 0 时不主动补充，已有物品仍可使用；收藏物品不计入存量，也不会被消耗。
+			Tooltip: 呆猫可用存量低于目标约三分之一时，从获准的箱子补足。设为 0 时不主动补充，已有物品仍可使用；呆猫背包中的收藏物品计入存量，仍可正常使用；不会取走获准储物中的收藏物品。
+		}
+
+		CatCart: {
+			Label: 猫车演出
+			Tooltip: 在死亡等待画面中，由呆猫推车送你回家。偶尔：本次游玩首次符合条件时播放，之后至少间隔 5 分钟。不额外扣钱，不改变复活时间；等待不足 3 秒或硬核角色不播放。
 		}
 
 		CatSounds: {
@@ -267,7 +328,7 @@ Configs: {
 
 		Fishing: {
 			Label: 自动钓鱼
-			Tooltip: 在水边逗留或你开始钓鱼时，呆猫会寻找钓点。需要呆猫背包中未收藏的鱼饵，可参考你携带的更好鱼竿；不使用松露虫，不钓起敌人。
+			Tooltip: 在水边逗留或你开始钓鱼时，呆猫会寻找钓点。需要呆猫背包中的鱼饵（包括收藏的鱼饵），可参考你携带的更好鱼竿；不使用松露虫，不钓起敌人。
 		}
 
 		DeliverRecoveryDrops: {
@@ -287,12 +348,12 @@ Configs: {
 
 		Ropes: {
 			Label: 协助铺设绳索
-			Tooltip: 连续铺绳索时帮忙延长，下行时接长绳索；在落差边缘按住向下键可开始铺绳。使用你或呆猫背包中未收藏的绳索。此选项随当前角色保存，新角色默认关闭。
+			Tooltip: 连续铺绳索时帮忙延长，下行时接长绳索；在落差边缘按住向下键可开始铺绳。使用呆猫背包中的绳索（包括收藏的绳索），或你背包中未收藏的绳索。此选项随当前角色保存，新角色默认关闭。
 		}
 
 		AutoHeal: {
 			Label: 自动喝药
-			Tooltip: 呆猫生命不高于一半时喝治疗药水，施法时法力不足则喝魔力药水。消耗呆猫背包中未收藏的药水；药水冷却与魔力病独立于玩家。
+			Tooltip: 呆猫生命不高于一半时喝治疗药水，施法时法力不足则喝魔力药水。消耗呆猫背包中的药水（包括收藏的药水）；药水冷却与魔力病独立于玩家。
 		}
 
 		Chatter: {
@@ -312,12 +373,17 @@ Configs: {
 
 		Gardening: {
 			Label: 自动采收药草
-			Tooltip: 采收附近开花的药草，未开花的不动。有可用种子时补种；没有种子也能采收。收藏的种子不会被消耗。
+			Tooltip: 采收附近开花的药草，未开花的不动。有可用种子时补种；没有种子也能采收。呆猫背包中的收藏种子仍可用于补种。
 		}
 
 		CompanionHud: {
-			Label: 显示左上角状态卡
-			Tooltip: 在增益图标下方显示生命、状态和装备冷却。点击可打开呆猫背包；打开物品栏或全屏地图时隐藏。
+			Label: 显示呆猫状态卡
+			Tooltip: 显示生命、状态和装备冷却。点击打开呆猫背包；按住 Alt 拖动状态卡可调整位置。可在按键设置中绑定显示／隐藏快捷键。打开物品栏或全屏地图时隐藏。
+		}
+
+		HudPosition: {
+			Label: 恢复状态卡默认位置
+			Tooltip: 恢复到增益图标下方，自动避让增益图标。保存设置后生效。
 		}
 
 		ShowActivityStatus: {
@@ -379,7 +445,7 @@ Configs: {
 
 		Torches: {
 			Label: 自动照明
-			Tooltip: 陆地优先使用火把，水下或缺少火把时使用荧光棒。使用你或呆猫背包中未收藏的物品；放置火把才消耗，手持照明不消耗。
+			Tooltip: 陆地优先使用火把，水下或缺少火把时使用荧光棒。使用呆猫背包中的物品（包括收藏物品），或你背包中未收藏的物品；放置火把才消耗，手持照明不消耗。
 		}
 
 		Bridges: {
@@ -413,11 +479,36 @@ Configs: {
 		// Standard.Tooltip: ""
 		// Agile.Tooltip: ""
 	}
+
+	CatCartMode: {
+		// Tooltip: ""
+		// Occasional.Tooltip: ""
+		// EveryTime.Tooltip: ""
+		// Off.Tooltip: ""
+	}
 }
 
 MemoryTwins: 双子魔眼
 
 Speech: {
+	PetFood: {
+		Line1: 给我的喵？谢谢老大！
+		Line2: 老大也记得吃点东西喵
+		Line3: 开饭喵！我吃两口就来
+	}
+
+	PetFoodFish: {
+		Line1: 有鱼吃喵！
+		Line2: 老大，这个给我留一份喵
+		Line3: 闻到香味了喵，原来是老大带的
+	}
+
+	PetFoodSweet: {
+		Line1: 甜的喵！
+		Line2: 老大，你那份也有吗？
+		Line3: 这个好吃喵，慢慢吃
+	}
+
 	BossEventGoblin: {
 		Line1: 老大，哥布林都跑到咱们这儿来了喵！
 		Line2: 他们怎么还带刺球的喵……老大，小心脚下！
@@ -1222,14 +1313,15 @@ Discovery: {
 CatWorkbenchName: 呆猫工作台
 
 TrainingNames: {
+	GigaBarrelBomb: 特大桶爆弹
 	HoneyCage: 蜜虫笼
-	GuardShield: 小盾牌
-	CleansingPot: 净化壶
+	GuardShield: 守护盾
+	CleansingPot: 活力壶
 	CheerBell: 应援铃
-	BattleDrum: 战鼓
+	BattleDrum: 强化太鼓
 	PiercingBoomerang: 破甲镖
 	UpdraftBag: 助跃袋
-	BombPot: 爆弹壶
+	BombPot: 壶爆弹
 	PlunderKnife: 掠夺刀
 	MiningKit: 采矿工具
 	GardenKit: 丰收篮
@@ -1255,6 +1347,7 @@ Items: {
 	// ImprovedTools.Tooltip: ""
 	// MasterTools.Tooltip: ""
 	// CatWorkbench.Tooltip: ""
+	// GigaBarrelBomb.Tooltip: ""
 }
 
 EvasionChoices: {
@@ -1300,4 +1393,17 @@ StrengthPresets: {
 		Label: 自定义
 		Tooltip: 当前数值不匹配任何预设，可以继续逐项调整
 	}
+}
+
+CartChoices: {
+	Occasional: 偶尔
+	EveryTime: 每次（默认）
+	Off: 关闭
+}
+
+CartSpeech: {
+	Free: 老大躺好，这趟不收车费喵。
+	Small: 车费收好啦，送老大回家喵！
+	Gold: 老大，这趟车费有点贵喵……
+	Costly: 老大，下次咱们先把钱存好喵……
 }

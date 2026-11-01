@@ -25,10 +25,12 @@ public sealed class CompanionConfigLayout : ModSystem {
         ["AutoLogistics"]="Chest",["StockTorches"]="Torch",["StockGlowsticks"]="Glowstick",["StockPlatforms"]="WoodPlatform",["StockRopes"]="Rope",
         ["StockHealing"]="HealingPotion",["StockMana"]="ManaPotion",["StockAmmo"]="WoodenArrow",["StockAcorns"]="Acorn",["StockBait"]="Worm",
         ["CompanionHud"]="head",["ShowActivityStatus"]="Stopwatch",["CompanionMarker"]="Compass",["Discoveries"]="MetalDetector",
-        ["Chatter"]="Sign",["Emotes"]="WhoopieCushion",["CatSounds"]="Bell",["TrainingHints"]="Book",
+        ["Chatter"]="Sign",["Emotes"]="WhoopieCushion",["CatSounds"]="Bell",["CatCart"]="Minecart",["TrainingHints"]="Book",
+        ["DyeClothesOnly"]="BlueDye",["DyeKite"]="KiteBlue",
         ["RunInBackground"]="Stopwatch",["AdvancedOrders"]="Ruler",
-        ["Preset"]="head",["DamagePercent"]="GoldBroadsword",["HealthPercent"]="LifeCrystal",["DefensePercent"]="IronChainmail",
-        ["CombatMovementPercent"]="HermesBoots",["TravelMovementPercent"]="Aglet",["Evasion"]="MasterNinjaGear",["WorkSpeedPercent"]="GoldPickaxe",["FishingSpeedPercent"]="WoodFishingPole"
+        ["Preset"]="head",["DamagePercent"]="GoldBroadsword",["HealthPercent"]="LifeCrystal",["DefensePercent"]="IronChainmail",["TargetingRangePercent"]="Binoculars",
+        ["CombatMovementPercent"]="HermesBoots",["TravelMovementPercent"]="Aglet",["Evasion"]="MasterNinjaGear",["WorkSpeedPercent"]="GoldPickaxe",["FishingSpeedPercent"]="WoodFishingPole",
+        ["BossHealthBoost"]="SuspiciousLookingEye",["BossHealthPercent"]="LifeCrystal"
     };
     readonly Dictionary<string, FieldInfo> fields = new();
     readonly List<Action> restore = new();

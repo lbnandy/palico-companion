@@ -69,6 +69,20 @@ public sealed class CompanionPickup {
         ItemLoader.CanPickup(i,owner);
     public static bool Eligible(Item i,Player owner,CompanionPlayer state,Projectile cat,bool requireRoom=true)=>
         CanCollect(i,owner,state,requireRoom)&&i.noGrabDelay==0&&i.shimmerTime==0&&(!i.shimmered||i.velocity.Length()<.2f)&&Reachability.Clear(cat.Center,i.Center);
+    // Player.GrabItems already owns attraction inside a human's pickup range.
+    // Yield before contact as well as pulling, including when a void bag or a
+    // modded inventory can accept the item. A full/distant player does not
+    // prevent the companion from collecting it. Never reserve or move it here.
+    static bool PlayerCollecting(Item item) {
+        for(int i=0;i<Main.maxPlayers;i++) {
+            var player=Main.player[i];
+            if(!player.active||player.dead||player.ghost||
+                item.playerIndexTheItemIsReservedFor!=255&&item.playerIndexTheItemIsReservedFor!=i)continue;
+            int range=player.GetItemGrabRange(item);var grab=player.Hitbox;grab.Inflate(range,range);
+            if(grab.Intersects(item.Hitbox)&&player.CanPullItem(item,player.ItemSpace(item))&&ItemLoader.CanPickup(item,player))return true;
+        }
+        return false;
+    }
     internal void BeginSelection(){tracked=null;stalled=0;deferred.Clear();}
     // A caught fish and a ground pickup enter the same bag and get the same
     // provenance/receipt. Sounds stay at the caller so a sweep can batch them.
@@ -100,6 +114,7 @@ public sealed class CompanionPickup {
             int range=Range(item);Rectangle grab=cat.Hitbox;grab.Inflate(range,range);
             Rectangle tail=grab;tail.Inflate(32,32);
             bool inGrab=grab.Intersects(item.Hitbox),attached=Attached(item,tail,slot);
+            if(PlayerCollecting(item)){pulling.Remove(slot);continue;}
             if(inGrab&&item.active&&!item.IsAir&&!InventoryTransfer.HasRoom(item,state.Bag)&&Eligible(item,owner,state,cat,false))blocked=true;
             if(!pursue&&!inGrab&&!attached)continue;
             if(!inGrab&&!attached&&Vector2.DistanceSquared(item.Center,cat.Center)>pursuitRange*pursuitRange)continue;

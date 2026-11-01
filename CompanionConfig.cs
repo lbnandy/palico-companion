@@ -15,6 +15,12 @@ public enum CoinDestinationMode {
     [EnumMember(Value="存入小猪存钱罐"),LabelKey("$Mods.PalicoCompanion.CoinChoices.Bank")] Bank,
     [EnumMember(Value="留在呆猫背包"),LabelKey("$Mods.PalicoCompanion.CoinChoices.Bag")] Bag
 }
+[JsonConverter(typeof(StringEnumConverter))]
+public enum CatCartMode {
+    [LabelKey("$Mods.PalicoCompanion.CartChoices.Occasional")] Occasional,
+    [LabelKey("$Mods.PalicoCompanion.CartChoices.EveryTime")] EveryTime,
+    [LabelKey("$Mods.PalicoCompanion.CartChoices.Off")] Off
+}
 public sealed class CompanionConfig : ModConfig {
     public override ConfigScope Mode => ConfigScope.ClientSide;
     [Header("Companion")]
@@ -55,14 +61,22 @@ public sealed class CompanionConfig : ModConfig {
     [DefaultValue(20),Range(0,999)] public int StockAcorns=20;
     [DefaultValue(20),Range(0,999)] public int StockBait=20;
 
+    [Header("Appearance")]
+    [DefaultValue(false)] public bool DyeClothesOnly;
+    [DefaultValue(true)] public bool DyeKite = true;
+
     [Header("Display")]
     [DefaultValue(true)] public bool CompanionHud = true;
+    // Fraction of the available UI area; null retains automatic buff avoidance.
+    [CustomModConfigItem(typeof(Systems.CompanionHudPositionElement))]
+    public Microsoft.Xna.Framework.Vector2? HudPosition;
     [DefaultValue(false)] public bool ShowActivityStatus;
     [DefaultValue(true)] public bool CompanionMarker = true;
     [DefaultValue(true)] public bool Discoveries = true;
     [DefaultValue(true)] public bool Chatter = true;
     [DefaultValue(true)] public bool Emotes = true;
     [DefaultValue(true)] public bool CatSounds = true;
+    [DefaultValue(CatCartMode.EveryTime),Dropdown] public CatCartMode CatCart = CatCartMode.EveryTime;
     [DefaultValue(true)] public bool TrainingHints = true;
 
     [Header("Advanced")]
@@ -73,7 +87,13 @@ public sealed class CompanionConfig : ModConfig {
         Systems.CompanionExclusions.Apply(this,s);
         s.Enabled=Enabled&&!s.Stowed;s.Pickup=Pickup;s.Combat=Combat;s.Torches=Torches;s.Bridges=Bridges;s.Ropes=Ropes;s.AutoLogistics=AutoLogistics;Systems.CompanionNetwork.Configure(s);
     }
+    bool savingDisplay;
+    internal void SaveDisplayChanges() {
+        // HUD shortcuts save locally without reapplying gameplay preferences.
+        try { savingDisplay=true;SaveChanges(); }
+        finally { savingDisplay=false; }
+    }
     public override void OnChanged() {
-        if(!Main.gameMenu && Main.LocalPlayer is { active:true } p) Apply(p.GetModPlayer<CompanionPlayer>());
+        if(!savingDisplay && !Main.gameMenu && Main.LocalPlayer is { active:true } p) Apply(p.GetModPlayer<CompanionPlayer>());
     }
 }

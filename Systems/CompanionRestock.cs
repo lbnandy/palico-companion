@@ -21,21 +21,25 @@ public static class CompanionRestock {
     internal static bool Thrown(CompanionPlayer s,Item i)=>!i.IsAir&&s.Gear[0].consumable&&s.Gear[0].shoot>ProjectileID.None&&i.type==s.Gear[0].type;
     internal static Item[] Destination(CompanionPlayer s,Item i)=>Thrown(s,i)?new[]{s.Gear[0]}:s.Bag;
     static int Goal(int configured,Item i)=>configured==0?0:Math.Max(configured,Infinite(i));
-    // Merge only compatible, unstarred ammunition; native StackItems preserves
+    // Top up the active ammo stack without moving other starred stacks; StackItems preserves
     // mod data and pickup credit. A split total is not an infinite ammo stack.
     internal static void Maintain(CompanionPlayer s){
         if(CompanionNetwork.Client)return;
-        var first=s.Bag.FirstOrDefault(i=>!i.IsAir&&!i.favorited&&Ammo(s,i));
+        var first=s.Bag.FirstOrDefault(i=>!i.IsAir&&Ammo(s,i));
         if(first!=null&&Infinite(first)>0&&first.stack<Infinite(first))
             foreach(var other in s.Bag){
                 if(ReferenceEquals(first,other)||other.IsAir||other.favorited||other.type!=first.type||!ItemLoader.CanStack(first,other))continue;
                 ItemLoader.StackItems(first,other,out _,false,Math.Min(other.stack,Math.Max(0,Infinite(first)-first.stack)));
                 if(other.stack<=0)other.TurnToAir();if(first.stack>=Infinite(first))break;
             }
-        if(s.Gear[0].favorited)return;
-        foreach(var item in s.Bag)if(!item.IsAir&&!item.favorited&&Thrown(s,item)){
+        foreach(var item in s.Bag)if(!item.IsAir&&Thrown(s,item)){
             int goal=Goal(CompanionStock.For(s).Ammo,item);
-            InventoryTransfer.Move(item,new[]{s.Gear[0]},Math.Max(0,goal-s.Gear[0].stack));
+            // Reloading the equipped throwing weapon is use, not a withdrawal.
+            // Keep a starred reserve protected when it joins the equipped stack.
+            if(goal>s.Gear[0].stack&&ItemLoader.CanStack(s.Gear[0],item)){
+                s.Gear[0].favorited|=item.favorited;
+                InventoryTransfer.Move(item,new[]{s.Gear[0]},goal-s.Gear[0].stack);
+            }
         }
     }
     static (int low,int cap,Func<Item,bool> match) Policy(CompanionPlayer s,Item i){
@@ -50,8 +54,8 @@ public static class CompanionRestock {
         if(CompanionRecovery.Supported(i))return Target(stock.Healing,CompanionRecovery.Supported);
         if(s.Gear[0].mana>0&&CompanionRecovery.ManaPotion(i))return Target(stock.Mana,CompanionRecovery.ManaPotion);
         if(Ammo(s,i)){
-            if(stock.Ammo==0||s.Bag.Any(x=>!x.IsAir&&!x.favorited&&Ammo(s,x)&&!x.consumable))return (0,0,_=>false);
-            var preferred=s.Bag.FirstOrDefault(x=>!x.IsAir&&!x.favorited&&Ammo(s,x))??i;
+            if(stock.Ammo==0||s.Bag.Any(x=>!x.IsAir&&Ammo(s,x)&&!x.consumable))return (0,0,_=>false);
+            var preferred=s.Bag.FirstOrDefault(x=>!x.IsAir&&Ammo(s,x))??i;
             if(Infinite(preferred)>0){
                 if(preferred.type!=i.type||!ItemLoader.CanStack(preferred,i))return (0,0,_=>false);
                 int cap=Goal(stock.Ammo,i);
@@ -67,11 +71,11 @@ public static class CompanionRestock {
         return (0,0,_=>false);
     }
     public static int Wanted(CompanionPlayer s,Item i,bool onlyLow=false){
-        if(i.IsAir||i.favorited||Thrown(s,i)&&s.Gear[0].favorited)return 0;
+        if(i.IsAir||i.favorited)return 0;
         var policy=Policy(s,i);if(policy.cap==0)return 0;
         long held=0;
         foreach(var owned in Thrown(s,i)?s.Bag.Concat(new[]{s.Gear[0]}):s.Bag){
-            if(owned.IsAir||owned.favorited||!policy.match(owned))continue;
+            if(owned.IsAir||!policy.match(owned))continue;
             if(owned.ammo>0&&!owned.consumable)return 0; // Endless ammunition already covers the need.
             held+=owned.stack;
         }
@@ -89,9 +93,9 @@ public static class CompanionRestock {
         if(item.type==ItemID.DD2EnergyCrystal)return 0;
         if(GardenAssist.IsSeed(item.type)||TreeSpecies.IsSeed(item.type)&&item.type!=ItemID.Acorn)return 0;
         var policy=Policy(s,item);if(policy.cap<=0)return item.stack;
-        long held=(Thrown(s,item)?s.Bag.Concat(new[]{s.Gear[0]}):s.Bag).Where(i=>!i.IsAir&&!i.favorited&&policy.match(i)).Sum(i=>(long)i.stack);
+        long held=(Thrown(s,item)?s.Bag.Concat(new[]{s.Gear[0]}):s.Bag).Where(i=>!i.IsAir&&policy.match(i)).Sum(i=>(long)i.stack);
         return (int)Math.Clamp(held-policy.cap,0,item.stack);
     }
-    public static System.Collections.Generic.IEnumerable<Item> Candidates(CompanionPlayer s,Chest c)=>c.item.OrderByDescending(i=>!i.IsAir&&s.Bag.Any(held=>!held.IsAir&&!held.favorited&&held.type==i.type));
+    public static System.Collections.Generic.IEnumerable<Item> Candidates(CompanionPlayer s,Chest c)=>c.item.OrderByDescending(i=>!i.IsAir&&s.Bag.Any(held=>!held.IsAir&&held.type==i.type));
     public static bool Needs(CompanionPlayer s,Chest c)=>c.item.Any(i=>Wanted(s,i,true)>0&&InventoryTransfer.HasRoom(i,Destination(s,i)));
 }

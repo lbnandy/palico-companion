@@ -1,5 +1,15 @@
-更新呆猫形象、界面头像与模组图标。
-刷新工坊封面及展示图片。
+1.1 — 2026-11-01
 
-Updated the Palico sprites, UI portrait and mod icons.
-Refreshed the Workshop cover and gallery images.
+- 接入画师新版角色、推车与举桶动画；UI 头像和模组图标改用新版素材。
+- 新增投喂、特大桶爆弹、猫车演出与呆猫风筝。
+- 新增瑟银乐器、治疗与投掷武器联动。
+- 新增状态卡拖动、可自定义显隐快捷键、染色范围、可调索敌距离和默认关闭的 Boss 生命补偿。
+- 调整收藏物品的使用与批量取回规则，修正钓鱼奖励、命中判定和拾取拉扯。
+- 修复已复现的部分弹幕、枪械、界面和联机兼容问题；更新装备名称与部分冷却、伤害。
+
+- Integrated the artist's new character, cart and barrel animations; replaced UI portraits and mod icons with the new artwork.
+- Added feeding, the Giga Barrel Bomb, cart death scenes and Palico kite flying.
+- Added Thorium instrument, healing and throwing-weapon integration.
+- Added draggable HUD placement, an optional HUD keybind, dye scope, configurable targeting range and an opt-in boss health bonus.
+- Revised favorite-item use and bulk retrieval; corrected fishing rewards, hit rules and competing item pickup.
+- Fixed reproduced projectile, gun, UI and multiplayer compatibility cases; revised equipment names and selected cooldowns and damage.

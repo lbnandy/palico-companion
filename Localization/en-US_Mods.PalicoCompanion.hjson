@@ -1,4 +1,5 @@
 Keybinds: {
+	Hud.DisplayName: Toggle Palico status card
 	Environment.DisplayName: Toggle automatic environment changes
 	Direct.DisplayName: Direct companion (hold and click)
 	Panel.DisplayName: Companion panel
@@ -6,6 +7,27 @@ Keybinds: {
 }
 
 UI: {
+	KiteHint: Right-click to fly your Palico
+	KiteHelp: Hold left-click to let out line; right-click to reel in. Switch items to stop
+	KiteStatus: Flying a kite
+	KiteUnavailable: Cannot fly your Palico right now
+	KiteNeedItem: Hold a vanilla kite first
+	KiteCloser: Move closer to your Palico
+	KiteBusy: Let your Palico finish its current action first
+	KiteReelFirst: Reel in your other kite first
+	HudMoveHint: Alt + drag the status card to move
+	FeedHint: Right-click to feed {0}
+	FeedHelp: One serving; +25% out-of-combat health regen
+	FeedBuffName: Well Fed
+	FeedEffect: Your Palico regenerates health 25% faster out of combat ({0} remaining)
+	FeedUnavailable: Cannot feed your Palico right now
+	FeedStatus: Eating
+	FeedEating: Let your Palico finish eating first
+	FeedCloser: Move closer to feed your Palico
+	FeedBusy: Your Palico is busy; try again when things settle down
+	FeedInvalid: This item cannot be fed to your Palico
+	FeedChanged: The item changed; nothing was fed
+	FeedAccepted: Your Palico accepted the food
 	EnvironmentPause: Pause environment changes
 	EnvironmentResume: Resume environment changes
 	EnvironmentPaused: Automatic environment changes paused
@@ -51,7 +73,7 @@ UI: {
 	GardenReplantBlocked: Replant blocked; seed and normal drops retained.
 	GardenBlocked: Harvest blocked; seed retained.
 	QuickStack: Quick stack
-	NativeBagHint: While this panel is open, Shift-click in your inventory or a chest transfers to the companion. Favorited items stay put.
+	NativeBagHint: While this panel is open, Shift-click in your inventory or a chest transfers to the companion. Favorites are protected from quick transfers, but your Palico can still use and consume favorites in its own inventory.
 	Transferred: Transferred {0} items
 	Recovering: Recovering: back in {0}s
 	GearHint: Equip throwing weapons as a stack; keep ammo in the Palico inventory
@@ -112,7 +134,8 @@ UI: {
 Projectiles: {
 	CompanionCat.DisplayName: Palico
 	TrainingBomb.DisplayName: Palico Bomb
-	TrainingDart.DisplayName: Piercing Boomerang
+	TrainingDart.DisplayName: Armorbreak Dart
+	TrainingBarrelBlast.DisplayName: Giga Barrel Bomb
 }
 
 CoinChoices: {
@@ -130,13 +153,14 @@ Configs: {
 			Strength: "[palicohead:icon] Combat abilities"
 			Movement: "[palicoitem:HermesBoots] Movement and evasion"
 			WorkEfficiency: "[palicoitem:GoldPickaxe] Work efficiency"
+			BossHealth: "[palicoitem:SuspiciousLookingEye] Boss health"
 		}
 
 		Preset: {
 			Label: Strength preset
 			Tooltip:
 				'''
-				Choose a preset to fill in the six settings below, then save to apply
+				Choose a preset to adjust damage, health, defense, both movement speeds and evasion, then save to apply
 				You can still adjust each value; unmatched settings appear as Custom
 				All presets keep following and work movement at 100%
 				In multiplayer, only the host can change these settings in-game; they apply to every Palico on the server
@@ -156,6 +180,17 @@ Configs: {
 		DefensePercent: {
 			Label: Defense inherited (%)
 			Tooltip: Defense as a percentage of the owner's defense. This is not a percentage reduction in incoming damage.
+		}
+
+		TargetingRangePercent: {
+			Label: Targeting range (%)
+			Tooltip:
+				'''
+				Adjusts how far your Palico detects and tracks enemies, without changing the weapon's own reach
+				At 100%, detects enemies within 75 tiles and tracks engaged or minion-command targets up to 100 tiles
+				Targets must be in range of both you and your Palico; screen size does not affect range, and walls still block sight
+				Unaffected by strength presets; controlled by the host for everyone in multiplayer
+				'''
 		}
 
 		CombatMovementPercent: {
@@ -178,6 +213,16 @@ Configs: {
 			Tooltip: Adjusts how quickly fish bite for your Palico. 100% keeps the current speed. Does not change fishing power, catch-quality rolls, bait consumption rules, or casting and reeling animations. Strength presets leave this setting unchanged.
 		}
 
+		BossHealthBoost: {
+			Label: Increase boss health with Palicos
+			Tooltip: Increases boss health based on nearby players and their active combat Palicos when the fight begins. Does not change damage, defense or attacks. Changes apply to new fights; strength presets leave this setting unchanged. Off by default.
+		}
+
+		BossHealthPercent: {
+			Label: Extra boss health (%)
+			Tooltip: Requires boss health enhancement. With one combat Palico per nearby player, adds this percentage to the boss's existing health. At 35%, two players with one Palico add 17.5%; two players with two Palicos add 35%. The bonus stays fixed for that fight, including while Palicos recover.
+		}
+
 		Evasion: {
 			Label: Active evasion
 			Tooltip:
@@ -197,6 +242,7 @@ Configs: {
 			Building: "[palicoitem:Torch] Lighting and building"
 			Deliveries: "[palicoitem:GoldCoin] Deliveries to you"
 			Restocking: "[palicoitem:Chest] Chest supplies and reserves"
+			Appearance: "[palicoitem:BlueDye] Appearance and dyes"
 			Display: "[palicoitem:Goggles] Interface and notifications"
 			Advanced: "[palicoitem:Wrench] Other options"
 		}
@@ -206,6 +252,16 @@ Configs: {
 			Tooltip: Tops up your existing stacks and brings you usable permanent upgrades. Keeps your Palico's reserves first. Manually stored and favorited items stay put.
 		}
 
+		DyeClothesOnly: {
+			Label: Dye clothing only
+			Tooltip: Apply the equipped dye to your Palico's hood, clothes and sword sheath, including their outlines, while preserving the face, eyes, paws and feet. Also applies to UI portraits. Kite dyeing is controlled separately below. Other players see your choice in multiplayer.
+		}
+
+		DyeKite: {
+			Label: Dye the kite
+			Tooltip: Apply the equipped dye to your Palico's kite, independently of "Dye clothing only". Turn off to keep the kite's original colors. Applies both when following in flight and when flying your Palico as a kite.
+		}
+
 		CoinDestination: {
 			Label: Where collected coins go
 			Tooltip: Applies to newly collected coins. Keeps Coin Gun ammunition and any coins that do not fit in the Piggy Bank.
@@ -213,47 +269,52 @@ Configs: {
 
 		StockTorches: {
 			Label: Torches to keep
-			Tooltip: Restocks from permitted storage when supplies fall below about a third of this amount. Set to 0 to stop restocking. Favorited items are not used or counted.
+			Tooltip: Restocks from permitted storage when supplies fall below about a third of this amount. Set to 0 to stop restocking. Favorited Palico supplies are counted and usable. Favorites in permitted storage are never withdrawn.
 		}
 
 		StockGlowsticks: {
 			Label: Glowsticks to keep
-			Tooltip: Restocks from permitted storage when supplies fall below about a third of this amount. Set to 0 to stop restocking. Favorited items are not used or counted.
+			Tooltip: Restocks from permitted storage when supplies fall below about a third of this amount. Set to 0 to stop restocking. Favorited Palico supplies are counted and usable. Favorites in permitted storage are never withdrawn.
 		}
 
 		StockPlatforms: {
 			Label: Wood Platforms to keep
-			Tooltip: Restocks from permitted storage when supplies fall below about a third of this amount. Set to 0 to stop restocking. Favorited items are not used or counted.
+			Tooltip: Restocks from permitted storage when supplies fall below about a third of this amount. Set to 0 to stop restocking. Favorited Palico supplies are counted and usable. Favorites in permitted storage are never withdrawn.
 		}
 
 		StockRopes: {
 			Label: Rope to keep
-			Tooltip: Restocks from permitted storage when supplies fall below about a third of this amount. Set to 0 to stop restocking. Favorited items are not used or counted.
+			Tooltip: Restocks from permitted storage when supplies fall below about a third of this amount. Set to 0 to stop restocking. Favorited Palico supplies are counted and usable. Favorites in permitted storage are never withdrawn.
 		}
 
 		StockHealing: {
 			Label: Healing Potions to keep
-			Tooltip: Restocks from permitted storage when supplies fall below about a third of this amount. Set to 0 to stop restocking. Favorited items are not used or counted.
+			Tooltip: Restocks from permitted storage when supplies fall below about a third of this amount. Set to 0 to stop restocking. Favorited Palico supplies are counted and usable. Favorites in permitted storage are never withdrawn.
 		}
 
 		StockMana: {
 			Label: Mana Potions to keep
-			Tooltip: Restocks from permitted storage when supplies fall below about a third of this amount. Set to 0 to stop restocking. Favorited items are not used or counted.
+			Tooltip: Restocks from permitted storage when supplies fall below about a third of this amount. Set to 0 to stop restocking. Favorited Palico supplies are counted and usable. Favorites in permitted storage are never withdrawn.
 		}
 
 		StockAmmo: {
 			Label: Ammunition to keep
-			Tooltip: Restocks ammunition for the equipped weapon, including throwing weapons. With Quality of Terraria infinite ammo enabled, tops up the active type to its threshold. Otherwise restocks below about a third of this amount. Set to 0 to stop restocking. Favorites are not used.
+			Tooltip: Restocks ammunition for the equipped weapon, including throwing weapons. With Quality of Terraria infinite ammo enabled, tops up the active type to its threshold. Otherwise restocks below about a third of this amount. Set to 0 to stop restocking. Favorited Palico ammunition remains usable. Favorites in permitted storage are never withdrawn.
 		}
 
 		StockAcorns: {
 			Label: Acorns to keep
-			Tooltip: Restocks from permitted storage when supplies fall below about a third of this amount. Set to 0 to stop restocking. Favorited items are not used or counted.
+			Tooltip: Restocks from permitted storage when supplies fall below about a third of this amount. Set to 0 to stop restocking. Favorited Palico supplies are counted and usable. Favorites in permitted storage are never withdrawn.
 		}
 
 		StockBait: {
 			Label: Bait to keep
-			Tooltip: Restocks from permitted storage when supplies fall below about a third of this amount. Set to 0 to stop restocking. Favorited items are not used or counted.
+			Tooltip: Restocks from permitted storage when supplies fall below about a third of this amount. Set to 0 to stop restocking. Favorited Palico supplies are counted and usable. Favorites in permitted storage are never withdrawn.
+		}
+
+		CatCart: {
+			Label: Cat cart animation
+			Tooltip: Your Palico wheels you home on the death screen. Occasionally: the first eligible death each session, then at least 5 minutes apart. No extra coin loss or respawn delay. Skipped for Hardcore characters or less than 3 seconds of waiting.
 		}
 
 		CatSounds: {
@@ -263,7 +324,7 @@ Configs: {
 
 		Fishing: {
 			Label: Automatic fishing
-			Tooltip: Fishes when you linger by water or cast your own line, using unfavorited bait from the Palico inventory. Moving nearby or opening your inventory does not interrupt it. Water, honey and lava use the usual fishing requirements.
+			Tooltip: Fishes when you linger by water or cast your own line, using bait from the Palico inventory, including favorites. Moving nearby or opening your inventory does not interrupt it. Water, honey and lava use the usual fishing requirements.
 		}
 
 		DeliverRecoveryDrops: {
@@ -288,7 +349,7 @@ Configs: {
 
 		AutoHeal: {
 			Label: Use recovery potions
-			Tooltip: Drinks Healing Potions at half life and Mana Potions when a spell needs mana. Uses unfavorited Palico supplies. Potion cooldowns and Mana Sickness are saved.
+			Tooltip: Drinks Healing Potions at half life and Mana Potions when a spell needs mana. Uses Palico supplies, including favorites. Potion cooldowns and Mana Sickness are saved.
 		}
 
 		Chatter: {
@@ -308,12 +369,17 @@ Configs: {
 
 		Gardening: {
 			Label: Harvest blooming herbs
-			Tooltip: Harvests wild or planted blooming herbs. Replants when an unfavorited seed is available, including fresh drops. Only successful replanting consumes a seed. Leaves unbloomed herbs alone.
+			Tooltip: Harvests wild or planted blooming herbs. Replants when a seed is available, including favorited Palico seeds and fresh drops. Only successful replanting consumes a seed. Leaves unbloomed herbs alone.
 		}
 
 		CompanionHud: {
-			Label: Palico status card
-			Tooltip: Shown below your buffs. Click to open the Palico inventory. Hidden while your inventory or full-screen map is open.
+			Label: Show Palico status card
+			Tooltip: Shows health, status and equipment cooldowns. Click to open the Palico inventory; hold Alt and drag the status card to move. A show/hide key can be assigned in Controls. Hidden while your inventory or full-screen map is open.
+		}
+
+		HudPosition: {
+			Label: Restore status card position
+			Tooltip: Returns the card below your buffs and follows their layout automatically. Save changes to apply.
 		}
 
 		ShowActivityStatus: {
@@ -338,7 +404,7 @@ Configs: {
 
 		Forestry: {
 			Label: Chop and replant trees
-			Tooltip: Uses a basic axe or a stronger axe you carry. Chops mature trees, including palms, ash trees and gem trees. Replants with a matching unfavorited seed when possible; only successful planting consumes it. Leaves trees built into housing walls or actuators alone unless you start chopping them.
+			Tooltip: Uses a basic axe or a stronger axe you carry. Chops mature trees, including palms, ash trees and gem trees. Replants with a matching seed from the Palico inventory (including favorites) or an unfavorited seed from yours; only successful planting consumes it. Leaves trees built into housing walls or actuators alone unless you start chopping them.
 		}
 
 		DiggingAssist: {
@@ -375,7 +441,7 @@ Configs: {
 
 		Torches: {
 			Label: Automatic lighting
-			Tooltip: Prefers Torches on land and holds Glowsticks underwater or when Torches run out. Uses unfavorited supplies. Placing a Torch consumes it; holding a light does not.
+			Tooltip: Prefers Torches on land and holds Glowsticks underwater or when Torches run out. Uses Palico supplies (including favorites) or unfavorited supplies from your inventory. Placing a Torch consumes it; holding a light does not.
 		}
 
 		Bridges: {
@@ -409,11 +475,36 @@ Configs: {
 		Standard.Tooltip: ""
 		Agile.Tooltip: ""
 	}
+
+	CatCartMode: {
+		Tooltip: ""
+		Occasional.Tooltip: ""
+		EveryTime.Tooltip: ""
+		Off.Tooltip: ""
+	}
 }
 
 MemoryTwins: the Twins
 
 Speech: {
+	PetFood: {
+		Line1: For me? Thanks, Boss!
+		Line2: You should have a bite too, Boss.
+		Line3: Food! Give me a moment, Boss.
+	}
+
+	PetFoodFish: {
+		Line1: Fish! Now that's a treat, meow!
+		Line2: Save me some of this next time, Boss!
+		Line3: So that's what smelled so good!
+	}
+
+	PetFoodSweet: {
+		Line1: Ooh, something sweet!
+		Line2: You saved some for yourself too, right?
+		Line3: Mmm... I'm taking my time with this one.
+	}
+
 	BossEventGoblin: {
 		Line1: Goblins at our doorstep, Meowster!
 		Line2: Spiky balls! Watch your paws... feet!
@@ -1218,14 +1309,15 @@ Discovery: {
 CatWorkbenchName: Palico Workbench
 
 TrainingNames: {
+	GigaBarrelBomb: Giga Barrel Bomb
 	HoneyCage: Vigorwasp Cage
-	GuardShield: Shield
+	GuardShield: Guardian Shield
 	CleansingPot: Vase of Vitality
 	CheerBell: Cheer Bell
 	BattleDrum: Power Drum
-	PiercingBoomerang: Piercing Boomerang
+	PiercingBoomerang: Armorbreak Dart
 	UpdraftBag: Updraft Pouch
-	BombPot: Bomb Pot
+	BombPot: Meowlotov Cocktail
 	PlunderKnife: Plunderblade
 	MiningKit: Mining Kit
 	GardenKit: Harvest Basket
@@ -1251,6 +1343,7 @@ Items: {
 	ImprovedTools.Tooltip: ""
 	MasterTools.Tooltip: ""
 	CatWorkbench.Tooltip: ""
+	GigaBarrelBomb.Tooltip: ""
 }
 
 EvasionChoices: {
@@ -1296,4 +1389,17 @@ StrengthPresets: {
 		Label: Custom
 		Tooltip: These values do not match a preset; adjust individual settings as you like
 	}
+}
+
+CartChoices: {
+	Occasional: Occasionally
+	EveryTime: Every time (default)
+	Off: Off
+}
+
+CartSpeech: {
+	Free: Lie back, Meowster. This ride is on me!
+	Small: Fare collected! Let's get you home, Meowster.
+	Gold: That was one expensive ride, Meowster...
+	Costly: Let's bank those coins next time, Meowster...
 }

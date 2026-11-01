@@ -17,11 +17,14 @@ internal sealed class CompanionFace {
         Closed=!downed&&(hurtTicks>0||petTicks>0&&petTicks%45<32);
     }
     internal static void Draw(SpriteBatch batch,Vector2 feet,int pose,int direction,Color light){
-        int bob=CompanionDivingVisual.HeadBob(pose);
-        var source=new Rectangle(11,CompanionSpriteLayout.Blink*CompanionSprite.Height+14,10,2);
+        // These authored expressions already include their closed eyes.
+        if(pose is CompanionSpriteLayout.Pet or CompanionSpriteLayout.Downed or CompanionSpriteLayout.RestBlink)return;
+        if(!CompanionSpriteLayout.TryFaceOffset(pose,out var offset))return;
+        var source=new Rectangle(15,CompanionSpriteLayout.Blink*CompanionSprite.Height+14,6,2);
         // Crop origins must mirror about the same whole-frame origin as DrawBody.
-        float x=direction<0?CompanionSprite.Width-source.Right:source.X;
-        var origin=CompanionSpriteLayout.Origin-new Vector2(x,14+bob);
+        int targetX=source.X+offset.X;
+        float x=direction<0?CompanionSprite.Width-targetX-source.Width:targetX;
+        var origin=CompanionSpriteLayout.Origin-new Vector2(x,14+offset.Y);
         CompanionDye.Draw(batch,new DrawData(CompanionSprite.Atlas,feet,source,light,0,origin,
             CompanionSpriteLayout.Scale,direction<0?SpriteEffects.FlipHorizontally:SpriteEffects.None));
     }

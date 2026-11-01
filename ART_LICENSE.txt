@@ -1,0 +1,25 @@
+# Artwork license / 美术素材许可
+
+## 中文
+
+本项目的 MIT 许可证适用于代码及文字文档，不适用于美术素材。
+
+除另有明确许可的第三方内容外，角色贴图、动画、UI 图像、图标、封面及宣传图片保留所有权利。这包括 `Assets/` 中的图像、根目录的 `icon*.png` 以及 `docs/images/` 中的图片和动画；`Assets/` 中的 CSV 数据不属于美术素材，仍适用 MIT。
+
+这些素材随呆猫伙伴模组提供，供正常游玩及本地构建本模组使用。单独提取、修改后再发布、用于其他项目或商业素材包，需要取得相关权利人的另行授权。正常游戏截图、实况与介绍视频不受本声明禁止。
+
+各素材的权利归各自权利人所有。本声明不授予第三方游戏角色、商标或素材的权利，也不改变已明确提供的第三方许可；参见 [第三方许可](ThirdParty/README.md)。需要其他用途的授权，请通过仓库联系维护者，由相关权利人确认。
+
+本声明不撤销此前已经有效授予的许可。
+
+## English
+
+The MIT license covers this project's code and text documentation, not its artwork.
+
+Except for third-party content with an explicit separate license, all rights are reserved in character sprites, animations, UI images, icons, covers and promotional images. This includes images in `Assets/`, root-level `icon*.png` files, and images and animations in `docs/images/`. CSV data in `Assets/` remains covered by MIT.
+
+These assets are supplied with Palico Companion for normal gameplay and local builds of this mod. Extracting assets for separate reuse, publishing modified artwork, or using them in other projects or commercial asset packs requires separate permission from the relevant rights holders. Normal gameplay screenshots, streams and showcase videos are not prohibited by this notice.
+
+Rights remain with their respective holders. This notice grants no rights to third-party game characters, trademarks or assets and does not override explicit third-party licenses; see [third-party notices](ThirdParty/README.md). Contact the maintainer through this repository for other uses so that permission can be confirmed with the relevant rights holders.
+
+This notice does not revoke any previously valid license grant.

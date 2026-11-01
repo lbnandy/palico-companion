@@ -66,7 +66,7 @@ public sealed class CompanionFishing {
         return best;
     }
     internal static bool StandardRod(Item item)=>Terraria.ID.ContentSamples.ProjectilesByType.TryGetValue(item.shoot,out var shot)&&shot.bobber;
-    public static bool SafeBait(Item i)=>!i.IsAir&&!i.favorited&&i.bait>0&&i.type!=ItemID.TruffleWorm;
+    public static bool SafeBait(Item i)=>!i.IsAir&&i.bait>0&&i.type!=ItemID.TruffleWorm;
     internal bool WaitingForOverflow(CompanionPlayer s){
         waitingOverflow.RemoveAll(i=>!i.active||i.IsAir||!Main.item.Contains(i));
         return waitingOverflow.Any(i=>!InventoryTransfer.HasRoom(i,s.Bag));
@@ -186,9 +186,17 @@ public sealed class CompanionFishing {
         Actor.accLavaFishing=State.Player.accLavaFishing;
         Actor.dead=false;Actor.selectedItem=0;Actor.itemRotation=0;Actor.heldProj=-1;
         Actor.fishingSkill=State.Player.fishingSkill+(State.Training.Work(10)?5*(State.Training.Tier+1):0);
-        var p=State.Player;Actor.name=p.name;Actor.ZoneCorrupt=p.ZoneCorrupt;Actor.ZoneCrimson=p.ZoneCrimson;
-        Actor.ZoneJungle=p.ZoneJungle;Actor.ZoneSnow=p.ZoneSnow;Actor.ZoneHallow=p.ZoneHallow;Actor.ZoneDesert=p.ZoneDesert;
+        var p=State.Player;Actor.name=p.name;
+        // Native reward rolls read these separately from GetFishingConditions.
+        // Copy the native biome flags together so ocean/dungeon/mushroom catches
+        // follow the same rules as the owner's other fishing bonuses.
+        Actor.zone1=p.zone1;Actor.zone2=p.zone2;Actor.zone3=p.zone3;Actor.zone4=p.zone4;Actor.zone5=p.zone5;
+        Actor.cratePotion=p.cratePotion;Actor.luck=p.luck;
+        // HasItem suppresses duplicate quest fish. Expose the cat's actual bag,
+        // not the owner's inventory; native bait selection still uses slot 54.
+        for(int i=1;i<50;i++)Actor.inventory[i]=i<=State.Bag.Length?State.Bag[i-1]:empty;
     }
+    readonly Item empty=new();
     readonly List<DrawData> cache=new();
     public Vector2 DrawShift(Color light){
         cache.Clear();
@@ -204,7 +212,7 @@ public sealed class CompanionFishing {
         var c=(CompanionCat)Cat.ModProjectile;var hand=CompanionSprite.Hand(Cat);
         Vector2 shift=DrawShift(light);
         foreach(var entry in cache){var draw=entry;draw.position+=shift;draw.Draw(Main.spriteBatch);}
-        CompanionItemVisual.DrawGrip(Main.spriteBatch,Cat.Bottom+new Vector2(0,Cat.gfxOffY)-Main.screenPosition,c.Animation.SpriteFrame,Cat.direction,light);
+        CompanionItemVisual.DrawHeldItemForeground(Main.spriteBatch,Cat.Bottom+new Vector2(0,Cat.gfxOffY)-Main.screenPosition,c.Animation.SpriteFrame,Cat.direction,light);
     }
     internal void PrepareVisual(){
         // Remote replicas do not run ItemCheck, which can reel/consume bait.
@@ -251,8 +259,8 @@ public sealed class CompanionFishingBobber:GlobalProjectile{
     public static CompanionFishing Of(Projectile p)=>p.TryGetGlobalProjectile<CompanionFishingBobber>(out var g)?g.Context:null;
 }
 public sealed class CompanionFishingHooks:ModSystem{
-    public override void Load(){On_Projectile.Update+=Update;On_Main.DrawProjDirect+=Draw;On_Player.GetItem+=GetItem;On_Main.DrawProj_FishingLine+=Line;}
-    public override void Unload(){On_Projectile.Update-=Update;On_Main.DrawProjDirect-=Draw;On_Player.GetItem-=GetItem;On_Main.DrawProj_FishingLine-=Line;}
+    public override void Load(){On_Projectile.Update+=Update;On_Main.DrawProj_Inner+=Draw;On_Player.GetItem+=GetItem;On_Main.DrawProj_FishingLine+=Line;}
+    public override void Unload(){On_Projectile.Update-=Update;On_Main.DrawProj_Inner-=Draw;On_Player.GetItem-=GetItem;On_Main.DrawProj_FishingLine-=Line;}
     static void Line(On_Main.orig_DrawProj_FishingLine orig,Projectile p,ref float x,ref float y,Vector2 center){
         var c=CompanionFishingBobber.Of(p);
         if(c!=null&&c.Available){center+=c.DrawShift(Lighting.GetColor(c.Cat.Center.ToTileCoordinates()));}
@@ -277,9 +285,10 @@ public sealed class CompanionFishingHooks:ModSystem{
         using(new CompanionFishing.Scope(c))orig(p,index);
         if(CompanionNetwork.Server&&p.active&&Main.GameUpdateCount%6==0)NetMessage.SendData(MessageID.SyncProjectile,-1,-1,null,p.whoAmI);
     }
-    static void Draw(On_Main.orig_DrawProjDirect orig,Main self,Projectile p){
+    // Match native weapon drawing: the small DrawProjDirect wrapper can inline.
+    static void Draw(On_Main.orig_DrawProj_Inner orig,Main self,Projectile p){
         var c=CompanionFishingBobber.Of(p);if(c==null){orig(self,p);return;}
-        if(!c.Available)return;using(new CompanionFishing.Scope(c)){c.PrepareVisual();orig(self,p);}
+        if(!c.Available)return;using(new CompanionFishing.Scope(c)){c.PrepareVisual();self.PrepareDrawnProjectileDrawing(p);orig(self,p);}
     }
 }
 

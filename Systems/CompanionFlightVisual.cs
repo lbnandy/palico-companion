@@ -37,7 +37,7 @@ public sealed class CompanionFlightVisual {
         for(int row=0;row<texture.Height;row++){
             int lean=(int)Math.Round(sway*(1-row/30f))*2;
             var at=new Vector2((int)top.X-30+lean,(int)top.Y+row*2);
-            CompanionDye.Draw(batch,new Terraria.DataStructures.DrawData(texture,at,new Rectangle(0,row,31,1),cloth,0,Vector2.Zero,2,direction<0?SpriteEffects.FlipHorizontally:SpriteEffects.None));
+            CompanionDye.Draw(batch,new Terraria.DataStructures.DrawData(texture,at,new Rectangle(0,row,31,1),cloth,0,Vector2.Zero,2,direction<0?SpriteEffects.FlipHorizontally:SpriteEffects.None),kite:true);
         }
         Color wood=new Color(110,83,48).MultiplyRGBA(frameLight)*amount;
         // Small foot rail and shoulder attachments imply a harness behind the cat.
@@ -67,7 +67,7 @@ public sealed class CompanionFlightVisual {
             Vector2 p=from+delta*(i/(float)steps);
             int x=(int)from.X+(int)Math.Round((p.X-from.X)/2)*2;
             int y=(int)from.Y+(int)Math.Round((p.Y-from.Y)/2)*2;
-            CompanionDye.Draw(batch,new Terraria.DataStructures.DrawData(TextureAssets.MagicPixel.Value,new Vector2(x,y),new Rectangle(0,0,1,1),color,0,Vector2.Zero,2,SpriteEffects.None));
+            CompanionDye.Draw(batch,new Terraria.DataStructures.DrawData(TextureAssets.MagicPixel.Value,new Vector2(x,y),new Rectangle(0,0,1,1),color,0,Vector2.Zero,2,SpriteEffects.None),kite:true);
         }
     }
 }

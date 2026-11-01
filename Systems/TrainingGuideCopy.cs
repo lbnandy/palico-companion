@@ -9,15 +9,22 @@ internal static class TrainingGuideCopy {
     // Resolve the catalog's three-value expressions, rather than maintaining
     // another set of balance numbers for the guide, tooltips and HUD.
     static readonly Regex TierValues=new(@"(?<v>\d+(?:\.\d+)?%?)\s*/\s*(?<v>\d+(?:\.\d+)?%?)\s*/\s*(?<v>\d+(?:\.\d+)?%?)",RegexOptions.Compiled);
+    // Explosive damage also follows the world's Hardmode state, so current
+    // values use the same resolver as the server-authoritative projectile.
+    static string TierValue(Match match,int kind,int tier)=>kind switch {
+        7=>CompanionTraining.BombDamage(tier).ToString(),
+        TrainingCatalog.Barrel=>CompanionBarrelCharge.Damage(tier).ToString(),
+        _=>match.Groups["v"].Captures[Math.Clamp(tier,0,2)].Value
+    };
     internal static string Detail(int kind,int tier,bool compare=false){
         string text=TrainingCatalog.Entries[kind].Detail;
-        return compare?text:TierValues.Replace(text,m=>m.Groups["v"].Captures[Math.Clamp(tier,0,2)].Value);
+        return compare?text:TierValues.Replace(text,m=>TierValue(m,kind,tier));
     }
     internal static string Tooltip(int kind,int tier,bool compare=false){
         // Short copy reuses the guide's tier values; balance numbers have one
         // localized source, rather than drifting between two descriptions.
         var entry=TrainingCatalog.Entries[kind];
-        object[] values=TierValues.Matches(entry.Detail).Select(m=>(object)(compare?m.Value:m.Groups["v"].Captures[Math.Clamp(tier,0,2)].Value)).ToArray();
+        object[] values=TierValues.Matches(entry.Detail).Select(m=>(object)(compare?m.Value:TierValue(m,kind,tier))).ToArray();
         return CompanionText.Get("ItemTooltips."+entry.Key,values);
     }
     internal static string DirectInstruction(){
@@ -27,6 +34,7 @@ internal static class TrainingGuideCopy {
     internal static string Page(int entry)=>entry switch {
         1=>CompanionText.Get("Guide.Introduction")+DirectInstruction()+CompanionText.Get("Guide.DirectAndRecover"),
         2=>CompanionText.Get("Guide.Combat")+
+            (CompanionCrossMod.SupportTool!=null?CompanionText.Get("Guide.Thorium"):"")+
             (CompanionCrossMod.InfiniteStack!=null?CompanionText.Get("Guide.QotAmmo"):"")+
             CompanionText.Get("Guide.Summons"),
         3=>CompanionText.Get("Guide.Mining")+

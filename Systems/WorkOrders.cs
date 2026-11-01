@@ -98,8 +98,8 @@ public sealed class WorkOrders
             return "Construction start must be within 12 tiles of the player";
         int available = 0;
         if (bag != null) foreach (Item item in bag)
-            if (item != null && !item.IsAir && !item.favorited && item.type == ItemType) available += Math.Min(item.stack, 24);
-        if (available < Length) return $"Insufficient un-favorited materials: {available}/{Length}";
+            if (item != null && !item.IsAir && item.type == ItemType) available += Math.Min(item.stack, 24);
+        if (available < Length) return $"Insufficient materials: {available}/{Length}";
         for (int n = 0; n < Length; n++) {
             int x = Start.X + Step.X * n, y = Start.Y + Step.Y * n;
             if (!WorldGen.InWorld(x, y, 10)) return "Preview touches the world boundary";

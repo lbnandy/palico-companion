@@ -8,10 +8,17 @@ namespace PalicoCompanion.Systems;
 // Tactical reach is a capability, not a damage class. Melee-damage projectiles
 // may be ranged attacks, while a shortsword's stab projectile is still contact.
 internal static class CompanionCombatReach {
-    internal const float SearchRange=700; // stable ExampleSimpleMinion's automatic search
-    internal static bool Clear(Vector2 from,Vector2 to)=>Reachability.Clear(from,to,SearchRange);
+    // World-space limits are shared by authority and replicas, not a viewport.
+    // Acquisition and retention are separate, as in vanilla minion targeting.
+    // Read the synchronized config live; changing range must not require a
+    // respawn or alter native projectile lifetime / finite weapon reach.
+    internal static float SearchRange=>1200*CompanionBalanceConfig.Current.TargetingRangeScale;
+    internal static float TrackingRange=>1600*CompanionBalanceConfig.Current.TargetingRangeScale;
+    internal static float RangedRange=>TrackingRange;
+    internal static bool Clear(Vector2 from,Vector2 to)=>Reachability.Clear(from,to,TrackingRange);
     internal static Projectile Sample(Item item)=>item.shoot>ProjectileID.None&&ContentSamples.ProjectilesByType.TryGetValue(item.shoot,out var p)?p:null;
     internal static float Range(Item item,Projectile cat=null) {
+        if(CompanionCrossMod.WeaponReach?.Invoke(item) is float reach)return reach;
         if(item.consumable&&CompanionWeapons.SafeThrow(item))return Math.Clamp(item.shootSpeed*18,100,240);
         var shot=Sample(item);
         if(shot==null||shot.aiStyle==ProjAIStyleID.ShortSword)return CompanionWeapons.Range(item)+24;
@@ -24,7 +31,7 @@ internal static class CompanionCombatReach {
             ProjectileID.ChainKnife=>Main.remixWorld?300:150,ProjectileID.BoxingGlove=>200,
             ProjectileID.GolemFist=>500,ProjectileID.ChainGuillotine=>525,_=>700});
         if(shot.aiStyle==ProjAIStyleID.Flail)return cat?.ModProjectile is CompanionCat c?c.Weapons.FlailRange:100;
-        if(shot.aiStyle==ProjAIStyleID.Yoyo)return Math.Clamp(ProjectileID.Sets.YoyosMaximumRange[shot.type]*0.85f,80,SearchRange);
+        if(shot.aiStyle==ProjAIStyleID.Yoyo)return Math.Clamp(ProjectileID.Sets.YoyosMaximumRange[shot.type]*0.85f,80,700);
         if(ProjectileID.Sets.IsAWhip[shot.type])return 220;
         // These are the sword's swing arc, not traveling sword beams.
         if(shot.aiStyle==ProjAIStyleID.LightsBane)return CompanionWeapons.Range(item)+24;
@@ -39,7 +46,7 @@ internal static class CompanionCombatReach {
         if(shot.aiStyle==ProjAIStyleID.Vilethorn)return Math.Clamp(item.shootSpeed*7,100,350); // finite chain of thorn segments
         if(shot.aiStyle==ProjAIStyleID.BloodThorn)return 400; // ground-spawned tears
         if(!item.noMelee&&shot.aiStyle==ProjAIStyleID.SuperStarBeam)return CompanionWeapons.Range(item)+24; // auxiliary spores on a sword swing
-        return SearchRange;
+        return RangedRange;
     }
     internal static bool Distance(Item item) {
         var shot=Sample(item);

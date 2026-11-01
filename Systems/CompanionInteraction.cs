@@ -29,7 +29,7 @@ public sealed class CompanionInteraction:ModSystem {
         Hovered=false;
         if(Main.gameMenu||Main.netMode==NetmodeID.Server||Main.inFancyUI||Main.mapFullscreen||Terraria.GameInput.PlayerInput.WritingText)return;
         var p=Main.LocalPlayer;var s=p.GetModPlayer<CompanionPlayer>();
-        if(s.PanelOpen||p.mouseInterface||!Main.mouseItem.IsAir||!CanInteract(p,s.Cat,WorldCursor(new Vector2(Terraria.GameInput.PlayerInput.MouseInfo.X,Terraria.GameInput.PlayerInput.MouseInfo.Y),Main.screenPosition,Main.GameViewMatrix.TransformationMatrix)))return;
+        if(CompanionKiteInput.Capturing||s.PanelOpen||p.mouseInterface||CompanionStatusBar.BlocksInput||!Main.mouseItem.IsAir||!CanInteract(p,s.Cat,WorldCursor(new Vector2(Terraria.GameInput.PlayerInput.MouseInfo.X,Terraria.GameInput.PlayerInput.MouseInfo.Y),Main.screenPosition,Main.GameViewMatrix.TransformationMatrix)))return;
         Hovered=true;
     }
     internal void HandleWorldInteraction(){
@@ -39,7 +39,9 @@ public sealed class CompanionInteraction:ModSystem {
         if(Main.mouseRight&&Main.npcChatRelease&&!p.tileInteractionHappened){
             Main.npcChatRelease=false;p.tileInteractionHappened=true;p.mouseInterface=true;
             p.SetTalkNPC(-1);Main.npcChatText="";p.sign=-1;Main.editSign=false;
-            CompanionUIFlow.Bag(s);Terraria.Audio.SoundEngine.PlaySound(SoundID.Chat);
+            if(p.selectedItem is >=0 and <10&&CompanionKite.Item(p.HeldItem))CompanionKiteInput.Request(s);
+            else if(p.selectedItem is >=0 and <10&&CompanionFeeding.Food(p.HeldItem))CompanionFeeding.Request(s);
+            else {CompanionUIFlow.Bag(s);Terraria.Audio.SoundEngine.PlaySound(SoundID.Chat);}
         }
     }
     public override void ModifyInterfaceLayers(List<GameInterfaceLayer> layers){
@@ -61,7 +63,12 @@ public sealed class CompanionInteraction:ModSystem {
         var s=Main.LocalPlayer.GetModPlayer<CompanionPlayer>();
         CompanionStatusBar.Draw(s);
         if(Hovered){
-            Main.instance.MouseText($"{s.CatName}: {s.Vitals.Health}/{s.Vitals.MaxHealth}");
+            string hint=s.Player.selectedItem is >=0 and <10&&CompanionKite.Item(s.Player.HeldItem)
+                ?CompanionKite.Text("Hint")+"\n"+CompanionKite.Text(CompanionKite.Unavailable(s)??"Help")
+                :s.Player.selectedItem is >=0 and <10&&CompanionFeeding.Food(s.Player.HeldItem)
+                ?CompanionFeeding.Text("Hint",s.Player.HeldItem.Name)+"\n"+CompanionFeeding.Text(CompanionFeeding.Unavailable(s)??"Help")
+                :$"{s.CatName}: {s.Vitals.Health}/{s.Vitals.MaxHealth}";
+            Main.instance.MouseText(hint);
             if(s.Cat is {} near){
                 DrawChatBubble(near);
             }

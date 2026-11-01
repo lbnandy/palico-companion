@@ -79,7 +79,7 @@ public sealed class CompanionPlayer : ModPlayer
         tag["lifeSteal"]=Vitals.LifeSteal;tag["manaSickness"]=Vitals.ManaSickness;tag["manaDelay"]=Vitals.ManaDelay;
         tag["dialogue"]=Dialogue.Save();
         tag["discoveries"]=Discovery.Save();
-        tag["potionDelay"]=Vitals.PotionDelay; tag["autoLogistics"]=AutoLogistics; tag["schema"]=5; tag["maxHealth"]=Vitals.MaxHealth;tag["maxMana"]=Vitals.MaxMana;tag["mana"]=Vitals.Mana; tag["gear"]=Gear.Select(ItemIO.Save).ToList(); tag["health"]=Vitals.Health;tag["recovery"]=Vitals.Recovery; tag["bag"]=Bag.Select(ItemIO.Save).ToList();
+        tag["foodTime"]=Vitals.FoodTime;tag["foodDuration"]=Vitals.FoodDuration;tag["potionDelay"]=Vitals.PotionDelay; tag["autoLogistics"]=AutoLogistics; tag["schema"]=5; tag["maxHealth"]=Vitals.MaxHealth;tag["maxMana"]=Vitals.MaxMana;tag["mana"]=Vitals.Mana; tag["gear"]=Gear.Select(ItemIO.Save).ToList(); tag["health"]=Vitals.Health;tag["recovery"]=Vitals.Recovery; tag["bag"]=Bag.Select(ItemIO.Save).ToList();
         tag["environmentPaused"]=EnvironmentPaused;
         tag["enabled"]=Enabled; tag["paused"]=Paused; tag["name"]=CatName;
         tag["pickup"]=Pickup; tag["combat"]=Combat; tag["torches"]=Torches; tag["bridges"]=Bridges; tag["ropes"]=Ropes;
@@ -106,6 +106,8 @@ public sealed class CompanionPlayer : ModPlayer
         int savedMana=tag.ContainsKey("maxMana")?Math.Clamp(tag.GetInt("maxMana"),0,100000):20;
         Vitals=new() {PotionDelay=Math.Clamp(tag.GetInt("potionDelay"),0,Item.potionDelay),MaxHealth=savedMax,MaxMana=savedMana,Mana=tag.ContainsKey("mana")?Math.Clamp(tag.GetInt("mana"),0,savedMana):savedMana,
             Health=tag.ContainsKey("health")?Math.Clamp(tag.GetInt("health"),0,savedMax):savedMax,Recovery=Math.Clamp(tag.GetInt("recovery"),0,CompanionVitals.RecoveryTime)};
+        Vitals.FoodTime=Math.Clamp(tag.GetInt("foodTime"),0,CompanionFeeding.MaxFoodTime);
+        Vitals.FoodDuration=Math.Clamp(tag.GetInt("foodDuration"),Vitals.FoodTime,CompanionFeeding.MaxFoodTime);
         Vitals.RecoveryTotal=Math.Clamp(tag.ContainsKey("recoveryTotal")?tag.GetInt("recoveryTotal"):Math.Max(Vitals.Recovery,600),1,CompanionVitals.RecoveryTime);
         if(Vitals.Health==0 && !Vitals.Downed)Vitals.Recovery=CompanionVitals.RecoveryTime;
         float lifeSteal=tag.ContainsKey("lifeSteal")?tag.GetFloat("lifeSteal"):80;Vitals.LifeSteal=float.IsFinite(lifeSteal)?Math.Clamp(lifeSteal,-100000,80):80;
@@ -136,6 +138,7 @@ public sealed class CompanionPlayer : ModPlayer
     public override void ProcessTriggers(TriggersSet triggersSet) {
         CompanionControlUI.Input(this);
         if(Main.inFancyUI||Terraria.GameInput.PlayerInput.WritingText) return;
+        if(PalicoCompanion.HudKey.JustPressed&&!Main.mapFullscreen&&!CompanionHudLayout.InputBlocked)CompanionHudLayout.Toggle();
         if(PalicoCompanion.PanelKey.JustPressed&&!Main.inFancyUI&&!Main.mapFullscreen) CompanionUIFlow.Toggle(this);
         if(PalicoCompanion.EnvironmentKey.JustPressed&&!Main.mapFullscreen)CompanionEnvironment.RequestToggle(this);
         if(CompanionNetwork.Client){if(PalicoCompanion.RecallKey.JustPressed)CompanionNetwork.Action(1);return;}
@@ -146,6 +149,7 @@ public sealed class CompanionPlayer : ModPlayer
         if(ReferenceEquals(Player,CompanionNativeUse.Current?.Actor)||ReferenceEquals(Player,CompanionFishing.Current?.Actor))return true;
         if(Main.dedServ||Player.whoAmI!=Main.myPlayer)return true;
         if(CompanionControlUI.Aiming)return false;
+        if(CompanionKiteInput.Capturing&&CompanionKite.Item(Player.HeldItem))return false;
         if(CompanionNetwork.Client&&CompanionNetwork.BlocksItemUse)return false;
         if(CompanionInteraction.Hovered&&Main.mouseRight||CompanionStatusBar.BlocksInput)return false;
         Digging.ObserveConstruction(this);
@@ -165,7 +169,7 @@ public sealed class CompanionPlayer : ModPlayer
             var companion=Cat?.ModProjectile as CompanionCat;
             Vitals.Tick(Cat?.velocity.X??0,Cat?.velocity.Y??0,
                 companion?.Weapons.Busy==true&&companion.Weapons.Actor.HeldItem.mana>0,
-                companion?.Animation.Motion==CatMotion.Rest,Main.expertMode,companion?.Weapons.Actor);
+                companion?.Animation.Motion==CatMotion.Rest,Main.expertMode,companion?.Weapons.Actor,CompanionFeeding.CanRecover(this,companion));
             if(++maintenanceTick%30==0)CompanionCoins.Maintain(this);
         }
         if(PetCooldown>0) PetCooldown--;
@@ -214,5 +218,5 @@ public sealed class CompanionPlayer : ModPlayer
         if(slot<0||slot>=Bag.Length)return;
         CompanionInventoryOperations.Take(this,Bag,slot).Present(this,true);
     }
-    public void Pet() {if(CompanionNetwork.Client){CompanionNetwork.Action(2);return;} if(PetCooldown>0||Stowed||Vitals.Downed) return; if(Cat is not {} cat || Vector2.Distance(cat.Center,Player.Center)>100) { Status=CompanionText.MessageFull("Mods.PalicoCompanion.UI.PetCloser");return; } Experience++; PetCooldown=600; cat.ai[1]=90; Status=CompanionText.MessageFull("Mods.PalicoCompanion.UI.PetHappy");if(cat.ModProjectile is CompanionCat companion)companion.Feedback.PetSound(cat);Expression.Say(this,cat,"Pet",Terraria.GameContent.UI.EmoteID.EmotionLove); }
+    public void Pet() {if(CompanionNetwork.Client){CompanionNetwork.Action(2);return;} if(PetCooldown>0||Stowed||Vitals.Downed) return; if(Cat is not {} cat || Vector2.Distance(cat.Center,Player.Center)>100) { Status=CompanionText.MessageFull("Mods.PalicoCompanion.UI.PetCloser");return; } if(cat.ModProjectile is CompanionCat flying)flying.Kite.Stop(flying); Experience++; PetCooldown=600; cat.ai[1]=90; Status=CompanionText.MessageFull("Mods.PalicoCompanion.UI.PetHappy");if(cat.ModProjectile is CompanionCat companion)companion.Feedback.PetSound(cat);Expression.Say(this,cat,"Pet",Terraria.GameContent.UI.EmoteID.EmotionLove); }
 }

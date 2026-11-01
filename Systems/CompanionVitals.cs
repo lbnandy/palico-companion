@@ -11,6 +11,9 @@ public sealed class CompanionVitals {
     public int RecoveryTotal=600;
     public int RecoveryProgress=>Math.Clamp(RecoveryTotal-Recovery,0,RecoveryTotal);
     public int PotionDelay;
+    public int FoodTime,FoodDuration;
+    internal int FeedCooldown;
+    int foodRegenRemainder;
     public int ManaSickness, ManaDelay, LifeCounter, ManaCounter;
     public float LifeSteal=80;
     public float MagicMultiplier=>1f-Player.manaSickLessDmg*Math.Clamp(ManaSickness/(float)Player.manaSickTime,0,Player.manaSickTimeMax/(float)Player.manaSickTime);
@@ -43,7 +46,9 @@ public sealed class CompanionVitals {
     }
     // Health keeps its existing baseline; mana uses the installed tML runtime.
     // No copying owner accessories, personal buffs or debuffs onto a second actor.
-    public void Tick(float velocityX=0,float velocityY=0,bool magicUse=false,bool resting=false,bool expert=false,Player manaActor=null) {
+    public void Tick(float velocityX=0,float velocityY=0,bool magicUse=false,bool resting=false,bool expert=false,Player manaActor=null,bool foodRecovery=false) {
+        if(FoodTime>0)FoodTime--;
+        if(FeedCooldown>0)FeedCooldown--;
         LifeSteal=Math.Min(expert?70:80,LifeSteal+(expert?.5f:.6f));
         if(PotionDelay>0)PotionDelay--;
         if(ManaSickness>0)ManaSickness--;
@@ -54,8 +59,12 @@ public sealed class CompanionVitals {
         float lifeRate=steps*(velocityX!=0?0.5f:1.25f)*(MaxHealth/400f*0.85f+0.15f);
         if(resting){QuietTicks=Math.Min(QuietTicks+3,3600);lifeRate*=1.3f;}
         if(expert)lifeRate*=0.5f; // Companion has no Well Fed buff of its own.
-        if(Health<MaxHealth){LifeCounter+=(int)Math.Round(lifeRate);Health=Math.Min(MaxHealth,Health+LifeCounter/120);LifeCounter%=120;}
-        else LifeCounter=0;
+        if(Health<MaxHealth){
+            int gain=(int)Math.Round(lifeRate);
+            if(FoodTime>0&&foodRecovery){foodRegenRemainder+=gain;gain+=foodRegenRemainder/4;foodRegenRemainder%=4;}
+            else foodRegenRemainder=0;
+            LifeCounter+=gain;Health=Math.Min(MaxHealth,Health+LifeCounter/120);LifeCounter%=120;
+        }else {LifeCounter=0;foodRegenRemainder=0;}
         if(MaxMana<=0){Mana=ManaCounter=ManaDelay=0;return;}
         if(manaActor==null)return;
         // Reuse the installed game's regeneration on the existing companion

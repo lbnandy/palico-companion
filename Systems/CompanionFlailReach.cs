@@ -29,7 +29,7 @@ public sealed class CompanionFlailReach : ModSystem {
             var use=CompanionOwnedShot.Of(shot);
             if(use==null)return;
             float travel=Math.Min(velocity*time,maximum);
-            if(float.IsFinite(travel))use.FlailRange=Math.Clamp(travel*.85f,32,CompanionCombatReach.SearchRange);
+            if(float.IsFinite(travel))use.FlailRange=Math.Clamp(travel*.85f,32,700);
         });
     }
 }

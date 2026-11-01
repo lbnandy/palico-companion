@@ -40,7 +40,8 @@ public sealed class CompanionDivingVisual {
         return tile.LiquidType==LiquidID.Water&&tile.LiquidAmount>0&&
             point.Y>=y*16+(256-tile.LiquidAmount)/16f;
     }
-    internal static int HeadBob(int pose)=>pose is 5 or 9?-1:pose is 13 or 14 or 15 or 16?1:pose==21?2:0;
+    internal static int HeadBob(int pose)=>CompanionSpriteLayout.TryFaceOffset(pose,out var offset)?offset.Y:
+        pose is 5 or 9?-1:pose is 13 or 14 or 15 or 16?1:pose==21?2:0;
     // Native 2-world-pixel cells, aligned with the atlas. Transparent
     // lenses leave every eye/eye-white pixel untouched. The snorkel's lower
     // elbow deliberately reaches the mouth: it is a bitten mouthpiece.

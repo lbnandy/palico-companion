@@ -12,8 +12,9 @@ namespace PalicoCompanion.Systems;
 // the binding; native pickup remains the only way to consume or heal with it.
 public sealed class CompanionCarriedItem:GlobalItem {
     public override bool InstancePerEntity=>true;
-    public override bool AppliesToEntity(Item item,bool lateInstantiation)=>item.type is
+    internal static bool RecoveryDrop(Item item)=>item.type is
         ItemID.Heart or ItemID.CandyApple or ItemID.CandyCane or ItemID.Star or ItemID.SoulCake or ItemID.SugarPlum;
+    public override bool AppliesToEntity(Item item,bool lateInstantiation)=>RecoveryDrop(item);
     public override GlobalItem Clone(Item from,Item to){
         var clone=(CompanionCarriedItem)base.Clone(from,to);
         // Carrying belongs to one world drop, not copies made for inventory or spawning.
@@ -37,7 +38,7 @@ public sealed class CompanionCarriedItem:GlobalItem {
     }
     CompanionCat Carrier {
         get {
-            if(owner<0||!Main.player[owner].active||Main.player[owner].dead)return null;
+            if(owner<0||owner>=Main.maxPlayers||!Main.player[owner].active||Main.player[owner].dead)return null;
             if(carrier?.Projectile.active!=true||carrier.OwnerIndex!=owner||carrier.NetworkInstance!=instance){
                 carrier=null;
                 foreach(var p in Main.projectile)if(p.active&&p.ModProjectile is CompanionCat cat&&cat.OwnerIndex==owner&&cat.NetworkInstance==instance){carrier=cat;break;}
@@ -46,9 +47,21 @@ public sealed class CompanionCarriedItem:GlobalItem {
             return s.Enabled&&!s.Paused&&!s.Vitals.Downed?carrier:null;
         }
     }
+    internal static bool TryGet(Item item,out CompanionCarriedItem tag){
+        // Only live recovery drops can carry this tag. Other mods can leave
+        // display/scratch items without per-entity globals in the world array;
+        // tML's TryGetGlobalItem still indexes that array without a size check.
+        int index=ModContent.GetInstance<CompanionCarriedItem>().PerEntityIndex;
+        System.ReadOnlySpan<GlobalItem> globals=item.EntityGlobals;
+        tag=item.active&&!item.IsAir&&RecoveryDrop(item)&&index>=0&&index<globals.Length
+            ?globals[index] as CompanionCarriedItem:null;
+        return tag!=null;
+    }
     internal static Item Find(CompanionCat cat){
-        foreach(var item in Main.item)
-            if(item.active&&!item.IsAir&&item.TryGetGlobalItem<CompanionCarriedItem>(out var tag)&&tag.Carrier==cat)return item;
+        for(int i=0;i<Main.maxItems;i++){
+            var item=Main.item[i];
+            if(TryGet(item,out var tag)&&tag.Carrier==cat)return item;
+        }
         return null;
     }
     internal static Vector2 Position(Projectile cat){
@@ -64,6 +77,6 @@ public sealed class CompanionCarriedItem:GlobalItem {
         ItemSlot.GetItemLight(ref color,ref scale,item);
         var at=(Position(cat)-Main.screenPosition).Floor();
         Main.spriteBatch.Draw(texture,at,frame,color,0,frame.Size()*.5f,scale,cat.direction<0?SpriteEffects.FlipHorizontally:SpriteEffects.None,0);
-        CompanionItemVisual.DrawGrip(Main.spriteBatch,feet,Frame,cat.direction,light);
+        CompanionItemVisual.DrawHeldItemForeground(Main.spriteBatch,feet,Frame,cat.direction,light);
     }
 }

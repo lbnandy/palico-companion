@@ -18,9 +18,9 @@ public sealed class CompanionLighting {
     public static Vector2 GripOffset(Projectile cat)=>CompanionTorchDrawing.Offset(cat.direction);
     public Vector2 Flame(Projectile cat)=>Hand(cat)+new Vector2(cat.direction<0?-10:10,-12);
     public static bool Torch(Item i)=>i!=null&&!i.IsAir&&ItemID.Sets.Torches[i.type]&&i.createTile>=TileID.Dirt&&TileID.Sets.Torch[i.createTile];
-    public static bool Available(Item i)=>Torch(i)&&!i.favorited&&i.stack>0;
+    public static bool Available(Item i)=>Torch(i)&&i.stack>0;
     static bool IsGlowstick(Item i)=>i!=null&&!i.IsAir&&i.stack>0&&i.ModItem is null&&ItemID.Sets.Glowsticks[i.type];
-    public static bool Glowstick(Item i)=>IsGlowstick(i)&&!i.favorited;
+    public static bool Glowstick(Item i)=>IsGlowstick(i);
     public static Item SelectLight(Player p,CompanionPlayer s,bool wet) {
         if(!wet){var torch=Array.Find(s.Bag,Torch)??Array.Find(p.inventory,Torch);if(torch!=null)return torch;}
         return Array.Find(s.Bag,IsGlowstick)??Array.Find(p.inventory,IsGlowstick);
@@ -28,8 +28,8 @@ public sealed class CompanionLighting {
     public static Item[] Materials(Player p,CompanionPlayer s) {
         if(Array.Exists(s.Bag,Available))return s.Bag;
         // Shared owner supply avoids requiring a separate manual cat refill.
-        if(CompanionNetwork.Server){var item=Array.Find(p.inventory,Available);if(item!=null)CompanionNetwork.RequestMaterial(s,0);return null;}
-        return Array.Exists(p.inventory,Available)?p.inventory:null;
+        if(CompanionNetwork.Server){var item=Array.Find(p.inventory,i=>!i.favorited&&Available(i));if(item!=null)CompanionNetwork.RequestMaterial(s,0);return null;}
+        return Array.Exists(p.inventory,i=>!i.favorited&&Available(i))?p.inventory:null;
     }
     internal static bool WantsLight(Vector2 center,bool holding){
         var cell=center.ToTileCoordinates();
@@ -51,7 +51,7 @@ public sealed class CompanionLighting {
         brightness<.48f || holding&&!(brightness>=.65f&&(daylight||placedLight));
     public void Update(Player p,CompanionPlayer s,Projectile cat,bool danger) {
         clock++;if(cooldown>0)cooldown--;
-        if(s.Paused||s.Vitals.Downed||!s.Torches||!s.Enabled) {Holding=false;HeldItem=null;Status="";return;}
+        if(s.Paused||s.Vitals.Downed||!s.Torches||!s.Enabled||cat.ModProjectile is CompanionCat companion&&companion.Kite.Active) {Holding=false;HeldItem=null;Status="";return;}
         var cell=cat.Center.ToTileCoordinates();
         if(!WorldGen.InWorld(cell.X,cell.Y,12))return;
         int oldType=HeldItem?.type??0;HeldItem=SelectLight(p,s,cat.wet);

@@ -18,14 +18,14 @@ public sealed class CompanionSupplies {
     public void Cancel(){
         if(Same&&carrying){
             item.beingGrabbed=false;item.velocity=Vector2.Zero;
-            item.GetGlobalItem<CompanionCarriedItem>().Release();
+            if(CompanionCarriedItem.TryGet(item,out var tag))tag.Release();
             if(CompanionNetwork.Server)NetMessage.SendData(MessageID.SyncItem,-1,-1,null,slot);
         }
         item=null;slot=-1;carrying=false;age=0;
     }
     public bool Tick(Player p,CompanionPlayer s,Projectile cat,ref Vector2 goal) {
         if(!(CompanionNetwork.Server?s.NetSupplies:ModContent.GetInstance<CompanionConfig>().DeliverRecoveryDrops)||s.Paused||s.Vitals.Downed||p.dead){Cancel();return false;}
-        bool Eligible(Item i)=>!s.ExcludedPickup.Contains(i.type)&&i.active&&!i.IsAir&&i.ModItem==null&&Needed(i,p)&&i.noGrabDelay==0&&i.shimmerTime==0&&!i.shimmered&&!Main.projectile.Any(q=>q.active&&q.ModProjectile is CompanionCat other&&!ReferenceEquals(other.Supplies,this)&&ReferenceEquals(other.Supplies.item,i))&&
+        bool Eligible(Item i)=>!s.ExcludedPickup.Contains(i.type)&&i.active&&!i.IsAir&&i.ModItem==null&&Needed(i,p)&&CompanionCarriedItem.TryGet(i,out _)&&i.noGrabDelay==0&&i.shimmerTime==0&&!i.shimmered&&!Main.projectile.Any(q=>q.active&&q.ModProjectile is CompanionCat other&&!ReferenceEquals(other.Supplies,this)&&ReferenceEquals(other.Supplies.item,i))&&
             (i.playerIndexTheItemIsReservedFor==255||i.playerIndexTheItemIsReservedFor==p.whoAmI)&&
             Vector2.DistanceSquared(i.Center,p.Center)<480*480&&p.CanAcceptItemIntoInventory(i)&&ItemLoader.CanPickup(i,p);
         if(item!=null&&(!Same||!Eligible(item)||++age>480))Cancel();

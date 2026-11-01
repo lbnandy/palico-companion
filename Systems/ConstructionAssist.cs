@@ -45,7 +45,7 @@ public sealed class ConstructionAssist {
             left--;next=new(next.X+step.X,next.Y+step.Y);
         }
         if(left<=0)return false;
-        var material=Array.Find(s.Bag,i=>!i.IsAir&&!i.favorited&&i.type==type);
+        var material=Array.Find(s.Bag,i=>!i.IsAir&&i.type==type);
         if(material==null){Cancel();return false;}
         bool reachable=Vector2.DistanceSquared(cat.Center,Target)<=MathF.Pow(128,2)&&SafeConstruction.CanReach(cat.Center,Target,type);
         MoveTarget=reachable?cat.Center:Target-new Vector2(0,24);

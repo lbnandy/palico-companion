@@ -409,3 +409,9 @@ WorkingGearEquippedSupport: {
 	Line2: 这个也给我喵？我收好啦。
 	Line3: 装好啦喵，待会儿试试！
 }
+
+WorkingGearBarrel: {
+	Line1: 老大，让一让喵！
+	Line2: 嘿咻！大的来啦喵！
+	Line3: 喵的，和你爆了！
+}

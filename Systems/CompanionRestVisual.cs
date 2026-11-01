@@ -8,7 +8,7 @@ namespace PalicoCompanion.Systems;
 public static class CompanionRestVisual {
     public const int StunTicks=30;
     public static bool Hidden(CompanionVitals v)=>v.Downed&&v.RecoveryProgress>=StunTicks;
-    public static int Frame(CompanionVitals v)=>CompanionSpriteLayout.RestBlink;
+    public static int Frame(CompanionVitals v)=>CompanionSpriteLayout.Downed;
     public static int BreathOffset(CompanionVitals v)=>0;
     public static void DustPuff(Projectile cat,bool returning=false)=>CompanionTransitEffects.At(cat.Center);
 }

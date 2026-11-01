@@ -7,6 +7,9 @@ namespace PalicoCompanion.Systems;
 // Usage decisions only: Player.ItemCheck still owns every projectile, payment,
 // animation and native projectile limit. Inspired by TG WeaponProfile.
 internal static class CompanionWeaponPolicy {
+    // Existing turrets still need a nearby target; acquiring farther enemies
+    // must not make a stranded sentry count as useful at twice its old range.
+    const float SentryRange=700;
     internal static bool Rain(Item item)=>item.type is ItemID.CrimsonRod or ItemID.NimbusRod;
     internal static bool Sentry(Item item)=>item.sentry||CompanionCombatReach.Sample(item)?.sentry==true;
     internal static bool Plan(Item item,CompanionNativeUse use,NPC target,ref Vector2 aim) {
@@ -23,7 +26,7 @@ internal static class CompanionWeaponPolicy {
             foreach(var p in Main.projectile)if(p.active&&p.type==item.shoot&&p.timeLeft>30&&CompanionOwnedShot.Of(p)==use){
                 var delta=target.Center-p.Center;
                 bool inRange=Math.Abs(delta.X)+Math.Abs(delta.Y)<300;
-                bool approaching=delta.LengthSquared()<CompanionCombatReach.SearchRange*CompanionCombatReach.SearchRange&&Vector2.Dot(delta,p.velocity)>0;
+                bool approaching=delta.LengthSquared()<CompanionCombatReach.RangedRange*CompanionCombatReach.RangedRange&&Vector2.Dot(delta,p.velocity)>0;
                 if((inRange||approaching)&&CompanionCombatReach.Clear(p.Center,target.Center))return false;
             }
         }
@@ -45,7 +48,7 @@ internal static class CompanionWeaponPolicy {
             int useful=0;
             foreach(var p in Main.projectile)if(p.active&&p.sentry&&CompanionOwnedShot.Of(p)==use&&
                 Vector2.DistanceSquared(p.Center,target.Hitbox.ClosestPointInRect(p.Center))<=
-                CompanionCombatReach.SearchRange*CompanionCombatReach.SearchRange)useful++;
+                SentryRange*SentryRange)useful++;
             if(useful>=use.Actor.maxTurrets)return false;
             // Spread placements. DD2's native CanUse rejects overlapping turrets.
             // ItemCheck/Shoot still decides whether the item rests or floats.
@@ -66,7 +69,7 @@ internal static class CompanionWeaponPolicy {
                     try{using(new CompanionNativeUse.Scope(use))use.Actor.FindSentryRestingSpot(item.shoot,out x,out y,out _);}
                     finally{use.PlacementAim(previous);}
                     if(Vector2.DistanceSquared(new Vector2(x,y),target.Hitbox.ClosestPointInRect(new Vector2(x,y)))>
-                        CompanionCombatReach.SearchRange*CompanionCombatReach.SearchRange)continue;
+                        SentryRange*SentryRange)continue;
                     if(ProjectileID.Sets.IsADD2Turret[item.shoot]&&Terraria.GameContent.Events.DD2Event.Ongoing&&
                         Player.WouldSpotOverlapWithSentry(x,y,item.shoot is ProjectileID.DD2LightningAuraT1 or ProjectileID.DD2LightningAuraT2 or ProjectileID.DD2LightningAuraT3))continue;
                 }

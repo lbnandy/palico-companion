@@ -32,8 +32,8 @@ internal static partial class CompanionNetwork {
     static void ReadPreferences(CompanionPlayer s,BinaryReader r){s.NetEnabled=r.ReadBoolean();s.Pickup=r.ReadBoolean();s.Combat=r.ReadBoolean();s.Torches=r.ReadBoolean();s.NetMining=r.ReadBoolean();s.NetDigging=r.ReadBoolean();s.NetForestry=r.ReadBoolean();s.NetAutoHeal=r.ReadBoolean();s.NetGarden=r.ReadBoolean();s.NetCatch=r.ReadBoolean();s.NetFishing=r.ReadBoolean();s.NetSupplies=r.ReadBoolean();s.AutoLogistics=r.ReadBoolean();s.Bridges=r.ReadBoolean();s.Ropes=r.ReadBoolean();s.NetChatter=r.ReadBoolean();s.NetEmotes=r.ReadBoolean();s.NetStock=CompanionStock.Read(r);CompanionExclusions.Read(r,s);s.Enabled=s.NetEnabled&&!s.Stowed;}
     internal static void FeedbackAt(byte kind,Vector2 center,int value=0,string key=""){if(!Server)return;var p=Packet(Feedback);p.Write(kind);p.Write(center.X);p.Write(center.Y);p.Write(value);p.Write(key);p.Send();}
     internal static void Transit(Vector2 center){var p=Packet(Effect);p.Write(center.X);p.Write(center.Y);p.Send();}
-    static void Vitals(BinaryWriter w,CompanionVitals v){w.Write(v.Health);w.Write(v.MaxHealth);w.Write(v.Mana);w.Write(v.MaxMana);w.Write(v.Recovery);w.Write(v.RecoveryTotal);w.Write(v.PotionDelay);w.Write(v.ManaSickness);w.Write(v.ManaDelay);w.Write(v.Immunity);w.Write(v.LifeSteal);}
-    static void Vitals(BinaryReader r,CompanionVitals v){v.Health=r.ReadInt32();v.MaxHealth=Math.Clamp(r.ReadInt32(),1,100000);v.Mana=r.ReadInt32();v.MaxMana=Math.Clamp(r.ReadInt32(),0,100000);v.Recovery=Math.Clamp(r.ReadInt32(),0,1800);v.RecoveryTotal=Math.Clamp(r.ReadInt32(),1,1800);v.PotionDelay=Math.Clamp(r.ReadInt32(),0,3600);v.ManaSickness=Math.Clamp(r.ReadInt32(),0,Player.manaSickTimeMax);v.ManaDelay=Math.Clamp(r.ReadInt32(),0,3600);v.Immunity=Math.Clamp(r.ReadInt32(),0,3600);float steal=r.ReadSingle();v.LifeSteal=float.IsFinite(steal)?Math.Clamp(steal,-100000,80):80;v.Health=Math.Clamp(v.Health,0,v.MaxHealth);v.Mana=Math.Clamp(v.Mana,0,v.MaxMana);}
+    static void Vitals(BinaryWriter w,CompanionVitals v){w.Write(v.Health);w.Write(v.MaxHealth);w.Write(v.Mana);w.Write(v.MaxMana);w.Write(v.Recovery);w.Write(v.RecoveryTotal);w.Write(v.PotionDelay);w.Write(v.ManaSickness);w.Write(v.ManaDelay);w.Write(v.Immunity);w.Write(v.LifeSteal);w.Write(v.FoodTime);w.Write(v.FoodDuration);w.Write(v.FeedCooldown);}
+    static void Vitals(BinaryReader r,CompanionVitals v){v.Health=r.ReadInt32();v.MaxHealth=Math.Clamp(r.ReadInt32(),1,100000);v.Mana=r.ReadInt32();v.MaxMana=Math.Clamp(r.ReadInt32(),0,100000);v.Recovery=Math.Clamp(r.ReadInt32(),0,1800);v.RecoveryTotal=Math.Clamp(r.ReadInt32(),1,1800);v.PotionDelay=Math.Clamp(r.ReadInt32(),0,3600);v.ManaSickness=Math.Clamp(r.ReadInt32(),0,Player.manaSickTimeMax);v.ManaDelay=Math.Clamp(r.ReadInt32(),0,3600);v.Immunity=Math.Clamp(r.ReadInt32(),0,3600);float steal=r.ReadSingle();v.LifeSteal=float.IsFinite(steal)?Math.Clamp(steal,-100000,80):80;v.Health=Math.Clamp(v.Health,0,v.MaxHealth);v.Mana=Math.Clamp(v.Mana,0,v.MaxMana);v.FoodTime=Math.Clamp(r.ReadInt32(),0,CompanionFeeding.MaxFoodTime);v.FoodDuration=Math.Clamp(r.ReadInt32(),v.FoodTime,CompanionFeeding.MaxFoodTime);v.FeedCooldown=Math.Clamp(r.ReadInt32(),0,CompanionFeeding.Duration);}
 
     static ModPacket Packet(byte kind){var p=ModContent.GetInstance<PalicoCompanion>().GetPacket();p.Write(kind);return p;}
     static void Items(BinaryWriter w,Item[] items){w.Write((ushort)items.Length);foreach(var i in items)ItemIO.Send(i,w,true,true);}
@@ -45,6 +45,7 @@ internal static partial class CompanionNetwork {
     internal static void Tick(CompanionPlayer s) {
         if(Client){
             if(s.Vitals.Immunity>0)s.Vitals.Immunity--;
+            if(s.Vitals.FoodTime>0)s.Vitals.FoodTime--;if(s.Vitals.FeedCooldown>0)s.Vitals.FeedCooldown--;
             if(s.Player.whoAmI==Main.myPlayer&&!s.NetReady&&s.NetTicks++==0){
                 var p=Packet(Init);p.Write(s.NetSession);p.Write(s.CatName);p.Write(s.HoodColor);p.Write(s.Bonded);p.Write(s.Stowed);p.Write(s.Enabled);p.Write(s.Introduced);p.Write(s.EnvironmentPaused);
                 Items(p,s.Bag);Items(p,s.Gear);Items(p,s.Dyes);s.Chests.Write(p);s.Dialogue.Write(p);Vitals(p,s.Vitals);WritePreferences(s,p);s.Training.Write(p);s.Loadouts.Write(p);p.Send();
@@ -58,7 +59,7 @@ internal static partial class CompanionNetwork {
         if(!Server||!s.NetReady||!s.Player.active||s.NetLeaving)return;
         if(s.PetCooldown>0)s.PetCooldown--;if(s.NoticeTicks>0)s.NoticeTicks--;
         var cat=s.Cat?.ModProjectile as CompanionCat;
-        s.Vitals.Sync(s.Player,s.Gear);s.Vitals.Tick(s.Cat?.velocity.X??0,s.Cat?.velocity.Y??0,cat?.Weapons.Busy==true&&cat.Weapons.Actor.HeldItem.mana>0,cat?.Animation.Motion==CatMotion.Rest,Main.expertMode,cat?.Weapons.Actor);
+        s.Vitals.Sync(s.Player,s.Gear);s.Vitals.Tick(s.Cat?.velocity.X??0,s.Cat?.velocity.Y??0,cat?.Weapons.Busy==true&&cat.Weapons.Actor.HeldItem.mana>0,cat?.Animation.Motion==CatMotion.Rest,Main.expertMode,cat?.Weapons.Actor,CompanionFeeding.CanRecover(s,cat));
         if(s.Enabled&&!s.Player.dead&&s.Cat==null)
             Projectile.NewProjectile(s.Player.GetSource_Misc("PalicoNetwork"),s.Player.Center,Vector2.Zero,ModContent.ProjectileType<CompanionCat>(),0,0,s.Player.whoAmI);
         if(s.Enabled&&!s.Player.dead){s.Digging.Tick(s.Player,s);s.MiningHelper.Tick(s.Player,s);}
@@ -89,7 +90,10 @@ internal static partial class CompanionNetwork {
             s.Training=training;s.Loadouts=loadouts;s.Bag=bag;s.Gear=gear;s.Dyes=dyes;s.Chests=permissions;s.NetReady=true;
         }
     internal static void Receive(byte kind,BinaryReader r,int sender) {
+        if(kind==NativeWeaponEffect){if(Client)ReadWeaponEffect(r);return;}
         if(kind==ChestDiscoveryState){if(Client)DiscoveryChests.Apply(new Point(r.ReadInt16(),r.ReadInt16()),r.ReadBoolean());return;}
+        if(kind==KiteResult&&Client){CompanionKiteInput.Result(r.ReadString());return;}
+        if(kind==FeedResult&&Client){ReadFeedResult(r);return;}
         if(kind==ControlResult&&Client){ReadControlResult(r);return;}
         if(kind==Pulse&&Client){ReadPulse(r);return;}
         if(kind==MaterialRequest&&Client){SupplyMaterial(r.ReadInt32());return;}
@@ -129,6 +133,7 @@ return;}
         if(!state.NetReady)return;
         if(kind==CloseRequest){state.NetLeaving=true;var ack=Packet(CloseAck);WriteState(state,ack);ack.Send(sender);return;}
         if(state.NetLeaving)return;
+        if(kind==KiteControl){ReadKite(state,r);return;}
         if(kind==StopDigging){state.Digging.Clear(state);return;}
         if(kind==ControlRequest){ReadControl(state,r);return;}
         if(kind==QuickTrash){ReadTrash(state,r);return;}
@@ -157,6 +162,7 @@ switch(action){
             case 0:CompanionLife.Toggle(state);break;case 1:state.Recall();break;case 2:state.Pet();break;
             case 3:state.Paused=!state.Paused;break;
         }Send(state);return;}
+        if(kind==FeedRequest){ReadFeed(state,r);return;}
         if(kind==Bulk){ReadBulk(state,r,sender);return;}
         if(kind==Slot){ReadSlot(state,r,sender);return;}
         if(kind==SortRequest){ReadSort(state,r,sender);return;}

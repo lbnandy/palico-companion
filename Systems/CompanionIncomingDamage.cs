@@ -32,6 +32,21 @@ public sealed class CompanionIncomingDamage : ModSystem {
             Math.Abs(n.Center.X-owner.Center.X)+Math.Abs(n.Center.Y-owner.Center.Y)<4000)return true;
         return false;
     }
+    internal static void Contact(CompanionCat cat,CompanionPlayer state){
+        if(CompanionNetwork.Client||state.Vitals.Downed||state.Vitals.Immunity>0)return;
+        var body=cat.Projectile;bool boss=BossNear(state.Player);
+        foreach(var enemy in Main.ActiveNPCs){
+            if(enemy.friendly||enemy.damage<=0||enemy.dontTakeDamage)continue;
+            // Same non-contact phases as Player.Update_NPCCollision.
+            if(enemy.type==NPCID.HallowBoss&&enemy.ai[0] is 0f or 10f)continue;
+            int cooldown=-1;float multiplier=1;var hitbox=enemy.Hitbox;
+            NPC.GetMeleeCollisionData(body.Hitbox,enemy.whoAmI,ref cooldown,ref multiplier,ref hitbox);
+            if(!body.Hitbox.Intersects(hitbox)||!float.IsFinite(multiplier)||multiplier<=0||
+                !cat.Weapons.CanReceiveHit(state,body,enemy,null,ref cooldown))continue;
+            int damage=Main.DamageVar(enemy.damage*multiplier);
+            if(cat.Feedback.Hurt(state,body,damage,boss))break;
+        }
+    }
     static void Hit(Projectile shot,Rectangle box){
         if(CompanionNetwork.Client||!shot.hostile||shot.damage<=0)return;
         // Scan actual companions, not all projectiles for every hostile shot.
@@ -41,6 +56,8 @@ public sealed class CompanionIncomingDamage : ModSystem {
             var owner=Main.player[cat.OwnerIndex];var state=owner.GetModPlayer<CompanionPlayer>();
             if(!owner.active||owner.dead||!state.Enabled||state.Stowed||state.Paused||state.Vitals.Downed||state.Vitals.Immunity>0||CompanionNetwork.Server&&(!state.NetReady||state.NetLeaving))continue;
             if(!shot.Colliding(box,p.Hitbox))continue;
+            int cooldown=-1;
+            if(!cat.Weapons.CanReceiveHit(state,p,null,shot,ref cooldown))continue;
             // Stable vanilla's hostile projectile path doubles the stored
             // projectile damage, after randomization. The cat has no luck gear.
             int damage=(int)Math.Min(int.MaxValue,(long)Main.DamageVar(shot.damage)*2);

@@ -23,36 +23,61 @@ public static class CompanionStatusBar {
     public static Rectangle Bounds(Player player){
         int last=-1;for(int i=0;i<player.buffType.Length;i++)if(player.buffType[i]>0)last=i;
         // Main.GUIHotbarDrawInner anchors slot 1 at 20 UI pixels.
-        return new Rectangle(20,80+50*Math.Max(1,last/11+1),244,TrainingHud.HasEquipment(player.GetModPlayer<CompanionPlayer>())?126:76);
+        var s=player.GetModPlayer<CompanionPlayer>();
+        int height=TrainingHud.HasEquipment(s)?126:76;
+        return CompanionHudLayout.Place(new Rectangle(20,80+50*Math.Max(1,last/11+1),244,height));
     }
-    public static bool BlocksInput=>Visible&&Bounds(Main.LocalPlayer).Contains(new Point((int)(PlayerInput.MouseInfo.X/Main.UIScale),(int)(PlayerInput.MouseInfo.Y/Main.UIScale)));
+    public static bool BlocksInput {
+        get {
+            if(CompanionHudLayout.Capturing)return true;
+            if(!Visible)return false;
+            var s=Main.LocalPlayer.GetModPlayer<CompanionPlayer>();var card=Bounds(s.Player);
+            var mouse=new Point((int)(PlayerInput.MouseInfo.X/Main.UIScale),(int)(PlayerInput.MouseInfo.Y/Main.UIScale));
+            return card.Contains(mouse)||CompanionFoodDisplay.Active(s)&&CompanionFoodDisplay.HudBounds(card).Contains(mouse);
+        }
+    }
     public static string State(CompanionPlayer s){
         if(s.Stowed)return CompanionLife.L("HudStowed");
         if(s.Vitals.Downed)return CompanionLife.L("HudRecovering")+$" {(s.Vitals.Recovery+59)/60}s";
         if(s.Paused)return CompanionLife.L("PausedState");
         if(s.Cat?.ModProjectile is CompanionCat c){
+            if(c.Kite.Active)return CompanionKite.Text("Status");
             if(s.Mining.Active||s.Digging.Active||s.Trees.Active||s.Garden.Active||s.Storage.Active||c.Catching.Active)return CompanionLife.L("HudWorking");
             if(c.Fishing.Active)return CompanionLife.L("HudFishing");
-            if(c.Weapons.Busy)return CompanionLife.L("HudCombat");
+            if(c.Barrel.Active||c.Weapons.Busy)return CompanionLife.L("HudCombat");
             if(c.Supplies.Active)return CompanionLife.L("HudDelivering");
             if(c.Animation.Motion==CatMotion.Rest)return CompanionLife.L("RestState");
         }
         return CompanionLife.L("Following");
     }
     public static void Draw(CompanionPlayer s){
-        bool clicked=Main.mouseLeft&&!previousLeft;previousLeft=Main.mouseLeft;
+        bool clicked=Main.mouseLeft&&!previousLeft&&!CompanionHudLayout.Capturing;previousLeft=Main.mouseLeft;
         if(!Visible||CompanionSprite.Atlas==null)return;
         Rectangle r=Bounds(s.Player);bool hover=r.Contains(Main.mouseX,Main.mouseY);
         panel.Left.Set(r.X,0);panel.Top.Set(r.Y,0);panel.Width.Set(r.Width,0);panel.Height.Set(r.Height,0);
         panel.BackgroundColor=hover?HoverBackground:Background;
         panel.BorderColor=new Color(16,22,39);panel.Recalculate();panel.Draw(Main.spriteBatch);
         string name=s.CatName;var font=FontAssets.MouseText.Value;
-        while(name.Length>1&&font.MeasureString(name).X*.8f>152)name=name[..^1];
+        int nameWidth=152;
+        while(name.Length>1&&font.MeasureString(name).X*.8f>nameWidth)name=name[..^1];
         Utils.DrawBorderString(Main.spriteBatch,name,new Vector2(r.X+76,r.Y+10),new Color(243,242,235),.8f);
         string amount=s.Vitals.Downed?$"{(int)(BarFraction(s)*100)}%":$"{s.Vitals.Health} / {s.Vitals.MaxHealth}";
         DrawDetails(s,r,amount);
         string skillHint=TrainingHud.HoverText(s,r);
-        if(hover){s.Player.mouseInterface=true;Main.instance.MouseText(skillHint??(CompanionText.Get("CompanionStatusBar.Vitals",s.CatName,s.Vitals.Health,s.Vitals.MaxHealth,s.Vitals.Mana,s.Vitals.MaxMana)+"\n"+CompanionLife.L("HudHint")+(s.EnvironmentPaused?"\n"+CompanionLife.L("EnvironmentPaused"):"")));if(clicked){int skill=TrainingHud.HitSkill(s,r);if(skill>=0)CompanionControl.Request(s,CompanionControlOp.Skill,skill);else if(skillHint==null)CompanionUIFlow.Toggle(s);}}
+        if(CompanionFoodDisplay.Draw(Main.spriteBatch,s,CompanionFoodDisplay.HudBounds(r),compact:true))return;
+        if(hover){
+            s.Player.mouseInterface=true;
+            string hint=skillHint??(CompanionText.Get("CompanionStatusBar.Vitals",s.CatName,s.Vitals.Health,s.Vitals.MaxHealth,s.Vitals.Mana,s.Vitals.MaxMana)
+                +(s.Cat?.ModProjectile is CompanionCat kiteCat&&kiteCat.Kite.Active?"\n"+CompanionKite.Text("Help"):"")
+                +(s.Vitals.FoodTime>0?"\n"+CompanionFeeding.Status(s):"")+"\n"+CompanionLife.L("HudHint")
+                +(s.EnvironmentPaused?"\n"+CompanionLife.L("EnvironmentPaused"):""));
+            Main.instance.MouseText(hint+"\n"+CompanionLife.L("HudMoveHint"));
+            if(clicked){
+                int skill=TrainingHud.HitSkill(s,r);
+                if(skill>=0)CompanionControl.Request(s,CompanionControlOp.Skill,skill);
+                else if(skillHint==null)CompanionUIFlow.Toggle(s);
+            }
+        }
     }
     internal static void DrawDetails(CompanionPlayer s,Rectangle r,string amount){
         string state=State(s);var font=FontAssets.MouseText.Value;

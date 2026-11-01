@@ -15,10 +15,10 @@ internal static partial class CompanionNetwork {
         var packet=Packet(receipt.Kind);packet.Write(receipt.Id);
         if(receipt.Kind==SlotResult)packet.Write(receipt.Accepted);
         WriteState(s,packet);
-        if(receipt.Kind is SlotResult or QuickTrashResult)ItemIO.Send(receipt.Returned[0],packet,true,true);
+        if(receipt.Kind is SlotResult or QuickTrashResult or FeedResult)ItemIO.Send(receipt.Returned[0],packet,true,true);
         else if(receipt.Kind==BulkResult)Items(packet,receipt.Returned);
         if(receipt.Kind!=QuickTrashResult)receipt.Outcome.Write(packet);
-        if(receipt.Kind==ControlResult)packet.Write(receipt.Message);
+        if(receipt.Kind is ControlResult or FeedResult)packet.Write(receipt.Message);
         return packet;
     }
     static void CommitInventoryReply(CompanionPlayer s,byte kind,int id,InventoryOutcome outcome=default,bool accepted=true,params Item[] returned){

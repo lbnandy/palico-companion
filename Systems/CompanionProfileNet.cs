@@ -8,28 +8,34 @@ namespace PalicoCompanion.Systems;
 
 // Cosmetic session data only. Never imports inventory, vitals, permissions or
 // work commands from a client. Real gameplay state needs authoritative transactions.
-internal readonly record struct CompanionProfile(string Name,bool Bonded,bool Stowed) {
-    internal static CompanionProfile Capture(CompanionPlayer s)=>new(s.CatName,s.Bonded,s.Stowed);
+internal readonly record struct CompanionProfile(string Name,bool Bonded,bool Stowed,bool DyeClothesOnly=false,bool DyeKite=true) {
+    internal static CompanionProfile Capture(CompanionPlayer s){
+        var config=ModContent.GetInstance<CompanionConfig>();
+        return new(s.CatName,s.Bonded,s.Stowed,config.DyeClothesOnly,config.DyeKite);
+    }
+    internal static CompanionProfile Appearance(CompanionPlayer s)=>
+        Main.netMode==NetmodeID.SinglePlayer||s.Player.whoAmI==Main.myPlayer?Capture(s):
+        s.HasNetworkProfile?s.NetworkProfile:new(s.CatName,s.Bonded,s.Stowed);
     internal void Write(BinaryWriter w) {
         byte[] name=Encoding.UTF8.GetBytes(Name??"");
         if(name.Length>256)name=Encoding.UTF8.GetBytes("呆猫");
         w.Write((ushort)name.Length);w.Write(name);
-        w.Write((byte)((Bonded?1:0)|(Stowed?2:0)));
+        w.Write((byte)((Bonded?1:0)|(Stowed?2:0)|(DyeClothesOnly?4:0)|(!DyeKite?8:0)));
     }
     internal static CompanionProfile Read(BinaryReader r) {
         int length=r.ReadUInt16();if(length>256)throw new InvalidDataException("Profile name too long");
         var bytes=r.ReadBytes(length);if(bytes.Length!=length)throw new EndOfStreamException();
         string name=new UTF8Encoding(false,true).GetString(bytes);
-        byte flags=r.ReadByte();if((flags&~3)!=0)throw new InvalidDataException("Unknown profile flags");
+        byte flags=r.ReadByte();if((flags&~15)!=0)throw new InvalidDataException("Unknown profile flags");
         // Share the existing UI's name sanitation without touching a real player.
         var cleaned=new CompanionPlayer();
         if(!CompanionNaming.Rename(cleaned,name))throw new InvalidDataException("Empty profile name");
-        return new(cleaned.CatName,(flags&1)!=0,(flags&2)!=0);
+        return new(cleaned.CatName,(flags&1)!=0,(flags&2)!=0,(flags&4)!=0,(flags&8)==0);
     }
 }
 
 internal static class CompanionProfileNet {
-    const byte ProfilePacket=1,Version=1;
+    const byte ProfilePacket=1,Version=2;
     internal static void Send(CompanionPlayer s,int toWho=-1,int ignore=-1) {
         if(Main.netMode==NetmodeID.SinglePlayer)return;
         if(Main.netMode==NetmodeID.MultiplayerClient&&s.Player.whoAmI!=Main.myPlayer)return;

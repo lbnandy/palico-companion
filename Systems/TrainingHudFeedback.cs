@@ -23,7 +23,7 @@ public sealed class TrainingHudFeedback : ModPlayer {
         bool available=s.Training.Active(s);
         for(int i=0;i<3;i++){
             int kind=TrainingCatalog.Id(s.Training.Slots[i]);
-            if(!available||i>=s.Training.Count(s.Player)||kind is <0 or >7){cells[i]=new(){Kind=-1};continue;}
+            if(!available||i>=s.Training.Count(s.Player)||!TrainingCatalog.Support(kind)){cells[i]=new(){Kind=-1};continue;}
             ref var cell=ref cells[i];int cooldown=s.Training.Cooldowns[kind];
             bool changed=cell.Kind!=kind;
             if(changed)cell=new(){Kind=kind,Cooldown=cooldown};

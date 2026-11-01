@@ -15,6 +15,7 @@ internal static class CompanionSpeechContext {
         var map=new Dictionary<string,string>();
         foreach(string family in BossFamilies){map["Boss"+family]="Boss";map["BossRematch"+family]="Boss";map["BossVictory"+family]="BossVictory";}
         map["RestMemory"]="Rest";
+        map["PetFood"]=map["PetFoodFish"]=map["PetFoodSweet"]="Pet";
         foreach(string name in CompanionWorldEvents.Names)map["BossEvent"+name]="Boss";
         map["RestEventQuiet"]="Rest";
         map["OwnerHurtDeath"]="OwnerHurt";map["WelcomeRevived"]="Welcome";map["WorkingBagFull"]="Working";
@@ -24,7 +25,7 @@ internal static class CompanionSpeechContext {
         map["FishCaughtCrate"]=map["FishCaughtQuest"]="FishCaught";
         // Equipment reactions share the existing saved work cursor and wire
         // layout; each variant still has its own repeat cooldown.
-        foreach(string gear in new[]{"Honey","Guard","GuardSelf","Cleanse","Bell","BellSelf","Drum","Dart","Lift","Bomb","EquippedWeapon","EquippedSupport"})map["WorkingGear"+gear]="Working";
+        foreach(string gear in new[]{"Honey","Guard","GuardSelf","Cleanse","Bell","BellSelf","Drum","Dart","Lift","Bomb","Barrel","EquippedWeapon","EquippedSupport"})map["WorkingGear"+gear]="Working";
         return map;
     }
     internal static IEnumerable<string> Pools=>CompanionDialogue.Events.Concat(variants.Keys).Concat(CompanionSpeechContent.Pools.Keys);

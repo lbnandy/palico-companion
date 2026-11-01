@@ -31,8 +31,14 @@ public sealed partial class CompanionExpression {
     enum Channel { Flavor, Work, Discovery, Interaction, Important }
     static int BubblePriority(Channel channel)=>channel switch {Channel.Important=>3,Channel.Interaction=>2,Channel.Discovery=>1,_=>0};
     internal void ClearPendingWork(){pendingGear=null;equipmentPending=0;}
+    internal bool TryCartCaption(CompanionPlayer s){
+        if(!IsLocalListener(s)||!ChatEnabled(s)||!s.Introduced||nextEvent.TryGetValue("CatCart",out int next)&&tick<next)return false;
+        nextEvent["CatCart"]=tick+1800;
+        pacing.Spoken(tick,CompanionSpeechPacing.Priority.Life);flavorAt=tick+1800;return true;
+    }
     internal void OwnerDied(CompanionPlayer s,Projectile cat){
         ClearPendingWork();ownerReturning=s.Introduced;
+        if(s.Player.GetModPlayer<CompanionCartPlayer>().ReplacesDeathSpeech)return;
         TrySay(s,cat,"OwnerHurt",EmoteID.EmoteSadness,variant:"Death");
     }
     // Dialogue is a personal report. Remote cat visuals must not advance another
@@ -122,7 +128,7 @@ public sealed partial class CompanionExpression {
     // world bubble is requested; no text or arbitrary emote is relayed.
     internal void DiscoveryBubble(CompanionPlayer s,int emote){
         if(!CompanionNetwork.Server||!s.NetEmotes||!s.Enabled||s.Paused||s.Vitals.Downed||tick<bubbleAt&&bubblePriority>=1||s.Cat is not {} cat)return;
-        if(emote!=EmoteID.EmoteConfused&&emote!=EmoteID.EmoteHappiness)return;
+        if(emote!=EmoteID.EmoteConfused&&emote!=EmoteID.EmoteHappiness&&emote!=EmoteID.EmotionAlert)return;
         StartBubble(cat,emote,1);
     }
     void StartBubble(Projectile cat,int emote,int priority){
@@ -156,10 +162,11 @@ public sealed partial class CompanionExpression {
         bool lifeEvent=key=="OwnerHurt"&&variant=="Death"||key=="Welcome"&&variant=="Revived";
         bool bagFull=key=="Working"&&variant=="BagFull";
         bool gear=variant!=null&&variant.StartsWith("Gear");
+        bool food=key=="Pet"&&variant!=null&&variant.StartsWith("Food");
         var priority=CompanionSpeechPacing.For(key,variant);
         var channel=lifeEvent||bagFull||priority==CompanionSpeechPacing.Priority.Support?Channel.Important:Kind(key);
-        string repeatKey=key is "Boss" or "BossVictory"?CompanionSpeechContext.Pool(key,variant)+":"+context:lifeEvent||bagFull||gear?key+variant:key;
-        int repeatDelay=gear?3600:bagFull?3600:lifeEvent?120:RepeatDelay(key);
+        string repeatKey=food?"Feeding":key is "Boss" or "BossVictory"?CompanionSpeechContext.Pool(key,variant)+":"+context:lifeEvent||bagFull||gear?key+variant:key;
+        int repeatDelay=food?1200:gear?3600:bagFull?3600:lifeEvent?120:RepeatDelay(key);
         // Boss Rush still records every genuine victory; text gets one shared
         // budget so rapid stages do not fill the owner's chat.
         if(key=="BossVictory"&&CompanionSpeechContent.BossMarathon?.Invoke()==true){repeatKey="BossMarathonVictory";repeatDelay=900;}

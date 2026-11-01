@@ -1,46 +1,49 @@
-[img]]
+[b]Boss, I followed you all the way to Terraria, meow![/b]
+Bring a Monster Hunter-inspired Palico along for your Terraria adventures.
 
-[b]Off to Terraria, Meowster? Count me in![/b]
-Bring a Palico from Monster Hunter along on your Terraria adventures.
+[h2]Your Palico companion[/h2]
 
-[h2]Meet your Palico[/h2]
+[b]Fight together[/b]: Give your Palico a weapon and fight side by side. Support gear can heal you, shield you and clear debuffs; your Palico can also throw pot bombs or charge into a group carrying a Giga Barrel Bomb. When you're hurt, it can bring you nearby Hearts, too.
 
-[b]A helping paw in combat.[/b] Give your Palico a weapon and fight side by side. Equip the mod's new support gear for extra help in combat. When you're hurt, it can bring you nearby Hearts, too.
+[img]https://raw.githubusercontent.com/lbnandy/palico-companion/main/docs/images/barrel-bomb.gif[/img]
 
-[b]Help with the daily work.[/b] Your Palico can mine ore, chop and replant trees, tend herbs, fish, catch critters and collect items. It can also light up dark areas and point out nearby chests and Life Crystals.
+[b]Gather and explore[/b]: Your Palico can mine ore, chop and replant trees, tend herbs, fish, catch critters and collect items. It can also light up dark areas and point out nearby chests and Life Crystals.
 
-[b]Make it your own.[/b] Choose a name, outfit color and dye. Your Palico chats with you and reacts with emotes. You can pet it, too.
+[b]Make it yours[/b]: Choose a name, outfit color and dye. Your Palico chats with you and reacts with emotes. When things are quiet, you can pet it, feed it or even fly it as a kite.
 
-[i]“I wasn't lost, Meowster! Just took the long way.”[/i]
+[i]“Boss, that's not rain—it's slimes, meow!”[/i]
 
-[h2]Customize your Palico’s abilities[/h2]
-The [b]Companion abilities[/b] settings offer three strength presets: choose [b]Support[/b] if you want to take the lead in combat, [b]Standard[/b] to fight side by side, or [b]Strong[/b] if you want to take it easy and let your Palico carry you. Standard is the default.
+[img]https://raw.githubusercontent.com/lbnandy/palico-companion/main/docs/images/cart.gif[/img]
 
-You can also fine-tune your Palico’s damage, health, defense, movement speed, ability to dodge attacks, work speed and fishing speed individually.
+[h2]Customize your Palico's abilities[/h2]
+The Companion abilities settings offer three strength presets: choose [b]Support[/b] if you want to take the lead in combat, [b]Standard[/b] to fight side by side, or [b]Strong[/b] if you want to take it easy and let your Palico carry you. Standard is the default.
+
+You can also adjust damage, survivability, movement speed, dodging, targeting range, work speed and fishing speed individually. An optional boss health bonus adds a little more challenge when fighting together; it is off by default.
 
 [h2]Equipment and inventory[/h2]
 Equip your Palico and save multiple loadouts to switch between.
 
-Your Palico has its own backpack for supplies and loot. Give it access to selected chests, and it can put items away alongside others of the same type and restock its supplies.
+Your Palico has its own backpack for supplies and loot. Give it access to selected chests, and it can put items away alongside others of the same type and restock its supplies. Favorited items remain usable and stay in its backpack when you retrieve everything else.
 
 [img]https://raw.githubusercontent.com/lbnandy/palico-companion/main/docs/images/04-equipment-en-compact.png[/img]
 
-[h2]Upgrades and the Palico Guide[/h2]
-Gather materials to craft and upgrade your Palico’s gear. The in-game Palico Guide explains how to craft, use and upgrade equipment.
+[h2]Equipment upgrades and the Palico Guide[/h2]
+Gather materials to craft and upgrade your Palico's gear. The in-game Palico Guide explains how to craft, use and upgrade equipment.
 
 [img]https://raw.githubusercontent.com/lbnandy/palico-companion/main/docs/images/05-guide-en-compact.png[/img]
 
-[h2]Bring your friends[/h2]
-Play solo or in multiplayer, [b]with existing characters and worlds[/b]. Each player has a Palico with separate equipment, inventory and upgrades. The host or server administrator manages the shared Companion abilities settings.
+[h2]Play with friends, too[/h2]
+Supports single-player and multiplayer. [b]No new character or world required.[/b] Each player has their own Palico with separately saved equipment, inventory and progression. The host or server administrator manages ability settings for everyone.
 
 [h2]Optional integrations[/h2]
 [list]
-[*][url=https://steamcommunity.com/sharedfiles/filedetails/?id=2563309347]Magic Storage[/url]: give your Palico access to store items and restock supplies.
-[*][url=https://steamcommunity.com/sharedfiles/filedetails/?id=2797518634]Quality of Terraria[/url]: its unlimited ammo settings apply to your Palico, too.
-[*][url=https://steamcommunity.com/sharedfiles/filedetails/?id=2824688072]Calamity[/url]: extra dialogue for its creatures and events.
+[*][url=https://steamcommunity.com/sharedfiles/filedetails/?id=2563309347]Magic Storage[/url]: let your Palico use your storage to put items away and restock its supplies.
+[*][url=https://steamcommunity.com/sharedfiles/filedetails/?id=2797518634]Quality of Terraria[/url]: its unlimited-ammo feature works for your Palico, too.
+[*][url=https://steamcommunity.com/sharedfiles/filedetails/?id=2824688072]Calamity[/url]: extra dialogue for its enemies and events.
+[*][url=https://steamcommunity.com/sharedfiles/filedetails/?id=2909886416]Thorium[/url]: supports Bard instruments, healing tools and throwing weapons. Let your Palico play music to provide buffs or use healing weapons to restore your health.
 [/list]
 None of these mods are required.
 
-Questions or suggestions? Leave a comment or visit [url=https://github.com/lbnandy/palico-companion/issues]GitHub[/url]. For bugs, include your game and mod versions, other mods, solo or multiplayer, and steps to reproduce.
+Questions and suggestions are welcome in the comments or on [url=https://github.com/lbnandy/palico-companion/issues]GitHub[/url]. For bugs, please include your versions, whether you're playing in multiplayer, other installed mods and steps to reproduce the issue.
 
 [url=https://github.com/lbnandy/palico-companion]Source code[/url]

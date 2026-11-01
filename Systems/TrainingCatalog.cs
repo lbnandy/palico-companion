@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.IO;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
@@ -17,6 +18,10 @@ internal record TrainingDefinition(string Key,int Icon,params int[] Materials) {
     internal string Detail=>CompanionText.Get("Catalog."+Key);
 }
 internal static class TrainingCatalog {
+    internal const int Barrel=20, TimerCount=21;
+    internal static bool Support(int kind)=>kind is >=0 and <8 or Barrel;
+    internal static bool WorkGear(int kind)=>kind is >=8 and <=10;
+    internal static bool Equipment(int kind)=>Support(kind)||WorkGear(kind);
     internal static readonly TrainingDefinition[] Entries = [
         new("HoneyCage",ItemID.HoneyComb,ItemID.BottledHoney,3,ItemID.JungleSpores,6,ItemID.Silk,4),
         new("GuardShield",ItemID.PaladinsShield,-1,8,ItemID.Wood,20,ItemID.Chain,2),
@@ -37,7 +42,8 @@ internal static class TrainingCatalog {
         null, // Retired catalog position; not registered as content.
         null, // Retired catalog position; not registered as content.
         null, // Retired catalog position; not registered as content.
-        new("CatWorkbench",ItemID.WorkBench,ItemID.Wood,20,-1,3)
+        new("CatWorkbench",ItemID.WorkBench,ItemID.Wood,20,-1,3),
+        new("GigaBarrelBomb",ItemID.Barrel,ItemID.Dynamite,3,ItemID.Wood,30,-1,8)
     ];
     internal static bool Current(int id)=>id>=0&&id<Entries.Length&&Entries[id]!=null;
     internal static int Type(int id)=>ModContent.GetInstance<PalicoCompanion>().Find<ModItem>(Entries[id].Key).Type;
@@ -63,12 +69,20 @@ public sealed class TrainingItem:ModItem {
     public override string Name=>TrainingCatalog.Entries[Kind].Key;
     public override string Texture=>Kind < 11 || Kind is >=13 and <=15 or 19 ? "PalicoCompanion/Assets/Training/"+Name : "Terraria/Images/Item_"+TrainingCatalog.Entries[Kind].Icon;
     public override LocalizedText DisplayName=>Language.GetOrRegister("Mods.PalicoCompanion.TrainingNames."+Name);
-    public override void SetDefaults(){Item.width=24;Item.height=24;Item.maxStack=Kind<13?1:9999;Item.rare=ItemRarityID.Blue;Item.value=Item.buyPrice(silver:10);if(Kind is >=13 and <=15){Item.useStyle=ItemUseStyleID.HoldUp;Item.useTime=Item.useAnimation=30;Item.UseSound=SoundID.Item4;Item.consumable=true;}if(Kind==19){Item.DefaultToPlaceableTile(ModContent.TileType<CatWorkbenchTile>());Item.maxStack=9999;}}
+    public override bool PreDrawInInventory(SpriteBatch spriteBatch,Vector2 position,Rectangle frame,Color drawColor,Color itemColor,Vector2 origin,float scale){
+        if(Kind!=TrainingCatalog.Barrel||CompanionBarrelVisual.Icon is not {} icon)return true;
+        spriteBatch.Draw(icon,position,null,drawColor,0,icon.Size()/2,scale*Math.Max(frame.Width,frame.Height)/Math.Max(icon.Width,icon.Height),SpriteEffects.None,0);return false;
+    }
+    public override bool PreDrawInWorld(SpriteBatch spriteBatch,Color lightColor,Color alphaColor,ref float rotation,ref float scale,int whoAmI){
+        if(Kind!=TrainingCatalog.Barrel||CompanionBarrelVisual.Icon is not {} icon)return true;
+        spriteBatch.Draw(icon,Item.Bottom-Main.screenPosition,null,Item.GetAlpha(lightColor),rotation,new Vector2(icon.Width/2f,icon.Height),scale,SpriteEffects.None,0);return false;
+    }
+    public override void SetDefaults(){Item.width=24;Item.height=24;Item.maxStack=TrainingCatalog.Equipment(Kind)?1:9999;Item.rare=ItemRarityID.Blue;Item.value=Item.buyPrice(silver:10);if(Kind is >=13 and <=15){Item.useStyle=ItemUseStyleID.HoldUp;Item.useTime=Item.useAnimation=30;Item.UseSound=SoundID.Item4;Item.consumable=true;}if(Kind==19){Item.DefaultToPlaceableTile(ModContent.TileType<CatWorkbenchTile>());Item.maxStack=9999;}}
     public override void ModifyTooltips(List<TooltipLine> lines){
         int tier=Main.gameMenu?0:Main.LocalPlayer.GetModPlayer<CompanionPlayer>().Training.Tier;
-        if(Kind<11)lines.Add(new(Mod,"Kind",CompanionText.Get(Kind<8?"Catalog.SupportGear":"Catalog.WorkGear")+(Main.gameMenu?"":" · "+TrainingCatalog.TierName(tier))));
+        if(TrainingCatalog.Equipment(Kind))lines.Add(new(Mod,"Kind",CompanionText.Get(TrainingCatalog.Support(Kind)?"Catalog.SupportGear":"Catalog.WorkGear")+(Main.gameMenu?"":" · "+TrainingCatalog.TierName(tier))));
         foreach(var line in TooltipLines(TrainingGuideCopy.Tooltip(Kind,tier,Main.gameMenu)))lines.Add(new(Mod,"Effect",line));
-        if(Kind<11&&!Main.gameMenu){var state=Main.LocalPlayer.GetModPlayer<CompanionPlayer>();for(int i=0;i<4;i++)if(IdAt(state,i)==Kind){lines.Add(new(Mod,"SkillStatus",TrainingStatus.Describe(state,i)));break;}}
+        if(TrainingCatalog.Equipment(Kind)&&!Main.gameMenu){var state=Main.LocalPlayer.GetModPlayer<CompanionPlayer>();for(int i=0;i<4;i++)if(IdAt(state,i)==Kind){lines.Add(new(Mod,"SkillStatus",TrainingStatus.Describe(state,i)));break;}}
         if(Installed)lines.Add(new(Mod,"Legacy",CompanionText.Get("Catalog.Legacy")));
     }
     internal static IEnumerable<string> TooltipLines(string text){

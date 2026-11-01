@@ -16,12 +16,11 @@ public static class CompanionTorchDrawing {
     public const int ForwardReach=2;
     public static Vector2 Offset(int direction)=>new(direction<0?-ForwardReach:ForwardReach,0);
     public static Vector2 Origin(Texture2D torch,int direction) => new(direction<0?torch.Width-1:1,torch.Height-2);
-    public static void Draw(SpriteBatch batch,Texture2D atlas,Vector2 feet,int pose,int direction,Color bodyLight,Color torchLight,int tick,Item item) {
+    public static void Draw(SpriteBatch batch,Vector2 feet,int pose,int direction,Color bodyLight,Color torchLight,int tick,Item item) {
         Item held=item;
         if(!CompanionLighting.Torch(held))return;
         Main.instance.LoadItem(held.type);if(held.flame)Main.instance.LoadItemFlames(held.type);
         var torch=TextureAssets.Item[held.type].Value;
-        float scale=CompanionSpriteLayout.Scale;
         var off=CompanionSpriteLayout.OffHand[pose];
         int facing=direction<0?-1:1;
         Vector2 oldHand=feet+new Vector2(off.X*facing,off.Y);
@@ -53,13 +52,7 @@ public static class CompanionTorchDrawing {
             Vector2 shift=hand.Floor()-first.position-shaft;
             foreach(var entry in cache){var draw=entry;draw.position+=shift;draw.Draw(batch);}
         }
-        Vector2 anchor=CompanionSpriteLayout.Origin+off/scale;
-        int px=(int)anchor.X-1,py=(int)anchor.Y;
-        var paw=new Rectangle(px,pose*CompanionSprite.Height+py,3,2);
-        float left=facing<0?CompanionSpriteLayout.Origin.X-px-paw.Width:px-CompanionSpriteLayout.Origin.X;
-        // Redraw the original paw at its ORIGINAL position. No shifted/extended
-        // limb, new skin blocks or change to the silhouette.
-        Vector2 at=feet+new Vector2(left,py-CompanionSpriteLayout.Origin.Y)*scale;
-        CompanionDye.Draw(batch,new DrawData(atlas,at,paw,bodyLight,0,Vector2.Zero,scale,flip));
+        // Reuse the authored near-paw contour, as weapon/tool foreground layers do.
+        CompanionItemVisual.DrawHeldItemForeground(batch,feet,pose,direction,bodyLight);
     }
 }

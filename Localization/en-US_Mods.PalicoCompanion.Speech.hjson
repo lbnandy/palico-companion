@@ -409,3 +409,9 @@ WorkingGearEquippedSupport: {
 	Line2: This is for me too? Got it!
 	Line3: All set! Let's try it out!
 }
+
+WorkingGearBarrel: {
+	Line1: Make way, Meowster!
+	Line2: Hup! Here comes the big one!
+	Line3: Oh, fur-get it! We're going out with a bang!
+}
