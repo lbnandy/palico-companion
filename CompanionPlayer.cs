@@ -46,6 +46,9 @@ public sealed class CompanionPlayer : ModPlayer
     public Item[] Bag = InventoryTransfer.Empty(24);
     public bool Enabled, Paused, Pickup=true, Combat=true, Torches=true, Bridges, Ropes;
     public bool EnvironmentPaused;
+    public CompanionCombatMode CombatMode;
+    public bool CooperativeCombat {get=>CombatMode==CompanionCombatMode.Assist;set=>CombatMode=value?CompanionCombatMode.Assist:CompanionCombatMode.Proactive;}
+    internal bool AttacksEnabled=>Combat&&CombatMode!=CompanionCombatMode.Passive;
     public bool AutoLogistics=true;
     public AutomaticLogistics Storage=new();
     public CompanionExpression Expression=new();
@@ -81,6 +84,7 @@ public sealed class CompanionPlayer : ModPlayer
         tag["discoveries"]=Discovery.Save();
         tag["foodTime"]=Vitals.FoodTime;tag["foodDuration"]=Vitals.FoodDuration;tag["potionDelay"]=Vitals.PotionDelay; tag["autoLogistics"]=AutoLogistics; tag["schema"]=5; tag["maxHealth"]=Vitals.MaxHealth;tag["maxMana"]=Vitals.MaxMana;tag["mana"]=Vitals.Mana; tag["gear"]=Gear.Select(ItemIO.Save).ToList(); tag["health"]=Vitals.Health;tag["recovery"]=Vitals.Recovery; tag["bag"]=Bag.Select(ItemIO.Save).ToList();
         tag["environmentPaused"]=EnvironmentPaused;
+        tag["combatMode"]=(int)CombatMode;
         tag["enabled"]=Enabled; tag["paused"]=Paused; tag["name"]=CatName;
         tag["pickup"]=Pickup; tag["combat"]=Combat; tag["torches"]=Torches; tag["bridges"]=Bridges; tag["ropes"]=Ropes;
         tag["xp"]=Experience; tag["fur"]=Fur; tag["home"]=Home; tag["homeWorld"]=HomeWorld;
@@ -117,6 +121,7 @@ public sealed class CompanionPlayer : ModPlayer
         Bag=InventoryTransfer.Empty(Math.Max(24,items.Count));
         for(int i=0;i<items.Count;i++) Bag[i]=ItemIO.Load(items[i]);
         EnvironmentPaused=tag.GetBool("environmentPaused");
+        CombatMode=tag.ContainsKey("combatMode")?CompanionCombatModes.Valid(tag.GetInt("combatMode")):tag.GetBool("cooperativeCombat")?CompanionCombatMode.Assist:CompanionCombatMode.Proactive;
         Enabled=tag.GetBool("enabled"); Paused=tag.GetBool("paused");
         CatName=tag.ContainsKey("name")?tag.GetString("name"):CompanionLife.L("DefaultName");
         Pickup=!tag.ContainsKey("pickup")||tag.GetBool("pickup"); Combat=!tag.ContainsKey("combat")||tag.GetBool("combat");
@@ -138,6 +143,7 @@ public sealed class CompanionPlayer : ModPlayer
     public override void ProcessTriggers(TriggersSet triggersSet) {
         CompanionControlUI.Input(this);
         if(Main.inFancyUI||Terraria.GameInput.PlayerInput.WritingText) return;
+        if(PalicoCompanion.StowKey.JustPressed&&!Main.mapFullscreen&&!Player.dead&&!CompanionSession.Closing){CompanionLife.Toggle(this);return;}
         if(PalicoCompanion.HudKey.JustPressed&&!Main.mapFullscreen&&!CompanionHudLayout.InputBlocked)CompanionHudLayout.Toggle();
         if(PalicoCompanion.PanelKey.JustPressed&&!Main.inFancyUI&&!Main.mapFullscreen) CompanionUIFlow.Toggle(this);
         if(PalicoCompanion.EnvironmentKey.JustPressed&&!Main.mapFullscreen)CompanionEnvironment.RequestToggle(this);

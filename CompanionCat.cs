@@ -60,6 +60,7 @@ public sealed class CompanionCat : ModProjectile
         w.Write((ulong)Main.GameUpdateCount);w.Write(PresentationEpoch);w.Write((byte)Animation.Motion);w.Write(Animation.IdleTicks);w.Write(Animation.StateTicks);w.Write(Animation.WalkPhase);
         w.Write(Catching.SwingTicks>0?Catching.Duration:mine?s.Mining.SwingDuration:s.Trees.SwingDuration);
         ActionVisual.Write(w);Barrel.Write(w);Kite.Write(w);
+        var combatTarget=targeting.VisibleTarget;w.Write((short)(combatTarget?.whoAmI??-1));w.Write(combatTarget?.type??0);
     }
     public override void ReceiveExtraAI(System.IO.BinaryReader r){
         ulong previousInstance=NetworkInstance,instance=r.ReadUInt64();if(CompanionNetwork.Client)NetworkInstance=instance;
@@ -72,10 +73,16 @@ public sealed class CompanionCat : ModProjectile
             ItemDirection=itemDirection,ItemAnimation=itemAnimation,ItemMax=itemMax,ItemRotation=itemRotation,Channel=channel,ItemOffset=itemOffset,
             Tool=networkTool,ToolProgress=networkToolProgress,ToolAim=networkToolAim,WeaponAim=weaponAim};
         ActionVisual.Read(r,previousInstance!=instance);Barrel.Read(r,previousInstance!=instance);Kite.Read(r);
+        int combatId=r.ReadInt16(),combatType=r.ReadInt32();
+        if(CompanionNetwork.Client&&pose.Time>=replicaCombatTime){
+            replicaCombatTime=(ulong)pose.Time;
+            targeting.Engage(combatId>=0&&combatId<Main.maxNPCs&&Main.npc[combatId].active&&Main.npc[combatId].type==combatType?Main.npc[combatId]:null);
+        }
         if(CompanionNetwork.Client&&CompanionRoster.Observe(this,(ulong)pose.Time)){if(previousInstance!=instance)replica.Clear();replica.Receive(pose,Main.GameUpdateCount);Projectile.position=replica.Position;}
 
     }
     Vector2 workFacing,attackFacing;
+    ulong replicaCombatTime;
     int workFacingTicks;
     public void FaceWork(Vector2 target) {workFacing=target;workFacingTicks=12;}
     public static int Facing(Vector2 center,Vector2 target,int current)=>Math.Abs(target.X-center.X)>2?Math.Sign(target.X-center.X):current;
@@ -205,7 +212,7 @@ public sealed class CompanionCat : ModProjectile
         }
         var airborneTarget=!state.Paused&&!state.Vitals.Downed&&Navigation.Riding?FindThreat(owner):null;
         var airWeapon=CompanionWeapons.Active(state.Gear);
-        bool airWorkDanger=airborneTarget!=null&&(HoldingThreat||CompanionThreat.InterruptsWork(airborneTarget,owner,Projectile.Center)||CompanionTargeting.Marked(owner,Projectile.Center)==airborneTarget);
+        bool airWorkDanger=airborneTarget!=null&&(state.CooperativeCombat||HoldingThreat||CompanionThreat.InterruptsWork(airborneTarget,owner,Projectile.Center)||CompanionTargeting.Marked(owner,Projectile.Center)==airborneTarget);
         if(!state.Paused&&!state.Vitals.Downed&&Navigation.Riding&&!airWorkDanger&&Vector2.DistanceSquared(owner.Center,Projectile.Center)<480*480) {
             if(state.Construction.Active&&state.Construction.Tick(owner,state,Projectile,false)&&Navigation.UpdateWorkFlight(Projectile,owner,state.Construction.MoveTarget,true)){
                 Weapons.Tick(owner,state,Projectile,null,false);Light.Update(owner,state,Projectile,true);return;
@@ -261,7 +268,7 @@ public sealed class CompanionCat : ModProjectile
         if(!state.Paused&&!state.Vitals.Downed&&Navigation.Riding&&!airWorkDanger&&state.Digging.Active&&!state.Mining.Active&&Vector2.DistanceSquared(owner.Center,Projectile.Center)<480*480){
             Projectile.velocity*=.5f;Weapons.Tick(owner,state,Projectile,null,false);Light.Update(owner,state,Projectile,true);return;
         }
-        if(!state.Paused&&!state.Vitals.Downed&&Navigation.UpdateReturn(Projectile,owner,state.Combat?airborneTarget:null,airWeapon,tactics.Cautious,HoldingThreat)) {
+        if(!state.Paused&&!state.Vitals.Downed&&Navigation.UpdateReturn(Projectile,owner,state.AttacksEnabled?airborneTarget:null,airWeapon,tactics.Cautious,HoldingThreat)) {
             // Nearby hovering/landing is still a working state. Only genuine
             // long-distance catch-up clears the owner's current digging intention;
             // nearby combat suspends a still-valid mining job.
@@ -269,7 +276,7 @@ public sealed class CompanionCat : ModProjectile
             else if(airborneTarget!=null){SuspendWorkForCombat(state);state.Mining.Tick(owner,Projectile.Center,false,true);}
             targetItem=-1;
             var airTarget=airborneTarget??FindThreat(owner);
-            Weapons.Tick(owner,state,Projectile,airTarget,state.Combat&&(CompanionNativeUse.Summoning(airWeapon)||CompanionCombatReach.CanUse(airWeapon,Projectile,airTarget)),allowSupport:true);
+            Weapons.Tick(owner,state,Projectile,airTarget,state.AttacksEnabled&&(CompanionNativeUse.Summoning(airWeapon)||CompanionCombatReach.CanUse(airWeapon,Projectile,airTarget)),allowSupport:true);
             animationThreat=airTarget!=null;attackThrust=!CompanionNativeUse.SwingArm(airWeapon);
             attackVisualTicks=Weapons.Actor.itemAnimation;attackVisualDuration=Math.Max(1,Weapons.Actor.itemAnimationMax);
             if(CompanionWeapons.Support(airWeapon)&&Weapons.Busy)attackFacing=Weapons.Aim;
@@ -294,11 +301,11 @@ public sealed class CompanionCat : ModProjectile
         if(target is {} npc) {
             state.Status=HoldingThreat?CompanionText.Message("CompanionCat.WatchingEnemies"):tactics.Cautious?CompanionText.Message("CompanionCat.KeepingDistance"):"Guarding";targetItem=-1;
             Item weapon=CompanionWeapons.Active(state.Gear);
-            if(state.Combat&&!CompanionWeapons.Support(weapon))goal=HoldingThreat?Projectile.Center:CompanionCombatReach.Stand(weapon,Projectile,npc,tactics.Cautious);
+            if(state.AttacksEnabled&&!CompanionWeapons.Support(weapon))goal=HoldingThreat?Projectile.Center:CompanionCombatReach.Stand(weapon,Projectile,npc,tactics.Cautious);
             attackFacing=npc.Center;
         }
         Item activeWeapon=CompanionWeapons.Active(state.Gear);
-        Weapons.Tick(owner,state,Projectile,target,state.Combat&&(CompanionNativeUse.Summoning(activeWeapon)||CompanionCombatReach.CanUse(activeWeapon,Projectile,target)),allowSupport:true);
+        Weapons.Tick(owner,state,Projectile,target,state.AttacksEnabled&&(CompanionNativeUse.Summoning(activeWeapon)||CompanionCombatReach.CanUse(activeWeapon,Projectile,target)),allowSupport:true);
         if(CompanionWeapons.Support(activeWeapon)&&Weapons.Busy)attackFacing=Weapons.Aim;
         attackThrust=!CompanionNativeUse.SwingArm(activeWeapon);
         attackVisualTicks=Weapons.Actor.itemAnimation;attackVisualDuration=Math.Max(1,Weapons.Actor.itemAnimationMax);
@@ -346,7 +353,7 @@ public sealed class CompanionCat : ModProjectile
             else if(tick%15==0)state.Status=state.Trees.Status.Length>0?state.Trees.Status:"Following";
         }
         if((Light.Holding||Light.Status.Length>0)&&!building&&!mining&&!ordered&&!logistics&&!gardening&&!forestry&&!threat)state.Status=Light.Status.Length>0?Light.Status:CompanionText.Message("CompanionCat.HoldingTorch");
-        Move(goal,owner,state,threat&&state.Combat);
+        Move(goal,owner,state,threat&&state.AttacksEnabled);
     }
     public override void PostAI() {
         if(!Projectile.active)return;
@@ -396,12 +403,19 @@ public sealed class CompanionCat : ModProjectile
     NPC FindThreat(Player owner) {
         var state=owner.GetModPlayer<CompanionPlayer>();
         bool working=state.Directive.Active||state.Construction.Active||state.Digging.Active||state.Mining.Active||state.Trees.Active||state.Garden.Active||state.Order.Active||state.Storage.Active||targetItem>=0;
+        var previous=targeting.VisibleTarget;
         var target=targeting.Select(owner,Projectile.Center,working);
+        if(previous!=targeting.VisibleTarget)PendingPresentation=true;
         tactics.Update(state,target!=null);return target;
     }
     readonly CompanionCombatTactics tactics=new();
     internal bool HoldingThreat=>targeting.Holding;
     internal NPC EngagedTarget=>animationThreat?targeting.VisibleTarget:null;
+    internal int CombatTargetIndex=>targeting.VisibleTarget?.whoAmI??-1;
+    internal void Engage(NPC npc){targeting.Engage(npc);PendingPresentation=true;}
+    internal bool PermitsCombatTarget(NPC npc)=>targeting.VisibleTarget is {} target&&
+        (target==npc||target.realLife>=0&&target.realLife==(npc.realLife>=0?npc.realLife:npc.whoAmI)||npc.realLife==target.whoAmI);
+    internal void ClearCombat(){targeting.Clear();Weapons.Cancel();animationThreat=false;PendingPresentation=true;}
     internal bool Cautious=>tactics.Cautious;
     public void StopWork(CompanionPlayer s){Kite.Stop(this);targeting.Clear();tactics.Update(s,false);CancelTransitWork(s);Weapons.Cancel();}
     // Ground and flight share the same interruption contract: preserve pending

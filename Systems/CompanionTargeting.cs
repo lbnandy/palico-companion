@@ -15,6 +15,7 @@ internal sealed class CompanionTargeting {
     bool SameTarget=>current is {active:true}&&current.type==currentType&&ReferenceEquals(currentEpoch,current.GetGlobalNPC<CompanionNpcEpoch>());
     internal bool Holding=>Obscured&&SameTarget&&Main.GameUpdateCount-lastSeen<SightGrace;
     internal NPC VisibleTarget=>SameTarget&&!Obscured?current:null;
+    internal void Engage(NPC npc)=>Remember(npc);
     internal void Clear(){current=null;currentEpoch=null;Obscured=false;}
     NPC Remember(NPC target){current=target;currentType=target?.type??0;currentEpoch=target?.GetGlobalNPC<CompanionNpcEpoch>();Obscured=false;if(target!=null)lastSeen=Main.GameUpdateCount;return target;}
     internal static bool Destructible(NPC npc)=>npc is {active:true,friendly:false,dontTakeDamage:false,immortal:false}&&npc.type>=NPCID.None&&NPCID.Sets.ProjectileNPC[npc.type];
@@ -29,11 +30,17 @@ internal sealed class CompanionTargeting {
     internal static bool Valid(Player owner,Vector2 cat,NPC npc,float range)=>InReach(owner,cat,npc,range)&&CompanionCombatReach.Clear(cat,npc.Center);
     internal static NPC Marked(Player owner,Vector2 cat){
         int id=owner.MinionAttackTargetNPC;
-        return owner.GetModPlayer<CompanionPlayer>().Combat&&id>=0&&id<Main.maxNPCs&&Valid(owner,cat,Main.npc[id],CompanionCombatReach.TrackingRange)?Main.npc[id]:null;
+        return owner.GetModPlayer<CompanionPlayer>().AttacksEnabled&&id>=0&&id<Main.maxNPCs&&Valid(owner,cat,Main.npc[id],CompanionCombatReach.TrackingRange)?Main.npc[id]:null;
     }
     internal NPC Select(Player owner,Vector2 cat,bool working){
+        if(owner.GetModPlayer<CompanionPlayer>().CombatMode==CompanionCombatMode.Passive)return Remember(null);
         if(Marked(owner,cat) is {} marked)return Remember(marked);
         bool retained=SameTarget;
+        if(owner.GetModPlayer<CompanionPlayer>().CooperativeCombat){
+            if(retained&&Valid(owner,cat,current,CompanionCombatReach.TrackingRange))return Remember(current);
+            if(retained&&InReach(owner,cat,current,CompanionCombatReach.TrackingRange)&&Main.GameUpdateCount-lastSeen<SightGrace){Obscured=true;return current;}
+            return Remember(null);
+        }
         bool Intercept(NPC n)=>Incoming(n,owner.Center)||Incoming(n,cat);
         // A target crossing the acquisition boundary remains engaged until
         // the wider release boundary. Identity includes NPC slot reuse.

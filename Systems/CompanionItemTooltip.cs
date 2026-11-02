@@ -1,0 +1,47 @@
+using System;
+using Mono.Cecil.Cil;
+using MonoMod.Cil;
+using Terraria;
+using Terraria.ModLoader;
+
+namespace PalicoCompanion.Systems;
+
+// ItemSlot only selects the hovered item; native tooltip stats are calculated
+// later by Main. Substitute their receiver here, not Main.LocalPlayer or the
+// mouse/input globals. Inventory interactions and other tooltips stay human-owned.
+public sealed class CompanionItemTooltip : ModSystem {
+    static Item hovered;
+    static Player subject;
+    static Player inactive;
+    internal static void Clear(){hovered=null;subject=null;}
+    internal static void Hover(CompanionPlayer owner){
+        if(Main.HoverItem.IsAir||Main.HoverItem.damage<=0)return;
+        hovered=Main.HoverItem;
+        if(owner.Cat?.ModProjectile is CompanionCat cat&&cat.Weapons.Available&&
+            cat.Weapons.Actor.HeldItem.type==hovered.type&&cat.Weapons.Actor.HeldItem.prefix==hovered.prefix){subject=cat.Weapons.Actor;return;}
+        // An inactive companion or a different backpack weapon needs a preview.
+        // Do not borrow weapon-specific live effects (e.g. the drum's different
+        // summon multiplier), advance buffs, or mutate the real attack actor.
+        inactive??=new Player {whoAmI=255};
+        inactive.inventory[0]=hovered;inactive.selectedItem=0;
+        CompanionNativeUse.ApplyCombatModifiers(inactive,owner,hovered);
+        subject=inactive;
+    }
+    public override void Load()=>IL_Main.MouseText_DrawItemTooltip_GetLinesInfo+=UseCompanion;
+    public override void Unload(){IL_Main.MouseText_DrawItemTooltip_GetLinesInfo-=UseCompanion;Clear();inactive=null;}
+    public override void OnWorldUnload(){Clear();inactive=null;}
+    static Player ForItem(Player human,Item item){
+        return subject!=null&&ReferenceEquals(item,hovered)&&ReferenceEquals(item,Main.HoverItem)?subject:human;
+    }
+    static void UseCompanion(ILContext il){
+        var c=new ILCursor(il);int reads=0;
+        while(c.TryGotoNext(MoveType.After,
+            i=>i.MatchLdsfld<Main>(nameof(Main.player)),
+            i=>i.MatchLdsfld<Main>(nameof(Main.myPlayer)),
+            i=>i.OpCode==OpCodes.Ldelem_Ref)){
+            c.Emit(OpCodes.Ldarg_0);
+            c.EmitDelegate<Func<Player,Item,Player>>(ForItem);reads++;
+        }
+        if(reads==0)throw new InvalidOperationException("Native item tooltip player reads not found");
+    }
+}

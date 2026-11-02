@@ -39,7 +39,7 @@ public sealed class ThoriumCompanionBridge:ModSystem {
         mouseLookup=new Hook(typeof(MousePlayer).GetMethod("TryGetMousePosition")!,GetMouse);
         CompanionCrossMod.SupportTool=Support;CompanionCrossMod.SafeThrow=Throw;
         CompanionCrossMod.UpdateResources+=Update;CompanionCrossMod.SupportTarget=Target;
-        CompanionCrossMod.ResourceReady=Ready;CompanionCrossMod.WeaponEffect=Effect;
+        CompanionCrossMod.ResourceReady+=Ready;CompanionCrossMod.WeaponEffect=Effect;
         CompanionCrossMod.PlanUse=Plan;CompanionCrossMod.WeaponReach=Range;
     }
     public override void Unload(){
@@ -47,7 +47,7 @@ public sealed class ThoriumCompanionBridge:ModSystem {
         instrumentEmpower?.Dispose();instrumentEmpower=null;
         playerLookup?.Dispose();mouseLookup?.Dispose();playerLookup=mouseLookup=null;
         CompanionCrossMod.UpdateResources-=Update;CompanionCrossMod.SupportTool=null;CompanionCrossMod.SafeThrow=null;
-        CompanionCrossMod.SupportTarget=null;CompanionCrossMod.ResourceReady=null;CompanionCrossMod.WeaponEffect=null;
+        CompanionCrossMod.SupportTarget=null;CompanionCrossMod.ResourceReady-=Ready;CompanionCrossMod.WeaponEffect=null;
         CompanionCrossMod.PlanUse=null;CompanionCrossMod.WeaponReach=null;
         resources=new();empower=null;playSound=null;findAlly=null;
     }

@@ -51,6 +51,7 @@ public sealed class TrainingPanel:ModSystem {
     void Inventory(On_Main.orig_DrawInventory orig,Main self){int x=Main.mouseX,y=Main.mouseY;try{if(Open&&HitBounds.Contains(x,y)){Main.mouseX=Main.mouseY=-10000;}orig(self);}finally{Main.mouseX=x;Main.mouseY=y;}}
     public override void ModifyInterfaceLayers(List<GameInterfaceLayer> layers){int i=layers.FindIndex(l=>l.Name=="Vanilla: Mouse Text");if(i>=0)layers.Insert(i,new LegacyGameInterfaceLayer("PalicoCompanion: Guide",Draw,InterfaceScaleType.UI));}
     internal bool Draw(){bool click=Main.mouseLeft&&!previous;previous=Main.mouseLeft;if(!Main.playerInventory)Open=false;if(!Open||!CompanionUIFlow.Visible){dragging=false;return true;}
+        using var navigation=CompanionGamepad.Begin("guide",Fit);
         var s=Main.LocalPlayer.GetModPlayer<CompanionPlayer>();
         var pointer=new Vector2(Main.mouseX,Main.mouseY);
         if(!Main.mouseLeft)dragging=false;
@@ -64,7 +65,7 @@ public sealed class TrainingPanel:ModSystem {
         if(b.Contains(mouse)){s.Player.mouseInterface=true;s.Player.cursorItemIconEnabled=false;}
         void Box(Rectangle r,Color color){panel.Left.Set(r.X,0);panel.Top.Set(r.Y,0);panel.Width.Set(r.Width,0);panel.Height.Set(r.Height,0);panel.BackgroundColor=color;panel.BorderColor=Color.Black;panel.Recalculate();panel.Draw(sb);}
         void Text(string text,int tx,int ty,Color? color=null,float scale=.8f)=>Utils.DrawBorderString(sb,text,new Vector2(tx,ty),color??Color.White,scale);
-        void Button(string text,int tx,int ty,int width,Action action,bool on=false){var r=new Rectangle(tx,ty,width,CompanionButtonLayout.Height);Box(r,on?new Color(82,105,177):r.Contains(mouse)?new Color(68,87,151):new Color(43,57,102));CenteredButtonText.Draw(sb,text,r,Color.White,CompanionButtonLayout.TextScale);if(click&&r.Contains(mouse))action();}
+        void Button(string text,int tx,int ty,int width,Action action,bool on=false){var r=new Rectangle(tx,ty,width,CompanionButtonLayout.Height);CompanionGamepad.Add("button-"+text,r);Box(r,on?new Color(82,105,177):r.Contains(mouse)?new Color(68,87,151):new Color(43,57,102));CenteredButtonText.Draw(sb,text,r,Color.White,CompanionButtonLayout.TextScale);if(click&&r.Contains(mouse))action();}
         DrawBackdrop(sb,b);
         var titlePosition=CompanionPanelHeader.TitlePosition(CompanionText.Get("TrainingPanel.Title"),b);
         Text(CompanionText.Get("TrainingPanel.Title"),titlePosition.X,titlePosition.Y,Color.Gold,1);
@@ -78,7 +79,7 @@ public sealed class TrainingPanel:ModSystem {
         for(int i=0;i<CategoryKeys.Length;i++) {
             var tab=categoryTabs[i]??=new UITextPanel<string>(CategoryLabel(i),.8f);
             tab.SetText(CategoryLabel(i),.8f,false);
-            var r=CategoryBounds(i);bool hover=r.Contains(mouse);
+            var r=CategoryBounds(i);CompanionGamepad.Add("category-"+i,r);bool hover=r.Contains(mouse);
             tab.SetPadding(0);tab.TextHAlign=.5f;
             tab.PaddingLeft=tab.PaddingRight=12;
             tab.PaddingTop=tab.PaddingBottom=(r.Height-16*.8f)/2;
@@ -93,7 +94,7 @@ public sealed class TrainingPanel:ModSystem {
         int start=new[]{0,0,8,13}[Category],end=new[]{9,9,11,17}[Category];Entry=Math.Clamp(Entry,start,end-1);
         int Actual(int index)=>Category==1&&index==8?TrainingCatalog.Barrel:Category==3&&index==16?19:index;
         for(int i=start;i<end;i++) {
-            var r=new Rectangle(x+28,y+103+(i-start)*40,156,32);bool selected=Entry==i,hover=r.Contains(mouse);
+            var r=new Rectangle(x+28,y+103+(i-start)*40,156,32);bool selected=Entry==i,hover=r.Contains(mouse);CompanionGamepad.Add("topic-"+i,r);
             if(selected||hover)Box(r,selected?new Color(70,90,150):new Color(49,65,111));
             CenteredButtonText.Draw(sb,Category==0?Topic(i):TrainingCatalog.Entries[Actual(i)].Name,r,selected?Color.White:hover?Main.OurFavoriteColor:new Color(195,207,231),.8f);
             if(click&&hover&&Entry!=i){Entry=i;recipeVariant=0;scrollDragging=false;Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuTick);}
@@ -107,7 +108,8 @@ public sealed class TrainingPanel:ModSystem {
         bool legend=Category==0&&Entry==2;
         int bodyTop=143+(legend?78:0);
         int bodyTextY=(int)Math.Round(CenteredButtonText.Layout(CompanionText.Get("TrainingPanel.Baseline"),new Rectangle(x+204,y+bodyTop,504,32),.78f).Position.Y);
-        bool body=new Rectangle(x+204,y+bodyTop,504,327-(legend?78:0)).Contains(mouse);
+        var bodyBounds=new Rectangle(x+204,y+bodyTop,504,327-(legend?78:0));CompanionGamepad.Add("body",bodyBounds);
+        bool body=bodyBounds.Contains(mouse);
         if(body&&Terraria.GameInput.PlayerInput.ScrollWheelDeltaForUI!=0){scrollLine=Math.Max(0,scrollLine-Terraria.GameInput.PlayerInput.ScrollWheelDeltaForUI/120*3);Terraria.GameInput.PlayerInput.ScrollWheelDeltaForUI=0;}
         void Wrapped(string str,Color? color=null){foreach(var paragraph in str.Split('\n')){
             var ink=color??((paragraph.StartsWith("【")||paragraph.StartsWith("["))?Color.LightSkyBlue:Color.White);

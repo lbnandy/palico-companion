@@ -14,7 +14,8 @@ namespace PalicoCompanion.Systems;
 // The server owns movement, commitment and damage. Replicas receive only the
 // phase clock; repeated projectile snapshots never restart the lift or tumble.
 internal sealed class CompanionBarrelCharge {
-    internal const int BlastSize=288,LiftTicks=30,RushTicks=100,RecoverTicks=60,SettleTicks=24;
+    internal const int BlastSize=288,LiftTicks=30,RushTicks=100,RecoverTicks=60;
+    internal const int ProneTicks=18,GetUpFrameTicks=11,SettleTicks=ProneTicks+2*GetUpFrameTicks;
     const int RetryTicks=120;
     const float Reach=320;
     enum Stage:byte { None,Lift,Rush,Recover,Landing,Settle }
@@ -50,6 +51,7 @@ internal sealed class CompanionBarrelCharge {
     NPC Select(CompanionPlayer s,CompanionCat cat,bool requested,bool needsLanding,out Vector2 landingPoint){
         landingPoint=default;NPC best=null;float score=float.MinValue;
         foreach(var n in Main.npc){
+            if(!requested&&!CompanionCombatBehavior.Allows(s,n))continue;
             if(needsLanding&&!requested&&!CompanionTargeting.Valid(s.Player,cat.Projectile.Center,n))continue;
             if(!Enemy(n)||Vector2.DistanceSquared(n.Hitbox.ClosestPointInRect(cat.Projectile.Center),cat.Projectile.Center)>Reach*Reach)continue;
             int group=Group(n);if(!requested&&!n.boss&&group<2)continue;
@@ -67,7 +69,7 @@ internal sealed class CompanionBarrelCharge {
         return best;
     }
     internal bool TryStart(CompanionPlayer s,CompanionCat cat,bool requested){
-        if(CompanionNetwork.Client||Active||retry>0||!s.Training.Ready(s,TrainingCatalog.Barrel)||!requested&&!s.Combat||
+        if(CompanionNetwork.Client||s.CombatMode==CompanionCombatMode.Passive||Active||retry>0||!s.Training.Ready(s,TrainingCatalog.Barrel)||!requested&&!s.Combat||
             Working(s)||cat.ActionVisual.Active||cat.Fishing.Active||cat.Catching.Active||cat.Supplies.Active||s.Vitals.Health<=s.Vitals.MaxHealth*.35f)return false;
         bool needsLanding=cat.Navigation.Riding||!cat.Navigation.Grounded(cat.Projectile);
         // Use the ordinary combat selector, not weapon animations or hits:
@@ -76,6 +78,7 @@ internal sealed class CompanionBarrelCharge {
             Vector2.DistanceSquared(s.Player.Center,cat.Projectile.Center)>=480*480)||!needsLanding&&!Headroom(cat.Projectile.Center))return false;
         var chosen=Select(s,cat,requested,needsLanding,out var point);
         if(chosen==null){if(!requested)retry=30;return false;}
+        if(requested)CompanionCombatBehavior.Engage(s,chosen);
         target=chosen.whoAmI;targetType=chosen.type;
         cat.Weapons.Cancel();
         if(needsLanding){automaticLanding=!requested;landing.Begin(cat,point);Change(cat,Stage.Landing);return true;}
@@ -95,6 +98,7 @@ internal sealed class CompanionBarrelCharge {
         var p=cat.Projectile;
         if(!s.Training.Active(s)||s.Training.Find(s,TrainingCatalog.Barrel)<0||Working(s)||s.PetCooldown>510||
             Vector2.DistanceSquared(s.Player.Center,p.Center)>480*480){Cancel(cat);return false;}
+        if(s.CombatMode==CompanionCombatMode.Passive&&(Preparing||Carrying)){Cancel(cat);return false;}
         cat.Weapons.Tick(s.Player,s,p,null,false);
         p.tileCollide=true;
         s.Status=CompanionText.Message(Preparing?"CompanionBarrelCharge.Landing":"CompanionBarrelCharge.Busy");

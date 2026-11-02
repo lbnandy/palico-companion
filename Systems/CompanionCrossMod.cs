@@ -12,6 +12,11 @@ public sealed class CompanionCrossMod:ModSystem {
     internal static Action<CompanionNativeUse> UpdateResources;
     internal static Func<CompanionNativeUse,Player> SupportTarget;
     internal static Func<CompanionNativeUse,bool> ResourceReady;
+    internal static bool ResourcesReady(CompanionNativeUse use){
+        if(ResourceReady==null)return true;
+        foreach(Func<CompanionNativeUse,bool> ready in ResourceReady.GetInvocationList())if(!ready(use))return false;
+        return true;
+    }
     internal static Action<CompanionNativeUse> PlanUse;
     internal static Func<Item,float?> WeaponReach;
     internal static Action<CompanionNativeUse,int,byte,byte,float> WeaponEffect;

@@ -1,4 +1,5 @@
 Keybinds: {
+	Stow.DisplayName: 收回／召出呆猫
 	Hud.DisplayName: 显示／隐藏呆猫状态卡
 	Environment.DisplayName: 切换呆猫环境改动
 	Direct.DisplayName: 指挥呆猫（按住并左键选择）
@@ -7,6 +8,14 @@ Keybinds: {
 }
 
 UI: {
+	CombatProactive: 主动进攻
+	CombatAssist: 协同进攻
+	CombatPassive: 不攻击
+	CombatProactiveHint: 自动寻找附近敌人
+	CombatAssistHint: 攻击主人命中或标记的目标；主人或呆猫受击时还击
+	CombatPassiveHint: 不攻击、不还击，仍可工作、拾取和治疗
+	CombatPassiveSkill: 不攻击模式下无法使用攻击技能
+	CombatModeHint: 点击切换：{0}
 	KiteHint: 右键放飞呆猫
 	KiteHelp: 按住左键放线，右键收线；切换物品结束
 	KiteStatus: 放风筝中

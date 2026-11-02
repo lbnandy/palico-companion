@@ -1,4 +1,5 @@
 Keybinds: {
+	Stow.DisplayName: Stow / call out Palico
 	Hud.DisplayName: Toggle Palico status card
 	Environment.DisplayName: Toggle automatic environment changes
 	Direct.DisplayName: Direct companion (hold and click)
@@ -7,6 +8,14 @@ Keybinds: {
 }
 
 UI: {
+	CombatProactive: Attack proactively
+	CombatAssist: Assist owner
+	CombatPassive: Do not attack
+	CombatProactiveHint: Automatically seek nearby enemies
+	CombatAssistHint: Engage enemies you hit or mark; retaliate when you or your Palico are hurt
+	CombatPassiveHint: No attacks or retaliation; work, pickup and healing remain available
+	CombatPassiveSkill: Attack skills are unavailable in passive mode
+	CombatModeHint: Click to switch: {0}
 	KiteHint: Right-click to fly your Palico
 	KiteHelp: Hold left-click to let out line; right-click to reel in. Switch items to stop
 	KiteStatus: Flying a kite

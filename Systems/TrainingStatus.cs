@@ -27,6 +27,7 @@ internal static class TrainingStatus {
         string effect=kind switch {0=>CompanionText.Get("TrainingStatus.Healing"),2=>CompanionText.Get("TrainingStatus.DebuffImmunity"),3=>s.Training.ManaTarget==0?CompanionText.Get("TrainingStatus.PlayerMana"):CompanionText.Get("TrainingStatus.PalicoMana"),4=>CompanionText.Get("TrainingStatus.DrumBuff"),_=>""};
         if(duration>0)return CompanionText.Get("TrainingStatus.Duration" ,effect, (duration+59)/60)+(cooldown>0?CompanionText.Get("TrainingStatus.CooldownSuffix" ,(cooldown+59)/60):"");
         if(cooldown>0)return CompanionText.Get("TrainingStatus.CooldownRemaining" ,(cooldown+59)/60);
+        if(s.CombatMode==CompanionCombatMode.Passive&&kind is 5 or 7 or TrainingCatalog.Barrel)return Terraria.Localization.Language.GetTextValue("Mods.PalicoCompanion.UI.CombatPassiveSkill");
         if(!s.Combat&&kind is 4 or 5 or 7 or TrainingCatalog.Barrel)return CompanionText.Get("TrainingStatus.CombatDisabled");
         return CompanionText.Get("TrainingStatus.Ready");
     }

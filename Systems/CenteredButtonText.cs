@@ -73,6 +73,7 @@ internal static class CenteredButtonText {
         return (new Vector2(box.X+box.Width/2f-(left+right)*scale/2f,box.Y+box.Height/2f-(top+bottom)*scale/2f),scale);
     }
     internal static bool Close(SpriteBatch batch,Rectangle bounds,Point mouse,bool clicked) {
+        CompanionGamepad.Add("close",bounds);
         bool hover=bounds.Contains(mouse);
         Draw(batch,"X",bounds,hover?Main.OurFavoriteColor:Color.White,.9f);
         if(!hover)return false;

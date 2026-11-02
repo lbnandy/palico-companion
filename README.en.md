@@ -23,6 +23,8 @@ Subscribe on the [Steam Workshop](https://steamcommunity.com/sharedfiles/filedet
 
 By default, `P` opens the panel, `K` recalls your Palico, and holding `V` while left-clicking assigns a work target. Rebind these in the game's control settings.
 
+You can also bind a key to stow or call out your Palico. The panel supports gamepad controls, and clicking its sword button cycles through proactive, assist and passive modes. Passive mode keeps work, pickup and healing available.
+
 Gather materials to craft and upgrade your Palico’s gear. The in-game Palico Guide explains how to craft, use and upgrade equipment.
 
 ![Palico Guide](docs/images/05-guide-en-compact.png)
@@ -47,6 +49,8 @@ None of these mods are required:
 - [Thorium](https://steamcommunity.com/sharedfiles/filedetails/?id=2909886416): class support for instruments, healing tools and throwing weapons, including separate inspiration, ally healing and throwing exhaustion. See the compatibility notes below for special-input limits.
 
 See [compatibility notes](docs/COMPATIBILITY.md#english) for weapon support and known limits.
+
+Secrets of the Shadows (SOTS) blade trails and void weapons are also supported, using a separate void meter for the Palico.
 
 ## Feedback and development
 

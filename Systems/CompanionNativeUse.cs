@@ -144,11 +144,14 @@ public sealed partial class CompanionNativeUse {
     internal bool CanMaintainShot(Projectile p)=>Present&&(State.Combat||p.ModProjectile is TrainingDart or TrainingBomb or TrainingBarrelBlast);
     internal void BindReplica(Player owner,CompanionPlayer state,Projectile cat){
         Cat=cat;State=state;EnsureActorSlot();
+        Actor.MinionAttackTargetNPC=cat.ModProjectile is CompanionCat companion?companion.CombatTargetIndex:-1;
         if(!initialized){Actor.inventory=InventoryTransfer.Empty(59);initialized=true;}
         var item=CompanionWeapons.Active(state.Gear);if(Actor.inventory[0].type!=item.type||Actor.inventory[0].prefix!=item.prefix)Actor.inventory[0]=item.Clone();
         // ResetEffects clears the projectile caches too. Match Player.Update's
         // order: reset, rebuild caches, then update buffs which maintain minions.
-        if(!ResetEffects())return;CountOwnedProjectiles();
+        if(!ResetEffects())return;
+        ApplyCombatModifiers(Actor,state,item);
+        CountOwnedProjectiles();
         using(new Scope(this))Actor.UpdateBuffs(Actor.whoAmI);Actor.maxMinions=MinionLimit(owner);Actor.maxTurrets=SentryLimit(owner);
         Actor.slotsMinions=0;Actor.numMinions=0;
         Actor.selectedItem=0;LocateActor(cat);ApplyReplicaPose();Actor.dead=false;
@@ -189,9 +192,7 @@ public sealed partial class CompanionNativeUse {
         Actor.maxMinions=MinionLimit(owner);Actor.maxTurrets=SentryLimit(owner);
         Actor.downedDD2EventAnyDifficulty=owner.downedDD2EventAnyDifficulty;
         Actor.manaCost=state.Training.Find(state,3)>=0&&state.Training.ManaDance>0&&state.Training.ManaTarget==1?.9f-.05f*state.Training.Tier:1;
-        Actor.GetDamage(DamageClass.Generic)=StatModifier.Default*(Actor.HeldItem.CountsAsClass(DamageClass.Summon)?1:state.Training.Damage(state));
-        Actor.GetAttackSpeed(DamageClass.Generic)=Actor.HeldItem.CountsAsClass(DamageClass.Summon)?1:state.Training.Speed(state);
-        Actor.GetDamage(DamageClass.Magic)=StatModifier.Default*state.Vitals.MagicMultiplier;
+        ApplyCombatModifiers(Actor,state,weapon);
         // Map only the cat's bag. Mod weapons may consume materials rather than
         // ammo (for example Wulfrum scrap); never borrow the human inventory.
         // Like native ChooseAmmo/QuickHeal, favorites remain usable. Transfer
@@ -227,7 +228,7 @@ public sealed partial class CompanionNativeUse {
             if(ally!=null)Aim=ally.Center;
         }
         CompanionCrossMod.PlanUse?.Invoke(this);
-        if(CompanionCrossMod.ResourceReady?.Invoke(this)==false)wants=false;
+        if(!CompanionCrossMod.ResourcesReady(this))wants=false;
         if(target!=null)Actor.MinionAttackTargetNPC=target.whoAmI;else Actor.MinionAttackTargetNPC=-1;
         // Finish a natural refill after running dry. Native regeneration speeds
         // up as the bar fills; restarting early discards that faster portion and
@@ -269,6 +270,14 @@ public sealed partial class CompanionNativeUse {
         // Consumption mutates mapped Items. Never copy cloned counts back.
     }
     static readonly Item Empty=new();
+    // Shared by authoritative attacks, network presentation and an inactive
+    // companion's tooltip. These are companion effects, never owner equipment.
+    internal static void ApplyCombatModifiers(Player actor,CompanionPlayer state,Item weapon) {
+        bool summon=weapon.CountsAsClass(DamageClass.Summon);
+        actor.GetDamage(DamageClass.Generic)=StatModifier.Default*(summon?1:state.Training.Damage(state));
+        actor.GetAttackSpeed(DamageClass.Generic)=summon?1:state.Training.Speed(state);
+        actor.GetDamage(DamageClass.Magic)=StatModifier.Default*state.Vitals.MagicMultiplier;
+    }
     readonly List<DrawData> drawCache=new();
     // Projectile.Update enforces maxMinions, including reconnecting segmented
     // summons before sacrificing excess bodies. Do not bypass it with Kill().
@@ -334,6 +343,7 @@ public sealed partial class CompanionNativeUse {
         readonly bool triggerLeft,triggerRight;
         readonly bool actorActive;
         readonly int actorSlot;readonly CompanionProjectileScope projectiles;
+        readonly CompanionCombatTargets combatTargets;
         readonly IDisposable hitCooldowns;readonly bool healthScope;readonly int healthBefore;
         public Scope(CompanionNativeUse use,bool trackHealing=true) {
             if(!use.EnsureActorSlot())throw new InvalidOperationException("No free native companion actor slot");
@@ -364,11 +374,12 @@ public sealed partial class CompanionNativeUse {
             // mouse state (for example InnoVault's PressKey). Scope both to the
             // actor, so firing never depends on the human player's mouse.
             triggers.MouseLeft=use.Actor.controlUseItem;triggers.MouseRight=use.Actor.controlUseTile;
+            combatTargets=use.State.CombatMode!=CompanionCombatMode.Proactive?new CompanionCombatTargets(use.State):null;
         }
         public void Dispose() {
             try {if(healthScope)CompanionWeaponRecovery.End(context,healthBefore);}
             finally {try {hitCooldowns?.Dispose();}finally {
-            projectiles.Dispose();Main.player[actorSlot]=backup;Main.myPlayer=myPlayer;Main.mouseX=mouseX;Main.mouseY=mouseY;Current=previous;
+            combatTargets?.Dispose();projectiles.Dispose();Main.player[actorSlot]=backup;Main.myPlayer=myPlayer;Main.mouseX=mouseX;Main.mouseY=mouseY;Current=previous;
             Main.blockMouse=blockMouse;
             Main.mouseLeft=mouseLeft;Main.mouseLeftRelease=mouseLeftRelease;Main.mouseRight=mouseRight;Main.mouseRightRelease=mouseRightRelease;
             triggers.MouseLeft=triggerLeft;triggers.MouseRight=triggerRight;
@@ -432,6 +443,7 @@ public sealed class CompanionOwnedShot : GlobalProjectile {
     public override void OnHitNPC(Projectile projectile,NPC target,NPC.HitInfo hit,int damageDone) {
         if(Context!=null&&damageDone>0)Context.Hits++;
     }
+    public override bool? CanHitNPC(Projectile projectile,NPC target)=>Context!=null&&(Context.State.CombatMode==CompanionCombatMode.Passive||projectile.minion||projectile.sentry||ProjectileID.Sets.MinionShot[projectile.type]||ProjectileID.Sets.SentryShot[projectile.type])&&!CompanionCombatBehavior.Allows(Context.State,target)?false:null;
     public override void ModifyHitNPC(Projectile projectile,NPC target,ref NPC.HitModifiers modifiers) {
         if(Context!=null)modifiers.FinalDamage*=CompanionBalanceConfig.Current.DamageScale;
     }
@@ -460,8 +472,8 @@ public sealed class CompanionCombatTerrain : GlobalTile {
     public override bool CanExplode(int i,int j,int type)=>CompanionNativeUse.Current==null;
 }
 public sealed class CompanionNativeHooks : ModSystem {
-    public override void Load(){IL_Player.ItemCheck_Shoot+=HeadlessShoot;IL_Player.ItemCheck_ApplyUseStyle_Inner+=HeadlessGeometry;IL_Player.ItemCheck_GetMeleeHitbox+=HeadlessGeometry;On_Item.GetDrawHitbox+=DrawHitbox;On_Player.GetItemDrawFrame+=ItemFrame;On_NetMessage.SendData+=SendNative;On_Player.ItemCheck_PlayInstruments+=Instruments;On_Projectile.Update+=UpdateShot;On_Main.DrawProj_Inner+=DrawShot;On_Player.ItemCheck_CutTiles+=CutTiles;On_Main.GetPlayerArmPosition+=ArmPosition;On_NPC.PlayerInteraction+=Interaction;On_Player.HealEffect+=Heal;On_Player.ManaEffect+=ManaFeedback;}
-    public override void Unload(){IL_Player.ItemCheck_Shoot-=HeadlessShoot;IL_Player.ItemCheck_ApplyUseStyle_Inner-=HeadlessGeometry;IL_Player.ItemCheck_GetMeleeHitbox-=HeadlessGeometry;On_Item.GetDrawHitbox-=DrawHitbox;On_Player.GetItemDrawFrame-=ItemFrame;On_NetMessage.SendData-=SendNative;On_Player.ItemCheck_PlayInstruments-=Instruments;On_Projectile.Update-=UpdateShot;On_Main.DrawProj_Inner-=DrawShot;On_Player.ItemCheck_CutTiles-=CutTiles;On_Main.GetPlayerArmPosition-=ArmPosition;On_NPC.PlayerInteraction-=Interaction;On_Player.HealEffect-=Heal;On_Player.ManaEffect-=ManaFeedback;}
+    public override void Load(){IL_Player.ItemCheck_Shoot+=HeadlessShoot;IL_Player.ItemCheck_ApplyUseStyle_Inner+=HeadlessGeometry;IL_Player.ItemCheck_GetMeleeHitbox+=HeadlessGeometry;On_Item.GetDrawHitbox+=DrawHitbox;On_Player.GetItemDrawFrame+=ItemFrame;On_NetMessage.SendData+=SendNative;On_Player.ItemCheck_PlayInstruments+=Instruments;On_Projectile.Update+=UpdateShot;On_Main.DrawProj_Inner+=DrawShot;On_Player.ItemCheck_CutTiles+=CutTiles;On_Main.GetPlayerArmPosition+=ArmPosition;IL_Main.SortBabyBirdProjectiles+=FinchDrawOwner;On_NPC.PlayerInteraction+=Interaction;On_Player.HealEffect+=Heal;On_Player.ManaEffect+=ManaFeedback;}
+    public override void Unload(){IL_Player.ItemCheck_Shoot-=HeadlessShoot;IL_Player.ItemCheck_ApplyUseStyle_Inner-=HeadlessGeometry;IL_Player.ItemCheck_GetMeleeHitbox-=HeadlessGeometry;On_Item.GetDrawHitbox-=DrawHitbox;On_Player.GetItemDrawFrame-=ItemFrame;On_NetMessage.SendData-=SendNative;On_Player.ItemCheck_PlayInstruments-=Instruments;On_Projectile.Update-=UpdateShot;On_Main.DrawProj_Inner-=DrawShot;On_Player.ItemCheck_CutTiles-=CutTiles;On_Main.GetPlayerArmPosition-=ArmPosition;IL_Main.SortBabyBirdProjectiles-=FinchDrawOwner;On_NPC.PlayerInteraction-=Interaction;On_Player.HealEffect-=Heal;On_Player.ManaEffect-=ManaFeedback;}
     // These two native methods contain server early-outs for human rendering.
     // Their geometry is also used by melee hits and replicated held weapons.
     // Override only the branch value during the companion actor scope; never
@@ -514,6 +526,19 @@ public sealed class CompanionNativeHooks : ModSystem {
         // Whips and other arm-anchored native projectiles ask the engine for a
         // human body-frame hand. Substitute only the tagged cat's front paw.
         return context?.Available==true?CompanionSprite.Hand(context.Cat):orig(p);
+    }
+    static void FinchDrawOwner(ILContext il) {
+        // Vanilla repositions perched finches while sorting the draw cache,
+        // before DrawProj_Inner. Resolve this projectile's actor, including
+        // multiplayer's shared sentinel, and retain vanilla perch/stacking math.
+        var cursor=new ILCursor(il);int projectileLocal=-1;
+        if(!cursor.TryGotoNext(MoveType.After,
+            i=>i.MatchLdloc(out projectileLocal),
+            i=>i.MatchLdfld<Projectile>(nameof(Projectile.owner)),
+            i=>i.OpCode==Mono.Cecil.Cil.OpCodes.Ldelem_Ref))
+            throw new InvalidOperationException("Native finch draw owner lookup was not found");
+        cursor.Emit(Mono.Cecil.Cil.OpCodes.Ldloc,il.Body.Variables[projectileLocal]);
+        cursor.EmitDelegate<Func<Player,Projectile,Player>>((owner,shot)=>CompanionOwnedShot.Of(shot)?.Actor??owner);
     }
     static void CutTiles(On_Player.orig_ItemCheck_CutTiles orig,Player p,Item item,Rectangle box,bool[] ignore) {
         if(CompanionNativeUse.Current?.Actor==p)return;orig(p,item,box,ignore);

@@ -1,0 +1,77 @@
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using Terraria;
+using Terraria.GameContent;
+using Terraria.ID;
+using Terraria.Localization;
+
+namespace PalicoCompanion.Systems;
+
+internal sealed class CompanionIconToggle
+{
+    internal const int Size=32;
+    const int Border=2;
+    Texture2D inactive,highlight,alternate;
+    readonly float? alternateHue;
+    readonly int itemType;
+    internal CompanionIconToggle(int itemType,float? alternateHue=null){this.itemType=itemType;this.alternateHue=alternateHue;}
+
+    void PrepareFrames(Texture2D icon)
+    {
+        if(inactive!=null)return;
+        var pixels=new Color[icon.Width*icon.Height];
+        icon.GetData(pixels);
+        var gray=new Color[pixels.Length];
+        var colored=alternateHue.HasValue?new Color[pixels.Length]:null;
+        int width=icon.Width+Border*2,height=icon.Height+Border*2;
+        var outline=new Color[width*height];
+        for(int y=0;y<icon.Height;y++)for(int x=0;x<icon.Width;x++){
+            var color=pixels[y*icon.Width+x];
+            int luminance=(color.R*77+color.G*150+color.B*29)>>8;
+            gray[y*icon.Width+x]=new Color(luminance,luminance,luminance,(int)color.A);
+            if(colored!=null&&color.A>0){
+                var hsl=Main.rgbToHsl(color);
+                var recolored=Main.hslToRgb(alternateHue.Value,System.Math.Clamp(hsl.Y,.4f,.78f),hsl.Z);
+                recolored.A=color.A;colored[y*icon.Width+x]=recolored;
+            }
+            if(color.A==0)continue;
+            for(int dy=-Border;dy<=Border;dy++)for(int dx=-Border;dx<=Border;dx++){
+                int index=(y+Border+dy)*width+x+Border+dx;
+                if(outline[index].A<color.A)outline[index]=new Color(color.A,color.A,color.A,color.A);
+            }
+        }
+        inactive=new Texture2D(icon.GraphicsDevice,icon.Width,icon.Height);
+        inactive.SetData(gray);
+        highlight=new Texture2D(icon.GraphicsDevice,width,height);
+        highlight.SetData(outline);
+        if(colored!=null){alternate=new Texture2D(icon.GraphicsDevice,icon.Width,icon.Height);alternate.SetData(colored);}
+    }
+
+    internal void Unload()
+    {
+        var gray=inactive;var outline=highlight;var colored=alternate;
+        inactive=highlight=alternate=null;
+        if(gray!=null||outline!=null||colored!=null)Main.QueueMainThreadAction(()=>{gray?.Dispose();outline?.Dispose();colored?.Dispose();});
+    }
+
+    internal void Draw(SpriteBatch spriteBatch,CompanionPlayer state,Rectangle bounds,Point mouse,bool clicked,bool active,string hint,System.Action action,bool useAlternate=false)
+    {
+        Main.instance.LoadItem(itemType);
+        var icon=TextureAssets.Item[itemType].Value;
+        PrepareFrames(icon);
+        float scale=System.Math.Min(1f,24f/System.Math.Max(icon.Width,icon.Height));
+        var center=bounds.Center.ToVector2();
+        bool enabled=!state.Player.dead&&!CompanionNetwork.Pending&&(!CompanionNetwork.Client||state.NetReady);
+        if(enabled)CompanionGamepad.Add("toggle-"+itemType,bounds);
+        bool hover=bounds.Contains(mouse);
+        // Like vanilla's equipment/housing tabs: separate inactive, active and hover frames.
+        if(hover&&enabled)
+            spriteBatch.Draw(highlight,center,null,Main.OurFavoriteColor,0f,highlight.Size()/2f,scale,SpriteEffects.None,0f);
+        var texture=active?(useAlternate?alternate??icon:icon):inactive;
+        spriteBatch.Draw(texture,center,null,enabled?Color.White:Color.Gray,0f,texture.Size()/2f,scale,SpriteEffects.None,0f);
+        if(!hover)return;
+        state.Player.mouseInterface=true;
+        Main.instance.MouseText(string.Join("\n",CompanionCopy.Wrap(hint,System.Math.Min(520,Main.screenWidth-32))));
+        if(enabled&&clicked&&Main.mouseItem.IsAir)action();
+    }
+}

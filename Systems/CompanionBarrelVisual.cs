@@ -112,8 +112,8 @@ internal static class CompanionBarrelVisual {
         int y=frame==CompanionSpriteLayout.BarrelRaise0+1?12:frame==CompanionSpriteLayout.BarrelRaise0+2?11:9;
         return new Vector2(x,y);
     }
-    internal static int SettleFrame(int age)=>age<2?CompanionSpriteLayout.Prone:
-        age<13?CompanionSpriteLayout.GetUp0:CompanionSpriteLayout.GetUp1;
+    internal static int SettleFrame(int age)=>age<CompanionBarrelCharge.ProneTicks?CompanionSpriteLayout.Prone:
+        age<CompanionBarrelCharge.ProneTicks+CompanionBarrelCharge.GetUpFrameTicks?CompanionSpriteLayout.GetUp0:CompanionSpriteLayout.GetUp1;
     internal static void Draw(SpriteBatch batch,Vector2 feet,CompanionCat cat,Color light,int stage,int age){
         var atlas=CompanionSprite.Atlas;if(atlas==null)return;
         int direction=cat.Projectile.direction;

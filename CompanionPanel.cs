@@ -85,7 +85,7 @@ public sealed class CompanionPanel : ModSystem
         On_Main.DrawInventory -= DrawVanillaInventory;
         var placeholder=weaponPlaceholder;weaponPlaceholder=null;
         if(placeholder!=null)Main.QueueMainThreadAction(placeholder.Dispose);
-        CompanionEnvironmentButton.Unload();
+        CompanionEnvironmentButton.Unload();CompanionCombatButton.Unload();
     }
     void DrawVanillaInventory(On_Main.orig_DrawInventory orig,Main self) {
         int mx=Main.mouseX,my=Main.mouseY;
@@ -101,6 +101,7 @@ public sealed class CompanionPanel : ModSystem
         if(index>=0) layers.Insert(index,new LegacyGameInterfaceLayer("PalicoCompanion: Companion",Draw,InterfaceScaleType.UI));
     }
     internal bool Draw() {
+        CompanionItemTooltip.Clear();
         bool clicked=Main.mouseLeft&&!previousMouse; previousMouse=Main.mouseLeft;
         bool rightClicked=Main.mouseRight&&!previousRight;previousRight=Main.mouseRight;
         if(!CompanionUIFlow.Visible) {dragging=false;return true;}
@@ -120,7 +121,7 @@ public sealed class CompanionPanel : ModSystem
             Utils.DrawBorderString(sb,text,new Vector2(x,y),color,scale);
         }
         void Button(string label,int x,int y,int width,Action action,bool selected=false,bool enabled=true) {
-            var r=new Rectangle(x,y,width,CompanionButtonLayout.Height);bool hover=r.Contains(mouse);
+            var r=new Rectangle(x,y,width,CompanionButtonLayout.Height);if(enabled)CompanionGamepad.Add("button-"+label,r);bool hover=r.Contains(mouse);
             Box(r,!enabled?new Color(37,43,71):selected?new Color(83,109,190):hover?new Color(73,94,171):new Color(48,63,113));
 
             CenteredButtonText.Draw(sb,label,r,enabled?(selected?Accent:Ink):Muted,CompanionButtonLayout.TextScale);
@@ -144,6 +145,7 @@ public sealed class CompanionPanel : ModSystem
             return true;
         }
         if(!s.PanelOpen) return true;
+        using var navigation=CompanionGamepad.Begin("bag-"+tab);
         int width=tab==1?510:BackpackWidth,height=PanelHeight(s);
         if(!Main.mouseLeft)dragging=false;
         if(dragging)position=new Vector2(mouse.X,mouse.Y)-dragOffset;
@@ -159,19 +161,22 @@ public sealed class CompanionPanel : ModSystem
         var headerArea=area;
         var guideButton=CompanionPanelHeader.ButtonBounds(headerArea,CompanionButtonLayout.ContentWidth(CompanionText.Get("CompanionPanel.Guide")));
         int nameX=(int)MathF.Ceiling(portrait.Right/Main.UIScale)+8;
-        var title=new Rectangle(nameX,y+3,guideButton.X-16-CompanionEnvironmentButton.Size-nameX,38);
+        var title=new Rectangle(nameX,y+3,guideButton.X-20-CompanionEnvironmentButton.Size-CompanionCombatButton.Size-nameX,38);
         var namePosition=CompanionPanelHeader.TitlePosition(s.CatName,headerArea);
         Text(s.CatName,nameX,namePosition.Y,Accent,1f,title.Width);
         int nameRight=Math.Min(title.Right,nameX+(int)Math.Ceiling(FontAssets.MouseText.Value.MeasureString(s.CatName).X));
         int identityRight=nameRight+4;
         var environmentButton=new Rectangle(nameRight+8,y+8,CompanionEnvironmentButton.Size,CompanionEnvironmentButton.Size);
+        var combatButton=new Rectangle(environmentButton.Right+4,y+8,CompanionCombatButton.Size,CompanionCombatButton.Size);
         var identity=new Rectangle(x+12,y,identityRight-x-12,48);
+        CompanionGamepad.Add("identity",identity);
         if(identity.Contains(mouse)) {
             Main.instance.MouseText(CompanionAppearance.L("AppearanceEntry"));
             if(clicked&&Main.mouseItem.IsAir){dragging=false;CompanionAppearance.Open(s);return true;}
         }
-        else if(!environmentButton.Contains(mouse)&&title.Contains(mouse)&&Main.mouseLeft&&!dragging&&Main.mouseItem.IsAir){dragging=true;dragOffset=new Vector2(mouse.X,mouse.Y)-position;}
+        else if(!environmentButton.Contains(mouse)&&!combatButton.Contains(mouse)&&title.Contains(mouse)&&Main.mouseLeft&&!dragging&&Main.mouseItem.IsAir){dragging=true;dragOffset=new Vector2(mouse.X,mouse.Y)-position;}
         CompanionEnvironmentButton.Draw(sb,s,environmentButton,mouse,clicked);
+        CompanionCombatButton.Draw(sb,s,combatButton,mouse,clicked);
         Button(CompanionText.Get("CompanionPanel.Guide"),guideButton.X,guideButton.Y,guideButton.Width,TrainingPanel.OpenGuide);
         if(CenteredButtonText.Close(sb,CompanionPanelHeader.CloseBounds(headerArea),mouse,clicked))s.PanelOpen=false;
         y+=16;
@@ -198,6 +203,7 @@ public sealed class CompanionPanel : ModSystem
 
         bool shift=Main.keyState.IsKeyDown(Keys.LeftShift)||Main.keyState.IsKeyDown(Keys.RightShift);
         void Slot(Item[] items,int i,int bx,int by,bool equipment=false,bool dye=false,bool training=false) {
+            using var navigation=CompanionGamepad.Slot(s,items,i,new Rectangle(bx,by,SlotSize,SlotSize));
             float oldScale=Main.inventoryScale;
             try {
                 Main.inventoryScale=SlotScale;
@@ -207,6 +213,7 @@ public sealed class CompanionPanel : ModSystem
                     // Open it before moving a slot item so the cursor can carry it between panels.
                     if((clicked||Main.mouseRight)&&!Main.playerInventory)Main.playerInventory=true;
                     ItemSlot.MouseHover(items,ItemSlot.Context.BankItem,i);
+                    if(!items[i].IsAir)CompanionItemTooltip.Hover(s);
                     if(CompanionNetwork.Client) {if(clicked&&CompanionNetwork.QuickTrashHeld)CompanionNetwork.Trash(s,items,i);else if(clicked&&shift)CompanionNetwork.Transfer(s,false,i,(byte)(training?3:dye?2:equipment?1:0));else if(clicked||rightClicked)CompanionNetwork.Click(s,items,i,rightClicked,Main.keyState.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.LeftAlt)||Main.keyState.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.RightAlt));}
                     else if(shift) {
                         if(clicked&&!items[i].favorited) {

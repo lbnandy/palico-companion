@@ -19,6 +19,7 @@ public sealed partial class CompanionTraining {
         if(!ManualSkill(kind))return false;
         message=CompanionText.Message("CompanionSkillActivation.NotEquipped");if(Find(s,kind)<0)return false;
         message=CompanionText.Message("CompanionSkillActivation.Unavailable");if(!Active(s))return false;
+        if(s.CombatMode==CompanionCombatMode.Passive&&kind is 5 or 7 or TrainingCatalog.Barrel){message=CompanionText.MessageFull("Mods.PalicoCompanion.UI.CombatPassiveSkill");return false;}
         message=CompanionText.Message("CompanionSkillActivation.Cooldown");if(!Ready(s,kind))return false;
         var p=s.Player;var cat=CatFor(s);var use=(cat.ModProjectile as CompanionCat)?.Weapons;
         if(kind==TrainingCatalog.Barrel){
@@ -53,7 +54,8 @@ public sealed partial class CompanionTraining {
                     var marked=targetId>=0&&targetId<Main.maxNPCs&&CompanionTargeting.Valid(p,cat.Center,Main.npc[targetId])?Main.npc[targetId]:null;
                     if(marked!=null&&Vector2.DistanceSquared(marked.Center,cat.Center)<MathF.Pow(kind==7?560:900,2))target=marked;
                 }
-                target??=SupportTarget(s,cat,kind==7);if(target==null)return false;
+                target??=SupportTarget(s,cat,kind==7,manual);if(target==null)return false;
+                if(manual)CompanionCombatBehavior.Engage(s,target);
                 // Do not spend a cooldown if there is no projectile slot.
                 if(!Main.projectile.Any(q=>!q.active)){message=CompanionText.Message("CompanionSkillActivation.ProjectileLimit");return false;}
                 break;

@@ -7,7 +7,7 @@ Bring a Monster Hunter-inspired Palico along for your Terraria adventures.
 
 [b]Fight together[/b]: Give your Palico a weapon and fight side by side. Support gear can heal you, shield you and clear debuffs; your Palico can also throw pot bombs or charge into a group carrying a Giga Barrel Bomb. When you're hurt, it can bring you nearby Hearts, too.
 
-[img]https://raw.githubusercontent.com/lbnandy/palico-companion/main/docs/images/barrel-bomb.gif?v=emote1101[/img]
+[img]https://raw.githubusercontent.com/lbnandy/palico-companion/main/docs/images/barrel-bomb.gif?v=barrel-prone1101[/img]
 
 [b]Gather and explore[/b]: Your Palico can mine ore, chop and replant trees, tend herbs, fish, catch critters and collect items. It can also light up dark areas and point out nearby chests and Life Crystals.
 

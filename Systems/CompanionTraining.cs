@@ -67,10 +67,11 @@ public sealed partial class CompanionTraining {
             if(value>score){score=value;best=type;}
         }return best;
     }
-    internal static NPC SupportTarget(CompanionPlayer s,Projectile cat,bool bomb) {
+    internal static NPC SupportTarget(CompanionPlayer s,Projectile cat,bool bomb,bool manual=false) {
+        if(s.CombatMode==CompanionCombatMode.Passive)return null;
         NPC best=null;float bestScore=float.MinValue;float radius=bomb?560:900;
         foreach(var n in Main.npc){float distance=Vector2.DistanceSquared(n.Center,cat.Center);
-            if(!n.active||!n.CanBeChasedBy()||distance>radius*radius||!Collision.CanHitLine(cat.Center,1,1,n.position,n.width,n.height))continue;
+            if(!n.active||!n.CanBeChasedBy()||!manual&&!CompanionCombatBehavior.Allows(s,n)||distance>radius*radius||!Collision.CanHitLine(cat.Center,1,1,n.position,n.width,n.height))continue;
             if(!bomb&&n.GetGlobalNPC<TrainingMark>().Remaining(s.Player.whoAmI)>120)continue;
             float score;
             if(bomb){int group=0;foreach(var other in Main.npc)if(other.active&&other.CanBeChasedBy()&&Vector2.DistanceSquared(n.Center,other.Center)<80*80)group++;

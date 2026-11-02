@@ -25,7 +25,7 @@ internal static class CompanionLoadoutButtons {
             }
         }
         for(int i=0;i<3;i++) {
-            var box=Bounds(x,y,i);bool hover=box.Contains(Main.mouseX,Main.mouseY);
+            var box=Bounds(x,y,i);CompanionGamepad.Add("loadout-"+i,box);bool hover=box.Contains(Main.mouseX,Main.mouseY);
             int selected=state.Loadouts.Current==i?1:0;var frame=texture.Frame(3,3,selected,i);
             var origin=(box.Center.ToVector2()-frame.Size()/2).Floor();var colors=palettes[i*2+selected];
             void Pixel(int px,int py,int w,int h,Color color)=>batch.Draw(TextureAssets.MagicPixel.Value,new Rectangle((int)origin.X+px,(int)origin.Y+py,w,h),color);

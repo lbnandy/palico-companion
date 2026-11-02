@@ -4,13 +4,28 @@ using Terraria;
 
 namespace PalicoCompanion.Systems;
 
-internal enum CompanionControlOp:byte { Direct, Skill, SwitchLoadout, Environment }
+internal enum CompanionControlOp:byte { Direct, Skill, SwitchLoadout, Environment, CombatMode }
 
 internal static class CompanionControl {
     internal static bool Execute(CompanionPlayer s,CompanionControlOp op,int index,Point cell,string name,out string message) {
         message=CompanionText.Message("CompanionControl.Unavailable");
         if(CompanionNetwork.Client||s.Player.dead||s.NetLeaving)return false;
         switch(op) {
+            case CompanionControlOp.CombatMode:
+                if(index is <0 or >2)return false;
+                var mode=(CompanionCombatMode)index;
+                if(s.CombatMode!=mode){
+                    s.CombatMode=mode;
+                    if(s.Cat?.ModProjectile is CompanionCat cat){
+                        cat.ClearCombat();
+                        if(mode==CompanionCombatMode.Passive){
+                            cat.Weapons.Cancel(preserveSkills:false);
+                            if(cat.Barrel.Preparing||cat.Barrel.Carrying)cat.Barrel.Cancel(cat);
+                        }
+                    }
+                }
+                message=CompanionText.MessageFull("Mods.PalicoCompanion.UI."+CompanionCombatModes.Key(mode));
+                return true;
             case CompanionControlOp.Environment:
                 if(index is not (0 or 1))return false;
                 CompanionEnvironment.SetPaused(s,index==1);

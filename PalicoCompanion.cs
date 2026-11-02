@@ -2,7 +2,7 @@ using Terraria.ModLoader;
 namespace PalicoCompanion;
 public sealed class PalicoCompanion : Mod
 {
-    internal static ModKeybind PanelKey, RecallKey, DirectKey, EnvironmentKey, HudKey;
+    internal static ModKeybind PanelKey, RecallKey, DirectKey, EnvironmentKey, HudKey, StowKey;
     public override void HandlePacket(System.IO.BinaryReader reader,int whoAmI){
         long start=reader.BaseStream.Position;byte kind=reader.ReadByte();
         if(kind==1){reader.BaseStream.Position=start;Systems.CompanionProfileNet.Receive(reader,whoAmI);}
@@ -14,6 +14,7 @@ public sealed class PalicoCompanion : Mod
         DirectKey = KeybindLoader.RegisterKeybind(this, "Direct", "V");
         EnvironmentKey = KeybindLoader.RegisterKeybind(this, "Environment", Microsoft.Xna.Framework.Input.Keys.None);
         HudKey = KeybindLoader.RegisterKeybind(this, "Hud", Microsoft.Xna.Framework.Input.Keys.None);
+        StowKey = KeybindLoader.RegisterKeybind(this, "Stow", Microsoft.Xna.Framework.Input.Keys.None);
     }
-    public override void Unload() { PanelKey = RecallKey = DirectKey = EnvironmentKey = HudKey = null; Systems.CenteredButtonText.Clear(); }
+    public override void Unload() { PanelKey = RecallKey = DirectKey = EnvironmentKey = HudKey = StowKey = null; Systems.CenteredButtonText.Clear(); }
 }

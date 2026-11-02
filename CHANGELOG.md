@@ -1,5 +1,25 @@
 # Changelog
 
+## 1.1.1 — 2026-11-02
+
+- 新增可自定义的收回／叫出呆猫快捷键。
+- 新增主动进攻／协同进攻／不攻击三种模式，点击剑形按钮循环切换。协同模式在主人命中或指定目标、主人或呆猫受击后参战；不攻击模式仍保留工作、拾取和治疗。
+- 接入原版手柄界面导航，支持背包、配装、指南、外观与改名操作。
+- 修正呆猫背包中的武器提示框错误使用玩家属性的问题。
+- 改进旅人归途专用服务器兼容，去掉固定版本号限制。
+- 新增暗影奥秘（SOTS）刀光与虚空资源适配。
+- 修复雀杖召唤物在呆猫头上停留时反复消失、重新召唤的问题。
+- 调整特大桶爆弹炸飞落地后的短暂停顿与起身衔接。
+
+- Added an optional keybind to stow or call out your Palico.
+- Added proactive, assist and passive combat modes, cycled by clicking the sword button. Assist mode engages enemies the owner hits or marks, or retaliates when the owner or Palico is hit. Passive mode retains work, pickup and healing.
+- Added native gamepad navigation for inventory, loadouts, the guide, appearance and naming.
+- Fixed weapon tooltips in the Palico inventory incorrectly using the owner's stats.
+- Improved Homeward Journey dedicated-server compatibility without a fixed-version restriction.
+- Added Secrets of the Shadows (SOTS) trail and void-resource integration.
+- Fixed Finch Staff minions repeatedly disappearing and being resummoned while perched on the Palico.
+- Refined the brief landing pause and get-up sequence after a Giga Barrel Bomb blast.
+
 ## 1.1 — 2026-11-01
 
 - 接入画师新版角色、推车与举桶动画；UI 头像和模组图标改用新版素材。

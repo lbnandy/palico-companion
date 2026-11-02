@@ -1,5 +1,6 @@
 using System;
 using System.Globalization;
+using System.Collections.Generic;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -22,6 +23,7 @@ public sealed class CompanionAppearance : UIState {
     public string Text;
     bool nameFocused,previousLeft;
     UIText nameError;NameField nameField;
+    readonly List<(string key,UIElement element,bool slider)> navigation=new();
     internal int Draft {get;private set;}
     int frames;
     internal static CompanionAppearance Current {get;private set;}
@@ -42,18 +44,27 @@ public sealed class CompanionAppearance : UIState {
     public void Cancel(){if(first){state.Bonded=true;CompanionNetwork.UpdateIdentity(state);}Finish();}
     internal void Close()=>Cancel();
     void Finish(){PlayerInput.WritingText=false;IngameFancyUI.Close();if(first){state.PanelOpen=false;Main.playerInventory=false;}else CompanionUIFlow.Bag(state);}
-    internal void FocusName(){nameFocused=true;Main.clrInput();}
+    internal void FocusName(){
+        if(PlayerInput.UsingGamepad){
+            nameFocused=false;PlayerInput.WritingText=false;
+            void Return(){Current=this;IngameFancyUI.OpenUIState(this);}
+            var keyboard=new UIVirtualKeyboard(L("AppearanceName"),Text,value=>{Text=value;Return();},Return);
+            keyboard.SetMaxInputLength(24);IngameFancyUI.OpenUIState(keyboard);return;
+        }
+        nameFocused=true;Main.clrInput();
+    }
     public override void OnDeactivate(){PlayerInput.WritingText=false;if(Current==this)Current=null;base.OnDeactivate();}
     public override void OnInitialize(){
         var panel=new UIPanel();panel.Width.Set(520,0);panel.Height.Set(316,0);panel.HAlign=panel.VAlign=.5f;Append(panel);
         var title=new UIText(Language.GetText("Mods.PalicoCompanion.UI."+(first?"AppearanceMeetTitle":"AppearanceTitle")),1f);title.Top.Set(7,0);title.Left.Set(8,0);panel.Append(title);
-        void Button(string label,float x,float y,float width,Action action){var b=new CenteredTextButton(Language.GetText("Mods.PalicoCompanion.UI."+label));b.Left.Set(x,0);b.Top.Set(y,0);b.Width.Set(width,0);b.Height.Set(34,0);b.OnLeftClick+=(_,_)=>action();panel.Append(b);}
+        void Button(string label,float x,float y,float width,Action action){var b=new CenteredTextButton(Language.GetText("Mods.PalicoCompanion.UI."+label));b.Left.Set(x,0);b.Top.Set(y,0);b.Width.Set(width,0);b.Height.Set(34,0);b.OnLeftClick+=(_,_)=>action();panel.Append(b);navigation.Add((label,b,false));}
         void Label(string text,int row){var label=new RowLabel(Language.GetText("Mods.PalicoCompanion.UI."+text));label.Left.Set(180,0);label.Top.Set(40+row*36,0);label.Width.Set(112,0);label.Height.Set(34,0);panel.Append(label);}
         Label("AppearanceName",0);
         // Match ColorBar's visible border (its texture has two transparent
         // edge pixels); UIPanel's own border begins one pixel inside its box.
         int barWidth=Terraria.GameContent.TextureAssets.ColorBar.Width();
         nameField=new NameField(this);nameField.Left.Set(480-barWidth+1,0);nameField.Top.Set(40,0);nameField.Width.Set(barWidth-2,0);nameField.Height.Set(34,0);panel.Append(nameField);
+        navigation.Add(("name",nameField,false));
         nameError=new UIText("",.65f){TextColor=Color.Salmon};nameError.Left.Set(300,0);nameError.Top.Set(19,0);panel.Append(nameError);
         var preview=new Preview(this);preview.Left.Set(8,0);preview.Top.Set(40,0);preview.Width.Set(144,0);preview.Height.Set(187,0);panel.Append(preview);
         string[] labels=["AppearanceHue","AppearanceSaturation","AppearanceLightness"];
@@ -63,10 +74,12 @@ public sealed class CompanionAppearance : UIState {
                 var value=hsl;if(index==0)value=new(v,1,.5f);else Put(ref value,index,v);return Rgb(value);
             },Color.Transparent);
             slider.Left.Set(180,0);slider.Top.Set(75+i*36,0);slider.Width.Set(310,0);slider.Height.Set(30,0);slider.SetSnapPoint("Cloth",i);panel.Append(slider);
+            navigation.Add(("color-"+i,slider,true));
         }
         for(int i=0;i<Presets.Length;i++){
             int rgb=Presets[i];var swatch=new UIPanel{BackgroundColor=CompanionPalette.ColorOf(rgb),BorderColor=new Color(24,29,49)};
             swatch.Left.Set(180+i*52,0);swatch.Top.Set(195,0);swatch.Width.Set(40,0);swatch.Height.Set(32,0);swatch.OnLeftClick+=(_,_)=>SetColor(rgb);panel.Append(swatch);
+            navigation.Add(("preset-"+i,swatch,false));
         }
         Button("AppearanceReset",8,245,152,()=>SetColor(CompanionPalette.Default));
         Button(first?"AppearanceLater":"AppearanceCancel",172,245,152,Cancel);Button(first?"AppearanceStart":"AppearanceConfirm",336,245,152,Confirm);
@@ -83,6 +96,15 @@ public sealed class CompanionAppearance : UIState {
             if(!string.IsNullOrWhiteSpace(Text))nameError.SetText("");
         }
         if(frames>1&&Main.keyState.IsKeyDown(Keys.Escape))Cancel();
+    }
+    public override void Draw(SpriteBatch batch){
+        using var links=CompanionGamepad.Begin("appearance");
+        base.Draw(batch);
+        foreach(var entry in navigation){
+            var bounds=entry.element.GetDimensions().ToRectangle();
+            if(entry.slider){bounds.X=bounds.Right-178;bounds.Width=168;CompanionGamepad.Slider(entry.key,bounds);}
+            else CompanionGamepad.Add(entry.key,bounds);
+        }
     }
     sealed class RowLabel(LocalizedText label):UIElement {
         protected override void DrawSelf(SpriteBatch batch){

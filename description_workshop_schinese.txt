@@ -3,13 +3,15 @@
 [b]老大，我来泰拉瑞亚找你了喵！[/b]
 把怪物猎人里的呆猫带到泰拉瑞亚，和你一起冒险。
 
-[url=https://www.bilibili.com/video/BV141np6YECi/]观看演示视频（哔哩哔哩）[/url]
+[url=https://www.bilibili.com/video/BV141np6YECi/]模组介绍视频（哔哩哔哩）[/url]
+[url=https://www.bilibili.com/video/BV1r4xt6UE9n/]1.1 更新视频（哔哩哔哩）[/url]
+[url=https://www.bilibili.com/opus/1265772101059477520/]1.1 完整更新说明与投票[/url]
 
 [h2]你的呆猫伙伴[/h2]
 
 [b]一起打怪[/b]：给呆猫一把武器，它就会跟你一起战斗。搭配支援装备，还能帮你回血、抵挡伤害、解除异常状态；也可以投掷壶爆弹，或扛起特大桶爆弹冲向怪群。你受伤时，它也会把附近的红心送过来。
 
-[img]https://raw.githubusercontent.com/lbnandy/palico-companion/main/docs/images/barrel-bomb.gif?v=emote1101[/img]
+[img]https://raw.githubusercontent.com/lbnandy/palico-companion/main/docs/images/barrel-bomb.gif?v=barrel-prone1101[/img]
 
 [b]采集与探索[/b]：挖矿、砍树补种、照料药草、钓鱼、抓小动物、捡东西，它都能搭把手。还会在暗处帮你照明，发现附近的宝箱、生命水晶也会提醒你。
 
