@@ -40,7 +40,7 @@ public sealed class ThoriumCompanionBridge:ModSystem {
         CompanionCrossMod.SupportTool=Support;CompanionCrossMod.SafeThrow+=Throw;
         CompanionCrossMod.UpdateResources+=Update;CompanionCrossMod.SupportTarget=Target;
         CompanionCrossMod.ResourceReady+=Ready;CompanionCrossMod.WeaponEffect=Effect;
-        CompanionCrossMod.PlanUse=Plan;CompanionCrossMod.WeaponReach=Range;
+        CompanionCrossMod.PlanUse=Plan;CompanionCrossMod.WeaponReach+=Range;
     }
     public override void Unload(){
         instrumentUse?.Dispose();instrumentSound?.Dispose();instrumentUse=instrumentSound=null;
@@ -48,7 +48,7 @@ public sealed class ThoriumCompanionBridge:ModSystem {
         playerLookup?.Dispose();mouseLookup?.Dispose();playerLookup=mouseLookup=null;
         CompanionCrossMod.UpdateResources-=Update;CompanionCrossMod.SupportTool=null;CompanionCrossMod.SafeThrow-=Throw;
         CompanionCrossMod.SupportTarget=null;CompanionCrossMod.ResourceReady-=Ready;CompanionCrossMod.WeaponEffect=null;
-        CompanionCrossMod.PlanUse=null;CompanionCrossMod.WeaponReach=null;
+        CompanionCrossMod.PlanUse=null;CompanionCrossMod.WeaponReach-=Range;
         resources=new();empower=null;playSound=null;findAlly=null;
     }
     static bool Support(Item item)=>item.ModItem is ThoriumItem {isHealer:true}&&item.damage<=0&&

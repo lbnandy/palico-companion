@@ -18,7 +18,7 @@ internal static class CompanionCombatReach {
     internal static bool Clear(Vector2 from,Vector2 to)=>Reachability.Clear(from,to,TrackingRange);
     internal static Projectile Sample(Item item)=>item.shoot>ProjectileID.None&&ContentSamples.ProjectilesByType.TryGetValue(item.shoot,out var p)?p:null;
     internal static float Range(Item item,Projectile cat=null) {
-        if(CompanionCrossMod.WeaponReach?.Invoke(item) is float reach)return reach;
+        if(CompanionCrossMod.Reach(item) is float reach)return reach;
         if(item.consumable&&CompanionWeapons.SafeThrow(item))return Math.Clamp(item.shootSpeed*18,100,240);
         var shot=Sample(item);
         if(shot==null||shot.aiStyle==ProjAIStyleID.ShortSword)return CompanionWeapons.Range(item)+24;

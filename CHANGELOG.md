@@ -1,5 +1,29 @@
 # Changelog
 
+## 1.1.3 — 2026-11-03
+
+- 修复部分灾厄盗贼武器蓄力后不出手的问题。
+- 修正部分近身武器的接敌距离，以及鱼骨回旋镖投出时可能立即撞地的问题。
+- 修复灾厄与瑟银同时启用时，武器攻击距离适配互相覆盖的问题。
+
+- Fixed some Calamity rogue weapons failing to release after charging.
+- Corrected engagement distance for a close-range Calamity weapon and prevented Fishbone Boomerang throws from starting inside the ground.
+- Fixed weapon reach integrations overriding each other when Calamity and Thorium are both enabled.
+
+## 1.1.2 — 2026-11-03
+
+- 新增独立召唤武器栏，可放入随从或哨兵武器。补召或部署后切回主武器，支持与鞭子及其他武器配合使用。
+- 配装同步保存召唤武器；旧存档中的召唤武器会自动移入新槽位。
+- 支持灾厄的消耗型盗贼武器，修正部分弹幕出生位置过低、立即撞地消失的问题。
+- 修复部分灾厄武器在联机时弹幕尚未初始化就参与绘制造成的异常。
+- 修复新版 tModLoader 中打开呆猫设置可能崩溃的问题。
+
+- Added a separate slot for minion or sentry weapons. Your Palico returns to its main weapon after summoning or deploying, allowing summons to accompany whips and other weapons.
+- Loadouts now include the summon weapon. Summon weapons in older saves automatically move to the new slot.
+- Added support for consumable Calamity rogue weapons and corrected low projectile origins that could cause immediate ground collisions.
+- Fixed premature rendering of some Calamity weapon projectiles in multiplayer before their native initialization.
+- Fixed a crash when opening Palico settings on newer tModLoader builds.
+
 ## 1.1.1 — 2026-11-02
 
 - 新增可自定义的收回／叫出呆猫快捷键。

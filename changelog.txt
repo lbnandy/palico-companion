@@ -1,3 +1,13 @@
+1.1.3
+
+- 修复部分灾厄盗贼武器蓄力后不出手的问题。
+- 修正部分近身武器的接敌距离，以及鱼骨回旋镖投出时可能立即撞地的问题。
+- 修复灾厄与瑟银同时启用时，武器攻击距离适配互相覆盖的问题。
+
+- Fixed some Calamity rogue weapons failing to release after charging.
+- Corrected engagement distance for a close-range Calamity weapon and prevented Fishbone Boomerang throws from starting inside the ground.
+- Fixed weapon reach integrations overriding each other when Calamity and Thorium are both enabled.
+
 1.1.2
 
 - 新增独立召唤武器栏，可放入随从或哨兵武器。补召或部署后切回主武器，支持与鞭子及其他武器配合使用。

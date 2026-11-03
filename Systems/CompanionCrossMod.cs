@@ -24,6 +24,11 @@ public sealed class CompanionCrossMod:ModSystem {
     }
     internal static Action<CompanionNativeUse> PlanUse;
     internal static Func<Item,float?> WeaponReach;
+    internal static float? Reach(Item item){
+        if(WeaponReach!=null)foreach(Func<Item,float?> range in WeaponReach.GetInvocationList())
+            if(range(item) is float value)return value;
+        return null;
+    }
     internal static Action<CompanionNativeUse,int,byte,byte,float> WeaponEffect;
     internal static ICompanionStorageProvider Storage;
     internal static Func<Item,Item,int> UsesPerMaterial;
