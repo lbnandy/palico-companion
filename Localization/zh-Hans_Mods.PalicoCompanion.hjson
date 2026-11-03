@@ -87,7 +87,6 @@ UI: {
 	Recovering: 正在恢复，{0} 秒后回来帮忙
 	GearHint: 投掷武器可整叠装备；弹药放入呆猫背包
 	DefaultWeaponHint: 空栏时自带铜短剑
-	CannonStagesHint: 呆猫使用能量弹攻击，暂不使用最后的持续光束
 	RecoverArmor: 取回
 	LegacyArmorHint: 旧版防具仅供取回，防御现在随玩家成长
 	Weapon: 武器
@@ -195,6 +194,16 @@ Configs: {
 		DefensePercent: {
 			Label: 防御继承比例（%）
 			Tooltip: 呆猫的防御占主人防御的比例，不代表受到的伤害减少多少。
+		}
+
+		RegenInheritancePercent: {
+			Label: 回血继承比例（%）
+			Tooltip:
+				'''
+				继承主人由装备、增益等提供的通用附加回血，默认 50%；设为 0 时不继承，呆猫自身的回血不受影响
+				仍需等待呆猫自己的受伤恢复计时，不继承主人的自然回血、吸血或直接治疗
+				切换强度预设不会修改此项，联机时由房主统一设置
+				'''
 		}
 
 		TargetingRangePercent: {

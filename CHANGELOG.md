@@ -1,5 +1,29 @@
 # Changelog
 
+## 1.1.4 — 2026-11-03
+
+- 新增回血继承比例设置，默认继承主人通用附加回血的 50%，可调为 0～100%；受伤恢复计时仍独立计算。
+- 新增瑟银 Boss、探索、治疗和演奏情景台词，中英文各 56 句。
+- 改进蓄力、松手释放与持续使用武器的处理，支持带电爆破炮的完整充能和持续光束，并补充部分灾厄武器适配。
+- 修复与 Amulet of Many Minions 同时启用时，召唤武器可能导致呆猫消失或命中时报错的问题。
+- 修复开启 PvP 时呆猫的武器和弹幕可能伤到玩家的问题。
+- 回收的同种消耗性投掷武器优先补回仍有余量的武器槽。
+- 装备槽不再提供收藏操作并保持原有颜色；背包收藏仍可正常使用，一键取回时会保留。
+- 调整部分近战武器的接敌距离，减少有一定攻击距离却仍然贴脸的情况。
+- 修复 Terraria Overhaul 的瞄准与专用服务器输入兼容问题，并去掉呆猫触发的脚步、起跳和落地音效。
+- 同时提供 tModLoader 2026.8.3.0 与 2026.9.3.1 构建。
+
+- Added an inherited health regeneration setting: 50% of the owner's standard bonus regeneration by default, adjustable from 0% to 100%. The Palico keeps its own recovery timer after damage.
+- Added 56 lines per language for Thorium bosses, exploration, healing and music.
+- Improved charging, release-to-fire and sustained-use weapons, including the Charged Blaster Cannon's full charge sequence and beam, plus support for additional Calamity weapons.
+- Fixed missing companions and minion-hit errors when using summon weapons alongside Amulet of Many Minions.
+- Fixed Palico weapons and projectiles potentially damaging players in PvP.
+- Recovered matching consumable throwing weapons now refill a nonempty equipped stack first.
+- Equipment slots no longer offer favorite toggling and retain their normal colors. Backpack favorites remain usable and protected from bulk withdrawal.
+- Refined engagement distance for several melee weapon behaviors, reducing unnecessary contact with enemies.
+- Fixed Terraria Overhaul aiming and dedicated-server input compatibility, and suppressed footsteps, takeoff and landing sounds triggered by the Palico.
+- Includes builds for tModLoader 2026.8.3.0 and 2026.9.3.1.
+
 ## 1.1.3 — 2026-11-03
 
 - 修复部分灾厄盗贼武器蓄力后不出手的问题。

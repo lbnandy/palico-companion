@@ -10,7 +10,10 @@
 - 魔法武器正常消耗魔力。付不起下一次施法、且没有可用蓝药时，呆猫会等待自然回满后再攻击；期间喝到蓝药可以提前恢复。普通停手不强制等满蓝。
 - 暗影奥秘的刀光保留原有的拖尾更新。虚空武器使用呆猫独立的虚空值，上限与永久提升跟随主人，消耗和恢复沿用暗影奥秘的规则；不足时停手恢复，不扣主人的虚空值。
 - 手柄可在原版控制设置中绑定「呆猫面板」。面板、装备指南和外观页支持原版方向导航；肩键可在呆猫面板与玩家背包间切换。取放、拆分、收藏和取回使用相同的背包规则，改名使用原版虚拟键盘。
-- 带电爆破炮保留小、大能量球阶段，暂不使用最终的持续光束。玩家自己的武器行为不受影响。
+- 带电爆破炮支持完整充能与持续光束。蓄力释放、持续引导等武器按各自的使用方式处理，保留原有消耗、弹幕与恢复过程；部分模组的特殊蓄力机制仍需单独适配。
+- 呆猫自己的武器与弹幕不会对玩家造成 PvP 伤害。回收的同种消耗性投掷武器优先补入尚有余量的武器槽；装备槽不提供收藏操作，背包收藏仍可正常使用并保留在一键取回之外。
+- Amulet of Many Minions：修复专用服务器上的问答界面查询异常，并补齐呆猫使用召唤物时所需的寻路状态，避免呆猫消失或召唤物命中时报错。
+- Terraria Overhaul：呆猫不会触发它的脚步、起跳或落地音效；修正呆猫武器瞄准与专用服务器翻滚输入的兼容问题，保留玩家自己的移动音效和操作。
 - 瑟银的乐器使用呆猫自己的灵感，上限跟随主人的永久提升，耗尽后恢复再演奏；附近玩家可获得乐器原有的增益。鼓槌会先放鼓再敲击。
 - 瑟银的治疗工具会瞄准附近受伤的主人或友军；恢复术用于呆猫自身。保留原有的治疗弹幕、范围与接触条件，圣光法杖散出的治疗光球仍需玩家接触。治疗加成跟随主人，魔力与生命消耗由呆猫承担。
 - 瑟银的投掷武器使用呆猫装备栏中的实际数量；非消耗型投掷武器保留疲劳机制，过度疲劳时休息恢复。这些联动不需要另装附属模组，也不改变玩家自己的武器操作。
@@ -30,7 +33,10 @@ The Palico uses native item and projectile behavior while keeping its own invent
 - Magic weapons consume mana normally. If the Palico cannot afford the next cast and has no usable mana potion, it waits for a full natural refill. Drinking a potion can end that wait early. Ordinary pauses in combat do not force a full refill.
 - Secrets Of The Shadows blade trails retain their native updates. Void weapons use a separate Palico meter, with capacity and permanent upgrades following the owner. Native costs and regeneration remain in effect; the Palico pauses when depleted without spending the owner's void.
 - Bind the Palico panel in the native controller settings. The panel, equipment guide and appearance editor support directional navigation; shoulder buttons switch between the Palico panel and player inventory. Pickup, splitting, favorites and withdrawal use the same inventory rules. Naming uses the native virtual keyboard.
-- The Charged Blaster Cannon uses its small and large energy orbs, but currently stops before the sustained beam. The player's own weapon is unaffected.
+- The Charged Blaster Cannon supports its full charge sequence and sustained beam. Release-to-fire and sustained-use weapons follow their own input behavior, retaining native costs, projectiles and recovery. Some mod-specific charging mechanics still need individual integration.
+- The Palico's weapons and projectiles cannot deal PvP damage to players. Recovered matching consumable throwing weapons refill a nonempty equipped stack first. Equipment slots do not offer favorite toggling; backpack favorites remain usable and protected from bulk withdrawal.
+- Amulet of Many Minions: guards a dedicated-server quiz UI query and initializes the pathfinding state needed by the Palico's summons, preventing missing companions or errors on minion hits.
+- Terraria Overhaul: the Palico does not trigger its footstep, takeoff or landing sounds. Weapon aiming and dedicated-server dodgeroll input are handled without changing human movement sounds or controls.
 - Thorium instruments use the Palico's own inspiration, with capacity following the owner's permanent upgrades. It recovers before playing again after running dry, and nearby players receive the instrument's native empowerments. The Drum Mallet places a drum before striking it.
 - Thorium healing tools aim at injured owners or nearby allies; Renew heals the Palico itself. Native projectiles, ranges and contact requirements remain in effect, including collecting the Holy Staff's healing orbs. Healing bonus follows the owner; the Palico pays its own mana and life costs.
 - Consumable Thorium throwing weapons use the actual equipped stack. Non-consumable throws retain exhaustion and rest to recover from overexertion. These integrations need no separate addon and do not change the human player's weapon controls.

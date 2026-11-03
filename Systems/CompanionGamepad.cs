@@ -64,8 +64,9 @@ public sealed class CompanionGamepad:ModSystem {
         string text=Command(55,"MouseRight");
         if(items[slot].IsAir||!Main.mouseItem.IsAir)return text;
         bool ready=!CompanionNetwork.Pending&&(!CompanionNetwork.Client||state.NetReady)&&CompanionNetwork.CanMoveInventory(state.Player);
-        text+=Command(83,"SmartCursor");
-        if(PlayerInput.AllowExecutionOfGamepadInstructions&&ready&&PlayerInput.Triggers.JustPressed.SmartCursor){
+        bool canFavorite=CompanionInventoryOperations.CanFavorite(group);
+        if(canFavorite)text+=Command(83,"SmartCursor");
+        if(canFavorite&&PlayerInput.AllowExecutionOfGamepadInstructions&&ready&&PlayerInput.Triggers.JustPressed.SmartCursor){
             if(CompanionNetwork.Client)CompanionNetwork.Click(state,items,slot,false,true);
             else CompanionInventoryOperations.Click(items,slot,ref Main.mouseItem,false,true,group).Present(state);
             PlayerInput.LockGamepadButtons("SmartCursor");

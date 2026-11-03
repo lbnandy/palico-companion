@@ -6,6 +6,7 @@ using MonoMod.RuntimeDetour;
 using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
+using Terraria.GameContent.UI;
 using Terraria.ModLoader;
 using ThoriumMod;
 using ThoriumMod.Items;
@@ -21,7 +22,8 @@ public sealed class ThoriumCompanionBridge:ModSystem {
     static Action<BardItem,Player,Player> empower;
     static Action<Player,SoundStyle,float> playSound;
     static Action<ThoriumPlayer> findAlly;
-    Hook instrumentUse,instrumentSound,instrumentEmpower,playerLookup,mouseLookup;
+    Hook instrumentUse,instrumentSound,instrumentEmpower,playerLookup,mouseLookup,healing;
+    delegate int HealOriginal(Player player,int amount,Player healer,bool overMax,bool statistics);
     delegate void UseOriginal(BardItem item,Player player);
     delegate void SoundOriginal(BardItem item,Player player,float pitch);
     delegate ThoriumPlayer PlayerOriginal(Player player);
@@ -37,6 +39,7 @@ public sealed class ThoriumCompanionBridge:ModSystem {
         instrumentEmpower=new Hook(typeof(BardItem).GetMethod("NetApplyEmpowerments")!,EmpowerInstrument);
         playerLookup=new Hook(typeof(PlayerHelper).GetMethod("GetThoriumPlayer")!,GetPlayer);
         mouseLookup=new Hook(typeof(MousePlayer).GetMethod("TryGetMousePosition")!,GetMouse);
+        healing=new Hook(typeof(PlayerHelper).GetMethod("HealLife")!,Healed);
         CompanionCrossMod.SupportTool=Support;CompanionCrossMod.SafeThrow+=Throw;
         CompanionCrossMod.UpdateResources+=Update;CompanionCrossMod.SupportTarget=Target;
         CompanionCrossMod.ResourceReady+=Ready;CompanionCrossMod.WeaponEffect=Effect;
@@ -46,6 +49,7 @@ public sealed class ThoriumCompanionBridge:ModSystem {
         instrumentUse?.Dispose();instrumentSound?.Dispose();instrumentUse=instrumentSound=null;
         instrumentEmpower?.Dispose();instrumentEmpower=null;
         playerLookup?.Dispose();mouseLookup?.Dispose();playerLookup=mouseLookup=null;
+        healing?.Dispose();healing=null;
         CompanionCrossMod.UpdateResources-=Update;CompanionCrossMod.SupportTool=null;CompanionCrossMod.SafeThrow-=Throw;
         CompanionCrossMod.SupportTarget=null;CompanionCrossMod.ResourceReady-=Ready;CompanionCrossMod.WeaponEffect=null;
         CompanionCrossMod.PlanUse=null;CompanionCrossMod.WeaponReach-=Range;
@@ -88,7 +92,10 @@ public sealed class ThoriumCompanionBridge:ModSystem {
             int input=use.Actor.altFunctionUse,cost;
             try {if(input==1)use.Actor.altFunctionUse=2;cost=bard.GetInspirationCost(use.Actor);}
             finally {use.Actor.altFunctionUse=input;}
-            if(tp.bardResource<cost)clock.Waiting=true;
+            if(tp.bardResource<cost){
+                if(!clock.Waiting)use.State.Expression.QueueGear(use.State,"GearThoriumRest",EmoteID.EmoteConfused);
+                clock.Waiting=true;
+            }
             if(tp.bardResource>=tp.bardResourceMax2)clock.Waiting=false;
             return !clock.Waiting;
         }
@@ -150,8 +157,15 @@ public sealed class ThoriumCompanionBridge:ModSystem {
     static void UseInstrument(UseOriginal orig,BardItem item,Player player){
         var use=Context(player);if(use==null){orig(item,player);return;}
         if(item.ItemType!=BardItemType.Instrument)return;
+        use.State.Expression.QueueGear(use.State,"GearThoriumBard",EmoteID.EmoteNote);
         Emit(use,item,(byte)((item.EmpowerOnUse?1:0)|4));
         if(item.PlayOnUse&&ItemID.Sets.SkipsInitialUseSound[item.Type])PlayInstrument(null,item,player,0);
+    }
+    static int Healed(HealOriginal orig,Player player,int amount,Player healer,bool overMax,bool statistics){
+        int before=player.statLife,result=orig(player,amount,healer,overMax,statistics);
+        if(CompanionNativeUse.Current is {} use&&healer==use.Actor&&player!=use.Actor&&player.statLife>before)
+            use.State.Expression.QueueGear(use.State,"GearThoriumHeal",EmoteID.ItemLifePotion);
+        return result;
     }
     static void PlayInstrument(SoundOriginal orig,BardItem item,Player player,float pitch){
         var use=Context(player);if(use==null){orig(item,player,pitch);return;}

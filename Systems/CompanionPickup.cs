@@ -9,7 +9,7 @@ using Terraria.ModLoader;
 namespace PalicoCompanion.Systems;
 
 // Same local attraction idea and feedback as Player.GrabItems/GetItem. Storage
-// remains transactional to the cat bag; never invoke player pickup side effects.
+// remains transactional; never invoke player pickup side effects.
 public sealed class CompanionPickup {
     // Stable exposes this as private; cache its actual implementation once.
     // This isolated anchor never enters Main.player and owns no inventory.
@@ -61,11 +61,14 @@ public sealed class CompanionPickup {
     }
     // Selection is not pickup: a fresh throw or an obstacle may delay taking
     // an item without making it disappear from a direct work request.
+    internal static bool HasRoom(Item item,CompanionPlayer state)=>
+        CompanionRestock.Thrown(state,item)&&InventoryTransfer.HasRoom(item,CompanionRestock.Destination(state,item))||
+        InventoryTransfer.HasRoom(item,state.Bag);
     internal static bool CanCollect(Item i,Player owner,CompanionPlayer state,bool requireRoom=true)=>
         i.active&&!i.IsAir&&Ordinary(i)&&!ItemID.Sets.IsAPickup[i.type]&&i.type!=ItemID.Heart&&i.type!=ItemID.Star&&
         !state.ExcludedPickup.Contains(i.type)&&!i.favorited&&
         (i.playerIndexTheItemIsReservedFor==255||i.playerIndexTheItemIsReservedFor==owner.whoAmI)&&
-        Vector2.DistanceSquared(i.Center,state.WorkAnchor)<(480*480)&&(!requireRoom||InventoryTransfer.HasRoom(i,state.Bag))&&
+        Vector2.DistanceSquared(i.Center,state.WorkAnchor)<(480*480)&&(!requireRoom||HasRoom(i,state))&&
         ItemLoader.CanPickup(i,owner);
     public static bool Eligible(Item i,Player owner,CompanionPlayer state,Projectile cat,bool requireRoom=true)=>
         CanCollect(i,owner,state,requireRoom)&&i.noGrabDelay==0&&i.shimmerTime==0&&(!i.shimmered||i.velocity.Length()<.2f)&&Reachability.Clear(cat.Center,i.Center);
@@ -84,13 +87,18 @@ public sealed class CompanionPickup {
         return false;
     }
     internal void BeginSelection(){tracked=null;stalled=0;deferred.Clear();}
-    // A caught fish and a ground pickup enter the same bag and get the same
+    // A caught fish and a ground pickup use the same storage and get the same
     // provenance/receipt. Sounds stay at the caller so a sweep can batch them.
     internal int Receive(Item item,CompanionPlayer state,Projectile cat){
         var display=item.Clone();PickupCredit.Set(item,item.stack*PickupCredit.Unit(item));
         var courtesy=item.GetGlobalItem<CompanionDropCourtesy>();ulong until=courtesy.until;courtesy.until=0;
         int moved;
-        try{moved=InventoryTransfer.Move(item,state.Bag);}finally{PickupCredit.Clear(item);if(!item.IsAir)courtesy.until=until;}
+        try{
+            // Recovered throwing weapons refill the equipped stack first.
+            // Chest stock targets do not limit an item already being collected.
+            moved=CompanionRestock.Thrown(state,item)?InventoryTransfer.Move(item,CompanionRestock.Destination(state,item)):0;
+            moved+=InventoryTransfer.Move(item,state.Bag);
+        }finally{PickupCredit.Clear(item);if(!item.IsAir)courtesy.until=until;}
         if(moved>0){
             display.Center=cat.Center;display.stack=moved;
             if(CompanionNetwork.Server)CompanionNetwork.PickupEffect(state,display,cat.Center);
@@ -115,7 +123,7 @@ public sealed class CompanionPickup {
             Rectangle tail=grab;tail.Inflate(32,32);
             bool inGrab=grab.Intersects(item.Hitbox),attached=Attached(item,tail,slot);
             if(PlayerCollecting(item)){pulling.Remove(slot);continue;}
-            if(inGrab&&item.active&&!item.IsAir&&!InventoryTransfer.HasRoom(item,state.Bag)&&Eligible(item,owner,state,cat,false))blocked=true;
+            if(inGrab&&item.active&&!item.IsAir&&!HasRoom(item,state)&&Eligible(item,owner,state,cat,false))blocked=true;
             if(!pursue&&!inGrab&&!attached)continue;
             if(!inGrab&&!attached&&Vector2.DistanceSquared(item.Center,cat.Center)>pursuitRange*pursuitRange)continue;
             bool eligible=Eligible(item,owner,state,cat);
@@ -136,7 +144,7 @@ public sealed class CompanionPickup {
                     took=true;coin|=isCoin;valuable|=isValuable;
                     state.Experience++;
                 }
-                if(!item.active||!InventoryTransfer.HasRoom(item,state.Bag))continue;
+                if(!item.active||!HasRoom(item,state))continue;
             }
             bool attracting=inGrab||attached;
             if(attracting) {

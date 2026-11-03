@@ -29,7 +29,7 @@ public sealed partial class CompanionNativeUse {
     void ApplyReplicaPose(){
         Actor.direction=replicaPose.ItemDirection==0?Cat?.direction??1:replicaPose.ItemDirection;
         Actor.itemAnimation=replicaPose.ItemAnimation;Actor.itemAnimationMax=replicaPose.ItemMax;
-        Actor.itemRotation=replicaPose.ItemRotation;Actor.channel=replicaPose.Channel;
+        Actor.itemRotation=replicaPose.ItemRotation;Actor.channel=replicaPose.Channel;Actor.controlUseItem=replicaPose.UseItem;
         ReplicaItemOffset=replicaPose.ItemOffset;Actor.itemLocation=Actor.Center+ReplicaItemOffset;
     }
     // Native projectile AI may temporarily change its owner's arm. Rendering
@@ -37,14 +37,14 @@ public sealed partial class CompanionNativeUse {
     internal readonly struct ReplicaDrawScope:IDisposable {
         readonly CompanionNativeUse use;
         readonly int direction,animation,maximum;
-        readonly float rotation;readonly bool channel;readonly Vector2 location;
+        readonly float rotation;readonly bool channel,useItem;readonly Vector2 location;
         internal ReplicaDrawScope(CompanionNativeUse context){
             use=CompanionNetwork.Client?context:null;
             var actor=context.Actor;direction=actor.direction;animation=actor.itemAnimation;maximum=actor.itemAnimationMax;
-            rotation=actor.itemRotation;channel=actor.channel;location=actor.itemLocation;
+            rotation=actor.itemRotation;channel=actor.channel;useItem=actor.controlUseItem;location=actor.itemLocation;
             use?.ApplyReplicaPose();
         }
-        public void Dispose(){if(use==null)return;var actor=use.Actor;actor.direction=direction;actor.itemAnimation=animation;actor.itemAnimationMax=maximum;actor.itemRotation=rotation;actor.channel=channel;actor.itemLocation=location;}
+        public void Dispose(){if(use==null)return;var actor=use.Actor;actor.direction=direction;actor.itemAnimation=animation;actor.itemAnimationMax=maximum;actor.itemRotation=rotation;actor.channel=channel;actor.controlUseItem=useItem;actor.itemLocation=location;}
     }
     public int Hits {get;set;}
     internal float ReachFactor {get;private set;}=1;
@@ -63,7 +63,9 @@ public sealed partial class CompanionNativeUse {
         if(!attacking||target==null||!Busy||Summoning(weapon)||CompanionWeaponPolicy.Sentry(weapon)||CompanionWeaponPolicy.Rain(weapon)||
             weapon.channel&&CompanionCombatReach.Sample(weapon)?.aiStyle==ProjAIStyleID.Spear)return;
         if(++missTicks<Math.Max(180,weapon.useAnimation*3))return;
-        missTicks=0;ReachFactor=Math.Max(Math.Min(1,64/CompanionCombatReach.Range(weapon,Cat)),ReachFactor*.75f);
+        // Some short slashes reach less than four tiles. A 64-pixel floor
+        // prevented their recovery from ever closing an unsuccessful gap.
+        missTicks=0;ReachFactor=Math.Max(Math.Min(1,24/CompanionCombatReach.Range(weapon,Cat)),ReachFactor*.75f);
     }
     internal bool WaitingForMana {get;private set;}
     internal void WaitForMana(){
@@ -71,6 +73,7 @@ public sealed partial class CompanionNativeUse {
         State.Expression.Say(State,Cat,"NoMana",Terraria.GameContent.UI.EmoteID.EmoteConfused);
     }
     bool depletedThrow;
+    readonly CompanionChannelInput channelInput=new();
     // Read the same tagged native projectiles on every peer. A client does not
     // run Tick/ItemCheck, so a Tick-only cached value never described its minions.
     public float SummonSlots {
@@ -121,16 +124,17 @@ public sealed partial class CompanionNativeUse {
     }
     bool actorLocated;
     uint actorLocationTick;
-    Vector2 lastActorPosition;
+    Vector2 lastActorPosition,lastActorVelocity;
     void LocateActor(Projectile cat){
         Actor.Center=CompanionSprite.Hand(cat);Actor.velocity=cat.velocity;
         // BindReplica is also called by each projectile and draw pass. Keep the
-        // same previous-frame position for every native trail in this update.
+        // same previous-frame movement for every native hook in this update.
         if(!actorLocated||actorLocationTick!=Main.GameUpdateCount){
             Actor.oldPosition=actorLocated?lastActorPosition:Actor.position;
+            Actor.oldVelocity=actorLocated?lastActorVelocity:Actor.velocity;
             actorLocationTick=Main.GameUpdateCount;actorLocated=true;
         }
-        lastActorPosition=Actor.position;
+        lastActorPosition=Actor.position;lastActorVelocity=Actor.velocity;
     }
     public static int MinionLimit(Player owner)=>Math.Max(1,owner.maxMinions);
     public static int SentryLimit(Player owner)=>Math.Max(1,owner.maxTurrets);
@@ -248,6 +252,7 @@ public sealed partial class CompanionNativeUse {
                 if(cost>Actor.statMana){wants=false;WaitForMana();}
             }
         }
+        wants=channelInput.Hold(this,weapon,target,wants);
         if(wants){cat.direction=Aim.X<cat.Center.X?-1:1;Actor.direction=cat.direction;}
         PressedThisTick=wants&&(!Actor.controlUseItem||Actor.itemAnimation==0);
         Actor.controlUseItem=wants;Actor.releaseUseItem=Actor.itemAnimation==0;Actor.controlUseTile=false;
@@ -288,7 +293,7 @@ public sealed partial class CompanionNativeUse {
     // Projectile.Update enforces maxMinions, including reconnecting segmented
     // summons before sacrificing excess bodies. Do not bypass it with Kill().
     public void Cancel(bool preserveReleased=false,bool preserveSkills=true,bool preserveSummons=false) {
-        WaitingForMana=false;
+        WaitingForMana=false;channelInput.Reset();
         int held=Actor.heldProj;
         Actor.controlUseItem=Actor.channel=false;Actor.itemAnimation=Actor.itemTime=Actor.reuseDelay=0;Actor.heldProj=-1;
         foreach(var p in Main.projectile)if(p.active&&CompanionOwnedShot.Of(p)==this) {
@@ -376,7 +381,7 @@ public sealed partial class CompanionNativeUse {
             if(use.Cat is {active:true})use.LocateActor(use.Cat);
             Main.player[use.slot]=use.Actor;use.Actor.active=true;Main.myPlayer=CompanionNetwork.Client?myPlayer:use.slot;Current=use;
             Main.mouseX=(int)(use.Aim.X-Main.screenPosition.X);Main.mouseY=(int)(use.Aim.Y-Main.screenPosition.Y);
-            Main.mouseLeft=use.Actor.controlUseItem;Main.mouseLeftRelease=use.PressedThisTick;
+            Main.mouseLeft=use.Actor.controlUseItem;Main.mouseLeftRelease=!use.Actor.controlUseItem||use.PressedThisTick;
             Main.mouseRight=use.Actor.controlUseTile;Main.mouseRightRelease=false;
             // Held weapons may read the native input bindings instead of Main's
             // mouse state (for example InnoVault's PressKey). Scope both to the
@@ -446,6 +451,10 @@ public sealed class CompanionOwnedShot : GlobalProjectile {
         return true;
     }
     public static CompanionNativeUse Of(Projectile p)=>p.TryGetGlobalProjectile<CompanionOwnedShot>(out var tag)?tag.Context:null;
+    // Ownership can arrive before the cat replica. Block friendly fire during
+    // that interval too, without changing team data used by support weapons.
+    public override bool CanHitPvp(Projectile projectile,Player target)=>Context==null&&CatIdentity<0;
+    public override bool CanHitPlayer(Projectile projectile,Player target)=>Context==null&&CatIdentity<0;
     public override bool ShouldUpdatePosition(Projectile p)=>Context==null||!CompanionGrip.ShortStab(p);
     public override void PostAI(Projectile p) {
         HasRunAI=true;
@@ -469,11 +478,22 @@ public sealed class CompanionOwnedShot : GlobalProjectile {
         // local projectile. Network receipt uses SetDefaults/ReceiveExtraAI,
         // not this local spawn hook. Do not Kill(): that could spawn more shots.
         if(CompanionNetwork.Client&&Context!=null){p.active=false;return;}
+        // Held guns can create the actual shot several ticks after ItemCheck.
+        // Reuse primary-shot clearance only at a held parent's nearby muzzle;
+        // remote explosions, minions and later flight keep their native origin.
+        if(Context!=null&&source is EntitySource_Parent heldSource&&heldSource.Entity is Projectile heldParent&&
+            heldParent.whoAmI==Context.Actor.heldProj&&p.tileCollide&&!p.minion&&!p.sentry&&
+            Vector2.DistanceSquared(p.Center,Context.Actor.Center)<=32*32){
+            var origin=p.Center;CompanionWeaponAim.ClearLaunchFloor(ref origin,p);p.Center=origin;
+        }
         Summoned=Context!=null&&(p.minion||p.sentry||
             source is EntitySource_ItemUse itemUse&&ReferenceEquals(itemUse.Entity,Context.Actor)&&Context.HeldGearSlot==CompanionWeapons.SummonSlot||
             source is EntitySource_Parent summonedParent&&summonedParent.Entity is Projectile summonedFrom&&summonedFrom.GetGlobalProjectile<CompanionOwnedShot>().Summoned);
         Thrown=Context!=null&&(Context.Actor.HeldItem.consumable||source is EntitySource_Parent parentShot&&parentShot.Entity is Projectile from&&from.GetGlobalProjectile<CompanionOwnedShot>().Thrown);
     }
+}
+public sealed class CompanionPlayerSafety : GlobalItem {
+    public override bool CanHitPvp(Item item,Player player,Player target)=>CompanionNativeUse.Current?.Actor!=player;
 }
 public sealed class CompanionNativeMeleeHit : GlobalNPC {
     public override void ModifyHitByItem(NPC npc,Player player,Item item,ref NPC.HitModifiers modifiers) {

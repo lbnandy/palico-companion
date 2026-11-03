@@ -206,6 +206,8 @@ public sealed class CompanionPanel : ModSystem
         bool shift=Main.keyState.IsKeyDown(Keys.LeftShift)||Main.keyState.IsKeyDown(Keys.RightShift);
         void Slot(Item[] items,int i,int bx,int by,bool equipment=false,bool dye=false,bool training=false) {
             using var navigation=CompanionGamepad.Slot(s,items,i,new Rectangle(bx,by,SlotSize,SlotSize));
+            byte group=CompanionInventoryOperations.Group(s,items);
+            bool canFavorite=CompanionInventoryOperations.CanFavorite(group);
             float oldScale=Main.inventoryScale;
             try {
                 Main.inventoryScale=SlotScale;
@@ -216,22 +218,31 @@ public sealed class CompanionPanel : ModSystem
                     if((clicked||Main.mouseRight)&&!Main.playerInventory)Main.playerInventory=true;
                     ItemSlot.MouseHover(items,ItemSlot.Context.BankItem,i);
                     if(!items[i].IsAir)CompanionItemTooltip.Hover(s);
-                    if(CompanionNetwork.Client) {if(clicked&&CompanionNetwork.QuickTrashHeld)CompanionNetwork.Trash(s,items,i);else if(clicked&&shift)CompanionNetwork.Transfer(s,false,i,(byte)(training?3:dye?2:equipment?1:0));else if(clicked||rightClicked)CompanionNetwork.Click(s,items,i,rightClicked,Main.keyState.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.LeftAlt)||Main.keyState.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.RightAlt));}
+                    bool favorite=Main.keyState.IsKeyDown(Main.FavoriteKey);
+                    bool favoriteOnly=!canFavorite&&favorite&&!shift&&!Main.mouseRight&&Main.mouseItem.IsAir&&!items[i].IsAir&&!Main.drawingPlayerChat;
+                    if(favoriteOnly){if(Main.cursorOverride==3)Main.cursorOverride=0;}
+                    else if(CompanionNetwork.Client) {if(clicked&&CompanionNetwork.QuickTrashHeld)CompanionNetwork.Trash(s,items,i);else if(clicked&&shift)CompanionNetwork.Transfer(s,false,i,group);else if(clicked||rightClicked)CompanionNetwork.Click(s,items,i,rightClicked,favorite);}
                     else if(shift) {
                         if(clicked&&!items[i].favorited) {
                             CompanionInventoryOperations.Take(s,items,i).Present(s,true);
                         }
                     } else if(CompanionInventoryOperations.Accepts(s,Main.mouseItem,CompanionInventoryOperations.Group(s,items),i)) {
                         PickupCredit.Clear(Main.mouseItem);
-                        ItemSlot.LeftClick(items,ItemSlot.Context.BankItem,i);
-                        if(CompanionInventoryOperations.CanSplit(items[i],CompanionInventoryOperations.Group(s,items),i))ItemSlot.RightClick(items,ItemSlot.Context.BankItem,i);
+                        // Share the server's cursor transaction: native BankItem
+                        // clears favorites when placing an item into its slot.
+                        if(Main.drawingPlayerChat||CompanionNetwork.QuickTrashHeld)ItemSlot.LeftClick(items,ItemSlot.Context.BankItem,i);
+                        else if(clicked&&CompanionNetwork.CanMoveInventory(s.Player))CompanionInventoryOperations.Click(items,i,ref Main.mouseItem,false,favorite,group).Present(s);
+                        if(CompanionInventoryOperations.CanSplit(items[i],group,i))ItemSlot.RightClick(items,ItemSlot.Context.BankItem,i);
                     }
                 }
                 // Native backpack slots (indices >=10 avoid hotbar labels); native
                 // functional equipment tint. Slot 3 avoids a helmet placeholder.
-                // Only the draw uses these contexts; interaction remains BankItem.
+                // These contexts only render slots; cursor rules are shared above.
                 int drawSlot=dye?0:equipment||training?3:i+10;
                 slotDisplay[drawSlot]=items[i];
+                // Favorite belongs to the item, but equipment keeps its slot
+                // colour. Preserve the actual flag for returning it to a bag.
+                if(!canFavorite&&items[i].favorited){slotDisplay[drawSlot]=items[i].Clone();slotDisplay[drawSlot].favorited=false;}
                 if(equipment||training)CompanionLoadoutTint.Draw(sb,s,slotDisplay,dye?ItemSlot.Context.EquipDye:training?ItemSlot.Context.EquipAccessory:ItemSlot.Context.EquipArmor,drawSlot,new Vector2(bx,by));
                 else ItemSlot.Draw(sb,slotDisplay,dye?ItemSlot.Context.EquipDye:ItemSlot.Context.InventoryItem,drawSlot,new Vector2(bx,by),Color.White);
                 if(equipment&&!dye&&!training&&(i==0||i==CompanionWeapons.SummonSlot)&&items[i].IsAir){
@@ -305,8 +316,7 @@ public sealed class CompanionPanel : ModSystem
             Slot(s.Gear,CompanionWeapons.SummonSlot,equipmentLeft+SlotOffset(1),top+26,true);
             if(new Rectangle(equipmentLeft+SlotOffset(1),top+26,SlotSize,SlotSize).Contains(mouse)&&s.Gear[CompanionWeapons.SummonSlot].IsAir)Main.instance.MouseText(L("SummonWeapon")+"\n"+L("SummonWeaponHint"));
             if(new Rectangle(equipmentLeft,top+26,SlotSize,SlotSize).Contains(mouse)){
-                if(Main.mouseItem.type==ItemID.ChargedBlasterCannon||s.Gear[0].type==ItemID.ChargedBlasterCannon)Main.instance.MouseText(L("CannonStagesHint"));
-                else if(s.Gear[0].IsAir)Main.instance.MouseText(L("DefaultWeaponHint")+"\n"+L("GearHint"));
+                if(s.Gear[0].IsAir)Main.instance.MouseText(L("DefaultWeaponHint")+"\n"+L("GearHint"));
             }
             Slot(s.Training.Slots,3,equipmentLeft,top+26+SlotOffset(1),training:true);
             if(s.Training.Slots[3].IsAir&&new Rectangle(equipmentLeft,top+26+SlotOffset(1),SlotSize,SlotSize).Contains(mouse))Main.instance.MouseText(CompanionText.Get("CompanionPanel.WorkHint"));

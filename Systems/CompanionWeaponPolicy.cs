@@ -14,12 +14,6 @@ internal static class CompanionWeaponPolicy {
     internal static bool Sentry(Item item)=>item.sentry||CompanionCombatReach.Sample(item)?.sentry==true;
     internal static bool Plan(Item item,CompanionNativeUse use,NPC target,ref Vector2 aim) {
         if(target==null)return true;
-        if(item.channel&&CompanionCrossMod.ReleaseChannel?.Invoke(item,use)==true)return false;
-        if(item.type==ItemID.ChargedBlasterCannon){
-            // Keep native small/large energy shots, then release before the
-            // beam starts at 180. AI_075 handles its own normal cancellation.
-            foreach(var p in Main.projectile)if(p.active&&p.type==ProjectileID.ChargedBlasterCannon&&CompanionOwnedShot.Of(p)==use&&p.ai[0]>=170)return false;
-        }
         if(item.type==ItemID.MagnetSphere){
             // Each recast shortens the previous sphere's remaining life to 30
             // ticks. Let a useful sphere reach the target and fire normally.
@@ -28,15 +22,6 @@ internal static class CompanionWeaponPolicy {
                 bool inRange=Math.Abs(delta.X)+Math.Abs(delta.Y)<300;
                 bool approaching=delta.LengthSquared()<CompanionCombatReach.RangedRange*CompanionCombatReach.RangedRange&&Vector2.Dot(delta,p.velocity)>0;
                 if((inRange||approaching)&&CompanionCombatReach.Clear(p.Center,target.Center))return false;
-            }
-        }
-        if(item.channel&&CompanionCombatReach.Sample(item)?.aiStyle==ProjAIStyleID.Spear) {
-            foreach(var p in Main.projectile)if(p.active&&p.aiStyle==ProjAIStyleID.Spear&&CompanionOwnedShot.Of(p)==use&&p.ai[0]>=use.Actor.itemAnimationMax) {
-                // Native held lances keep the direction of their initial stab.
-                // Let the normal release/retraction finish before aiming again
-                // when the enemy has moved away from the tip.
-                var tip=p.Hitbox;tip.Inflate(8,8);
-                if(!tip.Intersects(target.Hitbox))return false;
             }
         }
         if(Sentry(item)){
@@ -100,10 +85,6 @@ internal static class CompanionWeaponPolicy {
                 aim=candidate;return true;
             }
             return false;
-        }
-        if(CompanionCombatReach.Sample(item)?.aiStyle==ProjAIStyleID.Flail) {
-            foreach(var p in Main.projectile)if(p.active&&CompanionOwnedShot.Of(p)==use&&p.aiStyle==ProjAIStyleID.Flail)
-                return p.ai[0]==0&&p.localAI[1]<18;
         }
         return true;
     }

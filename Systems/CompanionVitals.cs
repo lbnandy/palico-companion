@@ -13,13 +13,14 @@ public sealed class CompanionVitals {
     public int PotionDelay;
     public int FoodTime,FoodDuration;
     internal int FeedCooldown;
-    int foodRegenRemainder;
+    int foodRegenRemainder,ownerRegenRemainder,ownerLifeRegen;
     public int ManaSickness, ManaDelay, LifeCounter, ManaCounter;
     public float LifeSteal=80;
     public float MagicMultiplier=>1f-Player.manaSickLessDmg*Math.Clamp(ManaSickness/(float)Player.manaSickTime,0,Player.manaSickTimeMax/(float)Player.manaSickTime);
     public static int RespawnTicks(bool expert,bool boss=false)=>(expert?900:600)*(boss?2:1);
     public int EffectiveDefense { get; internal set; }
     public void Sync(Player owner,Item[] gear) {
+        ownerLifeRegen=CompanionRegeneration.Bonus(owner);
         // Native regeneration assumes at least the player's starting 20 mana.
         // Retain that floor for modded owners below the native starting value.
         var balance=CompanionBalanceConfig.Current;
@@ -40,12 +41,13 @@ public sealed class CompanionVitals {
     public bool Hurt(int damage,int defense,bool boss=false) => HurtFinal(AfterDefense(damage,defense),boss,damage>0);
     internal bool HurtFinal(int damage,bool boss,bool valid=true) {
         if(!valid||damage<=0 || Downed || Immunity>0)return false;
-        Health=Math.Max(0,Health-damage);Immunity=60;QuietTicks=0;LifeCounter=0;
+        Health=Math.Max(0,Health-damage);Immunity=60;QuietTicks=0;LifeCounter=0;ownerRegenRemainder=0;
         if(Health==0)Recovery=RecoveryTotal=RespawnTicks(Main.expertMode,boss);
         return true;
     }
     // Health keeps its existing baseline; mana uses the installed tML runtime.
-    // No copying owner accessories, personal buffs or debuffs onto a second actor.
+    // Only the owner's observed positive regen bonus is shared; no accessory,
+    // buff or debuff hooks are executed on a second actor.
     public void Tick(float velocityX=0,float velocityY=0,bool magicUse=false,bool resting=false,bool expert=false,Player manaActor=null,bool foodRecovery=false) {
         if(FoodTime>0)FoodTime--;
         if(FeedCooldown>0)FeedCooldown--;
@@ -61,10 +63,15 @@ public sealed class CompanionVitals {
         if(expert)lifeRate*=0.5f; // Companion has no Well Fed buff of its own.
         if(Health<MaxHealth){
             int gain=(int)Math.Round(lifeRate);
+            // Apply the server's share after our own recovery delay. Carry
+            // fractional units so small bonuses survive percentage scaling.
+            int share=CompanionBalanceConfig.Current.RegenInheritanceRatio;
+            if(QuietTicks>=300&&share>0){ownerRegenRemainder+=ownerLifeRegen*share;gain+=ownerRegenRemainder/100;ownerRegenRemainder%=100;}
+            else ownerRegenRemainder=0;
             if(FoodTime>0&&foodRecovery){foodRegenRemainder+=gain;gain+=foodRegenRemainder/4;foodRegenRemainder%=4;}
             else foodRegenRemainder=0;
             LifeCounter+=gain;Health=Math.Min(MaxHealth,Health+LifeCounter/120);LifeCounter%=120;
-        }else {LifeCounter=0;foodRegenRemainder=0;}
+        }else {LifeCounter=0;foodRegenRemainder=ownerRegenRemainder=0;}
         if(MaxMana<=0){Mana=ManaCounter=ManaDelay=0;return;}
         if(manaActor==null)return;
         // Reuse the installed game's regeneration on the existing companion

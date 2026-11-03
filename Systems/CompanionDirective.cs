@@ -66,7 +66,7 @@ internal sealed class CompanionDirective {
             case DirectiveKind.Collect:
                 selected.AddRange(Main.item.Where(i=>i.active&&!i.IsAir&&Vector2.DistanceSquared(i.Center,cell.ToWorldCoordinates())<112*112&&CompanionPickup.CanCollect(i,s.Player,s,false)));
                 message=CompanionText.Message("CompanionDirective.NoItems");if(selected.Count==0)return false;
-                message=CompanionText.Message("CompanionDirective.BagFull");if(!selected.Any(i=>InventoryTransfer.HasRoom(i,s.Bag)))return false;break;
+                message=CompanionText.Message("CompanionDirective.BagFull");if(!selected.Any(i=>CompanionPickup.HasRoom(i,s)))return false;break;
             case DirectiveKind.Fish:
                 message=CompanionText.Message("CompanionDirective.NoBait");if(!s.Bag.Any(CompanionFishing.SafeBait))return false;
                 message=CompanionText.Message("CompanionDirective.NoWater");
@@ -103,7 +103,7 @@ internal sealed class CompanionDirective {
                 int target=cat.Pickup.Tick(s.Player,s,cat.Projectile,ref goal,true,Selects);
                 var remaining=drops.Where(e=>e.Key.active&&!e.Key.IsAir&&e.Key.type==e.Value&&Main.item.Contains(e.Key)).Select(e=>e.Key).ToArray();
                 if(remaining.Length==0)done=CompanionText.Message("CompanionDirective.CollectDone");
-                else if(!remaining.Any(i=>InventoryTransfer.HasRoom(i,s.Bag)))done=CompanionText.Message("CompanionDirective.CollectFull");
+                else if(!remaining.Any(i=>CompanionPickup.HasRoom(i,s)))done=CompanionText.Message("CompanionDirective.CollectFull");
                 else if(target<0&&cat.Pickup.PulledThisTick==0){if(++idleTicks>=60)done=CompanionText.Message("CompanionDirective.CollectBlocked");}
                 else idleTicks=0;
                 break;

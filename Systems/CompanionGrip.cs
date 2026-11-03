@@ -64,7 +64,7 @@ public sealed class CompanionGrip : ModSystem {
         // AI_075 assigns a human arm position and UpdatePosition then adds
         // velocity. Replace the arm anchor before movement; beams/real hits
         // inherit the same corrected world position, not a drawing-only shift.
-        if(p.type==ProjectileID.SolarWhipSword)p.Center=CompanionSprite.Hand(use.Cat)-p.velocity;
+        if(p.type is ProjectileID.SolarWhipSword or ProjectileID.ChargedBlasterCannon)p.Center=CompanionSprite.Hand(use.Cat)-p.velocity;
         // Last Prism and other native held projectiles retain their AI position.
         // A floating weapon must not be snapped to an opaque texture pixel.
     }

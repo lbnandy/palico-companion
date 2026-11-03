@@ -87,7 +87,6 @@ UI: {
 	Recovering: Recovering: back in {0}s
 	GearHint: Equip throwing weapons as a stack; keep ammo in the Palico inventory
 	DefaultWeaponHint: An empty weapon slot uses a Copper Shortsword
-	CannonStagesHint: Your Palico fires energy shots; the final sustained beam is currently disabled
 	RecoverArmor: Retrieve
 	LegacyArmorHint: Legacy armor is withdrawal-only; defense now scales with the player
 	Weapon: Weapon
@@ -191,6 +190,17 @@ Configs: {
 		DefensePercent: {
 			Label: Defense inherited (%)
 			Tooltip: Defense as a percentage of the owner's defense. This is not a percentage reduction in incoming damage.
+		}
+
+		RegenInheritancePercent: {
+			Label: Health regeneration inherited (%)
+			Tooltip:
+				'''
+				Shares the owner's standard bonus health regeneration from equipment, buffs and similar effects; defaults to 50%
+				Set to 0 to disable sharing without affecting your Palico's own regeneration
+				Uses your Palico's own recovery delay after damage; does not inherit natural regeneration, life steal or direct healing
+				Unaffected by strength presets; controlled by the host for everyone in multiplayer
+				'''
 		}
 
 		TargetingRangePercent: {

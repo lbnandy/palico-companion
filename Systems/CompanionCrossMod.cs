@@ -32,7 +32,12 @@ public sealed class CompanionCrossMod:ModSystem {
     internal static Action<CompanionNativeUse,int,byte,byte,float> WeaponEffect;
     internal static ICompanionStorageProvider Storage;
     internal static Func<Item,Item,int> UsesPerMaterial;
-    internal static Func<Item,CompanionNativeUse,bool> ReleaseChannel;
+    internal static readonly System.Collections.Generic.List<Func<Item,Projectile,CompanionNativeUse,bool?>> ChargeComplete=new();
+    internal static bool? Charged(Item weapon,Projectile shot,CompanionNativeUse use){
+        foreach(var charge in ChargeComplete)
+            if(charge(weapon,shot,use) is bool complete)return complete;
+        return null;
+    }
     // Optional metadata only. Actual consumption remains in tML's item hooks.
     internal static Func<Item,int> InfiniteStack;
     internal static Action<Player,Point,int> MinedOre;
@@ -44,5 +49,5 @@ public sealed class CompanionCrossMod:ModSystem {
         var result=recipes.Call("AddItemCategory",Language.ActiveCulture.Name=="zh-Hans"?"呆猫装备":"Palico equipment","",icon,(Predicate<Item>)(item=>item.ModItem is TrainingItem));
         RecipeCategoryRegistered=result is string status&&status=="Success";
     }
-    public override void Unload(){PrepareActor=null;SupportTool=null;SafeThrow=null;UpdateResources=null;SupportTarget=null;ResourceReady=null;PlanUse=null;WeaponReach=null;WeaponEffect=null;Storage=null;UsesPerMaterial=null;ReleaseChannel=null;InfiniteStack=null;MinedOre=null;RecipeCategoryRegistered=false;CompanionRecovery.Unload();}
+    public override void Unload(){PrepareActor=null;SupportTool=null;SafeThrow=null;UpdateResources=null;SupportTarget=null;ResourceReady=null;PlanUse=null;WeaponReach=null;WeaponEffect=null;Storage=null;UsesPerMaterial=null;ChargeComplete.Clear();InfiniteStack=null;MinedOre=null;RecipeCategoryRegistered=false;CompanionRecovery.Unload();}
 }

@@ -37,8 +37,15 @@ internal static class CompanionCombatReach {
         if(shot.aiStyle==ProjAIStyleID.LightsBane)return CompanionWeapons.Range(item)+24;
         if(shot.aiStyle==ProjAIStyleID.NightsEdge&&shot.type!=ProjectileID.TerraBlade2)return 100;
         if(shot.aiStyle==ProjAIStyleID.SleepyOctopod||shot.aiStyle==ProjAIStyleID.ForwardStab)return 80; // Monk staff swing/thrust, native collision arc
-        if(shot.aiStyle==ProjAIStyleID.HeldProjectile&&item.CountsAsClass(DamageClass.Melee))
-            return shot.type is ProjectileID.Arkhalis or ProjectileID.Terragrim or ProjectileID.PiercingStarlight?80:260;
+        if(shot.aiStyle==ProjAIStyleID.HeldProjectile&&item.CountsAsClass(DamageClass.Melee)) {
+            // Starlight's native collision sweeps five projectile widths from
+            // the hand. Leave one width of margin; do not use its shorter light
+            // effect as weapon reach. ItemCheck supplies item scale to the shot.
+            if(shot.type==ProjectileID.PiercingStarlight)return shot.width*4*item.scale;
+            // These short slashes use a box centered on the native hand, not
+            // Starlight's forward sweep. Width is a diameter, not reach.
+            return shot.type is ProjectileID.Arkhalis or ProjectileID.Terragrim?shot.width*.5f:260;
+        }
         if(shot.aiStyle==ProjAIStyleID.Boomerang)return item.type==ItemID.PaladinsHammer?150:Math.Clamp(item.shootSpeed*24,120,600);
         if(item.type==ItemID.IceSickle)return 160; // AI_018 slows this disc to a stop
         if(shot.aiStyle==ProjAIStyleID.MoveShort&&!CompanionWeaponPolicy.Rain(item))return 180; // fading/curved spore projectile
@@ -50,9 +57,11 @@ internal static class CompanionCombatReach {
     }
     internal static bool Distance(Item item) {
         var shot=Sample(item);
-        // A short-range yoyo is still a distance weapon. A numeric threshold
-        // previously made the wooden yoyo walk into the enemy's body.
+        // Attached swings and thrusts still have reach even below 120 pixels.
+        // Classify their native attack shape before the numeric fallback, also
+        // covering mod weapons which reuse these projectile behaviors.
         return shot?.aiStyle is ProjAIStyleID.Yoyo or ProjAIStyleID.Spear or ProjAIStyleID.Harpoon or ProjAIStyleID.Flail or ProjAIStyleID.SleepyOctopod or ProjAIStyleID.ForwardStab||
+            shot!=null&&item.CountsAsClass(DamageClass.Melee)&&shot.aiStyle is (ProjAIStyleID.HeldProjectile or ProjAIStyleID.LightsBane or ProjAIStyleID.NightsEdge)||
             item.consumable&&CompanionWeapons.SafeThrow(item)||Range(item)>120||CompanionNativeUse.Summoning(item);
     }
     internal static float EffectiveRange(Item item,Projectile cat,NPC target=null) {

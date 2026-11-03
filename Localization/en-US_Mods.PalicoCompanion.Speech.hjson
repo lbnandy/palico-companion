@@ -415,3 +415,143 @@ WorkingGearBarrel: {
 	Line2: Hup! Here comes the big one!
 	Line3: Oh, fur-get it! We're going out with a bang!
 }
+
+BossThoriumThunderBird: {
+	Line1: "Meowster, that bird comes with lightning!"
+	Line2: "That is a little bigger than the birds I usually chase."
+}
+
+BossVictoryThoriumThunderBird: {
+	Line1: "Finally, some peace for my ears."
+	Line2: "Bird hunting is usually less... electrical."
+}
+
+BossThoriumJellyfish: {
+	Line1: "That jellyfish is huge. Keep your tail clear!"
+	Line2: "Meowster, it has the whole beach to itself!"
+}
+
+BossVictoryThoriumJellyfish: {
+	Line1: "Now we can enjoy the sea."
+	Line2: "Whew. Tail still unstung."
+}
+
+BossThoriumViscount: {
+	Line1: "Meowster, someone has been feeding that bat very well."
+	Line2: "My ears were not ready for that screech."
+}
+
+BossVictoryThoriumViscount: {
+	Line1: "At last. No more screeching."
+	Line2: "I prefer my caves quiet."
+}
+
+BossThoriumGraniteStorm: {
+	Line1: "Even the rocks have a temper here?"
+	Line2: "Careful of the things circling it, Meowster."
+}
+
+BossVictoryThoriumGraniteStorm: {
+	Line1: "Back to being an ordinary rock."
+	Line2: "Rock on the outside. Trouble on the inside."
+}
+
+BossThoriumChampion: {
+	Line1: "Meowster, he packed more weapons than I packed supplies."
+	Line2: "Wings AND all those weapons? That seems unfair."
+}
+
+BossVictoryThoriumChampion: {
+	Line1: "Does that make us the champions, Meowster?"
+	Line2: "Whew. Finally caught up with him."
+}
+
+BossThoriumStarScouter: {
+	Line1: "Meowster, that flying plate is coming this way!"
+	Line2: "Eyes off the sky, Meowster! Lasers!"
+}
+
+BossVictoryThoriumStarScouter: {
+	Line1: "That was one noisy landing."
+	Line2: "Came all that way and never even said hello."
+}
+
+BossThoriumStrider: {
+	Line1: "Big spider in the snow, Meowster!"
+	Line2: "All that hopping in this cold? I am tired just watching."
+}
+
+BossVictoryThoriumStrider: {
+	Line1: "Somewhere warm next, Meowster?"
+	Line2: "All those legs, and we still caught it."
+}
+
+BossThoriumBeholder: {
+	Line1: "Meowster, that eye will not stop staring."
+	Line2: "Watch your feet too, Meowster!"
+}
+
+BossVictoryThoriumBeholder: {
+	Line1: "Finally stopped staring."
+	Line2: "Whew. Almost toasted my paws."
+}
+
+BossThoriumLich: {
+	Line1: "Meowster, that scythe is not for harvesting pumpkins."
+	Line2: "I really do not want to get caught by that."
+}
+
+BossVictoryThoriumLich: {
+	Line1: "Put the scythe down. Time to rest."
+	Line2: "Let us keep clear of that scythe, Meowster."
+}
+
+BossThoriumForgotten: {
+	Line1: "Meowster, that is not the kind of crab we eat."
+	Line2: "How much can it fit inside that shell?"
+}
+
+BossVictoryThoriumForgotten: {
+	Line1: "Nothing else coming out of that shell... right?"
+	Line2: "I could use some sunshine on my fur, Meowster."
+}
+
+BossThoriumPrimordials: {
+	Line1: "Meowster... this is a big one."
+	Line2: "Right here with you, Meowster. Let us do this!"
+}
+
+BossVictoryThoriumPrimordials: {
+	Line1: "Is it over? Really, truly over?"
+	Line2: "Meowster, I need a very, very long nap."
+}
+
+RestThoriumDepths: {
+	Line1: "The fish down here look rather unfriendly."
+	Line2: "Meowster, what are those shiny things underwater?"
+}
+
+RestThoriumGranite: {
+	Line1: "Why are these rocks buzzing...?"
+	Line2: "These will not shock my paws, will they?"
+}
+
+RestThoriumMarble: {
+	Line1: "Meowster, this floor is fancier than ours."
+	Line2: "Awfully quiet here. Soft paws, then."
+}
+
+WorkingGearThoriumHeal: {
+	Line1: "A little healing, coming right up!"
+	Line2: "Hang in there. I have got you."
+}
+
+WorkingGearThoriumBard: {
+	Line1: "A tune for you, Meowster!"
+	Line2: "Keep the beat. Let us go!"
+}
+
+WorkingGearThoriumRest: {
+	Line1: "Give me a moment to find my tune..."
+	Line2: "A quick breather, then back to the music."
+}

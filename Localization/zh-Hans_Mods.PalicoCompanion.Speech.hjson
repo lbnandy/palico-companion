@@ -415,3 +415,143 @@ WorkingGearBarrel: {
 	Line2: 嘿咻！大的来啦喵！
 	Line3: 喵的，和你爆了！
 }
+
+BossThoriumThunderBird: {
+	Line1: "老大，天上那只鸟带电喵！"
+	Line2: "这么大的鸟，我还是头一回扑喵。"
+}
+
+BossVictoryThoriumThunderBird: {
+	Line1: "不打雷了，耳朵舒服多了喵。"
+	Line2: "抓鸟怎么还得躲雷喵……"
+}
+
+BossThoriumJellyfish: {
+	Line1: "这么大的水母，尾巴可别碰上喵。"
+	Line2: "老大，它把海面都占了喵！"
+}
+
+BossVictoryThoriumJellyfish: {
+	Line1: "这回能好好看海了喵。"
+	Line2: "呼，没被蜇到尾巴喵。"
+}
+
+BossThoriumViscount: {
+	Line1: "老大，这蝙蝠是不是吃得太好了喵？"
+	Line2: "它这一嗓子，我耳朵都麻了喵。"
+}
+
+BossVictoryThoriumViscount: {
+	Line1: "终于不用听它嚷嚷了喵。"
+	Line2: "这洞里还是安静点好喵。"
+}
+
+BossThoriumGraniteStorm: {
+	Line1: "石头也会发脾气喵？"
+	Line2: "老大，小心它身边那圈东西喵。"
+}
+
+BossVictoryThoriumGraniteStorm: {
+	Line1: "这下总算是普通石头了喵。"
+	Line2: "看着是石头，打起来全是电喵。"
+}
+
+BossThoriumChampion: {
+	Line1: "老大，他带的武器比我行李还多喵。"
+	Line2: "有翅膀还拿这么多武器，不讲理喵！"
+}
+
+BossVictoryThoriumChampion: {
+	Line1: "老大，这下咱们也是冠军了喵？"
+	Line2: "呼，总算跟上他的动作了喵。"
+}
+
+BossThoriumStarScouter: {
+	Line1: "老大，天上那个盘子冲咱们来了喵！"
+	Line2: "别看了老大，那个会发激光喵！"
+}
+
+BossVictoryThoriumStarScouter: {
+	Line1: "这盘子掉下来可真够响的喵。"
+	Line2: "从那么远过来，怎么不先打个招呼喵。"
+}
+
+BossThoriumStrider: {
+	Line1: "老大，雪里有只大蜘蛛喵！"
+	Line2: "这么冷还出来蹦，真有精神喵。"
+}
+
+BossVictoryThoriumStrider: {
+	Line1: "老大，咱们找个暖和地方歇会儿吧喵。"
+	Line2: "腿多也没跑过咱们喵。"
+}
+
+BossThoriumBeholder: {
+	Line1: "老大，那只眼睛一直盯着咱们喵。"
+	Line2: "小心脚下，别光顾着看它喵！"
+}
+
+BossVictoryThoriumBeholder: {
+	Line1: "终于不盯着咱们了喵。"
+	Line2: "呼，差点把脚底烫熟了喵。"
+}
+
+BossThoriumLich: {
+	Line1: "老大，它那把镰刀可不是收南瓜的喵。"
+	Line2: "我可不想挨那一下喵……"
+}
+
+BossVictoryThoriumLich: {
+	Line1: "镰刀放下，这回真该歇着了喵。"
+	Line2: "老大，咱们离那把镰刀远点喵。"
+}
+
+BossThoriumForgotten: {
+	Line1: "老大，这个可不是能吃的寄居蟹喵。"
+	Line2: "它壳里到底藏了多少东西喵……"
+}
+
+BossVictoryThoriumForgotten: {
+	Line1: "这下不会再从壳里钻出来了吧喵？"
+	Line2: "老大，我想上岸晒晒毛了喵。"
+}
+
+BossThoriumPrimordials: {
+	Line1: "老大，这次真是大场面喵。"
+	Line2: "我在呢老大，咱们一起上喵！"
+}
+
+BossVictoryThoriumPrimordials: {
+	Line1: "结束了？这回真的结束了喵？"
+	Line2: "老大，我要歇一大——会儿喵。"
+}
+
+RestThoriumDepths: {
+	Line1: "这里的鱼看着都不好惹喵。"
+	Line2: "老大，水里那些亮晶晶的是什么喵？"
+}
+
+RestThoriumGranite: {
+	Line1: "这些石头怎么还滋滋响喵……"
+	Line2: "老大，这里摸着不会麻爪吧喵？"
+}
+
+RestThoriumMarble: {
+	Line1: "老大，这地板比咱们家还讲究喵。"
+	Line2: "这里怪安静的，我轻点走喵。"
+}
+
+WorkingGearThoriumHeal: {
+	Line1: "这口奶接好喵！"
+	Line2: "稳住，还有我呢喵。"
+}
+
+WorkingGearThoriumBard: {
+	Line1: "老大，给你来一曲喵！"
+	Line2: "跟上拍子，一起上喵！"
+}
+
+WorkingGearThoriumRest: {
+	Line1: "容我找找调子喵……"
+	Line2: "等我喘口气，再接着奏喵。"
+}

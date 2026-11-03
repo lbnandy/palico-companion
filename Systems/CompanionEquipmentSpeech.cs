@@ -24,16 +24,19 @@ public sealed partial class CompanionExpression {
             3=>self?"GearBellSelf":"GearBell",4=>"GearDrum",5=>"GearDart",
             6=>"GearLift",7=>"GearBomb",TrainingCatalog.Barrel=>"GearBarrel",_=>null
         };
-        if(variant==null)return;
-        bool urgent=CompanionSpeechPacing.For("Working",variant)==CompanionSpeechPacing.Priority.Support;
-        if(pendingGear is {} pending&&tick<pending.expires&&
-           CompanionSpeechPacing.For("Working",pending.variant)==CompanionSpeechPacing.Priority.Support&&!urgent)return;
         int emote=kind switch {
             0=>EmoteID.ItemLifePotion,
             3 or 4=>EmoteID.EmoteNote,
             TrainingCatalog.Barrel=>EmoteID.EmotionAnger,
             _=>EmoteID.EmoteHappiness
         };
+        QueueGear(s,variant,emote);
+    }
+    internal void QueueGear(CompanionPlayer s,string variant,int emote){
+        if(variant==null||CompanionNetwork.Client||!ChatEnabled(s)&&!EmotesEnabled(s))return;
+        bool urgent=CompanionSpeechPacing.For("Working",variant)==CompanionSpeechPacing.Priority.Support;
+        if(pendingGear is {} pending&&tick<pending.expires&&
+           CompanionSpeechPacing.For("Working",pending.variant)==CompanionSpeechPacing.Priority.Support&&!urgent)return;
         pendingGear=(variant,emote,tick+240);
     }
     void SpeakGear(CompanionPlayer s,Projectile cat) {

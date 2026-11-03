@@ -28,17 +28,21 @@ internal static class CompanionInventoryOperations {
     static bool SameKind(Item a,Item b)=>a.netID==b.netID&&a.type==b.type;
     internal static Item[] Slots(CompanionPlayer s,byte group)=>group switch {0=>s.Bag,1=>s.Gear,2=>s.Dyes,3=>s.Training.Slots,_=>null};
     internal static byte Group(CompanionPlayer s,Item[] items)=>ReferenceEquals(items,s.Bag)?(byte)0:ReferenceEquals(items,s.Gear)?(byte)1:ReferenceEquals(items,s.Dyes)?(byte)2:(byte)3;
+    internal static bool CanFavorite(byte group)=>group==0;
     internal static bool Accepts(CompanionPlayer s,Item item,byte group,int index)=>group switch {
         0=>true,1=>CompanionVitals.Accepts(item,index),2=>CompanionDye.Accepts(item),3=>s.Training.Accepts(s,item,index),_=>false
     };
     internal static bool CanSplit(Item item,byte group,int index)=>item.maxStack>1&&(group==0||group==2||group==1&&index==0&&item.consumable);
 
-    // Server adapter for BankItem's cursor transaction. Do not run client-only
-    // ItemSlot on a server by swapping Main.LocalPlayer/mouse/input globals.
+    // Shared BankItem-style cursor transaction, preserving item favorites.
+    // Never run client-only ItemSlot on a server by swapping player/input globals.
     // Conformance tests compare these rules to the installed native ItemSlot.
     internal static InventoryOutcome Click(Item[] items,int index,ref Item cursor,bool right,bool favorite,byte group){
         PickupCredit.Clear(cursor);var item=items[index];
-        if(!right&&favorite&&cursor.IsAir&&!item.IsAir){item.favorited=!item.favorited;return new(InventoryCue.Tick);}
+        if(!right&&favorite&&cursor.IsAir&&!item.IsAir){
+            if(!CanFavorite(group))return default;
+            item.favorited=!item.favorited;return new(InventoryCue.Tick);
+        }
         if(right){
             if(item.IsAir||!CanSplit(item,group,index)||!cursor.IsAir&&(!SameKind(cursor,item)||!ItemLoader.CanStack(cursor,item)||cursor.stack>=cursor.maxStack))return default;
             int before=item.stack;

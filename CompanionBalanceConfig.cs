@@ -50,6 +50,7 @@ public sealed class CompanionBalanceConfig : ModConfig {
     [DefaultValue(75),Range(10,200),Increment(5),Slider] public int DamagePercent { get; set; } = 75;
     [DefaultValue(75),Range(10,200),Increment(5),Slider] public int HealthPercent { get; set; } = 75;
     [DefaultValue(75),Range(0,200),Increment(5),Slider] public int DefensePercent { get; set; } = 75;
+    [DefaultValue(50),Range(0,100),Increment(5),Slider] public int RegenInheritancePercent { get; set; } = 50;
     [DefaultValue(100),Range(50,150),Increment(5),Slider] public int TargetingRangePercent { get; set; } = 100;
 
     [Header("Movement")]
@@ -73,6 +74,7 @@ public sealed class CompanionBalanceConfig : ModConfig {
     internal float DamageScale => Math.Clamp(DamagePercent,10,200)/100f;
     internal int HealthRatio => Math.Clamp(HealthPercent,10,200);
     internal int DefenseRatio => Math.Clamp(DefensePercent,0,200);
+    internal int RegenInheritanceRatio => Math.Clamp(RegenInheritancePercent,0,100);
     internal float MovementScale(bool combat) => Math.Clamp(combat?CombatMovementPercent:TravelMovementPercent,25,150)/100f;
     internal CompanionEvasionMode EvasionStyle => Enum.IsDefined(Evasion)?Evasion:CompanionEvasionMode.Standard;
 

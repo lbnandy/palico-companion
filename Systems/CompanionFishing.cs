@@ -69,7 +69,7 @@ public sealed class CompanionFishing {
     public static bool SafeBait(Item i)=>!i.IsAir&&i.bait>0&&i.type!=ItemID.TruffleWorm;
     internal bool WaitingForOverflow(CompanionPlayer s){
         waitingOverflow.RemoveAll(i=>!i.active||i.IsAir||!Main.item.Contains(i));
-        return waitingOverflow.Any(i=>!InventoryTransfer.HasRoom(i,s.Bag));
+        return waitingOverflow.Any(i=>!CompanionPickup.HasRoom(i,s));
     }
     public static int WaterCount(Point cell){Pond(cell.X,cell.Y,out bool lava,out bool honey,out int water,out _);return lava||honey?0:water;}
     public void Cancel(){if(Active){Bobber.ai[1]=0;if(CompanionNetwork.Server)NetMessage.SendData(MessageID.KillProjectile,-1,-1,null,Bobber.identity,Bobber.owner);Bobber.active=false;}Bobber=null;Approaching=false;idle=age=biteDelay=gesture=0;recast=30;}

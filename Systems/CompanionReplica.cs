@@ -10,7 +10,7 @@ internal struct CompanionPose {
     internal Vector2 Position,Velocity,ItemOffset,ToolAim,WeaponAim;
     internal int Direction,ItemDirection,HeldGearSlot,Frame,IdleTicks,StateTicks,ItemAnimation,ItemMax,Tool,ToolDuration,Epoch;
     internal float ItemRotation,ToolProgress;
-    internal bool Flying,Channel;
+    internal bool Flying,Channel,UseItem;
     internal CatMotion Motion;
 }
 

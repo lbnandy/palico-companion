@@ -22,6 +22,7 @@ internal sealed class CompanionSpeechContent:ModSystem {
     internal static readonly Dictionary<string,(string Event,int Count)> Pools=new();
     internal static readonly List<WorldEvent> WorldEvents=new();
     internal static Func<Player,string> Place;
+    internal static void RegisterPlace(Func<Player,string> place){var previous=Place;Place=p=>previous?.Invoke(p)??place(p);}
     internal static Func<bool> BossMarathon;
     internal static Boss Find(NPC npc)=>Bosses.TryGetValue(npc.type,out var boss)&&(boss.Matches==null||boss.Matches(npc))?boss:null;
     internal static void Pool(string key,string variant,int count=2)=>Pools[key+variant]=(key,count);

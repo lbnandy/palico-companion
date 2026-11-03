@@ -59,7 +59,7 @@ public sealed class CalamitySpeechBridge:ModSystem {
             matches:n=>n.ModNPC is not SupremeCalamitas witch||!witch.permafrost);
         Boss("PrimordialWyrm","PrimordialWyrmHead","PrimordialWyrmBody PrimordialWyrmBodyAlt PrimordialWyrmTail");
         foreach(string place in new[]{"Sulphur","SunkenSea","Brimstone","Astral","Abyss","DeepAbyss"})CompanionSpeechContent.Pool("Rest","Calamity"+place);
-        CompanionSpeechContent.Place=Place;
+        CompanionSpeechContent.RegisterPlace(Place);
         CompanionSpeechContent.BossMarathon=()=>BossRushEvent.BossRushActive;
         CompanionSpeechContent.Pool("Boss","EventCalamityAcidRain");
         CompanionSpeechContent.Pool("Boss","EventCalamityBossRush");

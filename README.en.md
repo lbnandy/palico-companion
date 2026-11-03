@@ -33,7 +33,9 @@ Gather materials to craft and upgrade your Palico’s gear. The in-game Palico G
 
 The **Companion abilities** settings offer three strength presets: choose **Support** if you want to take the lead in combat, **Standard** to fight side by side, or **Strong** if you want to take it easy and let your Palico carry you. Standard is the default.
 
-You can also fine-tune your Palico’s damage, health, defense, targeting range, movement speeds in and out of combat, ability to dodge attacks, work speed and fishing speed individually. Targeting range is adjustable from 50% to 150% (default 100%); it does not change the weapon's own reach and is unaffected by strength presets.
+You can also fine-tune your Palico’s damage, health, defense, inherited health regeneration, targeting range, movement speeds in and out of combat, ability to dodge attacks, work speed and fishing speed individually. Targeting range is adjustable from 50% to 150% (default 100%); it does not change the weapon's own reach and is unaffected by strength presets.
+
+Your Palico inherits 50% of the owner's standard bonus health regeneration by default, adjustable from 0% to 100%. Set it to 0 to keep only the Palico's own regeneration. Recovery after damage uses its own timer, and strength presets leave this percentage unchanged.
 
 An optional boss health bonus adds a little more challenge when fighting together. It is off by default.
 
@@ -46,7 +48,7 @@ None of these mods are required:
 - [Magic Storage](https://steamcommunity.com/sharedfiles/filedetails/?id=2563309347): let your Palico use your storage to put items away and restock its supplies.
 - [Quality of Terraria](https://steamcommunity.com/sharedfiles/filedetails/?id=2797518634): your Palico follows its rules for unlimited ammo and other consumable items.
 - [Calamity](https://steamcommunity.com/sharedfiles/filedetails/?id=2824688072): your Palico has dialogue for its biomes and bosses, and can use some of its special weapon mechanics.
-- [Thorium](https://steamcommunity.com/sharedfiles/filedetails/?id=2909886416): class support for instruments, healing tools and throwing weapons, including separate inspiration, ally healing and throwing exhaustion. See the compatibility notes below for special-input limits.
+- [Thorium](https://steamcommunity.com/sharedfiles/filedetails/?id=2909886416): class support for instruments, healing tools and throwing weapons, including separate inspiration, ally healing and throwing exhaustion, plus dialogue for bosses, exploration and support actions. See the compatibility notes below for special-input limits.
 
 See [compatibility notes](docs/COMPATIBILITY.md#english) for weapon support and known limits.
 

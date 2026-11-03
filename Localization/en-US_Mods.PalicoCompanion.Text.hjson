@@ -459,7 +459,8 @@ Guide: {
 		[Feeding]
 		Hold vanilla food, such as cooked fish or fruit, and right-click your Palico nearby to feed one serving. Out-of-combat health regeneration increases by 25% for the food's usual duration. Feeding again does not stack the effect or add to its duration.
 
-		[Fainting]
+		[Health regeneration and fainting]
+		Your Palico keeps their own regeneration and gains 50% of your additive regeneration bonuses from equipment, Regeneration Potions and standard mod regeneration hooks. Recovery timing follows the Palico's own injuries; your natural recovery timer, damage over time and life steal are not inherited.
 		Your Palico retreats when defeated and returns after recovering.
 		'''
 	Introduction:

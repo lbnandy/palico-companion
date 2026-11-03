@@ -48,7 +48,7 @@ public sealed class CompanionCat : ModProjectile
     public override void SendExtraAI(System.IO.BinaryWriter w){
         w.Write(NetworkInstance);
         w.Write(Projectile.direction);w.Write(Animation.SpriteFrame);w.Write(Navigation.Riding||Kite.Active);
-        w.Write(Weapons.Actor.direction);w.Write(Weapons.Actor.itemAnimation);w.Write(Weapons.Actor.itemAnimationMax);w.Write(Weapons.Actor.itemRotation);w.Write(Weapons.Actor.channel);w.Write((byte)Weapons.HeldGearSlot);
+        w.Write(Weapons.Actor.direction);w.Write(Weapons.Actor.itemAnimation);w.Write(Weapons.Actor.itemAnimationMax);w.Write(Weapons.Actor.itemRotation);w.Write((byte)((Weapons.Actor.channel?1:0)|(Weapons.Actor.controlUseItem?2:0)));w.Write((byte)Weapons.HeldGearSlot);
         ushort count=0;for(int i=0;i<Weapons.Actor.buffType.Length;i++)if(Weapons.Actor.buffType[i]>0&&Weapons.Actor.buffTime[i]>0)count++;
         w.Write(count);for(int i=0;i<Weapons.Actor.buffType.Length;i++)if(Weapons.Actor.buffType[i]>0&&Weapons.Actor.buffTime[i]>0){w.Write(Weapons.Actor.buffType[i]);w.Write(Weapons.Actor.buffTime[i]);}
         Vector2 offset=Weapons.Actor.itemLocation-Weapons.Actor.Center;w.Write(offset.X);w.Write(offset.Y);
@@ -65,12 +65,12 @@ public sealed class CompanionCat : ModProjectile
     public override void ReceiveExtraAI(System.IO.BinaryReader r){
         ulong previousInstance=NetworkInstance,instance=r.ReadUInt64();if(CompanionNetwork.Client)NetworkInstance=instance;
         NetworkReceives++;Projectile.direction=r.ReadInt32();networkFrame=r.ReadInt32();networkFlying=r.ReadBoolean();
-        int itemDirection=r.ReadInt32(),itemAnimation=r.ReadInt32(),itemMax=r.ReadInt32();float itemRotation=r.ReadSingle();bool channel=r.ReadBoolean();int heldGearSlot=r.ReadByte();
+        int itemDirection=r.ReadInt32(),itemAnimation=r.ReadInt32(),itemMax=r.ReadInt32();float itemRotation=r.ReadSingle();byte input=r.ReadByte();bool channel=(input&1)!=0,useItem=(input&2)!=0;int heldGearSlot=r.ReadByte();
         int buffs=r.ReadUInt16();Array.Clear(Weapons.Actor.buffType);Array.Clear(Weapons.Actor.buffTime);for(int i=0;i<buffs;i++){int type=r.ReadInt32(),time=r.ReadInt32();if(i<Weapons.Actor.buffType.Length){Weapons.Actor.buffType[i]=type;Weapons.Actor.buffTime[i]=time;}}
         var itemOffset=new Vector2(r.ReadSingle(),r.ReadSingle());var weaponAim=new Vector2(r.ReadSingle(),r.ReadSingle());networkTool=r.ReadInt32();networkToolProgress=r.ReadSingle();networkToolAim=new Vector2(r.ReadSingle(),r.ReadSingle());
         var pose=new CompanionPose{Time=r.ReadUInt64(),Epoch=r.ReadInt32(),Motion=(CatMotion)r.ReadByte(),IdleTicks=r.ReadInt32(),StateTicks=r.ReadInt32(),WalkPhase=r.ReadDouble(),ToolDuration=r.ReadInt32(),
             Position=Projectile.position,Velocity=Projectile.velocity,Direction=Projectile.direction,Frame=networkFrame,Flying=networkFlying,
-            HeldGearSlot=heldGearSlot,ItemDirection=itemDirection,ItemAnimation=itemAnimation,ItemMax=itemMax,ItemRotation=itemRotation,Channel=channel,ItemOffset=itemOffset,
+            HeldGearSlot=heldGearSlot,ItemDirection=itemDirection,ItemAnimation=itemAnimation,ItemMax=itemMax,ItemRotation=itemRotation,Channel=channel,UseItem=useItem,ItemOffset=itemOffset,
             Tool=networkTool,ToolProgress=networkToolProgress,ToolAim=networkToolAim,WeaponAim=weaponAim};
         ActionVisual.Read(r,previousInstance!=instance);Barrel.Read(r,previousInstance!=instance);Kite.Read(r);
         int combatId=r.ReadInt16(),combatType=r.ReadInt32();
