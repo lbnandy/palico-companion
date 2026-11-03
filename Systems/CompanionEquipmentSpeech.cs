@@ -46,7 +46,7 @@ public sealed partial class CompanionExpression {
 
     internal void ObserveEquipment(CompanionPlayer s,Projectile cat) {
         if(!IsLocalListener(s)||CompanionNativeUse.Current!=null||CompanionFishing.Current!=null)return;
-        int[] Current()=>new[]{s.Gear[0].type}.Concat(s.Training.Slots.Select(i=>i.type)).ToArray();
+        int[] Current()=>new[]{s.Gear[0].type,CompanionWeapons.Summon(s.Gear).type}.Concat(s.Training.Slots.Select(i=>i.type)).ToArray();
         if(s.PanelOpen) {
             equipmentBefore??=Current();equipmentPending=0;return;
         }
@@ -57,7 +57,7 @@ public sealed partial class CompanionExpression {
             // already acknowledged item is not a new equipment conversation.
             int index=Array.FindIndex(after,type=>type>0&&!before.Contains(type)&&!equipmentSeen.Contains(type));
             if(index>=0&&tick>=equipmentAt) {
-                equipmentPending=after[index];equipmentVariant=index==0?"GearEquippedWeapon":"GearEquippedSupport";
+                equipmentPending=after[index];equipmentVariant=index<2?"GearEquippedWeapon":"GearEquippedSupport";
                 equipmentReady=tick+60;equipmentExpires=tick+600;
             }
         }

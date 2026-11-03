@@ -52,7 +52,7 @@ public static class CompanionRestock {
         if(i.type==ItemID.WoodPlatform)return Target(stock.Platforms,x=>x.type==ItemID.WoodPlatform);
         if(i.type==ItemID.Rope)return Target(stock.Ropes,x=>x.type==ItemID.Rope);
         if(CompanionRecovery.Supported(i))return Target(stock.Healing,CompanionRecovery.Supported);
-        if(s.Gear[0].mana>0&&CompanionRecovery.ManaPotion(i))return Target(stock.Mana,CompanionRecovery.ManaPotion);
+        if(CompanionWeapons.UsesMana(s)&&CompanionRecovery.ManaPotion(i))return Target(stock.Mana,CompanionRecovery.ManaPotion);
         if(Ammo(s,i)){
             if(stock.Ammo==0||s.Bag.Any(x=>!x.IsAir&&Ammo(s,x)&&!x.consumable))return (0,0,_=>false);
             var preferred=s.Bag.FirstOrDefault(x=>!x.IsAir&&Ammo(s,x))??i;

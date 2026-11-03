@@ -96,6 +96,8 @@ UI: {
 	DefenseHint: Defense is {0}% of the player
 	HealthLabel: Life
 	ManaLabel: Mana
+	SummonWeapon: Summon weapon
+	SummonWeaponHint: Equip a minion or sentry weapon. Returns to the main weapon after summoning or deploying. Replacing this slot dismisses its summons.
 	MinionSlots: Minion slots
 	SentrySlots: Sentry slots
 	SentrySlotsHint: Placed / limit. Matches your sentry limit, with a minimum of 1. Uses separate slots and repositions as combat moves. Old One's Army weapons follow vanilla unlock rules and use Etherian Mana from the Palico inventory during the event.

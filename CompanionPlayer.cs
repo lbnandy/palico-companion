@@ -36,7 +36,7 @@ public sealed class CompanionPlayer : ModPlayer
     }
     public int HoodColor=CompanionPalette.Default;
     public Item[] Dyes = InventoryTransfer.Empty(1);
-    public Item[] Gear = InventoryTransfer.Empty(4);
+    public Item[] Gear = InventoryTransfer.Empty(CompanionWeapons.EquipmentCount);
     public CompanionVitals Vitals = new();
     public CompanionTraining Training = new();
     internal CompanionLoadouts Loadouts=new();
@@ -104,8 +104,9 @@ public sealed class CompanionPlayer : ModPlayer
         Discovery=new();if(tag.ContainsKey("discoveries"))Discovery.Load(tag.GetCompound("discoveries"));
         AutoLogistics=!tag.ContainsKey("autoLogistics")||tag.GetBool("autoLogistics");
         var gear=tag.GetList<TagCompound>("gear");
-        Gear=InventoryTransfer.Empty(Math.Max(4,gear.Count));
+        Gear=InventoryTransfer.Empty(Math.Max(CompanionWeapons.EquipmentCount,gear.Count));
         for(int i=0;i<gear.Count;i++)Gear[i]=ItemIO.Load(gear[i]);
+        CompanionWeapons.Migrate(Gear);
         int savedMax=tag.ContainsKey("maxHealth")?Math.Clamp(tag.GetInt("maxHealth"),1,100000):CompanionVitals.LegacyMaxHealth;
         int savedMana=tag.ContainsKey("maxMana")?Math.Clamp(tag.GetInt("maxMana"),0,100000):20;
         Vitals=new() {PotionDelay=Math.Clamp(tag.GetInt("potionDelay"),0,Item.potionDelay),MaxHealth=savedMax,MaxMana=savedMana,Mana=tag.ContainsKey("mana")?Math.Clamp(tag.GetInt("mana"),0,savedMana):savedMana,

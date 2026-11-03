@@ -39,7 +39,7 @@ public sealed partial class CompanionTraining {
                 message=CompanionText.Message("CompanionSkillActivation.NoDebuff");if(debuff==0)return false;break;
             case 3:
                 bool playerNeeds=p.statMana<p.statManaMax2&&(manual||p.statManaMax2-p.statMana>=ManaDeficit(p.statManaMax2)&&p.statMana<p.statManaMax2/2&&p.HeldItem.mana>0&&(p.itemAnimation>0||p.controlUseItem));
-                bool catNeeds=s.Vitals.Mana<s.Vitals.MaxMana&&(manual||s.Vitals.MaxMana-s.Vitals.Mana>=ManaDeficit(s.Vitals.MaxMana)&&s.Gear[0].mana>0&&s.Combat&&use!=null&&(use.Busy||use.Actor.controlUseItem||use.WaitingForMana));
+                bool catNeeds=s.Vitals.Mana<s.Vitals.MaxMana&&(manual||s.Vitals.MaxMana-s.Vitals.Mana>=ManaDeficit(s.Vitals.MaxMana)&&CompanionWeapons.UsesMana(s)&&s.Combat&&use!=null&&(use.Busy||use.Actor.controlUseItem||use.WaitingForMana));
                 message=CompanionText.Message("CompanionSkillActivation.NoManaNeeded");if(!playerNeeds&&!catNeeds)return false;
                 manaTarget=playerNeeds?0:1;break;
             case 4:

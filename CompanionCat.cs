@@ -48,7 +48,7 @@ public sealed class CompanionCat : ModProjectile
     public override void SendExtraAI(System.IO.BinaryWriter w){
         w.Write(NetworkInstance);
         w.Write(Projectile.direction);w.Write(Animation.SpriteFrame);w.Write(Navigation.Riding||Kite.Active);
-        w.Write(Weapons.Actor.direction);w.Write(Weapons.Actor.itemAnimation);w.Write(Weapons.Actor.itemAnimationMax);w.Write(Weapons.Actor.itemRotation);w.Write(Weapons.Actor.channel);
+        w.Write(Weapons.Actor.direction);w.Write(Weapons.Actor.itemAnimation);w.Write(Weapons.Actor.itemAnimationMax);w.Write(Weapons.Actor.itemRotation);w.Write(Weapons.Actor.channel);w.Write((byte)Weapons.HeldGearSlot);
         ushort count=0;for(int i=0;i<Weapons.Actor.buffType.Length;i++)if(Weapons.Actor.buffType[i]>0&&Weapons.Actor.buffTime[i]>0)count++;
         w.Write(count);for(int i=0;i<Weapons.Actor.buffType.Length;i++)if(Weapons.Actor.buffType[i]>0&&Weapons.Actor.buffTime[i]>0){w.Write(Weapons.Actor.buffType[i]);w.Write(Weapons.Actor.buffTime[i]);}
         Vector2 offset=Weapons.Actor.itemLocation-Weapons.Actor.Center;w.Write(offset.X);w.Write(offset.Y);
@@ -65,12 +65,12 @@ public sealed class CompanionCat : ModProjectile
     public override void ReceiveExtraAI(System.IO.BinaryReader r){
         ulong previousInstance=NetworkInstance,instance=r.ReadUInt64();if(CompanionNetwork.Client)NetworkInstance=instance;
         NetworkReceives++;Projectile.direction=r.ReadInt32();networkFrame=r.ReadInt32();networkFlying=r.ReadBoolean();
-        int itemDirection=r.ReadInt32(),itemAnimation=r.ReadInt32(),itemMax=r.ReadInt32();float itemRotation=r.ReadSingle();bool channel=r.ReadBoolean();
+        int itemDirection=r.ReadInt32(),itemAnimation=r.ReadInt32(),itemMax=r.ReadInt32();float itemRotation=r.ReadSingle();bool channel=r.ReadBoolean();int heldGearSlot=r.ReadByte();
         int buffs=r.ReadUInt16();Array.Clear(Weapons.Actor.buffType);Array.Clear(Weapons.Actor.buffTime);for(int i=0;i<buffs;i++){int type=r.ReadInt32(),time=r.ReadInt32();if(i<Weapons.Actor.buffType.Length){Weapons.Actor.buffType[i]=type;Weapons.Actor.buffTime[i]=time;}}
         var itemOffset=new Vector2(r.ReadSingle(),r.ReadSingle());var weaponAim=new Vector2(r.ReadSingle(),r.ReadSingle());networkTool=r.ReadInt32();networkToolProgress=r.ReadSingle();networkToolAim=new Vector2(r.ReadSingle(),r.ReadSingle());
         var pose=new CompanionPose{Time=r.ReadUInt64(),Epoch=r.ReadInt32(),Motion=(CatMotion)r.ReadByte(),IdleTicks=r.ReadInt32(),StateTicks=r.ReadInt32(),WalkPhase=r.ReadDouble(),ToolDuration=r.ReadInt32(),
             Position=Projectile.position,Velocity=Projectile.velocity,Direction=Projectile.direction,Frame=networkFrame,Flying=networkFlying,
-            ItemDirection=itemDirection,ItemAnimation=itemAnimation,ItemMax=itemMax,ItemRotation=itemRotation,Channel=channel,ItemOffset=itemOffset,
+            HeldGearSlot=heldGearSlot,ItemDirection=itemDirection,ItemAnimation=itemAnimation,ItemMax=itemMax,ItemRotation=itemRotation,Channel=channel,ItemOffset=itemOffset,
             Tool=networkTool,ToolProgress=networkToolProgress,ToolAim=networkToolAim,WeaponAim=weaponAim};
         ActionVisual.Read(r,previousInstance!=instance);Barrel.Read(r,previousInstance!=instance);Kite.Read(r);
         int combatId=r.ReadInt16(),combatType=r.ReadInt32();
@@ -276,8 +276,8 @@ public sealed class CompanionCat : ModProjectile
             else if(airborneTarget!=null){SuspendWorkForCombat(state);state.Mining.Tick(owner,Projectile.Center,false,true);}
             targetItem=-1;
             var airTarget=airborneTarget??FindThreat(owner);
-            Weapons.Tick(owner,state,Projectile,airTarget,state.AttacksEnabled&&(CompanionNativeUse.Summoning(airWeapon)||CompanionCombatReach.CanUse(airWeapon,Projectile,airTarget)),allowSupport:true);
-            animationThreat=airTarget!=null;attackThrust=!CompanionNativeUse.SwingArm(airWeapon);
+            Weapons.Tick(owner,state,Projectile,airTarget,state.AttacksEnabled&&(CompanionNativeUse.Summoning(airWeapon)||CompanionCombatReach.CanUse(airWeapon,Projectile,airTarget)),allowSupport:true,allowSummons:state.AttacksEnabled);
+            animationThreat=airTarget!=null;attackThrust=!CompanionNativeUse.SwingArm(Weapons.Actor.HeldItem);
             attackVisualTicks=Weapons.Actor.itemAnimation;attackVisualDuration=Math.Max(1,Weapons.Actor.itemAnimationMax);
             if(CompanionWeapons.Support(airWeapon)&&Weapons.Busy)attackFacing=Weapons.Aim;
             else if(airTarget!=null)attackFacing=airTarget.Center;
@@ -305,9 +305,9 @@ public sealed class CompanionCat : ModProjectile
             attackFacing=npc.Center;
         }
         Item activeWeapon=CompanionWeapons.Active(state.Gear);
-        Weapons.Tick(owner,state,Projectile,target,state.AttacksEnabled&&(CompanionNativeUse.Summoning(activeWeapon)||CompanionCombatReach.CanUse(activeWeapon,Projectile,target)),allowSupport:true);
+        Weapons.Tick(owner,state,Projectile,target,state.AttacksEnabled&&(CompanionNativeUse.Summoning(activeWeapon)||CompanionCombatReach.CanUse(activeWeapon,Projectile,target)),allowSupport:true,allowSummons:state.AttacksEnabled);
         if(CompanionWeapons.Support(activeWeapon)&&Weapons.Busy)attackFacing=Weapons.Aim;
-        attackThrust=!CompanionNativeUse.SwingArm(activeWeapon);
+        attackThrust=!CompanionNativeUse.SwingArm(Weapons.Actor.HeldItem);
         attackVisualTicks=Weapons.Actor.itemAnimation;attackVisualDuration=Math.Max(1,Weapons.Actor.itemAnimationMax);
 
         bool mining=state.Mining.Active;

@@ -96,6 +96,8 @@ UI: {
 	DefenseHint: 呆猫的防御为玩家的 {0}%
 	HealthLabel: 生命
 	ManaLabel: 法力
+	SummonWeapon: 召唤武器
+	SummonWeaponHint: 放入随从或哨兵召唤武器；补召或部署后使用主武器。更换此槽会收回原有召唤物。
 	MinionSlots: 仆从位
 	SentrySlots: 哨兵位
 	SentrySlotsHint: 已放置 / 自动布置上限。上限与玩家相同，至少为 1，不占用玩家的哨兵位。战斗转移时重新布置。撒旦军队武器沿用原版解锁条件，事件中消耗呆猫背包里的天国魔力。

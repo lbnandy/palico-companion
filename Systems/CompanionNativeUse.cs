@@ -146,7 +146,7 @@ public sealed partial class CompanionNativeUse {
         Cat=cat;State=state;EnsureActorSlot();
         Actor.MinionAttackTargetNPC=cat.ModProjectile is CompanionCat companion?companion.CombatTargetIndex:-1;
         if(!initialized){Actor.inventory=InventoryTransfer.Empty(59);initialized=true;}
-        var item=CompanionWeapons.Active(state.Gear);if(Actor.inventory[0].type!=item.type||Actor.inventory[0].prefix!=item.prefix)Actor.inventory[0]=item.Clone();
+        HeldGearSlot=replicaPose.HeldGearSlot;var item=HeldGearSlot==CompanionWeapons.SummonSlot?CompanionWeapons.Summon(state.Gear):CompanionWeapons.Active(state.Gear);if(Actor.inventory[0].type!=item.type||Actor.inventory[0].prefix!=item.prefix)Actor.inventory[0]=item.Clone();
         // ResetEffects clears the projectile caches too. Match Player.Update's
         // order: reset, rebuild caches, then update buffs which maintain minions.
         if(!ResetEffects())return;
@@ -158,15 +158,15 @@ public sealed partial class CompanionNativeUse {
         Actor.statMana=state.Vitals.Mana;Actor.statManaMax2=state.Vitals.MaxMana;Actor.statLife=state.Vitals.Health;
         Actor.itemLocation=Actor.Center+ReplicaItemOffset;Actor.lastVisualizedSelectedItem=Actor.HeldItem.Clone();
     }
-    public void Tick(Player owner,CompanionPlayer state,Projectile cat,NPC target,bool allowAttack,bool allowSupport=false) {
+    public void Tick(Player owner,CompanionPlayer state,Projectile cat,NPC target,bool allowAttack,bool allowSupport=false,bool allowSummons=false) {
         Cat=cat;State=state;
         if(!EnsureActorSlot()){Cancel();return;}
         if(!initialized){Actor.inventory=InventoryTransfer.Empty(59);Actor.whoAmI=slot;if(!ResetEffects())return;initialized=true;}
         if(!Available){Cancel();return;}
-        Item weapon=CompanionWeapons.Active(state.Gear);
+        Item weapon=SelectWeapon(owner,target,allowSummons);
         CompanionRestock.Maintain(state);
         if(type!=weapon.type||prefix!=weapon.prefix) {
-            Cancel(depletedThrow&&state.Gear[0].IsAir);depletedThrow=false;type=weapon.type;prefix=weapon.prefix;Actor.inventory[0]=weapon.Clone();
+            Cancel(automaticSwitch||depletedThrow&&state.Gear[0].IsAir,preserveSummons:true);depletedThrow=false;type=weapon.type;prefix=weapon.prefix;Actor.inventory[0]=weapon.Clone();
             ReachFactor=1;FlailRange=100;reachTarget=-1;missTicks=0;
             // Player.ItemCheckWrapped normally refreshes this while idle. A
             // companion must do the same before starting a newly equipped item.
@@ -212,7 +212,7 @@ public sealed partial class CompanionNativeUse {
         // The item declares the cost of the complete summon. A head projectile
         // alone may cost zero or only part of the creature's slots.
         float slots=summon?ItemID.Sets.StaffMinionSlotsRequired[weapon.type]:0;
-        bool wants=allowAttack&&(summon?Actor.slotsMinions+Math.Max(.01f,slots)<=Actor.maxMinions:target!=null);
+        bool wants=(HeldGearSlot==CompanionWeapons.SummonSlot?allowSummons:allowAttack)&&(summon?Actor.slotsMinions+Math.Max(.01f,slots)<=Actor.maxMinions:target!=null);
         ObserveReach(weapon,target,wants&&target!=null&&CompanionCombatReach.Clear(cat.Center,target.Center));
         Aim=summon?CompanionWeaponAim.SummonPoint(cat,target):target!=null?CompanionWeaponAim.Point(weapon,this,target):cat.Center+new Vector2(cat.direction*80,-24);
         Vector2 plannedAim=Aim;
@@ -221,6 +221,7 @@ public sealed partial class CompanionNativeUse {
         // ItemCheck can finish one animation and start another in the same tick.
         // Release the input as soon as a persistent projectile is in flight.
         wants&=planned;
+        if(yieldToSummon||HeldGearSlot==CompanionWeapons.SummonSlot&&Busy)wants=false;
         if(target!=null&&!CompanionCombatReach.Clear(cat.Center,target.Center))wants=false;
         if(CompanionWeapons.Support(weapon)){
             var ally=allowSupport?CompanionCrossMod.SupportTarget?.Invoke(this):null;
@@ -233,6 +234,7 @@ public sealed partial class CompanionNativeUse {
         // Finish a natural refill after running dry. Native regeneration speeds
         // up as the bar fills; restarting early discards that faster portion and
         // pays the regeneration delay (and a held weapon's windup) again.
+        bool summonAttempt=HeldGearSlot==CompanionWeapons.SummonSlot&&wants&&Actor.itemAnimation==0;
         int cost=Actor.GetManaCost(weapon);
         if(WaitingForMana){
             if(Actor.statMana<cost)RestoreMana(cost);
@@ -261,6 +263,7 @@ public sealed partial class CompanionNativeUse {
                 if(weapon.stack<=0){weapon.TurnToAir();depletedThrow=true;}
             }
         }
+        if(summonAttempt)SummonAttempt(weapon,Actor.itemAnimation>0);
         if(CompanionNetwork.Server&&Actor.itemAnimation==Actor.itemAnimationMax&&Actor.itemAnimation>0)CompanionNetwork.FeedbackAt(4,cat.Center,weapon.type);
         // Projectile.Update totals minion slots again as each minion updates.
         // Feeding it the pre-use census would double-count and sacrifice pets.
@@ -276,23 +279,28 @@ public sealed partial class CompanionNativeUse {
         bool summon=weapon.CountsAsClass(DamageClass.Summon);
         actor.GetDamage(DamageClass.Generic)=StatModifier.Default*(summon?1:state.Training.Damage(state));
         actor.GetAttackSpeed(DamageClass.Generic)=summon?1:state.Training.Speed(state);
+        // Minions may update damage while a different class is held. Their
+        // drum bonus is applied at impact; do not inherit it a second time.
+        actor.GetDamage(DamageClass.Summon)=StatModifier.Default*(summon?1:1/state.Training.Damage(state));
         actor.GetDamage(DamageClass.Magic)=StatModifier.Default*state.Vitals.MagicMultiplier;
     }
     readonly List<DrawData> drawCache=new();
     // Projectile.Update enforces maxMinions, including reconnecting segmented
     // summons before sacrificing excess bodies. Do not bypass it with Kill().
-    public void Cancel(bool preserveReleased=false,bool preserveSkills=true) {
+    public void Cancel(bool preserveReleased=false,bool preserveSkills=true,bool preserveSummons=false) {
         WaitingForMana=false;
+        int held=Actor.heldProj;
         Actor.controlUseItem=Actor.channel=false;Actor.itemAnimation=Actor.itemTime=Actor.reuseDelay=0;Actor.heldProj=-1;
         foreach(var p in Main.projectile)if(p.active&&CompanionOwnedShot.Of(p)==this) {
             if(preserveSkills&&Present&&p.ModProjectile is TrainingDart or TrainingBomb or TrainingBarrelBlast)continue;
             // The final thrown grenade must keep flying/exploding after its
             // real stack reaches zero. Explicit pause/swap still cancels all.
-            if(preserveReleased&&!p.minion)continue;
+            if(preserveSummons&&Summoned(p))continue;
+            if(preserveReleased&&!p.minion&&p.whoAmI!=held)continue;
             // Stop child spawns during cancellation; no resource refund/duplication.
-            p.active=false;if(CompanionNetwork.Server)NetMessage.SendData(MessageID.KillProjectile,-1,-1,null,p.identity,p.owner);
+            Retire(p);
         }
-        Array.Clear(Actor.buffType);Array.Clear(Actor.buffTime);
+        if(!preserveSummons){Array.Clear(Actor.buffType);Array.Clear(Actor.buffTime);summonRetryAt=0;}
     }
     public void Draw(Color light) {
         if(!Available||!EnsureActorSlot())return;
@@ -409,18 +417,20 @@ public sealed class CompanionOwnedShot : GlobalProjectile {
     public override bool InstancePerEntity=>true;
     public CompanionNativeUse Context;
     public bool Thrown;
+    internal bool Summoned;
     internal int CatIdentity=-1;
     internal ulong CatInstance;
     internal int BondOwner;
     internal bool PendingNativeLinkRepair;
+    internal bool HasRunAI;
     int unboundTicks;
     public override void SendExtraAI(Projectile p,Terraria.ModLoader.IO.BitWriter bits,System.IO.BinaryWriter w){
-        bits.WriteBit(Context!=null);if(Context!=null){w.Write(Context.State.Player.whoAmI);w.Write(Context.Cat.identity);w.Write(((CompanionCat)Context.Cat.ModProjectile).NetworkInstance);w.Write(Thrown);}
+        bits.WriteBit(Context!=null);if(Context!=null){w.Write(Context.State.Player.whoAmI);w.Write(Context.Cat.identity);w.Write(((CompanionCat)Context.Cat.ModProjectile).NetworkInstance);w.Write(Thrown);w.Write(Summoned);}
     }
     public override void ReceiveExtraAI(Projectile p,Terraria.ModLoader.IO.BitReader bits,System.IO.BinaryReader r){
-        if(bits.ReadBit()){int bondOwner=r.ReadInt32(),identity=r.ReadInt32();ulong instance=r.ReadUInt64();bool thrown=r.ReadBoolean();if(CompanionNetwork.Client){BondOwner=bondOwner;CatIdentity=identity;CatInstance=instance;Thrown=thrown;PendingNativeLinkRepair=true;Resolve(p);
+        if(bits.ReadBit()){int bondOwner=r.ReadInt32(),identity=r.ReadInt32();ulong instance=r.ReadUInt64();bool thrown=r.ReadBoolean(),summoned=r.ReadBoolean();if(CompanionNetwork.Client){BondOwner=bondOwner;CatIdentity=identity;CatInstance=instance;Thrown=thrown;Summoned=summoned;PendingNativeLinkRepair=true;Resolve(p);
 }}
-        else if(CompanionNetwork.Client){Context=null;CatIdentity=-1;CatInstance=0;Thrown=false;PendingNativeLinkRepair=false;}
+        else if(CompanionNetwork.Client){Context=null;CatIdentity=-1;CatInstance=0;Thrown=false;Summoned=false;PendingNativeLinkRepair=false;}
     }
     internal void Resolve(Projectile p){
         if(CatIdentity<0)return;
@@ -438,10 +448,14 @@ public sealed class CompanionOwnedShot : GlobalProjectile {
     public static CompanionNativeUse Of(Projectile p)=>p.TryGetGlobalProjectile<CompanionOwnedShot>(out var tag)?tag.Context:null;
     public override bool ShouldUpdatePosition(Projectile p)=>Context==null||!CompanionGrip.ShortStab(p);
     public override void PostAI(Projectile p) {
+        HasRunAI=true;
         if(Context?.Available==true){CompanionGrip.FitStab(p,Context);CompanionGrip.FitHeld(p,Context);}
     }
     public override void OnHitNPC(Projectile projectile,NPC target,NPC.HitInfo hit,int damageDone) {
-        if(Context!=null&&damageDone>0)Context.Hits++;
+        // Persistent summons hitting must not convince the held weapon's
+        // reach adaptation that its own swings are connecting.
+        if(Context!=null&&damageDone>0&&!Summoned&&!projectile.minion&&!projectile.sentry&&
+            !ProjectileID.Sets.MinionShot[projectile.type]&&!ProjectileID.Sets.SentryShot[projectile.type])Context.Hits++;
     }
     public override bool? CanHitNPC(Projectile projectile,NPC target)=>Context!=null&&(Context.State.CombatMode==CompanionCombatMode.Passive||projectile.minion||projectile.sentry||ProjectileID.Sets.MinionShot[projectile.type]||ProjectileID.Sets.SentryShot[projectile.type])&&!CompanionCombatBehavior.Allows(Context.State,target)?false:null;
     public override void ModifyHitNPC(Projectile projectile,NPC target,ref NPC.HitModifiers modifiers) {
@@ -455,6 +469,9 @@ public sealed class CompanionOwnedShot : GlobalProjectile {
         // local projectile. Network receipt uses SetDefaults/ReceiveExtraAI,
         // not this local spawn hook. Do not Kill(): that could spawn more shots.
         if(CompanionNetwork.Client&&Context!=null){p.active=false;return;}
+        Summoned=Context!=null&&(p.minion||p.sentry||
+            source is EntitySource_ItemUse itemUse&&ReferenceEquals(itemUse.Entity,Context.Actor)&&Context.HeldGearSlot==CompanionWeapons.SummonSlot||
+            source is EntitySource_Parent summonedParent&&summonedParent.Entity is Projectile summonedFrom&&summonedFrom.GetGlobalProjectile<CompanionOwnedShot>().Summoned);
         Thrown=Context!=null&&(Context.Actor.HeldItem.consumable||source is EntitySource_Parent parentShot&&parentShot.Entity is Projectile from&&from.GetGlobalProjectile<CompanionOwnedShot>().Thrown);
     }
 }
@@ -570,6 +587,12 @@ public sealed class CompanionNativeHooks : ModSystem {
     // hooks load. Scope the actual draw body so global projectile hooks always
     // see the companion actor, including cached/held-projectile draw paths.
     static void DrawShot(On_Main.orig_DrawProj_Inner orig,Main self,Projectile projectile) {
+        // A network projectile can reach drawing before its first AI update.
+        // Modded holdouts may initialize cached owner/item references in AI.
+        // Wait for the normal update instead of running AI from a draw pass.
+        if(projectile.TryGetGlobalProjectile<CompanionOwnedShot>(out var tag)&&
+            (tag.Context!=null||tag.CatIdentity>=0)&&
+            (tag.Context==null||!tag.HasRunAI))return;
         var context=CompanionOwnedShot.Of(projectile);
         if(context==null){orig(self,projectile);return;}
         if(!context.CanMaintainShot(projectile)||!context.EnsureActorSlot()||!projectile.active)return;

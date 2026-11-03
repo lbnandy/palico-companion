@@ -9,6 +9,11 @@ namespace PalicoCompanion.Systems;
 public sealed class CompanionCrossMod:ModSystem {
     internal static Action<Player,Vector2> PrepareActor;
     internal static Func<Item,bool> SupportTool,SafeThrow;
+    internal static bool AllowsThrow(Item item){
+        if(SafeThrow==null)return false;
+        foreach(Func<Item,bool> accepts in SafeThrow.GetInvocationList())if(accepts(item))return true;
+        return false;
+    }
     internal static Action<CompanionNativeUse> UpdateResources;
     internal static Func<CompanionNativeUse,Player> SupportTarget;
     internal static Func<CompanionNativeUse,bool> ResourceReady;

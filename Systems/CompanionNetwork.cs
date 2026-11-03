@@ -121,7 +121,7 @@ internal static partial class CompanionNetwork {
             var bag=Items(r,256);var gear=Items(r,16);var dyes=Items(r,16);
             var permissions=ChestPermissions.Read(r);
             var history=new CompanionDialogue();history.Read(r);var savedVitals=new CompanionVitals();Vitals(r,savedVitals);ReadPreferences(state,r);var training=CompanionTraining.Read(r);var loadouts=CompanionLoadouts.Read(r);var combatMode=CompanionCombatModes.Valid(r.ReadByte());
-            if(state.NetReady||bag.Length<24||gear.Length<4||dyes.Length<1)return;
+            if(state.NetReady||bag.Length<24||gear.Length<CompanionWeapons.EquipmentCount||dyes.Length<1)return;
             state.NetSession=session;if(Restore(state)){var resume=Packet(Resume);WriteState(state,resume);resume.Send(sender);Send(state);return;}
             CompanionNaming.Rename(state,name);state.HoodColor=hoodColor;state.Bonded=bonded;state.Introduced=introduced;state.Stowed=stowed;state.Enabled=enabled&&!stowed;state.Paused=false;state.EnvironmentPaused=environmentPaused;
             state.CombatMode=combatMode;state.Dialogue=history;state.Training=training;state.Loadouts=loadouts;state.NetLeaving=false;state.Chests=permissions;state.Bag=bag;state.Gear=gear;state.Dyes=dyes;state.NetReady=true;state.Vitals=savedVitals;state.Enabled=state.NetEnabled&&!stowed;state.Vitals.Sync(state.Player,gear);var ready=Packet(Resume);WriteState(state,ready);ready.Send(sender);Send(state);return;

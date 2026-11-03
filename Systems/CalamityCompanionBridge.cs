@@ -3,6 +3,7 @@ using Terraria;
 using Terraria.ModLoader;
 using CalamityMod.CalPlayer;
 using CalamityMod.Items.Weapons.Ranged;
+using CalamityMod.Items.Weapons.Rogue;
 using CalamityMod.Projectiles.Ranged;
 
 namespace PalicoCompanion.Systems;
@@ -12,8 +13,10 @@ namespace PalicoCompanion.Systems;
 [ExtendsFromMod("CalamityMod")]
 [JITWhenModsEnabled("CalamityMod")]
 public sealed class CalamityCompanionBridge:ModSystem {
-    public override void Load(){CompanionCrossMod.PrepareActor+=Aim;CompanionCrossMod.UsesPerMaterial=Material;CompanionCrossMod.ReleaseChannel=Release;}
-    public override void Unload(){CompanionCrossMod.PrepareActor-=Aim;CompanionCrossMod.UsesPerMaterial=null;CompanionCrossMod.ReleaseChannel=null;}
+    public override void Load(){CompanionCrossMod.PrepareActor+=Aim;CompanionCrossMod.SafeThrow+=Throw;CompanionCrossMod.UsesPerMaterial=Material;CompanionCrossMod.ReleaseChannel=Release;}
+    public override void Unload(){CompanionCrossMod.PrepareActor-=Aim;CompanionCrossMod.SafeThrow-=Throw;CompanionCrossMod.UsesPerMaterial=null;CompanionCrossMod.ReleaseChannel=null;}
+    static bool Throw(Item item)=>item.ModItem is RogueWeapon&&item.damage>0&&item.shoot>0&&
+        item.createTile<0&&item.createWall<0&&item.ammo==0;
     static int Material(Item weapon,Item material)=>weapon.type==ModContent.ItemType<CalamityMod.Items.Weapons.Ranged.WulfrumBlunderbuss>()&&material.type==ModContent.ItemType<CalamityMod.Items.Materials.WulfrumMetalScrap>()?CalamityMod.Items.Weapons.Ranged.WulfrumBlunderbuss.ShotsPerScrap:0;
     static bool Release(Item weapon,CompanionNativeUse use){
         if(weapon.ModItem is not (Condemnation or ClockworkBow or MagnaCannon))return false;

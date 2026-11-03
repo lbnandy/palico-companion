@@ -37,7 +37,7 @@ public sealed class ThoriumCompanionBridge:ModSystem {
         instrumentEmpower=new Hook(typeof(BardItem).GetMethod("NetApplyEmpowerments")!,EmpowerInstrument);
         playerLookup=new Hook(typeof(PlayerHelper).GetMethod("GetThoriumPlayer")!,GetPlayer);
         mouseLookup=new Hook(typeof(MousePlayer).GetMethod("TryGetMousePosition")!,GetMouse);
-        CompanionCrossMod.SupportTool=Support;CompanionCrossMod.SafeThrow=Throw;
+        CompanionCrossMod.SupportTool=Support;CompanionCrossMod.SafeThrow+=Throw;
         CompanionCrossMod.UpdateResources+=Update;CompanionCrossMod.SupportTarget=Target;
         CompanionCrossMod.ResourceReady+=Ready;CompanionCrossMod.WeaponEffect=Effect;
         CompanionCrossMod.PlanUse=Plan;CompanionCrossMod.WeaponReach=Range;
@@ -46,7 +46,7 @@ public sealed class ThoriumCompanionBridge:ModSystem {
         instrumentUse?.Dispose();instrumentSound?.Dispose();instrumentUse=instrumentSound=null;
         instrumentEmpower?.Dispose();instrumentEmpower=null;
         playerLookup?.Dispose();mouseLookup?.Dispose();playerLookup=mouseLookup=null;
-        CompanionCrossMod.UpdateResources-=Update;CompanionCrossMod.SupportTool=null;CompanionCrossMod.SafeThrow=null;
+        CompanionCrossMod.UpdateResources-=Update;CompanionCrossMod.SupportTool=null;CompanionCrossMod.SafeThrow-=Throw;
         CompanionCrossMod.SupportTarget=null;CompanionCrossMod.ResourceReady-=Ready;CompanionCrossMod.WeaponEffect=null;
         CompanionCrossMod.PlanUse=null;CompanionCrossMod.WeaponReach=null;
         resources=new();empower=null;playSound=null;findAlly=null;
@@ -188,14 +188,9 @@ public sealed class ThoriumCompanionItem:GlobalItem {
         if(CompanionNativeUse.Current?.Actor!=player||
             !ContentSamples.ProjectilesByType.TryGetValue(type,out var shot))return;
         bool drum=player.altFunctionUse==2&&item.ModItem is ThoriumMod.Items.BardItems.DrumMallet;
-        if(!drum&&!(CompanionWeapons.Support(item)&&shot.tileCollide))return;
-        // The cat's low hand can place a native drum or healing projectile in
-        // the floor. Find nearby clearance without changing its native motion,
-        // collision rules, healing or resource cost.
-        var spawn=position;var half=shot.Size*.5f;
-        for(int rise=0;rise<=shot.height;rise++,spawn.Y--){
-            if(Collision.SolidCollision(spawn-half,shot.width,shot.height))continue;
-            position=spawn;return;
-        }
+        // Ordinary healing shots use CompanionLaunch; the stationary drum
+        // also needs clearance despite not using tile collision in flight.
+        if(!drum)return;
+        CompanionWeaponAim.ClearLaunchFloor(ref position,shot);
     }
 }

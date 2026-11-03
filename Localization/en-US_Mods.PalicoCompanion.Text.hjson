@@ -427,6 +427,7 @@ Guide: {
 
 
 		[Minions and sentries]
+		The slot beside the main weapon accepts either a minion or sentry weapon. Your Palico returns to the main weapon after summoning or deploying. Replacing the summon weapon dismisses its summons.
 		Both limits match yours, with a minimum of 1. They do not use your own slots.
 		Old One's Army weapons follow vanilla unlock rules. During the event, keep Etherian Mana in the Palico inventory.
 		'''

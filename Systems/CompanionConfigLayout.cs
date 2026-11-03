@@ -39,7 +39,7 @@ public sealed class CompanionConfigLayout : ModSystem {
     public override void Load() {
         if (Main.dedServ) return;
         var editorType = typeof(ModConfig).Assembly.GetType("Terraria.ModLoader.Config.UI.UIModConfig", true);
-        foreach (string name in new[] { "modConfig", "pendingConfig", "mainConfigItems", "filterTextField", "headerTextPanel", "backButton", "saveConfigButton", "revertConfigButton", "restoreDefaultsConfigButton" })
+        foreach (string name in new[] { "modConfig", "pendingConfig", "mainConfigItems", "filterTextField", "headerTextPanel" })
             fields[name] = editorType.GetField(name, Private);
         MonoModHooks.Add(editorType.GetMethod("OnActivate"), (Action<Action<UIState>, UIState>)Activate);
     }
@@ -57,14 +57,8 @@ public sealed class CompanionConfigLayout : ModSystem {
         var config=Get<ModConfig>(self,"modConfig");
         if (config is not CompanionConfig && config is not CompanionBalanceConfig) return;
         Get<UITextPanel<string>>(self, "headerTextPanel").SetText(config.DisplayName.Value);
-        // These controls belong to a shared singleton. Refresh our captions when
-        // the language changes, then restore them before opening another config.
-        foreach (var button in new[] { ("backButton", "Back"), ("saveConfigButton", "SaveConfig"), ("revertConfigButton", "RevertChanges"), ("restoreDefaultsConfigButton", "RestoreDefaults") }) {
-            var control = Get<UITextPanel<string>>(self, button.Item1);
-            string old = control.Text;
-            restore.Add(() => control.SetText(old));
-            control.SetText(Language.GetTextValue("tModLoader.ModConfig" + button.Item2));
-        }
+        // Native buttons own their LocalizedText and refresh with the language.
+        // Only the shared filter still holds a plain string to refresh/restore.
         var filter = Get<object>(self, "filterTextField");
         var hint = filter.GetType().GetField("_hintText", Private);
         string oldHint = (string)hint.GetValue(filter);

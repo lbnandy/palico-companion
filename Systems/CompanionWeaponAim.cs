@@ -2,12 +2,23 @@ using System;
 using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.ID;
+using Terraria.ModLoader;
 namespace PalicoCompanion.Systems;
 
 // Aim the native shot; never change its velocity after firing. Only known
 // ballistic profiles receive gravity correction. Cursor-controlled, homing,
 // growing and held projectiles must keep their actual target point.
 internal static class CompanionWeaponAim {
+    // A small companion's hand may be lower than half a native projectile.
+    // Reuse the healing/drum clearance rule for other supported low launches;
+    // only move an obstructed origin, leaving native velocity and AI intact.
+    internal static void ClearLaunchFloor(ref Vector2 position,Projectile shot){
+        var spawn=position;var half=shot.Size*.5f;
+        for(int rise=0;rise<=shot.height;rise++,spawn.Y--){
+            if(Collision.SolidCollision(spawn-half,shot.width,shot.height))continue;
+            position=spawn;return;
+        }
+    }
     internal static Vector2 SummonPoint(Projectile cat,NPC target) {
         // A summoning cursor places a creature; it is not a shot direction.
         // Spawning exactly at an enemy's center can also feed a zero vector
@@ -43,5 +54,16 @@ internal static class CompanionWeaponAim {
             time=Math.Min(120,Vector2.Distance(hand,point)/speed);
         }
         return point;
+    }
+}
+
+public sealed class CompanionLaunch:GlobalItem {
+    public override void ModifyShootStats(Item item,Player player,ref Vector2 position,ref Vector2 velocity,ref int type,ref int damage,ref float knockback){
+        if(CompanionNativeUse.Current?.Actor!=player||
+            !ContentSamples.ProjectilesByType.TryGetValue(type,out var shot)||!shot.tileCollide||shot.minion||shot.sentry)return;
+        // Correct only a primary shot launched near the low hand. Remote
+        // placements, child projectiles and human players keep native origins.
+        if(Vector2.DistanceSquared(position,player.Center)>32*32)return;
+        CompanionWeaponAim.ClearLaunchFloor(ref position,shot);
     }
 }

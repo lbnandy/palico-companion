@@ -33,7 +33,7 @@ public sealed class CompanionVitals {
     public int AttackDamage(Item[] gear,int experience) => Attack(gear,experience);
     public bool Downed => Recovery>0;
     // Legacy armor remains saved and removable, but cannot be equipped again.
-    public static bool Accepts(Item item,int slot) => item.IsAir || slot==0 && CompanionWeapons.Supports(item);
+    public static bool Accepts(Item item,int slot) => item.IsAir || (slot==CompanionWeapons.SummonSlot?CompanionWeapons.SummonWeapon(item):slot==0&&CompanionWeapons.Supports(item)&&!CompanionWeapons.SummonWeapon(item));
     public static int Attack(Item[] gear,int experience) => Math.Max(1,CompanionWeapons.Active(gear).damage);
     internal static int AfterDefense(int damage,int defense,float penetration=0)=>Math.Max(1,
         (int)Math.Floor(damage-Math.Max(0,defense-penetration)*(Main.masterMode?1f:Main.expertMode?.75f:.5f)));

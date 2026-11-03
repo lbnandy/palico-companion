@@ -8,7 +8,7 @@ namespace PalicoCompanion.Systems;
 internal struct CompanionPose {
     internal double Time,WalkPhase;
     internal Vector2 Position,Velocity,ItemOffset,ToolAim,WeaponAim;
-    internal int Direction,ItemDirection,Frame,IdleTicks,StateTicks,ItemAnimation,ItemMax,Tool,ToolDuration,Epoch;
+    internal int Direction,ItemDirection,HeldGearSlot,Frame,IdleTicks,StateTicks,ItemAnimation,ItemMax,Tool,ToolDuration,Epoch;
     internal float ItemRotation,ToolProgress;
     internal bool Flying,Channel;
     internal CatMotion Motion;
@@ -62,10 +62,10 @@ internal sealed class CompanionReplica {
             // between snapshots. Two active endpoints are not a completed
             // single use: keep the received pose visible through that interval.
             // An idle endpoint (or no next packet) still lets the timer expire.
-            if(a.ItemAnimation>0&&b.ItemAnimation>0&&a.ItemMax==b.ItemMax)
+            if(a.ItemAnimation>0&&b.ItemAnimation>0&&a.ItemMax==b.ItemMax&&a.HeldGearSlot==b.HeldGearSlot)
                 result.ItemAnimation=Math.Max(1,result.ItemAnimation);
             // Do not interpolate across a new weapon swing or a facing flip.
-            if(a.ItemDirection==b.ItemDirection&&a.ItemMax==b.ItemMax&&b.ItemAnimation<=a.ItemAnimation){
+            if(a.ItemDirection==b.ItemDirection&&a.ItemMax==b.ItemMax&&a.HeldGearSlot==b.HeldGearSlot&&b.ItemAnimation<=a.ItemAnimation){
                 result.ItemOffset=Vector2.Lerp(a.ItemOffset,b.ItemOffset,mix);
                 result.ItemRotation=a.ItemRotation+MathHelper.WrapAngle(b.ItemRotation-a.ItemRotation)*mix;
             }
