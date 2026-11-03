@@ -4,7 +4,7 @@
 
 ## 环境
 
-- tModLoader **1.4.4**；当前代码在 **2026.8.3.0、2026.9.3.1 / Terraria 1.4.4.9** 上验证。
+- tModLoader **1.4.4**；当前版本使用 **2026.9.3.1 / Terraria 1.4.4.9** 构建与验证。正式发布跟随稳定版，旧分支不保证获得每次更新。
 - .NET 8 SDK。`global.json` 允许使用已安装的 .NET 8 功能更新版本。
 - 下载灾厄、魔法存储、更好的体验、瑟银、暗影奥秘（SOTS）及其依赖。原生编译还会解析这些模组的弱引用，因此也需要 **Calamity Mod Music**。当前验证环境包含 **absoluteAquarian Utilities / SerousCommonLib**、**SilkyUI Framework** 和 **Subworld Library**。
 
@@ -78,7 +78,7 @@ dotnet build -c Release -p:TmlInstallRoot="/path/to/tModLoader" -p:ModReferenceP
 
 ## English
 
-Use tModLoader **1.4.4** and the **.NET 8 SDK**. The current code was verified with tModLoader **2026.8.3.0、2026.9.3.1 / Terraria 1.4.4.9**.
+Use tModLoader **1.4.4** and the **.NET 8 SDK**. The current release is built and verified with tModLoader **2026.9.3.1 / Terraria 1.4.4.9**. Releases follow the stable branch; older branches are not guaranteed to receive every update.
 
 Download **Calamity**, **Magic Storage**, **Quality of Terraria**, **Thorium**, **Secrets of the Shadows (SOTS)** and their dependencies before building. tModLoader's compiler also resolves their weak references, including **Calamity Mod Music**. The verified setup includes **SerousCommonLib**, **SilkyUI Framework** and **Subworld Library**. These are build references; they remain optional for players using the compiled mod.
 

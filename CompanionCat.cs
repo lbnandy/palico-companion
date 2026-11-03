@@ -479,6 +479,8 @@ public sealed class CompanionCat : ModProjectile
         if(!Diving.InWater)Flight.Draw(Main.spriteBatch,position,Projectile.direction,lightColor,
             Lighting.GetColor((Projectile.Bottom+new Vector2(-8*Projectile.direction,-42)).ToTileCoordinates()));
         if(state.Vitals.Downed)position.Y+=CompanionRestVisual.BreathOffset(state.Vitals);
+        // Back-to-front: deployed kite, stowed main weapon, body, held items.
+        CompanionBackWeapon.Draw(this,state,position,pose,lightColor);
         if(Barrel.Presenting&&!state.Vitals.Downed)Barrel.Draw(Main.spriteBatch,position,this,lightColor);
         else CompanionSprite.DrawBody(Main.spriteBatch,position,pose,Projectile.direction,lightColor);
         if(!Barrel.Active&&face.Closed)CompanionFace.Draw(Main.spriteBatch,position,pose,Projectile.direction,lightColor);

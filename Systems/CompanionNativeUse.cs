@@ -471,6 +471,11 @@ public sealed class CompanionOwnedShot : GlobalProjectile {
         if(Context!=null)modifiers.FinalDamage*=CompanionBalanceConfig.Current.DamageScale;
     }
     public override void OnSpawn(Projectile p,IEntitySource source) {
+        // Tile breaks can spawn hostile hazards while native weapon AI owns
+        // Main.myPlayer. They outlive that scope and must not retain its actor
+        // slot or inherit companion weapon effects.
+        if(p.hostile&&CompanionNativeUse.Current is {} use&&p.owner==use.Actor.whoAmI)
+            p.owner=use.State.Player.whoAmI;
         Context=!p.hostile&&p.owner==CompanionNativeUse.Current?.Actor.whoAmI?CompanionNativeUse.Current:null;
         if(Context==null&&!p.hostile&&source is EntitySource_Parent parent&&parent.Entity is Projectile ancestor&&ancestor.owner==p.owner)Context=CompanionOwnedShot.Of(ancestor);
         // Companion gameplay is server-owned, including children created by
@@ -480,10 +485,12 @@ public sealed class CompanionOwnedShot : GlobalProjectile {
         if(CompanionNetwork.Client&&Context!=null){p.active=false;return;}
         // Held guns can create the actual shot several ticks after ItemCheck.
         // Reuse primary-shot clearance only at a held parent's nearby muzzle;
+        // long barrels can extend beyond the hand, so include overlapping bounds.
         // remote explosions, minions and later flight keep their native origin.
         if(Context!=null&&source is EntitySource_Parent heldSource&&heldSource.Entity is Projectile heldParent&&
             heldParent.whoAmI==Context.Actor.heldProj&&p.tileCollide&&!p.minion&&!p.sentry&&
-            Vector2.DistanceSquared(p.Center,Context.Actor.Center)<=32*32){
+            (Vector2.DistanceSquared(p.Center,Context.Actor.Center)<=32*32||
+             heldParent.Hitbox.Intersects(Context.Actor.Hitbox)&&heldParent.Hitbox.Intersects(p.Hitbox))){
             var origin=p.Center;CompanionWeaponAim.ClearLaunchFloor(ref origin,p);p.Center=origin;
         }
         Summoned=Context!=null&&(p.minion||p.sentry||

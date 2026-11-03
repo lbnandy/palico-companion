@@ -273,6 +273,11 @@ Configs: {
 			Tooltip: Tops up your existing stacks and brings you usable permanent upgrades. Keeps your Palico's reserves first. Manually stored and favorited items stay put.
 		}
 
+		BackWeapon: {
+			Label: Carry weapon on back
+			Tooltip: Display the unused main weapon on your Palico's back or waist according to its type, including during flight. Oversized weapons are scaled down. Hidden while using that weapon, during barrel attacks or while downed. Consumable throwing weapons display one item while the stack remains. Ammo and tools are excluded. Combat stats are unchanged. Other players see your choice in multiplayer.
+		}
+
 		DyeClothesOnly: {
 			Label: Dye clothing only
 			Tooltip: Apply the equipped dye to your Palico's hood, clothes and sword sheath, including their outlines, while preserving the face, eyes, paws and feet. Also applies to UI portraits. Kite dyeing is controlled separately below. Other players see your choice in multiplayer.

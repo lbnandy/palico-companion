@@ -101,6 +101,21 @@ public static class CompanionSpriteLayout {
             pose==Rise?-1:pose==Downed?3:pose is RestEnter or Rest or RestBlink or RestExit?1:0);
         return ArtistPoseIndex(pose)>=0;
     }
+    // Torso attachment movement measured on the authored poses, in source
+    // pixels relative to idle. Share the same pose aliases as hand crops.
+    // Arms can swing independently; carried equipment follows shoulder/waist.
+    internal static Vector2 CarryOffset(int pose,bool waist) {
+        int index=ArtistPoseIndex(pose);
+        Point offset=waist?index switch {
+            2=>new(2,0),3 or 4=>new(3,0),5=>new(2,0),6=>new(1,0),
+            8 or 17=>new(0,-1),9 or 10=>new(1,0),13=>new(0,-2),
+            19=>new(-1,0),20 or 23=>new(0,1),21 or 22=>new(1,2),_=>Point.Zero
+        }:index switch {
+            2 or 3 or 5 or 9 or 10=>new(1,0),4=>new(2,0),8=>new(1,-1),
+            13=>new(-1,-2),14 or 20 or 21 or 22 or 23=>new(0,1),19=>new(-1,0),_=>Point.Zero
+        };
+        return new Vector2(offset.X,offset.Y)*Scale;
+    }
     public static Rectangle[] GripRegions(int pose,bool offhand) {
         int index=ArtistPoseIndex(pose);
         return index<0?null:(offhand?ArtistOffGrip:ArtistMainGrip)[index];

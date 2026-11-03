@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.1.5 — 2026-11-04
+
+- 新增背负武器显示，默认开启，可在外观设置中关闭。未使用的主武器按类型背在身后或挂在腰间，随动作移动，飞行时也保留；消耗类投掷武器有剩余时显示一件。
+- 修复虚空召唤的刻尘者、奈萨里奥等武器只朝固定方向平射的问题。
+- 修复灾厄 T 粒子炮等部分武器蓄满后不释放的问题，沿用武器自身的蓄力、射击和冷却过程。
+- 修正部分武器弹幕出射时可能立即撞地的问题。
+
+- Added carried weapon visuals, enabled by default and configurable under Appearance. Unused main weapons sit on the back or waist by type, follow the Palico's poses and remain visible during flight. Consumable throwing weapons display one item while the stack remains.
+- Fixed Call of Void weapons such as Dust Carver and Neltharion firing only in a fixed horizontal direction.
+- Fixed some Calamity weapons, including the Tau Cannon, not releasing after a full charge. Their native charging, firing and cooldown behavior is retained.
+- Corrected some weapon projectiles colliding with the ground immediately upon launch.
+
 ## 1.1.4 — 2026-11-03
 
 - 新增回血继承比例设置，默认继承主人通用附加回血的 50%，可调为 0～100%；受伤恢复计时仍独立计算。

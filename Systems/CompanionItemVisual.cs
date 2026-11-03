@@ -69,6 +69,9 @@ public static class CompanionItemVisual {
         // own timing. The actual tool pixels, rather than a texture corner,
         // remain covered by the forepaw through both facing directions.
         hand+=hand-CompanionGrip.DrawnGrip(new Terraria.DataStructures.DrawData(texture,hand,frame,light,rotation,origin,scale,flip,0));
+        DrawItem(batch,item,texture,frame,hand,rotation,origin,scale,flip,light,tick);
+    }
+    internal static void DrawItem(SpriteBatch batch,Item item,Texture2D texture,Rectangle frame,Vector2 hand,float rotation,Vector2 origin,float scale,SpriteEffects flip,Color light,int tick) {
         batch.Draw(texture,hand,frame,item.GetAlpha(light),rotation,origin,scale,flip,0);
         if(item.color!=default(Color))batch.Draw(texture,hand,frame,item.GetColor(light),rotation,origin,scale,flip,0);
         if(item.glowMask>=0&&item.glowMask<TextureAssets.GlowMask.Length) {

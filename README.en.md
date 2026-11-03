@@ -13,6 +13,8 @@
 
 Equip your Palico and save multiple loadouts to switch between.
 
+Unused main weapons are carried on the back or waist and move with your Palico. You can turn this off in the appearance settings.
+
 Your Palico has its own backpack for supplies and loot. Favorited items remain usable and stay in its backpack when you retrieve everything else. Give it access to selected chests, and it can put items away alongside others of the same type and restock its supplies.
 
 ![Equipment and inventory](docs/images/04-equipment-en-compact.png)

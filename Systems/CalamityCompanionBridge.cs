@@ -1,3 +1,5 @@
+using System;
+using System.Linq.Expressions;
 using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.ModLoader;
@@ -17,8 +19,19 @@ namespace PalicoCompanion.Systems;
 [ExtendsFromMod("CalamityMod")]
 [JITWhenModsEnabled("CalamityMod")]
 public sealed class CalamityCompanionBridge:ModSystem {
+    Func<ModProjectile,int> viperChargeFrames;
     public override void Load(){CompanionCrossMod.PrepareActor+=Aim;CompanionCrossMod.SafeThrow+=Throw;CompanionCrossMod.UsesPerMaterial=Material;CompanionCrossMod.ChargeComplete.Add(Charge);CompanionCrossMod.WeaponReach+=Range;}
-    public override void Unload(){CompanionCrossMod.PrepareActor-=Aim;CompanionCrossMod.SafeThrow-=Throw;CompanionCrossMod.UsesPerMaterial=null;CompanionCrossMod.ChargeComplete.Remove(Charge);CompanionCrossMod.WeaponReach-=Range;}
+    public override void Unload(){CompanionCrossMod.PrepareActor-=Aim;CompanionCrossMod.SafeThrow-=Throw;CompanionCrossMod.UsesPerMaterial=null;CompanionCrossMod.ChargeComplete.Remove(Charge);CompanionCrossMod.WeaponReach-=Range;viperChargeFrames=null;}
+    public override void PostSetupContent(){
+        // The holdout type is internal, but exposes its charge cap as a public
+        // instance field. Bind once; do not duplicate its timing or reflect per tick.
+        if(!ModContent.TryFind<ModProjectile>("CalamityMod/VitriolicViperHoldout",out var viper))return;
+        var field=viper.GetType().GetField("FullyChargedFrames");
+        if(field?.FieldType!=typeof(int))return;
+        var shot=Expression.Parameter(typeof(ModProjectile));
+        viperChargeFrames=Expression.Lambda<Func<ModProjectile,int>>(
+            Expression.Field(Expression.Convert(shot,viper.GetType()),field),shot).Compile();
+    }
     static bool Throw(Item item)=>item.ModItem is RogueWeapon&&item.damage>0&&item.shoot>0&&
         item.createTile<0&&item.createWall<0&&item.ammo==0;
     static int Material(Item weapon,Item material)=>weapon.type==ModContent.ItemType<CalamityMod.Items.Weapons.Ranged.WulfrumBlunderbuss>()&&material.type==ModContent.ItemType<CalamityMod.Items.Materials.WulfrumMetalScrap>()?CalamityMod.Items.Weapons.Ranged.WulfrumBlunderbuss.ShotsPerScrap:0;
@@ -32,7 +45,18 @@ public sealed class CalamityCompanionBridge:ModSystem {
     }
     // Only report native completion. Shared input policy owns release latching
     // and interruption for every damage class; no charge timers are simulated.
-    static bool? Charge(Item weapon,Projectile shot,CompanionNativeUse use){
+    bool? Charge(Item weapon,Projectile shot,CompanionNativeUse use){
+        if(weapon.ModItem is Roxcalibur&&shot.ModProjectile is RoxcaliburProj)return shot.ai[0]>=1f;
+        if(weapon.ModItem is StygianShield&&shot.ModProjectile is StygianShieldAttack shield)return shield.Charge>=StygianShieldAttack.MaxChargeTime;
+        if(weapon.ModItem is TauCannon&&shot.ModProjectile is TauCannonHoldout tau)return tau.hasReachedLV3;
+        if(weapon.ModItem is ArcNovaDiffuser&&shot.ModProjectile is ArcNovaDiffuserHoldout nova)return nova.ChargeLV2;
+        if(weapon.ModItem is TitaniumRailgun&&shot.ModProjectile is TitaniumRailgunScope rail)return rail.ChargePercent>=1f;
+        if(weapon.ModItem is OpalStriker&&shot.ModProjectile is OpalStrikerHoldout)return shot.ai[0]>=OpalStriker.FullChargeFrames;
+        if(weapon.ModItem is TheHive&&shot.ModProjectile is TheHiveHoldout hive)return hive.FireNuke;
+        if(weapon.ModItem is OntologicalDespoiler&&shot.ModProjectile is OntologicalDespoilerHoldout despoiler)return despoiler.ChargeLV2;
+        if(weapon.ModItem is Buzzkill&&shot.ModProjectile is BuzzkillHoldout saw)return saw.Time>=BuzzkillHoldout.ChargeupTime;
+        if(weapon.ModItem is SuperradiantSlaughterer&&shot.ModProjectile is SuperradiantSlaughtererHoldout radiant)return radiant.Time>=SuperradiantSlaughtererHoldout.ChargeupTime;
+        if(weapon.ModItem is VitriolicViper&&shot.type==weapon.shoot&&viperChargeFrames!=null)return shot.ai[2]>=viperChargeFrames(shot.ModProjectile);
         if(weapon.ModItem is Condemnation&&shot.ModProjectile is CondemnationHoldout bow)return bow.homing;
         if(weapon.ModItem is ClockworkBow&&shot.ModProjectile is ClockworkBowHoldout)return shot.ai[1]>=ClockworkBow.MaxBolts;
         if(weapon.ModItem is MagnaCannon&&shot.ModProjectile is MagnaCannonHoldout)return shot.ai[0]>=MagnaCannon.FullChargeFrames;
@@ -60,13 +84,25 @@ public sealed class CalamityCompanionBridge:ModSystem {
 [JITWhenModsEnabled("CalamityMod")]
 public sealed class CalamityCompanionLaunch:GlobalProjectile {
     public override void PostAI(Projectile shot){
+        if(CompanionOwnedShot.Of(shot) is not {Available:true})return;
+        // The shield enables tile collision only when releasing its charge.
+        // Clear that initial position using its terrain hitbox, not its much
+        // larger damage hitbox; subsequent dash collision stays native.
+        if(shot.ModProjectile is StygianShieldAttack shield&&shot.tileCollide&&
+            shield.DashTime==0&&shield.DashDestination!=Vector2.Zero){
+            int width=shot.width,height=shot.height;bool fallThrough=true;var center=new Vector2(.5f);
+            shield.TileCollideStyle(ref width,ref height,ref fallThrough,ref center);
+            var start=shot.Center;var shieldOrigin=start;
+            CompanionWeaponAim.ClearLaunchFloor(ref shieldOrigin,width,height);
+            if(shieldOrigin!=start){shot.Center=shieldOrigin;if(!CompanionNetwork.Client)shot.netUpdate=true;}
+            return;
+        }
         // Fishbone creates a non-colliding holdout, then relocates it at the
         // actual throw. Initial Shoot clearance cannot cover that later origin.
         // Run once at the native transition, before terrain collision, retaining
         // its velocity, bounce/return AI and all subsequent terrain collisions.
         if(shot.ModProjectile is not FishboneBoomerangProjectile||
-            shot.timeLeft!=FishboneBoomerangProjectile.Lifetime||!shot.tileCollide||
-            CompanionOwnedShot.Of(shot) is not {Available:true})return;
+            shot.timeLeft!=FishboneBoomerangProjectile.Lifetime||!shot.tileCollide)return;
         var origin=shot.Center;
         CompanionWeaponAim.ClearLaunchFloor(ref origin,shot);
         if(origin==shot.Center)return;

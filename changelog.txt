@@ -1,67 +1,11 @@
-1.1.4
+1.1.5
 
-- 新增回血继承比例设置，默认继承主人通用附加回血的 50%，可调为 0～100%；受伤恢复计时仍独立计算。
-- 新增瑟银 Boss、探索、治疗和演奏情景台词，中英文各 56 句。
-- 改进蓄力、松手释放与持续使用武器的处理，支持带电爆破炮的完整充能和持续光束，并补充部分灾厄武器适配。
-- 修复与 Amulet of Many Minions 同时启用时，召唤武器可能导致呆猫消失或命中时报错的问题。
-- 修复开启 PvP 时呆猫的武器和弹幕可能伤到玩家的问题。
-- 回收的同种消耗性投掷武器优先补回仍有余量的武器槽。
-- 装备槽不再提供收藏操作并保持原有颜色；背包收藏仍可正常使用，一键取回时会保留。
-- 调整部分近战武器的接敌距离，减少有一定攻击距离却仍然贴脸的情况。
-- 修复 Terraria Overhaul 的瞄准与专用服务器输入兼容问题，并去掉呆猫触发的脚步、起跳和落地音效。
-- 同时提供 tModLoader 2026.8.3.0 与 2026.9.3.1 构建。
+- 新增背负武器显示，默认开启，可在外观设置中关闭。未使用的主武器按类型背在身后或挂在腰间，随动作移动，飞行时也保留；消耗类投掷武器有剩余时显示一件。
+- 修复虚空召唤的刻尘者、奈萨里奥等武器只朝固定方向平射的问题。
+- 修复灾厄 T 粒子炮等部分武器蓄满后不释放的问题，沿用武器自身的蓄力、射击和冷却过程。
+- 修正部分武器弹幕出射时可能立即撞地的问题。
 
-- Added an inherited health regeneration setting: 50% of the owner's standard bonus regeneration by default, adjustable from 0% to 100%. The Palico keeps its own recovery timer after damage.
-- Added 56 lines per language for Thorium bosses, exploration, healing and music.
-- Improved charging, release-to-fire and sustained-use weapons, including the Charged Blaster Cannon's full charge sequence and beam, plus support for additional Calamity weapons.
-- Fixed missing companions and minion-hit errors when using summon weapons alongside Amulet of Many Minions.
-- Fixed Palico weapons and projectiles potentially damaging players in PvP.
-- Recovered matching consumable throwing weapons now refill a nonempty equipped stack first.
-- Equipment slots no longer offer favorite toggling and retain their normal colors. Backpack favorites remain usable and protected from bulk withdrawal.
-- Refined engagement distance for several melee weapon behaviors, reducing unnecessary contact with enemies.
-- Fixed Terraria Overhaul aiming and dedicated-server input compatibility, and suppressed footsteps, takeoff and landing sounds triggered by the Palico.
-- Includes builds for tModLoader 2026.8.3.0 and 2026.9.3.1.
-
-1.1.3
-
-- 修复部分灾厄盗贼武器蓄力后不出手的问题。
-- 修正部分近身武器的接敌距离，以及鱼骨回旋镖投出时可能立即撞地的问题。
-- 修复灾厄与瑟银同时启用时，武器攻击距离适配互相覆盖的问题。
-
-- Fixed some Calamity rogue weapons failing to release after charging.
-- Corrected engagement distance for a close-range Calamity weapon and prevented Fishbone Boomerang throws from starting inside the ground.
-- Fixed weapon reach integrations overriding each other when Calamity and Thorium are both enabled.
-
-1.1.2
-
-- 新增独立召唤武器栏，可放入随从或哨兵武器。补召或部署后切回主武器，支持与鞭子及其他武器配合使用。
-- 配装同步保存召唤武器；旧存档中的召唤武器会自动移入新槽位。
-- 支持灾厄的消耗型盗贼武器，修正部分弹幕出生位置过低、立即撞地消失的问题。
-- 修复部分灾厄武器在联机时弹幕尚未初始化就参与绘制造成的异常。
-- 修复新版 tModLoader 中打开呆猫设置可能崩溃的问题。
-
-- Added a separate slot for minion or sentry weapons. Your Palico returns to its main weapon after summoning or deploying, allowing summons to accompany whips and other weapons.
-- Loadouts now include the summon weapon. Summon weapons in older saves automatically move to the new slot.
-- Added support for consumable Calamity rogue weapons and corrected low projectile origins that could cause immediate ground collisions.
-- Fixed premature rendering of some Calamity weapon projectiles in multiplayer before their native initialization.
-- Fixed a crash when opening Palico settings on newer tModLoader builds.
-
-1.1.1 — 2026-11-02
-
-- 新增可自定义的收回／叫出呆猫快捷键。
-- 新增主动进攻／协同进攻／不攻击三种模式，点击剑形按钮循环切换。协同模式在主人命中或指定目标、主人或呆猫受击后参战；不攻击模式仍保留工作、拾取和治疗。
-- 接入原版手柄界面导航，支持背包、配装、指南、外观与改名操作。
-- 修正呆猫背包中的武器提示框错误使用玩家属性的问题。
-- 改进旅人归途专用服务器兼容，去掉固定版本号限制。
-- 新增暗影奥秘（SOTS）刀光与虚空资源适配。
-- 修复雀杖召唤物在呆猫头上停留时反复消失、重新召唤的问题。
-- 调整特大桶爆弹炸飞落地后的短暂停顿与起身衔接。
-
-- Added an optional keybind to stow or call out your Palico.
-- Added proactive, assist and passive combat modes, cycled by clicking the sword button. Assist mode engages enemies the owner hits or marks, or retaliates when the owner or Palico is hit. Passive mode retains work, pickup and healing.
-- Added native gamepad navigation for inventory, loadouts, the guide, appearance and naming.
-- Fixed weapon tooltips in the Palico inventory incorrectly using the owner's stats.
-- Improved Homeward Journey dedicated-server compatibility without a fixed-version restriction.
-- Added Secrets of the Shadows (SOTS) trail and void-resource integration.
-- Fixed Finch Staff minions repeatedly disappearing and being resummoned while perched on the Palico.
-- Refined the brief landing pause and get-up sequence after a Giga Barrel Bomb blast.
+- Added carried weapon visuals, enabled by default and configurable under Appearance. Unused main weapons sit on the back or waist by type, follow the Palico's poses and remain visible during flight. Consumable throwing weapons display one item while the stack remains.
+- Fixed Call of Void weapons such as Dust Carver and Neltharion firing only in a fixed horizontal direction.
+- Fixed some Calamity weapons, including the Tau Cannon, not releasing after a full charge. Their native charging, firing and cooldown behavior is retained.
+- Corrected some weapon projectiles colliding with the ground immediately upon launch.

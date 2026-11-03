@@ -62,6 +62,7 @@ public sealed class CompanionConfig : ModConfig {
     [DefaultValue(20),Range(0,999)] public int StockBait=20;
 
     [Header("Appearance")]
+    [DefaultValue(true)] public bool BackWeapon = true;
     [DefaultValue(false)] public bool DyeClothesOnly;
     [DefaultValue(true)] public bool DyeKite = true;
 

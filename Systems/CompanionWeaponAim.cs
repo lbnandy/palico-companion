@@ -13,9 +13,12 @@ internal static class CompanionWeaponAim {
     // Reuse the healing/drum clearance rule for other supported low launches;
     // only move an obstructed origin, leaving native velocity and AI intact.
     internal static void ClearLaunchFloor(ref Vector2 position,Projectile shot){
-        var spawn=position;var half=shot.Size*.5f;
-        for(int rise=0;rise<=shot.height;rise++,spawn.Y--){
-            if(Collision.SolidCollision(spawn-half,shot.width,shot.height))continue;
+        ClearLaunchFloor(ref position,shot.width,shot.height);
+    }
+    internal static void ClearLaunchFloor(ref Vector2 position,int width,int height){
+        var spawn=position;var half=new Vector2(width,height)*.5f;
+        for(int rise=0;rise<=height;rise++,spawn.Y--){
+            if(Collision.SolidCollision(spawn-half,width,height))continue;
             position=spawn;return;
         }
     }
