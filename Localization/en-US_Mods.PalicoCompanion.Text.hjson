@@ -95,6 +95,11 @@ CompanionLoadoutButtons: {
 }
 
 CompanionLoadouts: {
+	Share: Share across loadouts
+	Unshare: Stop sharing across loadouts
+	SharedHint: Shared across loadouts when the same slot is empty. Unfavorite to keep it in the current loadout.
+	ShareHint: Favorite to share this item across loadouts when the same slot is empty.
+
 	Invalid: Invalid loadout
 	AlreadyActive: Already using loadout {0}
 	Switched: Switched to loadout {0}

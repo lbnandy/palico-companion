@@ -11,7 +11,7 @@
 - 暗影奥秘的刀光保留原有的拖尾更新。虚空武器使用呆猫独立的虚空值，上限与永久提升跟随主人，消耗和恢复沿用暗影奥秘的规则；不足时停手恢复，不扣主人的虚空值。
 - 手柄可在原版控制设置中绑定「呆猫面板」。面板、装备指南和外观页支持原版方向导航；肩键可在呆猫面板与玩家背包间切换。取放、拆分、收藏和取回使用相同的背包规则，改名使用原版虚拟键盘。
 - 带电爆破炮支持完整充能与持续光束。灾厄的 T 粒子炮等松手开火武器会在自身蓄力完成后释放，并等待原有射击与冷却结束再开始下一次蓄力；自动发射和持续引导武器保留各自的使用方式。消耗、弹幕与恢复过程沿用武器原有逻辑；部分模组的特殊蓄力机制仍需单独适配。
-- 呆猫自己的武器与弹幕不会对玩家造成 PvP 伤害。回收的同种消耗性投掷武器优先补入尚有余量的武器槽；装备槽不提供收藏操作，背包收藏仍可正常使用并保留在一键取回之外。
+- 呆猫自己的武器与弹幕不会对玩家造成 PvP 伤害。回收的同种消耗性投掷武器优先补入尚有余量的武器槽；主武器、召唤武器和支援装备收藏后，可在其他配装的同一栏位为空时共用；取消收藏后留在当前配装。背包收藏仍会保留在一键取回之外。
 - Amulet of Many Minions：修复专用服务器上的问答界面查询异常，并补齐呆猫使用召唤物时所需的寻路状态，避免呆猫消失或召唤物命中时报错。
 - Terraria Overhaul：呆猫不会触发它的脚步、起跳或落地音效；修正呆猫武器瞄准与专用服务器翻滚输入的兼容问题，保留玩家自己的移动音效和操作。
 - 虚空召唤（Call of Void）：将呆猫的瞄准位置传入模组自身的瞄准状态，修正刻尘者、奈萨里奥等武器只朝固定方向平射的问题；保留武器原有弹幕和散布，不改变玩家操作。
@@ -35,7 +35,7 @@ The Palico uses native item and projectile behavior while keeping its own invent
 - Secrets Of The Shadows blade trails retain their native updates. Void weapons use a separate Palico meter, with capacity and permanent upgrades following the owner. Native costs and regeneration remain in effect; the Palico pauses when depleted without spending the owner's void.
 - Bind the Palico panel in the native controller settings. The panel, equipment guide and appearance editor support directional navigation; shoulder buttons switch between the Palico panel and player inventory. Pickup, splitting, favorites and withdrawal use the same inventory rules. Naming uses the native virtual keyboard.
 - The Charged Blaster Cannon supports its full charge sequence and sustained beam. Calamity release-to-fire weapons such as the Tau Cannon are released when their own charge completes, then finish their native firing and cooldown before charging again. Automatic-fire and sustained-use weapons retain their own input behavior, costs, projectiles and recovery. Some mod-specific charging mechanics still need individual integration.
-- The Palico's weapons and projectiles cannot deal PvP damage to players. Recovered matching consumable throwing weapons refill a nonempty equipped stack first. Equipment slots do not offer favorite toggling; backpack favorites remain usable and protected from bulk withdrawal.
+- The Palico's weapons and projectiles cannot deal PvP damage to players. Recovered matching consumable throwing weapons refill a nonempty equipped stack first. Favorited main weapons, summon weapons and support equipment are shared with loadouts whose matching slot is empty. Unfavoriting leaves the item in the current loadout. Backpack favorites remain protected from bulk withdrawal.
 - Amulet of Many Minions: guards a dedicated-server quiz UI query and initializes the pathfinding state needed by the Palico's summons, preventing missing companions or errors on minion hits.
 - Terraria Overhaul: the Palico does not trigger its footstep, takeoff or landing sounds. Weapon aiming and dedicated-server dodgeroll input are handled without changing human movement sounds or controls.
 - Call of Void: feeds the Palico's aim into the mod's own aiming state, correcting fixed horizontal fire with weapons such as Dust Carver and Neltharion. Native projectiles and spread are preserved, and human controls are unchanged.

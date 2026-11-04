@@ -95,6 +95,11 @@ CompanionLoadoutButtons: {
 }
 
 CompanionLoadouts: {
+	Share: 跨配装共用
+	Unshare: 取消跨配装共用
+	SharedHint: 其他配装的同一格为空时，会共用这件装备。取消收藏后留在当前配装。
+	ShareHint: 收藏后，其他配装的同一格为空时会共用这件装备。
+
 	Invalid: 配装不存在
 	AlreadyActive: 正在使用配装 {0}
 	Switched: 已切换至配装 {0}

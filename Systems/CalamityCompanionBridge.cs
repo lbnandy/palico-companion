@@ -20,8 +20,20 @@ namespace PalicoCompanion.Systems;
 [JITWhenModsEnabled("CalamityMod")]
 public sealed class CalamityCompanionBridge:ModSystem {
     Func<ModProjectile,int> viperChargeFrames;
-    public override void Load(){CompanionCrossMod.PrepareActor+=Aim;CompanionCrossMod.SafeThrow+=Throw;CompanionCrossMod.UsesPerMaterial=Material;CompanionCrossMod.ChargeComplete.Add(Charge);CompanionCrossMod.WeaponReach+=Range;}
-    public override void Unload(){CompanionCrossMod.PrepareActor-=Aim;CompanionCrossMod.SafeThrow-=Throw;CompanionCrossMod.UsesPerMaterial=null;CompanionCrossMod.ChargeComplete.Remove(Charge);CompanionCrossMod.WeaponReach-=Range;viperChargeFrames=null;}
+    public override void Load(){CompanionCrossMod.PrepareActor+=Aim;CompanionCrossMod.SafeThrow+=Throw;CompanionCrossMod.UsesPerMaterial=Material;CompanionCrossMod.ChargeComplete.Add(Charge);CompanionCrossMod.WeaponReach+=Range;CompanionCrossMod.ProjectileFlight+=Flight;}
+    public override void Unload(){CompanionCrossMod.PrepareActor-=Aim;CompanionCrossMod.SafeThrow-=Throw;CompanionCrossMod.UsesPerMaterial=null;CompanionCrossMod.ChargeComplete.Remove(Charge);CompanionCrossMod.WeaponReach-=Range;CompanionCrossMod.ProjectileFlight-=Flight;viperChargeFrames=null;}
+    // Flight metadata only; aiming and release stay in the shared native path.
+    static CompanionBallisticProfile? Flight(Projectile shot,Player actor){
+        if(shot.ModProjectile is IronFranciscaProj or LeadTomahawkProj)return new(.2f);
+        if(shot.ModProjectile is Brick)return new(.6f,Drag:.98f,GravityRamp:.025f);
+        // These stealth attacks fly straight or become a different projectile.
+        // Read the isolated actor's native state, never the human's equipment.
+        if(shot.ModProjectile is AdamantiteThrowingAxeProjectile or CobaltKunaiProjectile){
+            if(actor.GetModPlayer<CalamityPlayer>().StealthStrikeAvailable())return null;
+            return shot.ModProjectile is AdamantiteThrowingAxeProjectile?new(.35f,31,.96f):new(.25f,26,MaxFallSpeed:float.PositiveInfinity);
+        }
+        return null;
+    }
     public override void PostSetupContent(){
         // The holdout type is internal, but exposes its charge cap as a public
         // instance field. Bind once; do not duplicate its timing or reflect per tick.

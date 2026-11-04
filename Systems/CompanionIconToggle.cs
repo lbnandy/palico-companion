@@ -62,7 +62,7 @@ internal sealed class CompanionIconToggle
         float scale=System.Math.Min(1f,24f/System.Math.Max(icon.Width,icon.Height));
         var center=bounds.Center.ToVector2();
         bool enabled=!state.Player.dead&&!CompanionNetwork.Pending&&(!CompanionNetwork.Client||state.NetReady);
-        if(enabled)CompanionGamepad.Add("toggle-"+itemType,bounds);
+        CompanionGamepad.Add("toggle-"+itemType,bounds);
         bool hover=bounds.Contains(mouse);
         // Like vanilla's equipment/housing tabs: separate inactive, active and hover frames.
         if(hover&&enabled)

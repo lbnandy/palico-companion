@@ -24,6 +24,12 @@ public sealed class CompanionCrossMod:ModSystem {
     }
     internal static Action<CompanionNativeUse> PlanUse;
     internal static Func<Item,float?> WeaponReach;
+    internal static Func<Projectile,Player,CompanionBallisticProfile?> ProjectileFlight;
+    internal static CompanionBallisticProfile? Flight(Projectile projectile,Player actor){
+        if(ProjectileFlight!=null)foreach(Func<Projectile,Player,CompanionBallisticProfile?> profile in ProjectileFlight.GetInvocationList())
+            if(profile(projectile,actor) is {} flight)return flight;
+        return null;
+    }
     internal static float? Reach(Item item){
         if(WeaponReach!=null)foreach(Func<Item,float?> range in WeaponReach.GetInvocationList())
             if(range(item) is float value)return value;
@@ -49,5 +55,5 @@ public sealed class CompanionCrossMod:ModSystem {
         var result=recipes.Call("AddItemCategory",Language.ActiveCulture.Name=="zh-Hans"?"呆猫装备":"Palico equipment","",icon,(Predicate<Item>)(item=>item.ModItem is TrainingItem));
         RecipeCategoryRegistered=result is string status&&status=="Success";
     }
-    public override void Unload(){PrepareActor=null;SupportTool=null;SafeThrow=null;UpdateResources=null;SupportTarget=null;ResourceReady=null;PlanUse=null;WeaponReach=null;WeaponEffect=null;Storage=null;UsesPerMaterial=null;ChargeComplete.Clear();InfiniteStack=null;MinedOre=null;RecipeCategoryRegistered=false;CompanionRecovery.Unload();}
+    public override void Unload(){PrepareActor=null;SupportTool=null;SafeThrow=null;UpdateResources=null;SupportTarget=null;ResourceReady=null;PlanUse=null;WeaponReach=null;ProjectileFlight=null;WeaponEffect=null;Storage=null;UsesPerMaterial=null;ChargeComplete.Clear();InfiniteStack=null;MinedOre=null;RecipeCategoryRegistered=false;CompanionRecovery.Unload();}
 }

@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.1.6 — 2026-11-04
+
+- 收藏主武器、召唤武器或支援装备后，切换配装时可共用同一件装备；目标栏位已有装备时仍使用该配装自己的装备。取消收藏后留在当前配装。
+- 改进铁制飞斧等部分灾厄投掷武器及原版飞刀、手里剑、普通箭矢的抛物线瞄准，减少直线瞄准导致攻击提前落地的问题。
+- 修复手柄操作面板按钮后，焦点可能跳回左上角的问题。
+- 修正配装按钮悬停描边底部缺失和多余细线，并保留收藏装备栏位的配装颜色。
+
+- Favorited main weapons, summon weapons and support equipment can now be shared between loadouts when the matching destination slot is empty. Occupied slots retain their own equipment; unfavoriting leaves the item in the current loadout.
+- Improved ballistic aiming for supported Calamity throwing weapons, including the Iron Francisca, and vanilla throwing knives, shurikens and basic arrows, reducing shots that fall short of their targets.
+- Fixed controller focus jumping back to the top-left button after panel actions.
+- Fixed missing bottom outlines and stray lines on hovered loadout buttons, and preserved loadout slot colors for favorited equipment.
+
 ## 1.1.5 — 2026-11-04
 
 - 新增背负武器显示，默认开启，可在外观设置中关闭。未使用的主武器按类型背在身后或挂在腰间，随动作移动，飞行时也保留；消耗类投掷武器有剩余时显示一件。

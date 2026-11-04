@@ -65,14 +65,14 @@ public sealed class TrainingPanel:ModSystem {
         if(b.Contains(mouse)){s.Player.mouseInterface=true;s.Player.cursorItemIconEnabled=false;}
         void Box(Rectangle r,Color color){panel.Left.Set(r.X,0);panel.Top.Set(r.Y,0);panel.Width.Set(r.Width,0);panel.Height.Set(r.Height,0);panel.BackgroundColor=color;panel.BorderColor=Color.Black;panel.Recalculate();panel.Draw(sb);}
         void Text(string text,int tx,int ty,Color? color=null,float scale=.8f)=>Utils.DrawBorderString(sb,text,new Vector2(tx,ty),color??Color.White,scale);
-        void Button(string text,int tx,int ty,int width,Action action,bool on=false){var r=new Rectangle(tx,ty,width,CompanionButtonLayout.Height);CompanionGamepad.Add("button-"+text,r);Box(r,on?new Color(82,105,177):r.Contains(mouse)?new Color(68,87,151):new Color(43,57,102));CenteredButtonText.Draw(sb,text,r,Color.White,CompanionButtonLayout.TextScale);if(click&&r.Contains(mouse))action();}
+        void Button(string key,string text,int tx,int ty,int width,Action action,bool on=false){var r=new Rectangle(tx,ty,width,CompanionButtonLayout.Height);CompanionGamepad.Add("button-"+key,r);Box(r,on?new Color(82,105,177):r.Contains(mouse)?new Color(68,87,151):new Color(43,57,102));CenteredButtonText.Draw(sb,text,r,Color.White,CompanionButtonLayout.TextScale);if(click&&r.Contains(mouse))action();}
         DrawBackdrop(sb,b);
         var titlePosition=CompanionPanelHeader.TitlePosition(CompanionText.Get("TrainingPanel.Title"),b);
         Text(CompanionText.Get("TrainingPanel.Title"),titlePosition.X,titlePosition.Y,Color.Gold,1);
         var returnButton=CompanionPanelHeader.ButtonBounds(b,CompanionButtonLayout.ContentWidth(CompanionText.Get("TrainingPanel.Back")));
         var settingsButton=CompanionPanelHeader.ButtonBounds(b,CompanionButtonLayout.ContentWidth(CompanionText.Get("TrainingPanel.Settings")),returnButton.Width+CompanionButtonLayout.Gap);
-        Button(CompanionText.Get("TrainingPanel.Settings"),settingsButton.X,settingsButton.Y,settingsButton.Width,()=>{Open=false;ModContent.GetInstance<CompanionConfig>().Open(()=>OpenGuide());});
-        Button(CompanionText.Get("TrainingPanel.Back"),returnButton.X,returnButton.Y,returnButton.Width,()=>{Open=false;s.PanelOpen=true;});
+        Button("Settings",CompanionText.Get("TrainingPanel.Settings"),settingsButton.X,settingsButton.Y,settingsButton.Width,()=>{Open=false;ModContent.GetInstance<CompanionConfig>().Open(()=>OpenGuide());});
+        Button("Back",CompanionText.Get("TrainingPanel.Back"),returnButton.X,returnButton.Y,returnButton.Width,()=>{Open=false;s.PanelOpen=true;});
         if(CenteredButtonText.Close(sb,CompanionPanelHeader.CloseBounds(b),mouse,click)){Open=false;dragging=false;}
         // Magic Storage's UIPanelTab is a thin UITextPanel wrapper: use the
         // actual native control, compact label-sized widths, and yellow selection.
@@ -133,7 +133,7 @@ public sealed class TrainingPanel:ModSystem {
                 Terraria.UI.ItemSlot.DrawItemIcon(item,Terraria.UI.ItemSlot.Context.InventoryItem,sb,new Vector2(x+220,row+19),1f,28f,Color.White);
                 Text(item.Name,x+246,row+1,Color.White,.8f);
                 Text(TrainingProgress.Status(s,id),x+246,row+25,Color.LightGray,.65f);
-                int selected=id,detailsWidth=CompanionButtonLayout.ContentWidth(CompanionText.Get("TrainingPanel.Details"));Button(CompanionText.Get("TrainingPanel.Details"),x+694-detailsWidth,row+7,detailsWidth,()=>{Category=TrainingCatalog.Support(selected)?1:TrainingCatalog.WorkGear(selected)?2:3;Entry=selected==TrainingCatalog.Barrel?8:selected==19?16:selected;recipeVariant=0;});
+                int selected=id,detailsWidth=CompanionButtonLayout.ContentWidth(CompanionText.Get("TrainingPanel.Details"));Button("details-"+id,CompanionText.Get("TrainingPanel.Details"),x+694-detailsWidth,row+7,detailsWidth,()=>{Category=TrainingCatalog.Support(selected)?1:TrainingCatalog.WorkGear(selected)?2:3;Entry=selected==TrainingCatalog.Barrel?8:selected==19?16:selected;recipeVariant=0;});
                 row+=56;
             }
             if(suggestions.Length==0)Text(CompanionText.Get("TrainingPanel.AllReady"),x+204,row,Color.LightGray,.75f);
@@ -143,7 +143,7 @@ public sealed class TrainingPanel:ModSystem {
             int id=Actual(Entry);
             if(TrainingCatalog.Equipment(id)){
                 string label=compareTiers?CompanionText.Get("TrainingPanel.CurrentTier"):CompanionText.Get("TrainingPanel.CompareTiers");int width=CompanionButtonLayout.ContentWidth(label);
-                Button(label,x+694-width,y+103,width,()=>{compareTiers=!compareTiers;scrollLine=0;});
+                Button("compare",label,x+694-width,y+103,width,()=>{compareTiers=!compareTiers;scrollLine=0;});
                 Wrapped(compareTiers?CompanionText.Get("TrainingPanel.TierLegend"):CompanionText.Get("TrainingPanel.CurrentEffect" ,TrainingCatalog.TierName(s.Training.Tier)),Color.LightGray);
             }
             Wrapped(TrainingGuideCopy.Detail(id,s.Training.Tier,compareTiers).Replace("。","。\n").TrimEnd());Wrapped("");
@@ -175,7 +175,7 @@ public sealed class TrainingPanel:ModSystem {
         }else scrollDragging=false;
         for(int i=scrollLine;i<Math.Min(rows.Count,scrollLine+visibleRows);i++) {
             int rowY=bodyTextY+(i-scrollLine)*lineHeight;
-            if(rows[i].action is {} action)Button(rows[i].text,x+204,rowY,CompanionButtonLayout.ContentWidth(rows[i].text),action);
+            if(rows[i].action is {} action)Button("recipe",rows[i].text,x+204,rowY,CompanionButtonLayout.ContentWidth(rows[i].text),action);
             else Text(rows[i].text,x+204,rowY,rows[i].color,.78f);
         }
         if(scaled){sb.End();sb.Begin(SpriteSortMode.Deferred,BlendState.AlphaBlend,SamplerState.LinearClamp,null,null,null,Main.UIScaleMatrix);}

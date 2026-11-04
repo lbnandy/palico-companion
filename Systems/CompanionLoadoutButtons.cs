@@ -28,9 +28,14 @@ internal static class CompanionLoadoutButtons {
             var box=Bounds(x,y,i);CompanionGamepad.Add("loadout-"+i,box);bool hover=box.Contains(Main.mouseX,Main.mouseY);
             int selected=state.Loadouts.Current==i?1:0;var frame=texture.Frame(3,3,selected,i);
             var origin=(box.Center.ToVector2()-frame.Size()/2).Floor();var colors=palettes[i*2+selected];
+            // Exclude the inter-frame padding from sampling without shifting
+            // the icon. The hover frame's last two visible rows close its feet.
+            frame.Height-=2;
             void Pixel(int px,int py,int w,int h,Color color)=>batch.Draw(TextureAssets.MagicPixel.Value,new Rectangle((int)origin.X+px,(int)origin.Y+py,w,h),color);
             if(hover){
-                batch.Draw(texture,origin,texture.Frame(3,3,2,i),Main.OurFavoriteColor);
+                var outline=texture.Frame(3,3,2,i);
+                outline.Height-=2;
+                batch.Draw(texture,origin,outline,Main.OurFavoriteColor);
                 Pixel(7,-1,6,4,Main.OurFavoriteColor);Pixel(7,1,2,6,Main.OurFavoriteColor);
                 Pixel(17,-1,6,4,Main.OurFavoriteColor);Pixel(21,1,2,6,Main.OurFavoriteColor);
             }

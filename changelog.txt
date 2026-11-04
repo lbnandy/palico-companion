@@ -1,11 +1,11 @@
-1.1.5
+1.1.6
 
-- 新增背负武器显示，默认开启，可在外观设置中关闭。未使用的主武器按类型背在身后或挂在腰间，随动作移动，飞行时也保留；消耗类投掷武器有剩余时显示一件。
-- 修复虚空召唤的刻尘者、奈萨里奥等武器只朝固定方向平射的问题。
-- 修复灾厄 T 粒子炮等部分武器蓄满后不释放的问题，沿用武器自身的蓄力、射击和冷却过程。
-- 修正部分武器弹幕出射时可能立即撞地的问题。
+- 收藏主武器、召唤武器或支援装备后，切换配装时可共用同一件装备；目标栏位已有装备时仍使用该配装自己的装备。取消收藏后留在当前配装。
+- 改进铁制飞斧等部分灾厄投掷武器及原版飞刀、手里剑、普通箭矢的抛物线瞄准，减少直线瞄准导致攻击提前落地的问题。
+- 修复手柄操作面板按钮后，焦点可能跳回左上角的问题。
+- 修正配装按钮悬停描边底部缺失和多余细线，并保留收藏装备栏位的配装颜色。
 
-- Added carried weapon visuals, enabled by default and configurable under Appearance. Unused main weapons sit on the back or waist by type, follow the Palico's poses and remain visible during flight. Consumable throwing weapons display one item while the stack remains.
-- Fixed Call of Void weapons such as Dust Carver and Neltharion firing only in a fixed horizontal direction.
-- Fixed some Calamity weapons, including the Tau Cannon, not releasing after a full charge. Their native charging, firing and cooldown behavior is retained.
-- Corrected some weapon projectiles colliding with the ground immediately upon launch.
+- Favorited main weapons, summon weapons and support equipment can now be shared between loadouts when the matching destination slot is empty. Occupied slots retain their own equipment; unfavoriting leaves the item in the current loadout.
+- Improved ballistic aiming for supported Calamity throwing weapons, including the Iron Francisca, and vanilla throwing knives, shurikens and basic arrows, reducing shots that fall short of their targets.
+- Fixed controller focus jumping back to the top-left button after panel actions.
+- Fixed missing bottom outlines and stray lines on hovered loadout buttons, and preserved loadout slot colors for favorited equipment.

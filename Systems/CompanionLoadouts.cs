@@ -18,10 +18,29 @@ internal sealed class CompanionLoadouts {
         // Preserve items from a stronger world's extra slot. The existing
         // ReturnLocked policy returns them to the bag and disables their effects.
         Sets[Current]=new[]{s.Gear[0],s.Training.Slots[0],s.Training.Slots[1],s.Training.Slots[2],s.Training.Slots[3],CompanionWeapons.Summon(s.Gear)};
-        s.Gear[0]=incoming[0];s.Gear[CompanionWeapons.SummonSlot]=incoming[5];for(int i=0;i<4;i++)s.Training.Slots[i]=incoming[i+1];
+        for(int slot=0;slot<incoming.Length;slot++)Equip(s,slot,incoming[slot]);
+        // Keep real item ownership in exactly one set. Empty slots borrow a
+        // shared item, preferring the set we just left over other inactive sets.
+        for(int slot=0;slot<incoming.Length;slot++){
+            if(!incoming[slot].IsAir)continue;
+            for(int offset=0;offset<Sets.Length;offset++){
+                int source=(Current+offset)%Sets.Length;
+                var item=Sets[source][slot];
+                if(source==index||item.IsAir||!item.favorited)continue;
+                byte group=(byte)(slot is 0 or 5?1:3);
+                int indexInGroup=slot==5?CompanionWeapons.SummonSlot:slot==0?0:slot-1;
+                if(!CompanionInventoryOperations.Accepts(s,item,group,indexInGroup))continue;
+                incoming[slot]=item;Equip(s,slot,item);Sets[source][slot]=new Item();break;
+            }
+        }
         Sets[index]=InventoryTransfer.Empty(6);Current=index;
         s.Training.ReturnLocked(s);s.Training.ReconcileEffects(s);
         message=CompanionText.Message("CompanionLoadouts.Switched" ,index+1);return true;
+    }
+    static void Equip(CompanionPlayer s,int slot,Item item){
+        if(slot==0)s.Gear[0]=item;
+        else if(slot==5)s.Gear[CompanionWeapons.SummonSlot]=item;
+        else s.Training.Slots[slot-1]=item;
     }
     internal TagCompound SaveData()=>new(){["format"]=2,["current"]=Current,["sets"]=Sets.Select(a=>new TagCompound{["items"]=a.Select(ItemIO.Save).ToList()}).ToList()};
     internal void LoadData(TagCompound data) {

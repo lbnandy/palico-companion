@@ -64,8 +64,10 @@ public sealed class CompanionGamepad:ModSystem {
         string text=Command(55,"MouseRight");
         if(items[slot].IsAir||!Main.mouseItem.IsAir)return text;
         bool ready=!CompanionNetwork.Pending&&(!CompanionNetwork.Client||state.NetReady)&&CompanionNetwork.CanMoveInventory(state.Player);
-        bool canFavorite=CompanionInventoryOperations.CanFavorite(group);
-        if(canFavorite)text+=Command(83,"SmartCursor");
+        bool canFavorite=CompanionInventoryOperations.CanFavorite(group,slot);
+        if(canFavorite)text+=CompanionInventoryOperations.SharedSlot(group,slot)
+            ?PlayerInput.BuildCommand(CompanionText.Get("CompanionLoadouts."+(items[slot].favorited?"Unshare":"Share")),false,PlayerInput.ProfileGamepadUI.KeyStatus["SmartCursor"])
+            :Command(83,"SmartCursor");
         if(canFavorite&&PlayerInput.AllowExecutionOfGamepadInstructions&&ready&&PlayerInput.Triggers.JustPressed.SmartCursor){
             if(CompanionNetwork.Client)CompanionNetwork.Click(state,items,slot,false,true);
             else CompanionInventoryOperations.Click(items,slot,ref Main.mouseItem,false,true,group).Present(state);
@@ -101,6 +103,8 @@ public sealed class CompanionGamepad:ModSystem {
         page.UpdateEvent+=()=>PlayerInput.GamepadAllowScrolling=TrainingPanel.Open;
         UILinkPointNavigator.RegisterPage(page,id,false);
     }
+    // Keys identify controls, not their captions or enabled state, so cooldowns
+    // and network acknowledgements cannot discard the current focus.
     internal static int Add(string key,Rectangle bounds,bool item=false){
         if(collecting==null)return -1;
         EnsurePage();key=collecting+"/"+key;

@@ -11,7 +11,7 @@
 
 ## Equipment and inventory
 
-Equip your Palico and save multiple loadouts to switch between.
+Equip your Palico and save multiple loadouts to switch between. Favorite weapons or support equipment to share them with loadouts whose matching slot is empty.
 
 Unused main weapons are carried on the back or waist and move with your Palico. You can turn this off in the appearance settings.
 

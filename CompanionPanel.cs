@@ -122,8 +122,8 @@ public sealed class CompanionPanel : ModSystem
             if(text!=value && text.Length>3) text=text[..^3]+"...";
             Utils.DrawBorderString(sb,text,new Vector2(x,y),color,scale);
         }
-        void Button(string label,int x,int y,int width,Action action,bool selected=false,bool enabled=true) {
-            var r=new Rectangle(x,y,width,CompanionButtonLayout.Height);if(enabled)CompanionGamepad.Add("button-"+label,r);bool hover=r.Contains(mouse);
+        void Button(string key,string label,int x,int y,int width,Action action,bool selected=false,bool enabled=true) {
+            var r=new Rectangle(x,y,width,CompanionButtonLayout.Height);CompanionGamepad.Add("button-"+key,r);bool hover=r.Contains(mouse);
             Box(r,!enabled?new Color(37,43,71):selected?new Color(83,109,190):hover?new Color(73,94,171):new Color(48,63,113));
 
             CenteredButtonText.Draw(sb,label,r,enabled?(selected?Accent:Ink):Muted,CompanionButtonLayout.TextScale);
@@ -179,14 +179,14 @@ public sealed class CompanionPanel : ModSystem
         else if(!environmentButton.Contains(mouse)&&!combatButton.Contains(mouse)&&title.Contains(mouse)&&Main.mouseLeft&&!dragging&&Main.mouseItem.IsAir){dragging=true;dragOffset=new Vector2(mouse.X,mouse.Y)-position;}
         CompanionEnvironmentButton.Draw(sb,s,environmentButton,mouse,clicked);
         CompanionCombatButton.Draw(sb,s,combatButton,mouse,clicked);
-        Button(CompanionText.Get("CompanionPanel.Guide"),guideButton.X,guideButton.Y,guideButton.Width,TrainingPanel.OpenGuide);
+        Button("Guide",CompanionText.Get("CompanionPanel.Guide"),guideButton.X,guideButton.Y,guideButton.Width,TrainingPanel.OpenGuide);
         if(CenteredButtonText.Close(sb,CompanionPanelHeader.CloseBounds(headerArea),mouse,clicked))s.PanelOpen=false;
         y+=16;
         if(!HasHeaderRow(s))y-=36;
         if(advanced) {
             int companionTabWidth=CompanionButtonLayout.ContentWidth(L("CompanionTab"));
-            Button(L("CompanionTab"),x+16,y+48,companionTabWidth,()=>tab=0,tab==0);
-            Button(L("WorkTab"),x+16+companionTabWidth+CompanionButtonLayout.Gap,y+48,CompanionButtonLayout.ContentWidth(L("WorkTab")),()=>tab=1,tab==1);
+            Button("CompanionTab",L("CompanionTab"),x+16,y+48,companionTabWidth,()=>tab=0,tab==0);
+            Button("WorkTab",L("WorkTab"),x+16+companionTabWidth+CompanionButtonLayout.Gap,y+48,CompanionButtonLayout.ContentWidth(L("WorkTab")),()=>tab=1,tab==1);
         }
 
         if(ActivityVisible&&tab==1) {
@@ -198,16 +198,16 @@ public sealed class CompanionPanel : ModSystem
         }
         y-=tab==0?52:ActivityOffset;
         if(tab==1) {
-            Button(L(s.Stowed?"CallOut":"Stow"),x+12,y+139,132,()=>CompanionLife.Toggle(s));
-            Button(L("RecallAction"),x+156,y+139,132,s.Recall,false,!s.Vitals.Downed&&!s.Stowed);
-            Button(L("Pet"),x+300,y+139,132,s.Pet,false,s.PetCooldown==0&&!s.Stowed&&!s.Vitals.Downed);
+            Button("Stow",L(s.Stowed?"CallOut":"Stow"),x+12,y+139,132,()=>CompanionLife.Toggle(s));
+            Button("RecallAction",L("RecallAction"),x+156,y+139,132,s.Recall,false,!s.Vitals.Downed&&!s.Stowed);
+            Button("Pet",L("Pet"),x+300,y+139,132,s.Pet,false,s.PetCooldown==0&&!s.Stowed&&!s.Vitals.Downed);
         }
 
         bool shift=Main.keyState.IsKeyDown(Keys.LeftShift)||Main.keyState.IsKeyDown(Keys.RightShift);
         void Slot(Item[] items,int i,int bx,int by,bool equipment=false,bool dye=false,bool training=false) {
             using var navigation=CompanionGamepad.Slot(s,items,i,new Rectangle(bx,by,SlotSize,SlotSize));
             byte group=CompanionInventoryOperations.Group(s,items);
-            bool canFavorite=CompanionInventoryOperations.CanFavorite(group);
+            bool canFavorite=CompanionInventoryOperations.CanFavorite(group,i);
             float oldScale=Main.inventoryScale;
             try {
                 Main.inventoryScale=SlotScale;
@@ -217,7 +217,7 @@ public sealed class CompanionPanel : ModSystem
                     // Open it before moving a slot item so the cursor can carry it between panels.
                     if((clicked||Main.mouseRight)&&!Main.playerInventory)Main.playerInventory=true;
                     ItemSlot.MouseHover(items,ItemSlot.Context.BankItem,i);
-                    if(!items[i].IsAir)CompanionItemTooltip.Hover(s);
+                    if(!items[i].IsAir)CompanionItemTooltip.Hover(s,CompanionInventoryOperations.SharedSlot(group,i));
                     bool favorite=Main.keyState.IsKeyDown(Main.FavoriteKey);
                     bool favoriteOnly=!canFavorite&&favorite&&!shift&&!Main.mouseRight&&Main.mouseItem.IsAir&&!items[i].IsAir&&!Main.drawingPlayerChat;
                     if(favoriteOnly){if(Main.cursorOverride==3)Main.cursorOverride=0;}
@@ -242,8 +242,8 @@ public sealed class CompanionPanel : ModSystem
                 slotDisplay[drawSlot]=items[i];
                 // Favorite belongs to the item, but equipment keeps its slot
                 // colour. Preserve the actual flag for returning it to a bag.
-                if(!canFavorite&&items[i].favorited){slotDisplay[drawSlot]=items[i].Clone();slotDisplay[drawSlot].favorited=false;}
-                if(equipment||training)CompanionLoadoutTint.Draw(sb,s,slotDisplay,dye?ItemSlot.Context.EquipDye:training?ItemSlot.Context.EquipAccessory:ItemSlot.Context.EquipArmor,drawSlot,new Vector2(bx,by));
+                if(group!=0&&items[i].favorited){slotDisplay[drawSlot]=items[i].Clone();slotDisplay[drawSlot].favorited=false;}
+                if(equipment||training)CompanionLoadoutTint.Draw(sb,s,slotDisplay,dye?ItemSlot.Context.EquipDye:training?ItemSlot.Context.EquipAccessory:ItemSlot.Context.EquipArmor,drawSlot,new Vector2(bx,by),shared:CompanionInventoryOperations.SharedSlot(group,i)&&items[i].favorited);
                 else ItemSlot.Draw(sb,slotDisplay,dye?ItemSlot.Context.EquipDye:ItemSlot.Context.InventoryItem,drawSlot,new Vector2(bx,by),Color.White);
                 if(equipment&&!dye&&!training&&(i==0||i==CompanionWeapons.SummonSlot)&&items[i].IsAir){
                     int icon=i==0?0:1;
@@ -298,9 +298,9 @@ public sealed class CompanionPanel : ModSystem
             string capacity=$"{s.Bag.Count(i=>!i.IsAir)} / {s.Bag.Length}";
             HeaderText(capacity,x+299-(int)(FontAssets.MouseText.Value.MeasureString(capacity).X*.75f),Muted,.75f,96);
             for(int i=0;i<Math.Min(24,s.Bag.Length);i++)Slot(s.Bag,i,x+16+SlotOffset(i%6),top+26+SlotOffset(i/6));
-            Button(L("QuickStack"),x+16,top+228,89,s.QuickStack);
-            Button(L("Take"),x+113,top+228,89,s.TakeAll);
-            Button(L("SortBag"),x+210,top+228,89,()=>CompanionSorting.Request(s));
+            Button("QuickStack",L("QuickStack"),x+16,top+228,89,s.QuickStack);
+            Button("Take",L("Take"),x+113,top+228,89,s.TakeAll);
+            Button("SortBag",L("SortBag"),x+210,top+228,89,()=>CompanionSorting.Request(s));
             if(new Rectangle(x+16,sectionHeader,283,24).Contains(mouse))Main.instance.MouseText(L("NativeBagHint"));
 
             // Four equipment rows align with the four backpack rows.
@@ -354,20 +354,20 @@ public sealed class CompanionPanel : ModSystem
                 footer+=52;
             }
             int footerWidth=(width-52)/3;
-            Button(L("Pet"),x+16,footer,footerWidth,s.Pet,false,s.PetCooldown==0&&!s.Stowed&&!s.Vitals.Downed);
-            Button(L("RecallAction"),x+26+footerWidth,footer,footerWidth,s.Recall,false,!s.Vitals.Downed&&!s.Stowed);
-            Button(L(s.Stowed?"CallOut":"Stow"),x+36+footerWidth*2,footer,footerWidth,()=>CompanionLife.Toggle(s));
+            Button("Pet",L("Pet"),x+16,footer,footerWidth,s.Pet,false,s.PetCooldown==0&&!s.Stowed&&!s.Vitals.Downed);
+            Button("RecallAction",L("RecallAction"),x+26+footerWidth,footer,footerWidth,s.Recall,false,!s.Vitals.Downed&&!s.Stowed);
+            Button("Stow",L(s.Stowed?"CallOut":"Stow"),x+36+footerWidth*2,footer,footerWidth,()=>CompanionLife.Toggle(s));
         } else {
-            Button(L("MineTarget"),x+12,y+183,154,()=>{targeting=1;s.PanelOpen=false;});
-            Button(L("Left"),x+12,y+223,100,()=>direction=-1,direction==-1);
-            Button(L("Right"),x+120,y+223,100,()=>direction=1,direction==1);
-            Button(L("Down"),x+228,y+223,100,()=>direction=0,direction==0);
-            Button("-",x+12,y+263,36,()=>length=Math.Max(1,length-1));
+            Button("MineTarget",L("MineTarget"),x+12,y+183,154,()=>{targeting=1;s.PanelOpen=false;});
+            Button("Left",L("Left"),x+12,y+223,100,()=>direction=-1,direction==-1);
+            Button("Right",L("Right"),x+120,y+223,100,()=>direction=1,direction==1);
+            Button("Down",L("Down"),x+228,y+223,100,()=>direction=0,direction==0);
+            Button("Shorter","-",x+12,y+263,36,()=>length=Math.Max(1,length-1));
             Text(L("Length")+" "+length,x+58,y+269,Ink,0.85f,125);
-            Button("+",x+185,y+263,36,()=>length=Math.Min(24,length+1));
-            Button(L("Preview"),x+230,y+263,132,()=>{targeting=2;s.PanelOpen=false;});
-            Button(L("Confirm"),x+370,y+263,132,()=>{s.Mining.Cancel();s.Status=s.Order.Confirm(Main.LocalPlayer,s.Bag);},false,s.Order.HasPreview&&!s.Paused&&s.Enabled);
-            Button(L(mineVein?"VeinOn":"VeinOff"),x+12,y+303,154,()=>mineVein=!mineVein,mineVein);
+            Button("Longer","+",x+185,y+263,36,()=>length=Math.Min(24,length+1));
+            Button("Preview",L("Preview"),x+230,y+263,132,()=>{targeting=2;s.PanelOpen=false;});
+            Button("Confirm",L("Confirm"),x+370,y+263,132,()=>{s.Mining.Cancel();s.Status=s.Order.Confirm(Main.LocalPlayer,s.Bag);},false,s.Order.HasPreview&&!s.Paused&&s.Enabled);
+            Button("Vein",L(mineVein?"VeinOn":"VeinOff"),x+12,y+303,154,()=>mineVein=!mineVein,mineVein);
             string progress=s.Order.Active||s.Order.HasPreview?$"{s.Order.Completed} / {s.Order.Length}":L("NoOrder");
             Text(L("Progress")+"  "+progress,x+178,y+309,Accent,0.8f,310);
             string budget=L("WorkHint");

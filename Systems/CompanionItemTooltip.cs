@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using Terraria;
@@ -12,11 +13,13 @@ namespace PalicoCompanion.Systems;
 public sealed class CompanionItemTooltip : ModSystem {
     static Item hovered;
     static Player subject;
+    static bool sharedSlot;
     static Player inactive;
-    internal static void Clear(){hovered=null;subject=null;}
-    internal static void Hover(CompanionPlayer owner){
-        if(Main.HoverItem.IsAir||Main.HoverItem.damage<=0)return;
-        hovered=Main.HoverItem;
+    internal static void Clear(){hovered=null;subject=null;sharedSlot=false;}
+    internal static void Hover(CompanionPlayer owner,bool sharing=false){
+        if(Main.HoverItem.IsAir)return;
+        hovered=Main.HoverItem;sharedSlot=sharing;
+        if(hovered.damage<=0)return;
         if(owner.Cat?.ModProjectile is CompanionCat cat&&cat.Weapons.Available&&
             cat.Weapons.Actor.HeldItem.type==hovered.type&&cat.Weapons.Actor.HeldItem.prefix==hovered.prefix){subject=cat.Weapons.Actor;return;}
         // An inactive companion or a different backpack weapon needs a preview.
@@ -27,6 +30,7 @@ public sealed class CompanionItemTooltip : ModSystem {
         CompanionNativeUse.ApplyCombatModifiers(inactive,owner,hovered);
         subject=inactive;
     }
+    internal static bool Shared(Item item)=>sharedSlot&&ReferenceEquals(item,hovered)&&ReferenceEquals(item,Main.HoverItem);
     public override void Load()=>IL_Main.MouseText_DrawItemTooltip_GetLinesInfo+=UseCompanion;
     public override void Unload(){IL_Main.MouseText_DrawItemTooltip_GetLinesInfo-=UseCompanion;Clear();inactive=null;}
     public override void OnWorldUnload(){Clear();inactive=null;}
@@ -43,5 +47,14 @@ public sealed class CompanionItemTooltip : ModSystem {
             c.EmitDelegate<Func<Player,Item,Player>>(ForItem);reads++;
         }
         if(reads==0)throw new InvalidOperationException("Native item tooltip player reads not found");
+    }
+}
+
+public sealed class CompanionSharingTooltip:GlobalItem {
+    public override void ModifyTooltips(Item item,List<TooltipLine> lines){
+        if(!CompanionItemTooltip.Shared(item))return;
+        // Keep vanilla's favorite marker, but explain its equipment meaning.
+        lines.RemoveAll(line=>line.Mod=="Terraria"&&line.Name=="FavoriteDesc");
+        lines.Add(new(Mod,"LoadoutSharing",CompanionText.Get("CompanionLoadouts."+(item.favorited?"SharedHint":"ShareHint"))));
     }
 }
