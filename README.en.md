@@ -11,7 +11,7 @@
 
 ## Equipment and inventory
 
-Equip your Palico and save multiple loadouts to switch between. Favorite weapons or support equipment to share them with loadouts whose matching slot is empty.
+Equip your Palico and save multiple loadouts to switch between. Main weapons and summon weapons have separate slots; after summoning minions or deploying sentries, your Palico switches back to its main weapon. Favorite weapons or support equipment to share them with loadouts whose matching slot is empty.
 
 Unused main weapons are carried on the back or waist and move with your Palico. You can turn this off in the appearance settings.
 
@@ -37,6 +37,8 @@ The **Companion abilities** settings offer three strength presets: choose **Supp
 
 You can also fine-tune your Palico’s damage, health, defense, inherited health regeneration, targeting range, movement speeds in and out of combat, ability to dodge attacks, work speed and fishing speed individually. Targeting range is adjustable from 50% to 150% (default 100%); it does not change the weapon's own reach and is unaffected by strength presets.
 
+Combat-stat inheritance is adjustable from 0% to 100% (0% disables it). New configurations default to 100%; existing configurations retain their previous behavior. It follows the weapon’s damage class and does not copy armor or accessory trigger effects; see the [compatibility notes](docs/COMPATIBILITY.md#english).
+
 Your Palico inherits 50% of the owner's standard bonus health regeneration by default, adjustable from 0% to 100%. Set it to 0 to keep only the Palico's own regeneration. Recovery after damage uses its own timer, and strength presets leave this percentage unchanged.
 
 An optional boss health bonus adds a little more challenge when fighting together. It is off by default.
@@ -50,7 +52,7 @@ None of these mods are required:
 - [Magic Storage](https://steamcommunity.com/sharedfiles/filedetails/?id=2563309347): let your Palico use your storage to put items away and restock its supplies.
 - [Quality of Terraria](https://steamcommunity.com/sharedfiles/filedetails/?id=2797518634): your Palico follows its rules for unlimited ammo and other consumable items.
 - [Calamity](https://steamcommunity.com/sharedfiles/filedetails/?id=2824688072): your Palico has dialogue for its biomes and bosses, and can use some of its special weapon mechanics.
-- [Thorium](https://steamcommunity.com/sharedfiles/filedetails/?id=2909886416): class support for instruments, healing tools and throwing weapons, including separate inspiration, ally healing and throwing exhaustion, plus dialogue for bosses, exploration and support actions. See the compatibility notes below for special-input limits.
+- [Thorium](https://steamcommunity.com/sharedfiles/filedetails/?id=2909886416): class support for instruments, healing tools and throwing weapons, including separate inspiration, ally healing and throwing exhaustion, plus dialogue for bosses, exploration and support actions. You can also heal it with weapons that heal allies. See the compatibility notes below for special-input limits.
 
 See [compatibility notes](docs/COMPATIBILITY.md#english) for weapon support and known limits.
 

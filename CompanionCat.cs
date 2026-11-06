@@ -76,6 +76,7 @@ public sealed class CompanionCat : ModProjectile
         int combatId=r.ReadInt16(),combatType=r.ReadInt32();
         if(CompanionNetwork.Client&&pose.Time>=replicaCombatTime){
             replicaCombatTime=(ulong)pose.Time;
+            Weapons.ReceiveInput(pose.Time,channel,useItem);
             targeting.Engage(combatId>=0&&combatId<Main.maxNPCs&&Main.npc[combatId].active&&Main.npc[combatId].type==combatType?Main.npc[combatId]:null);
         }
         if(CompanionNetwork.Client&&CompanionRoster.Observe(this,(ulong)pose.Time)){if(previousInstance!=instance)replica.Clear();replica.Receive(pose,Main.GameUpdateCount);Projectile.position=replica.Position;}

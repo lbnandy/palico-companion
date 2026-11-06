@@ -2,7 +2,9 @@
 
 [English](#english)
 
-呆猫使用原版物品与弹幕流程，但独立维护自己的背包、魔力、仆从和哨兵。它的魔力、仆从与哨兵上限跟随主人的对应上限；这不代表它拥有玩家的整套职业装备加成。
+呆猫使用原版物品与弹幕流程，但独立维护自己的背包、魔力、仆从和哨兵。它的魔力、仆从与哨兵上限跟随主人的对应上限；新配置默认完整继承主人的职业数值加成，旧配置保留原来的开关选择。
+
+- 「呆猫能力 → 战斗属性继承比例」范围 0%～100%，新配置默认 100%，0% 关闭继承，由房主统一设置，切换能力预设不会改变它。按设置比例、武器所属职业继承主人通过原版职业系统提供的伤害、暴击、攻速、击退和穿甲，以及支持的弹药、魔力和职业资源加成。比例只缩放额外数值，例如主人 +60% 增伤在 50% 继承时提供 +30%；原版省弹、箭术、近战大小和魔力恢复等开关效果在比例大于 0 时保留完整效果，不拆分它们的原版机制。混合职业沿用其原本的继承规则，不取主人最高的职业加成。生命、防御和回血保留各自的比例；伤害倍率仍作用于呆猫的最终命中伤害。灾厄的数值型暴击伤害、盗贼投速和瑟银的治疗速度、灵感与投掷耐力加成通过各自的联动接口处理。不会复制护甲、饰品的触发效果或共享当前魔力、灵感、怒气、肾上腺素、弹匣和蓄力。模组若在独立钩子中实现特殊装备效果，需要另外适配。
 
 - 呆猫本体使用原版 `ProjectileID.Sets.ForcePlateDetection` 接口关闭接触式机关检测，不会因走过压力板、青绿压力垫或地雷而触发它们。武器弹幕仍保留各自的原版机关交互，已启动的陷阱也仍能伤害呆猫。这项保护不涉及挖掘造成的地形变化，例如挖掉巨石的支撑块。
 
@@ -26,7 +28,9 @@
 
 ## English
 
-The Palico uses native item and projectile behavior while keeping its own inventory, mana, minions and sentries. Its mana and summon capacities follow its owner's corresponding limits; it does not inherit the player's entire class loadout and bonuses.
+The Palico uses native item and projectile behavior while keeping its own inventory, mana, minions and sentries. Its mana and summon capacities follow its owner's corresponding limits; new configurations inherit class-stat bonuses by default, while existing configurations retain their previous choice.
+
+- Palico Abilities → Combat stats inherited ranges from 0% to 100%, defaults to 100% for new configurations (0% disables it), and is controlled by the host and independent of ability presets. Weapons inherit the selected proportion of the owner's native damage-class modifiers for damage, critical chance, attack speed, knockback and armor penetration, plus supported ammunition, mana and class-resource bonuses. Only bonus values are scaled: +60% damage at 50% inheritance becomes +30%. Native on/off ammo, Archery, melee-size and mana-regeneration effects retain their full behavior above 0% rather than rewriting those mechanics. Hybrid classes keep their own inheritance rules rather than taking the owner's highest class bonus. Health, defense and regeneration retain their separate ratios; damage scaling still applies to the Palico's final hit damage. The existing integration bridges handle Calamity's numerical critical-damage and rogue-velocity bonuses and Thorium's healing speed, inspiration and throwing-exhaustion bonuses. Armor/accessory triggers and current mana, inspiration, rage, adrenaline, magazines and charge state are not copied. Special equipment effects implemented through separate mod hooks may need individual integration.
 
 - The Palico's body opts out of native contact-switch detection through `ProjectileID.Sets.ForcePlateDetection`, so crossing pressure plates, teal pressure pads or land mines does not activate them. Weapon projectiles retain their own native switch interactions, and active traps can still damage the Palico. This protection does not cover terrain changes caused by mining, such as removing a boulder's support blocks.
 

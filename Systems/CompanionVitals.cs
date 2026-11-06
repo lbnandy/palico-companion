@@ -55,7 +55,8 @@ public sealed class CompanionVitals {
         if(PotionDelay>0)PotionDelay--;
         if(ManaSickness>0)ManaSickness--;
         if(Immunity>0)Immunity--;
-        if(Recovery>0){if(--Recovery==0){Health=MaxHealth;Mana=MaxMana;Immunity=120;QuietTicks=LifeCounter=ManaCounter=ManaDelay=0;}return;}
+        // Match the vanilla player's non-PvP respawn protection (180 ticks).
+        if(Recovery>0){if(--Recovery==0){Health=MaxHealth;Mana=MaxMana;Immunity=180;QuietTicks=LifeCounter=ManaCounter=ManaDelay=0;}return;}
         QuietTicks=Math.Min(QuietTicks+1,3600);
         int steps=Math.Min(QuietTicks/300,6)+(QuietTicks>=2400?1:0)+(QuietTicks>=3000?1:0)+(QuietTicks>=3600?1:0);
         float lifeRate=steps*(velocityX!=0?0.5f:1.25f)*(MaxHealth/400f*0.85f+0.15f);

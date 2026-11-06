@@ -1,7 +1,10 @@
 using System;
 using System.ComponentModel;
+using System.IO;
+using System.Runtime.Serialization;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using Newtonsoft.Json.Linq;
 using Terraria;
 using Terraria.Localization;
 using Terraria.ModLoader;
@@ -47,6 +50,9 @@ public sealed class CompanionBalanceConfig : ModConfig {
     }
 
     [Header("Strength")]
+    [DefaultValue(100),Range(0,100),Increment(5),Slider]
+    [JsonProperty(DefaultValueHandling=DefaultValueHandling.Include)]
+    public int CombatInheritancePercent { get=>combatInheritancePercent; set {combatInheritancePercent=value;inheritanceSpecified=true;} }
     [DefaultValue(75),Range(10,200),Increment(5),Slider] public int DamagePercent { get; set; } = 75;
     [DefaultValue(75),Range(10,200),Increment(5),Slider] public int HealthPercent { get; set; } = 75;
     [DefaultValue(75),Range(0,200),Increment(5),Slider] public int DefensePercent { get; set; } = 75;
@@ -67,6 +73,7 @@ public sealed class CompanionBalanceConfig : ModConfig {
     [DefaultValue(35),Range(0,100),Increment(5),Slider] public int BossHealthPercent { get; set; } = 35;
 
     internal float WorkScale => Math.Clamp(WorkSpeedPercent,25,200)/100f;
+    internal float CombatInheritanceScale => Math.Clamp(CombatInheritancePercent,0,100)/100f;
     internal float FishingScale => Math.Clamp(FishingSpeedPercent,25,200)/100f;
     internal float TargetingRangeScale => Math.Clamp(TargetingRangePercent,50,150)/100f;
 
@@ -77,6 +84,26 @@ public sealed class CompanionBalanceConfig : ModConfig {
     internal int RegenInheritanceRatio => Math.Clamp(RegenInheritancePercent,0,100);
     internal float MovementScale(bool combat) => Math.Clamp(combat?CombatMovementPercent:TravelMovementPercent,25,150)/100f;
     internal CompanionEvasionMode EvasionStyle => Enum.IsDefined(Evasion)?Evasion:CompanionEvasionMode.Standard;
+
+    int combatInheritancePercent=100;
+    bool inheritanceSpecified;
+    bool? legacyInheritance;
+    // Read the former checkbox without exposing or writing an obsolete setting.
+    [JsonProperty("InheritCombatStats",DefaultValueHandling=DefaultValueHandling.Include)]
+    bool? LegacyInheritance { set=>legacyInheritance=value; }
+    [OnDeserializing] void BeginRead(StreamingContext context){combatInheritancePercent=100;inheritanceSpecified=false;legacyInheritance=null;}
+    [OnDeserialized] void EndRead(StreamingContext context){
+        if(!inheritanceSpecified&&legacyInheritance.HasValue)CombatInheritancePercent=legacyInheritance.Value?100:0;
+        legacyInheritance=null;
+    }
+    public override void OnLoaded(){
+        // tML omitted false/default values in old files. Only migrate a local
+        // existing file here; resetting defaults and server config sync must
+        // not consult or be overridden by the client's old local choices.
+        if(inheritanceSpecified)return;
+        string path=Path.Combine(ConfigManager.ModConfigPath,$"{Mod.Name}_{Name}.json");
+        if(File.Exists(path)&&JObject.Parse(File.ReadAllText(path))[nameof(CombatInheritancePercent)]==null)CombatInheritancePercent=0;
+    }
 
     public override bool AcceptClientChanges(ModConfig pendingConfig,int whoAmI,ref NetworkText message) {
         if(Main.netMode==Terraria.ID.NetmodeID.SinglePlayer)return true;

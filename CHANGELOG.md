@@ -1,5 +1,23 @@
 # Changelog
 
+## 1.1.7 — 2026-11-07
+
+- 新增战斗属性继承比例（0%～100%），按武器职业继承主人的伤害、暴击、攻速、击退、穿甲等数值加成；新配置默认 100%，旧配置维持原有行为，可自行开启。护甲、饰品的特殊触发效果不随之复制。
+- 瑟银治疗武器现在可以按各自原本的规则治疗呆猫，包括生命涌动法杖等追踪治疗；修正自疗、多人治疗与目标收回后的处理。
+- 呆猫复活后的无敌时间调整为 3 秒，减少刚起身就再次被击倒的情况。
+- 修复虚空召唤的狱烬聚能枪无法正常攻击，以及灾熵“切换装备时清空潜行条”可能阻止呆猫使用武器的问题。
+- 改进 Koishi 原版武器重做的蓄力弓、Homura 的换弹与后坐力，以及空想归途部分弓枪的瞄准和持握显示。
+- 修复嗡鸣绞轮等持续使用武器在联机中的输入同步与显示问题；补充 MEAC 弹幕额外数据的联机兼容处理。
+- 调整灾厄螺丝刀等部分近战武器的接敌距离，减少停在实际命中范围外的问题。
+
+- Added a combat-stat inheritance slider (0–100%). Weapons inherit a proportion of the owner's damage-class bonuses, including damage, critical chance, attack speed, knockback and armor penetration. New configurations default to 100%; existing configurations retain their previous behavior and can opt in. Armor and accessory trigger effects are not copied.
+- Thorium healing weapons can now heal the Palico according to their native rules, including Life Surge Staff homing heals. Improved self-healing, multiplayer healing and handling of recalled patients.
+- Increased post-revival invulnerability to 3 seconds to reduce immediate knockdowns.
+- Fixed the Call of Void energy gun's missing attacks and Calamity Entropy's equipment-change stealth setting potentially preventing Palico weapon use.
+- Improved charged bows from Koishi's vanilla weapon rework, Homura magazine and recoil handling, and aiming and held-weapon visuals for supported Lostbelt Journey bows and guns.
+- Fixed multiplayer input and visual synchronization for sustained-use weapons such as Buzzkill, and added compatibility for MEAC projectile extra-data synchronization.
+- Adjusted engagement distances for several Calamity melee weapons, including the Wulfrum Screwdriver, to avoid stopping outside their effective hit range.
+
 ## 1.1.6 — 2026-11-04
 
 - 收藏主武器、召唤武器或支援装备后，切换配装时可共用同一件装备；目标栏位已有装备时仍使用该配装自己的装备。取消收藏后留在当前配装。

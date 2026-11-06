@@ -28,7 +28,7 @@ public sealed class CompanionConfigLayout : ModSystem {
         ["Chatter"]="Sign",["Emotes"]="WhoopieCushion",["CatSounds"]="Bell",["CatCart"]="Minecart",["TrainingHints"]="Book",
         ["DyeClothesOnly"]="BlueDye",["DyeKite"]="KiteBlue",
         ["RunInBackground"]="Stopwatch",["AdvancedOrders"]="Ruler",
-        ["Preset"]="head",["DamagePercent"]="GoldBroadsword",["HealthPercent"]="LifeCrystal",["DefensePercent"]="IronChainmail",["RegenInheritancePercent"]="BandofRegeneration",["TargetingRangePercent"]="Binoculars",
+        ["Preset"]="head",["CombatInheritancePercent"]="AvengerEmblem",["DamagePercent"]="GoldBroadsword",["HealthPercent"]="LifeCrystal",["DefensePercent"]="IronChainmail",["RegenInheritancePercent"]="BandofRegeneration",["TargetingRangePercent"]="Binoculars",
         ["CombatMovementPercent"]="HermesBoots",["TravelMovementPercent"]="Aglet",["Evasion"]="MasterNinjaGear",["WorkSpeedPercent"]="GoldPickaxe",["FishingSpeedPercent"]="WoodFishingPole",
         ["BossHealthBoost"]="SuspiciousLookingEye",["BossHealthPercent"]="LifeCrystal"
     };

@@ -20,14 +20,14 @@ Bring a Monster Hunter-inspired Palico along for your Terraria adventures.
 [h2]Customize your Palico's abilities[/h2]
 The Companion abilities settings offer three strength presets: choose [b]Support[/b] if you want to take the lead in combat, [b]Standard[/b] to fight side by side, or [b]Strong[/b] if you want to take it easy and let your Palico carry you. Standard is the default.
 
-You can also adjust damage, survivability, movement speed, dodging, targeting range, work speed and fishing speed individually. An optional boss health bonus adds a little more challenge when fighting together; it is off by default.
+You can also adjust damage, survivability, movement speed, dodging, targeting range, work speed and fishing speed individually. Combat stats can inherit a configurable share of your matching class bonuses, or inheritance can be disabled. An optional boss health bonus adds a little more challenge when fighting together; it is off by default.
 
 [h2]Equipment and inventory[/h2]
-Equip your Palico and save multiple loadouts to switch between.
+Equip your Palico and save multiple loadouts to switch between. Main weapons and summon weapons have separate slots; after summoning minions or deploying sentries, your Palico switches back to its main weapon. Favorited equipment can be shared when the matching slot in another loadout is empty.
 
 Your Palico has its own backpack for supplies and loot. Give it access to selected chests, and it can put items away alongside others of the same type and restock its supplies. Favorited items remain usable and stay in its backpack when you retrieve everything else.
 
-[img]https://raw.githubusercontent.com/lbnandy/palico-companion/main/docs/images/04-equipment-en-compact.png[/img]
+[img]https://raw.githubusercontent.com/lbnandy/palico-companion/24e901a2e75e040a85b7d4cbb4d24fb0b81d910b/docs/images/04-equipment-en-compact.png[/img]
 
 [h2]Equipment upgrades and the Palico Guide[/h2]
 Gather materials to craft and upgrade your Palico's gear. The in-game Palico Guide explains how to craft, use and upgrade equipment.
@@ -42,7 +42,7 @@ Supports single-player and multiplayer. [b]No new character or world required.[/
 [*][url=https://steamcommunity.com/sharedfiles/filedetails/?id=2563309347]Magic Storage[/url]: let your Palico use your storage to put items away and restock its supplies.
 [*][url=https://steamcommunity.com/sharedfiles/filedetails/?id=2797518634]Quality of Terraria[/url]: its unlimited-ammo feature works for your Palico, too.
 [*][url=https://steamcommunity.com/sharedfiles/filedetails/?id=2824688072]Calamity[/url]: extra dialogue for its enemies and events.
-[*][url=https://steamcommunity.com/sharedfiles/filedetails/?id=2909886416]Thorium[/url]: supports Bard instruments, healing tools and throwing weapons. Let your Palico play music to provide buffs or use healing weapons to restore your health.
+[*][url=https://steamcommunity.com/sharedfiles/filedetails/?id=2909886416]Thorium[/url]: supports Bard instruments, healing tools and throwing weapons. Let your Palico play music to provide buffs or use healing weapons to restore your health. You can also heal it with weapons that heal allies.
 [/list]
 None of these mods are required.
 

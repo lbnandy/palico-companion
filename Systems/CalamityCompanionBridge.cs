@@ -20,8 +20,14 @@ namespace PalicoCompanion.Systems;
 [JITWhenModsEnabled("CalamityMod")]
 public sealed class CalamityCompanionBridge:ModSystem {
     Func<ModProjectile,int> viperChargeFrames;
-    public override void Load(){CompanionCrossMod.PrepareActor+=Aim;CompanionCrossMod.SafeThrow+=Throw;CompanionCrossMod.UsesPerMaterial=Material;CompanionCrossMod.ChargeComplete.Add(Charge);CompanionCrossMod.WeaponReach+=Range;CompanionCrossMod.ProjectileFlight+=Flight;}
-    public override void Unload(){CompanionCrossMod.PrepareActor-=Aim;CompanionCrossMod.SafeThrow-=Throw;CompanionCrossMod.UsesPerMaterial=null;CompanionCrossMod.ChargeComplete.Remove(Charge);CompanionCrossMod.WeaponReach-=Range;CompanionCrossMod.ProjectileFlight-=Flight;viperChargeFrames=null;}
+    public override void Load(){CompanionCrossMod.InheritStats+=Stats;CompanionCrossMod.PrepareActor+=Aim;CompanionCrossMod.SafeThrow+=Throw;CompanionCrossMod.UsesPerMaterial=Material;CompanionCrossMod.ChargeComplete.Add(Charge);CompanionCrossMod.WeaponReach+=Range;CompanionCrossMod.ProjectileFlight+=Flight;}
+    public override void Unload(){CompanionCrossMod.InheritStats-=Stats;CompanionCrossMod.PrepareActor-=Aim;CompanionCrossMod.SafeThrow-=Throw;CompanionCrossMod.UsesPerMaterial=null;CompanionCrossMod.ChargeComplete.Remove(Charge);CompanionCrossMod.WeaponReach-=Range;CompanionCrossMod.ProjectileFlight-=Flight;viperChargeFrames=null;}
+    static void Stats(Player actor,Player owner,float ratio){
+        var target=actor.GetModPlayer<CalamityPlayer>();var source=owner.GetModPlayer<CalamityPlayer>();
+        target.critDamage=source.critDamage*ratio;
+        target.rogueVelocity=CompanionCombatInheritance.Blend(1f,source.rogueVelocity,ratio);
+        // Rage, adrenaline, stealth and equipment flags stay actor-owned.
+    }
     // Flight metadata only; aiming and release stay in the shared native path.
     static CompanionBallisticProfile? Flight(Projectile shot,Player actor){
         if(shot.ModProjectile is IronFranciscaProj or LeadTomahawkProj)return new(.2f);
@@ -50,6 +56,14 @@ public sealed class CalamityCompanionBridge:ModSystem {
     // Primary use is a held slash, not the alternate thrown attack. Approach
     // within its native hitbox instead of treating its holdout as a long shot.
     static float? Range(Item weapon){
+        // Its custom AI is a hand-bound thrust, with a native 78px collision
+        // line. Leave the extra thrust offset as margin, not ranged spacing.
+        if(weapon.ModItem is WulfrumScrewdriver)return 78f*weapon.scale;
+        // Primary attacks remain attached to the hand. Derive spacing from
+        // their native swing boxes / collision line, not the alternate throw.
+        if(weapon.ModItem is Omniblade&&CompanionCombatReach.Sample(weapon) is {} blade)return blade.width*.5f;
+        if(weapon.ModItem is DeathsAscension)return Terraria.ID.ContentSamples.ProjectilesByType[ModContent.ProjectileType<DeathsAscensionSwing>()].width-26f;
+        if(weapon.ModItem is DevilsSunrise)return weapon.shootSpeed*5.5f;
         if(weapon.ModItem is TheFinalDawn)return Terraria.ID.ContentSamples.ProjectilesByType[ModContent.ProjectileType<FinalDawnFireSlash>()].width*.5f;
         if(weapon.ModItem is HolyCollider&&CompanionCombatReach.Sample(weapon) is {} shot&&shot.ModProjectile is HolyColliderHoldout hammer)
             return (hammer.HitboxOutset+hammer.HitboxSize.X*.5f)*shot.scale*.85f;
@@ -97,6 +111,13 @@ public sealed class CalamityCompanionBridge:ModSystem {
 public sealed class CalamityCompanionLaunch:GlobalProjectile {
     public override void PostAI(Projectile shot){
         if(CompanionOwnedShot.Of(shot) is not {Available:true})return;
+        // The native release is synchronized in ai[1], but its local drawing
+        // flag is not. A replica receiving that transition must show the same
+        // empty holder without executing the owner's firing branch again.
+        if(CompanionNetwork.Client&&shot.ModProjectile is BuzzkillHoldout saw){
+            saw.NoSawOnHoldout=shot.ai[1]>=1;
+            if(saw.NoSawOnHoldout)shot.frame=4;
+        }
         // The shield enables tile collision only when releasing its charge.
         // Clear that initial position using its terrain hitbox, not its much
         // larger damage hitbox; subsequent dash collision stays native.

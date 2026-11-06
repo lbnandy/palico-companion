@@ -15,6 +15,8 @@ public sealed class CompanionCrossMod:ModSystem {
         return false;
     }
     internal static Action<CompanionNativeUse> UpdateResources;
+    internal static Action<Player,Player,float> InheritStats;
+    internal static Action<CompanionNativeUse> BeforeReset;
     internal static Func<CompanionNativeUse,Player> SupportTarget;
     internal static Func<CompanionNativeUse,bool> ResourceReady;
     internal static bool ResourcesReady(CompanionNativeUse use){
@@ -23,6 +25,7 @@ public sealed class CompanionCrossMod:ModSystem {
         return true;
     }
     internal static Action<CompanionNativeUse> PlanUse;
+    internal static Action<CompanionNativeUse> MaintainHeldWeapon;
     internal static Func<Item,float?> WeaponReach;
     internal static Func<Projectile,Player,CompanionBallisticProfile?> ProjectileFlight;
     internal static CompanionBallisticProfile? Flight(Projectile projectile,Player actor){
@@ -55,5 +58,5 @@ public sealed class CompanionCrossMod:ModSystem {
         var result=recipes.Call("AddItemCategory",Language.ActiveCulture.Name=="zh-Hans"?"呆猫装备":"Palico equipment","",icon,(Predicate<Item>)(item=>item.ModItem is TrainingItem));
         RecipeCategoryRegistered=result is string status&&status=="Success";
     }
-    public override void Unload(){PrepareActor=null;SupportTool=null;SafeThrow=null;UpdateResources=null;SupportTarget=null;ResourceReady=null;PlanUse=null;WeaponReach=null;ProjectileFlight=null;WeaponEffect=null;Storage=null;UsesPerMaterial=null;ChargeComplete.Clear();InfiniteStack=null;MinedOre=null;RecipeCategoryRegistered=false;CompanionRecovery.Unload();}
+    public override void Unload(){PrepareActor=null;SupportTool=null;SafeThrow=null;UpdateResources=null;InheritStats=null;BeforeReset=null;SupportTarget=null;ResourceReady=null;PlanUse=null;MaintainHeldWeapon=null;WeaponReach=null;ProjectileFlight=null;WeaponEffect=null;Storage=null;UsesPerMaterial=null;ChargeComplete.Clear();InfiniteStack=null;MinedOre=null;RecipeCategoryRegistered=false;CompanionRecovery.Unload();}
 }

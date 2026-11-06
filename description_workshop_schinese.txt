@@ -24,14 +24,14 @@
 [h2]按你的喜好调整呆猫能力[/h2]
 在「呆猫能力」设置中，可以选择三档强度预设：想自己当主力，可以选[b]辅助[/b]；想和呆猫并肩作战，可以选[b]标准[/b]；想轻松些、让呆猫带飞，可以选[b]强力[/b]。默认使用标准档。
 
-也能单独调整呆猫的伤害、生存能力、移速、闪避能力、索敌范围、工作速度和钓鱼速度。也可以开启 Boss 生命增强，为并肩作战增加一些挑战；默认关闭。
+也能单独调整呆猫的伤害、生存能力、移速、闪避能力、索敌范围、工作速度和钓鱼速度。战斗属性可按比例继承主人的对应职业加成，也可以关闭。也可以开启 Boss 生命增强，为并肩作战增加一些挑战；默认关闭。
 
 [h2]装备与背包[/h2]
-给呆猫搭配装备，也能保存多套配装，随时切换。
+给呆猫搭配装备，也能保存多套配装，随时切换。主武器和召唤武器分栏装备，召出仆从或部署哨兵后，会切回主武器继续战斗。收藏的装备可在其他配装的对应栏位为空时共用。
 
 呆猫有自己的背包，能携带补给和战利品。你还可以允许它使用指定箱子，帮你存放同类物品、补充消耗品。收藏的物品可以照常使用，一键取回时会留在呆猫背包里。
 
-[img]https://raw.githubusercontent.com/lbnandy/palico-companion/main/docs/images/04-equipment-zh-compact.png[/img]
+[img]https://raw.githubusercontent.com/lbnandy/palico-companion/24e901a2e75e040a85b7d4cbb4d24fb0b81d910b/docs/images/04-equipment-zh-compact.png[/img]
 
 [h2]装备升级与呆猫指南[/h2]
 收集材料，为呆猫制作新装备，也能强化已有装备。装备怎么做、怎么用、还能怎样升级，都能在游戏内的呆猫指南里查到。
@@ -46,7 +46,7 @@
 [*][url=https://steamcommunity.com/sharedfiles/filedetails/?id=2563309347]魔法存储[/url]：允许呆猫使用后，它会帮你存东西、补充消耗品。
 [*][url=https://steamcommunity.com/sharedfiles/filedetails/?id=2797518634]更好的体验[/url]：无限弹药功能对呆猫也有效。
 [*][url=https://steamcommunity.com/sharedfiles/filedetails/?id=2824688072]灾厄[/url]：遇到相关敌人和事件时，有专门的台词。
-[*][url=https://steamcommunity.com/sharedfiles/filedetails/?id=2909886416]瑟银[/url]：支持吟游诗人乐器、治疗工具与投掷武器。让呆猫演奏乐曲提供增益，或拿起治疗武器为你恢复生命。
+[*][url=https://steamcommunity.com/sharedfiles/filedetails/?id=2909886416]瑟银[/url]：支持吟游诗人乐器、治疗工具与投掷武器。让呆猫演奏乐曲提供增益，或拿起治疗武器为你恢复生命。你也可以用能治疗队友的武器给它回血。
 [/list]
 这些模组都不是必需的。
 

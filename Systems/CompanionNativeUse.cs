@@ -25,6 +25,17 @@ public sealed partial class CompanionNativeUse {
     internal void PlacementAim(Vector2 aim)=>Aim=aim;
     internal Vector2 ReplicaItemOffset;
     CompanionPose replicaPose;
+    double inputTime=-1;
+    bool inputChannel,inputUse;
+    internal void ReceiveInput(double time,bool channel,bool useItem){
+        if(time<inputTime)return;
+        inputTime=time;inputChannel=channel;inputUse=useItem;
+        ApplyReplicaInput();
+    }
+    void ApplyReplicaInput(){
+        if(inputTime<0)return;
+        Actor.channel=inputChannel;Actor.controlUseItem=inputUse;Actor.releaseUseItem=!inputUse;
+    }
     internal void ReceivePose(CompanionPose pose){replicaPose=pose;ApplyReplicaPose();}
     void ApplyReplicaPose(){
         Actor.direction=replicaPose.ItemDirection==0?Cat?.direction??1:replicaPose.ItemDirection;
@@ -158,7 +169,7 @@ public sealed partial class CompanionNativeUse {
         CountOwnedProjectiles();
         using(new Scope(this))Actor.UpdateBuffs(Actor.whoAmI);Actor.maxMinions=MinionLimit(owner);Actor.maxTurrets=SentryLimit(owner);
         Actor.slotsMinions=0;Actor.numMinions=0;
-        Actor.selectedItem=0;LocateActor(cat);ApplyReplicaPose();Actor.dead=false;
+        Actor.selectedItem=0;LocateActor(cat);ApplyReplicaPose();ApplyReplicaInput();Actor.dead=false;
         Actor.statMana=state.Vitals.Mana;Actor.statManaMax2=state.Vitals.MaxMana;Actor.statLife=state.Vitals.Health;
         Actor.itemLocation=Actor.Center+ReplicaItemOffset;Actor.lastVisualizedSelectedItem=Actor.HeldItem.Clone();
     }
@@ -182,6 +193,7 @@ public sealed partial class CompanionNativeUse {
         LocateActor(cat);
         // Rebuild temporary effects before applying buffs, as Player.Update
         // does. Additive effects must not accumulate on a persistent actor.
+        CompanionCrossMod.BeforeReset?.Invoke(this);
         if(!ResetEffects()){Cancel();return;}
         // Repeated AI attacks use vanilla's hold-to-repeat policy. ItemCheck
         // owns cadence, reuse delay and CanAutoReuseItem overrides; manually
@@ -195,7 +207,6 @@ public sealed partial class CompanionNativeUse {
         if(weapon.consumable)Actor.inventory[0].stack=weapon.stack;
         Actor.maxMinions=MinionLimit(owner);Actor.maxTurrets=SentryLimit(owner);
         Actor.downedDD2EventAnyDifficulty=owner.downedDD2EventAnyDifficulty;
-        Actor.manaCost=state.Training.Find(state,3)>=0&&state.Training.ManaDance>0&&state.Training.ManaTarget==1?.9f-.05f*state.Training.Tier:1;
         ApplyCombatModifiers(Actor,state,weapon);
         // Map only the cat's bag. Mod weapons may consume materials rather than
         // ammo (for example Wulfrum scrap); never borrow the human inventory.
@@ -255,10 +266,17 @@ public sealed partial class CompanionNativeUse {
         wants=channelInput.Hold(this,weapon,target,wants);
         if(wants){cat.direction=Aim.X<cat.Center.X?-1:1;Actor.direction=cat.direction;}
         PressedThisTick=wants&&(!Actor.controlUseItem||Actor.itemAnimation==0);
-        Actor.controlUseItem=wants;Actor.releaseUseItem=Actor.itemAnimation==0;Actor.controlUseTile=false;
+        Actor.controlUseItem=wants;Actor.releaseUseItem=!wants||Actor.itemAnimation==0;Actor.controlUseTile=false;
         if(!wants)Actor.channel=false;
         int stackBefore=Actor.HeldItem.stack;
-        try {using(new Scope(this)){Actor.UpdateMeleeHitCooldowns();if(Actor.attackCD>0)Actor.attackCD--;Actor.ItemCheck();}}
+        try {using(new Scope(this)){
+            Actor.UpdateMeleeHitCooldowns();if(Actor.attackCD>0)Actor.attackCD--;Actor.ItemCheck();
+            // PlayerFrame normally dispatches this after ItemCheck. Some items
+            // use it for aim or magazine accounting as well as body animation.
+            // Run once on authority; drawing/replicas must never spend ammo.
+            if(Actor.itemAnimation>0&&Actor.HeldItem.useStyle!=ItemUseStyleID.None)ItemLoader.UseItemFrame(Actor.HeldItem,Actor);
+            CompanionCrossMod.MaintainHeldWeapon?.Invoke(this);
+        }}
         finally {
             if(materials)for(int i=0;i<Math.Min(state.Bag.Length,49);i++)state.Bag[i]=Actor.inventory[i+1];
             state.Vitals.ManaDelay=Math.Max(0,(int)Math.Ceiling(Actor.manaRegenDelay));state.Vitals.Mana=Math.Clamp(Actor.statMana,0,state.Vitals.MaxMana);
@@ -279,15 +297,19 @@ public sealed partial class CompanionNativeUse {
     }
     static readonly Item Empty=new();
     // Shared by authoritative attacks, network presentation and an inactive
-    // companion's tooltip. These are companion effects, never owner equipment.
+    // companion's tooltip. Copy numerical modifiers before the cat's own
+    // effects; do not run the owner's equipment hooks on a second actor.
     internal static void ApplyCombatModifiers(Player actor,CompanionPlayer state,Item weapon) {
+        CompanionCombatInheritance.Apply(actor,state.Player);
         bool summon=weapon.CountsAsClass(DamageClass.Summon);
-        actor.GetDamage(DamageClass.Generic)=StatModifier.Default*(summon?1:state.Training.Damage(state));
-        actor.GetAttackSpeed(DamageClass.Generic)=summon?1:state.Training.Speed(state);
+        actor.GetDamage(DamageClass.Generic)*=summon?1:state.Training.Damage(state);
+        actor.GetAttackSpeed(DamageClass.Generic)+=(summon?1:state.Training.Speed(state))-1;
         // Minions may update damage while a different class is held. Their
         // drum bonus is applied at impact; do not inherit it a second time.
-        actor.GetDamage(DamageClass.Summon)=StatModifier.Default*(summon?1:1/state.Training.Damage(state));
-        actor.GetDamage(DamageClass.Magic)=StatModifier.Default*state.Vitals.MagicMultiplier;
+        actor.GetDamage(DamageClass.Summon)*=summon?1:1/state.Training.Damage(state);
+        actor.GetDamage(DamageClass.Magic)*=state.Vitals.MagicMultiplier;
+        if(state.Training.Find(state,3)>=0&&state.Training.ManaDance>0&&state.Training.ManaTarget==1)
+            actor.manaCost*=.9f-.05f*state.Training.Tier;
     }
     readonly List<DrawData> drawCache=new();
     // Projectile.Update enforces maxMinions, including reconnecting segmented
@@ -404,11 +426,12 @@ public sealed partial class CompanionNativeUse {
     public void RestoreMana(int required) {
         if(!Available||!(CompanionNetwork.Server?State.NetAutoHeal:ModContent.GetInstance<CompanionConfig>().AutoHeal))return;
         State.Vitals.Mana=Math.Clamp(Actor.statMana,0,State.Vitals.MaxMana);
+        float previousSickness=State.Vitals.MagicMultiplier;
         int restored=Drink(true,required,out int potion);
         if(restored==0)return;
         WaitingForMana=false;
         Actor.statMana=State.Vitals.Mana;
-        Actor.GetDamage(DamageClass.Magic)=StatModifier.Default*State.Vitals.MagicMultiplier;
+        Actor.GetDamage(DamageClass.Magic)*=State.Vitals.MagicMultiplier/previousSickness;
         (Cat.ModProjectile as CompanionCat)?.ActionVisual.Begin((CompanionCat)Cat.ModProjectile,CompanionGesture.Drink,potion);
         CompanionFeedback.Show(2,Cat.Center,restored,NativeDrink&&!CompanionNetwork.Server?"skill":"");
         State.Expression.Say(State,Cat,"ManaPotion",Terraria.GameContent.UI.EmoteID.ItemManaPotion);
@@ -429,11 +452,17 @@ public sealed class CompanionOwnedShot : GlobalProjectile {
     internal bool PendingNativeLinkRepair;
     internal bool HasRunAI;
     int unboundTicks;
+    ulong inputTime;byte input;
     public override void SendExtraAI(Projectile p,Terraria.ModLoader.IO.BitWriter bits,System.IO.BinaryWriter w){
-        bits.WriteBit(Context!=null);if(Context!=null){w.Write(Context.State.Player.whoAmI);w.Write(Context.Cat.identity);w.Write(((CompanionCat)Context.Cat.ModProjectile).NetworkInstance);w.Write(Thrown);w.Write(Summoned);}
+        bits.WriteBit(Context!=null);if(Context!=null){w.Write(Context.State.Player.whoAmI);w.Write(Context.Cat.identity);w.Write(((CompanionCat)Context.Cat.ModProjectile).NetworkInstance);w.Write(Thrown);w.Write(Summoned);
+            // A projectile may arrive before the cat's next pose. Carry the
+            // matching input so native AI cannot mistake visual buffering for
+            // a release. The latest server tick wins across both packet paths.
+            w.Write((ulong)Main.GameUpdateCount);w.Write((byte)((Context.Actor.channel?1:0)|(Context.Actor.controlUseItem?2:0)));w.Write(p.timeLeft);
+        }
     }
     public override void ReceiveExtraAI(Projectile p,Terraria.ModLoader.IO.BitReader bits,System.IO.BinaryReader r){
-        if(bits.ReadBit()){int bondOwner=r.ReadInt32(),identity=r.ReadInt32();ulong instance=r.ReadUInt64();bool thrown=r.ReadBoolean(),summoned=r.ReadBoolean();if(CompanionNetwork.Client){BondOwner=bondOwner;CatIdentity=identity;CatInstance=instance;Thrown=thrown;Summoned=summoned;PendingNativeLinkRepair=true;Resolve(p);
+        if(bits.ReadBit()){int bondOwner=r.ReadInt32(),identity=r.ReadInt32();ulong instance=r.ReadUInt64();bool thrown=r.ReadBoolean(),summoned=r.ReadBoolean();ulong time=r.ReadUInt64();byte controls=r.ReadByte();int lifetime=r.ReadInt32();if(CompanionNetwork.Client){p.timeLeft=Math.Max(1,lifetime);BondOwner=bondOwner;CatIdentity=identity;CatInstance=instance;Thrown=thrown;Summoned=summoned;inputTime=time;input=controls;PendingNativeLinkRepair=true;Resolve(p);Context?.ReceiveInput(inputTime,(input&1)!=0,(input&2)!=0);
 }}
         else if(CompanionNetwork.Client){Context=null;CatIdentity=-1;CatInstance=0;Thrown=false;Summoned=false;PendingNativeLinkRepair=false;}
     }
@@ -442,7 +471,7 @@ public sealed class CompanionOwnedShot : GlobalProjectile {
         if(Context!=null){if(Context.Cat is {active:true}&&Context.Cat.ModProjectile is CompanionCat live&&live.NetworkInstance==CatInstance)return;Context=null;}
         foreach(var cat in Main.projectile)
         if(cat.active&&cat.ModProjectile is CompanionCat c&&c.OwnerIndex==BondOwner&&c.NetworkInstance==CatInstance){
-            var owner=Main.player[BondOwner];Context=c.Weapons;c.Weapons.BindReplica(owner,owner.GetModPlayer<CompanionPlayer>(),cat);return;
+            var owner=Main.player[BondOwner];Context=c.Weapons;Context.ReceiveInput(inputTime,(input&1)!=0,(input&2)!=0);c.Weapons.BindReplica(owner,owner.GetModPlayer<CompanionPlayer>(),cat);return;
         }
     }
     internal bool Waiting(Projectile p){

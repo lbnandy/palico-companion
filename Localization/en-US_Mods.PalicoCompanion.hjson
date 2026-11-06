@@ -177,6 +177,18 @@ Configs: {
 				'''
 		}
 
+		CombatInheritancePercent: {
+			Label: Combat stats inherited (%)
+			Tooltip:
+				'''
+				Inherit damage-class bonuses to damage, critical chance, attack speed, knockback, armor penetration and supported resources
+				0% disables inheritance; 100% inherits all bonuses. At 50%, an owner's +60% damage becomes +30%
+				Native on/off effects such as ammo conservation and Archery are enabled above 0%, not scaled; equipment triggers are not copied
+				Default: 100%. Health, defense and regeneration have separate settings; damage scaling applies afterwards
+				Presets do not change this setting; controlled by the host in multiplayer
+				'''
+		}
+
 		DamagePercent: {
 			Label: Damage (%)
 			Tooltip: Scales hits from your Palico's weapons, minions, sentries and offensive support gear. Based on the damage your Palico would otherwise deal, not your damage; 100% leaves it unchanged. Does not scale damage over time, such as poison or fire.

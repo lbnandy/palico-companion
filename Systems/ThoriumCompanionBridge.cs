@@ -41,6 +41,7 @@ public sealed class ThoriumCompanionBridge:ModSystem {
         mouseLookup=new Hook(typeof(MousePlayer).GetMethod("TryGetMousePosition")!,GetMouse);
         healing=new Hook(typeof(PlayerHelper).GetMethod("HealLife")!,Healed);
         CompanionCrossMod.SupportTool=Support;CompanionCrossMod.SafeThrow+=Throw;
+        CompanionCrossMod.InheritStats+=Stats;
         CompanionCrossMod.UpdateResources+=Update;CompanionCrossMod.SupportTarget=Target;
         CompanionCrossMod.ResourceReady+=Ready;CompanionCrossMod.WeaponEffect=Effect;
         CompanionCrossMod.PlanUse=Plan;CompanionCrossMod.WeaponReach+=Range;
@@ -50,10 +51,24 @@ public sealed class ThoriumCompanionBridge:ModSystem {
         instrumentEmpower?.Dispose();instrumentEmpower=null;
         playerLookup?.Dispose();mouseLookup?.Dispose();playerLookup=mouseLookup=null;
         healing?.Dispose();healing=null;
+        CompanionCrossMod.InheritStats-=Stats;
         CompanionCrossMod.UpdateResources-=Update;CompanionCrossMod.SupportTool=null;CompanionCrossMod.SafeThrow-=Throw;
         CompanionCrossMod.SupportTarget=null;CompanionCrossMod.ResourceReady-=Ready;CompanionCrossMod.WeaponEffect=null;
         CompanionCrossMod.PlanUse=null;CompanionCrossMod.WeaponReach-=Range;
         resources=new();empower=null;playSound=null;findAlly=null;
+    }
+    static void Stats(Player actor,Player owner,float ratio){
+        var target=actor.GetModPlayer<ThoriumPlayer>();var source=owner.GetModPlayer<ThoriumPlayer>();
+        // Healing amount was already shared before combat inheritance existed.
+        target.healBonus=Math.Max(0,source.healBonus);
+        target.healingSpeed=CompanionCombatInheritance.Blend(1f,source.healingSpeed,ratio);
+        target.bardResourceMax=Math.Clamp(source.bardResourceMax,10,40);
+        target.bardResourceMax2=CompanionCombatInheritance.Blend(target.bardResourceMax,Math.Clamp(source.bardResourceMax2,target.bardResourceMax,target.bardResourceMax+20),ratio);
+        target.consumedInspirationGem=source.consumedInspirationGem;
+        target.inspirationRegenBonus=CompanionCombatInheritance.Blend(target.consumedInspirationGem?1.1f:1,source.inspirationRegenBonus,ratio);
+        target.inspirationConsume=source.inspirationConsume*ratio;
+        target.throwerExhaustionMax=CompanionCombatInheritance.Blend(1200,source.throwerExhaustionMax,ratio);
+        target.throwerExhaustionRegenBonus=source.throwerExhaustionRegenBonus*ratio;
     }
     static bool Support(Item item)=>item.ModItem is ThoriumItem {isHealer:true}&&item.damage<=0&&
         item.CountsAsClass(ThoriumDamageBase<HealerTool>.Instance)&&
@@ -63,19 +78,16 @@ public sealed class ThoriumCompanionBridge:ModSystem {
     static void Update(CompanionNativeUse use){
         if(CompanionNetwork.Client)return;
         var clock=resources.GetOrCreateValue(use);if(clock.Tick==Main.GameUpdateCount)return;clock.Tick=Main.GameUpdateCount;
-        var actor=use.Actor;var tp=actor.GetModPlayer<ThoriumPlayer>();var owner=use.State.Player.GetModPlayer<ThoriumPlayer>();
+        var actor=use.Actor;var tp=actor.GetModPlayer<ThoriumPlayer>();
         actor.team=use.State.Player.team;actor.hostile=use.State.Player.hostile;
-        // Permanent resource progression, not the human's current resource or
-        // equipment triggers. ResetEffects has already rebuilt native defaults.
-        tp.bardResourceMax=tp.bardResourceMax2=Math.Clamp(owner.bardResourceMax,10,40);
+        // Stats supplies resource limits on every peer; only the authority
+        // advances the companion's own resource and recovery clocks.
         tp.bardResource=Math.Clamp(tp.bardResource,0,tp.bardResourceMax2);
-        tp.consumedInspirationGem=owner.consumedInspirationGem;
-        tp.healBonus=Math.Max(0,owner.healBonus);
         // Thorium 1.7.2 keeps these clocks inline in PostUpdateEquips. Advance
         // only those clocks once per simulation tick; running that entire hook
         // would also mutate shared UI/world state and trigger equipment effects.
         if(tp.bardResource<tp.bardResourceMax2){
-            if(tp.inspirationRegenTimer<8)tp.inspirationRegenTimer+=(int)((1+tp.inspirationRegenBase)*(tp.consumedInspirationGem?1.1f:1));
+            if(tp.inspirationRegenTimer<8)tp.inspirationRegenTimer+=(int)((1+tp.inspirationRegenBase)*tp.inspirationRegenBonus);
             else {tp.inspirationRegenBase=Math.Min(5,tp.inspirationRegenBase+.15f);tp.inspirationRegenTimer=0;tp.bardResource++;}
             if(tp.bardResource==tp.bardResourceMax2)tp.inspirationRegenBase=0;
         }
@@ -128,9 +140,15 @@ public sealed class ThoriumCompanionBridge:ModSystem {
         // Renew is natively a self heal; never redirect it to the owner.
         if(use.Actor.HeldItem.ModItem is ThoriumMod.Items.HealerItems.Renew)
             return use.State.Vitals.Health<use.State.Vitals.MaxHealth?use.Actor:null;
-        Player best=null;float score=float.MaxValue;
+        // Thorium declares who each healing tool is intended for. Include the
+        // companion only for native self-healing tools; projectile eligibility,
+        // healing amount, pickup range and resource cost remain native.
+        var healingType=(use.Actor.HeldItem.ModItem as ThoriumItem)?.healType??HealType.None;
+        bool self=healingType is HealType.Player or HealType.AllyAndPlayer;
+        Player best=self&&use.State.Vitals.Health<use.State.Vitals.MaxHealth?use.Actor:null;
+        float score=best!=null?(float)use.State.Vitals.Health/use.State.Vitals.MaxHealth*1000:float.MaxValue;
         foreach(var player in Main.ActivePlayers){
-            if(player==use.Actor||player.dead||player.ghost||player.statLife>=player.statLifeMax2||
+            if(healingType==HealType.Player||player==use.Actor||player.dead||player.ghost||player.statLife>=player.statLifeMax2||
                 use.Actor.team!=0&&player.team!=use.Actor.team||player.hostile&&(player.team==0||player.team!=use.Actor.team))continue;
             float distance=Vector2.DistanceSquared(use.Cat.Center,player.Center);
             if(distance>600*600||!CompanionCombatReach.Clear(use.Cat.Center,player.Center))continue;
