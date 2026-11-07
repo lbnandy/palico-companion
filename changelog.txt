@@ -1,18 +1,4 @@
-1.2
-
-- 新增独立配装模式，可为呆猫装备护甲和饰品；也可继续选择继承玩家属性，切换模式时保留装备。
-- 新增首次见面的属性模式选择、属性面板和套装奖励提示，调整相关设置的分类与显示。
-- 接入护甲、套装及饰品的多种被动效果，补充灾厄、瑟银相关适配。
-- 补齐法狗装备的被动效果、计时和资源恢复，修正多人服务器上的效果执行中断；修复装备致死保命、生命／魔力基础值及切换模式清空保命冷却的问题。
-- 部分支援装备升级后会缩短冷却时间。
-- 新增传送音效独立开关，并调整反复传送相关处理。
-- 呆猫拾取物品时也会遵守主人的负重石限制。
-- 修复与 MEAC 同开时，永夜刃等武器可能朝向错误，以及挥剑中断后呆猫无法继续攻击或召唤的问题。
-- 修复 Koishi 原版武器重做中部分枪械打空弹匣后不换弹的问题，并修正联机换弹状态同步。
-- 修复同时装备召唤武器时，反复尝试召唤可能打断弑君等武器预热的问题。
-- 修复与灾厄、法狗同开时，清理呆猫弹幕可能报错、导致突变体转阶段中断的问题。
-- 修复呆猫接触终灾黑洞后反复触发玩家死亡提示、却不正常倒地的问题；保留黑洞原本的持续伤害和呆猫复活保护。
-- 更新呆猫指南及中英文提示，补充属性模式、装备与收藏共用等说明。
+1.2 Update
 
 - Added independent equipment mode with armor and accessory slots, alongside player-stat inheritance. Equipment is retained when switching modes.
 - Added an attribute-mode choice on first meeting, a stats panel and armor-set bonus tooltips; reorganized related settings and conditional visibility.
