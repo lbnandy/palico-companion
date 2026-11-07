@@ -44,12 +44,17 @@ public sealed class CompanionFeedback {
     }
     public bool Hurt(CompanionPlayer state,Projectile cat,int damage,bool boss,float penetration=0) {
         if(damage<=0||state.Vitals.Downed||state.Vitals.Immunity>0)return false;
-        int before=state.Vitals.Health;
         damage=CompanionVitals.AfterDefense(damage,state.Vitals.EffectiveDefense,penetration);
+        if(CompanionEquipment.Independent(state))damage=Math.Max(1,(int)(damage*(1-state.Equipment.Endurance)));
         damage=state.Training.Shield(state,damage,true);
-        if(!state.Vitals.HurtFinal(damage,boss))return false;
+        return HurtFinal(state,cat,damage,boss);
+    }
+    internal bool HurtFinal(CompanionPlayer state,Projectile cat,int damage,bool boss,int immunityTicks=60,bool showDamage=true){
+        int before=state.Vitals.Health;
+        if(!state.Vitals.HurtFinal(damage,boss,immunityTicks:immunityTicks))return false;
         int lost=before-state.Vitals.Health;
-        Show(0,cat.Center,lost);
+        if(showDamage)Show(0,cat.Center,lost);
+        else if(!CompanionNetwork.Server)SoundEngine.PlaySound(SoundID.NPCHit1,cat.Center);
         // Native town-cat damage sound, with a restrained vocal response.
         Voice(cat,state.Vitals.Downed?"Downed":"Hurt");
         return true;

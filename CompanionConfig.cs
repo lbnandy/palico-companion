@@ -21,10 +21,19 @@ public enum CatCartMode {
     [LabelKey("$Mods.PalicoCompanion.CartChoices.EveryTime")] EveryTime,
     [LabelKey("$Mods.PalicoCompanion.CartChoices.Off")] Off
 }
+[JsonConverter(typeof(StringEnumConverter))]
+public enum CompanionAttributeMode {
+    [LabelKey("$Mods.PalicoCompanion.Equipment.Inherited")] Inherited,
+    [LabelKey("$Mods.PalicoCompanion.Equipment.Independent")] Independent
+}
 public sealed class CompanionConfig : ModConfig {
     public override ConfigScope Mode => ConfigScope.ClientSide;
     [Header("Companion")]
     [DefaultValue(true)] public bool Enabled = true;
+    // Stored locally; the abilities page presents this personal choice.
+    [JsonProperty("AttributeMode"),DefaultValue(CompanionAttributeMode.Inherited)]
+    CompanionAttributeMode attributeMode=CompanionAttributeMode.Inherited;
+    [JsonIgnore] public CompanionAttributeMode AttributeMode { get=>attributeMode; set=>attributeMode=value; }
     [DefaultValue(true)] public bool Combat = true;
     [DefaultValue(true)] public bool AutoHeal = true;
 
@@ -77,6 +86,7 @@ public sealed class CompanionConfig : ModConfig {
     [DefaultValue(true)] public bool Chatter = true;
     [DefaultValue(true)] public bool Emotes = true;
     [DefaultValue(true)] public bool CatSounds = true;
+    [DefaultValue(true)] public bool TeleportSounds = true;
     [DefaultValue(CatCartMode.EveryTime),Dropdown] public CatCartMode CatCart = CatCartMode.EveryTime;
     [DefaultValue(true)] public bool TrainingHints = true;
 
@@ -86,9 +96,15 @@ public sealed class CompanionConfig : ModConfig {
 
     public void Apply(CompanionPlayer s) {
         Systems.CompanionExclusions.Apply(this,s);
+        if(!Systems.CompanionNetwork.Client)Systems.CompanionEquipment.SetMode(s,AttributeMode==CompanionAttributeMode.Independent);
         s.Enabled=Enabled&&!s.Stowed;s.Pickup=Pickup;s.Combat=Combat;s.Torches=Torches;s.Bridges=Bridges;s.Ropes=Ropes;s.AutoLogistics=AutoLogistics;Systems.CompanionNetwork.Configure(s);
     }
     bool savingDisplay;
+    internal void SelectAttributeMode(CompanionAttributeMode mode) {
+        if(AttributeMode==mode)return;
+        var pending=(CompanionConfig)Clone();pending.AttributeMode=mode;
+        SaveChanges(pending);
+    }
     internal void SaveDisplayChanges() {
         // HUD shortcuts save locally without reapplying gameplay preferences.
         try { savingDisplay=true;SaveChanges(); }

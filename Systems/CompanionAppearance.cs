@@ -12,6 +12,8 @@ using Terraria.Localization;
 using Terraria.UI;
 using Terraria.UI.Gamepad;
 using Terraria.Initializers;
+using Terraria.ModLoader;
+using Terraria.ModLoader.UI;
 
 namespace PalicoCompanion.Systems;
 
@@ -25,10 +27,11 @@ public sealed class CompanionAppearance : UIState {
     UIText nameError;NameField nameField;
     readonly List<(string key,UIElement element,bool slider)> navigation=new();
     internal int Draft {get;private set;}
+    CompanionAttributeMode draftMode;
     int frames;
     internal static CompanionAppearance Current {get;private set;}
     internal static readonly int[] Presets=[CompanionPalette.Default,0x8C639D,0x5B886E,0xAC6F53,0x9D626C,0x9E9058];
-    public CompanionAppearance(CompanionPlayer state,bool first=false){this.state=state;this.first=first;Text=state.CatName;SetColor(state.HoodColor);}
+    public CompanionAppearance(CompanionPlayer state,bool first=false){this.state=state;this.first=first;Text=state.CatName;SetColor(state.HoodColor);draftMode=ModContent.GetInstance<CompanionConfig>().AttributeMode;}
     internal static void Open(CompanionPlayer state,bool first=false){state.PanelOpen=false;TrainingPanel.Open=false;var ui=new CompanionAppearance(state,first);Current=ui;IngameFancyUI.OpenUIState(ui);}
     internal void SetColor(int rgb){Draft=CompanionPalette.Valid(rgb);hsl=Main.rgbToHsl(CompanionPalette.ColorOf(Draft));hsl.Z=Math.Clamp((hsl.Z-.15f)/.85f,0,1);}
     // Same lightness range as vanilla UICharacterCreation, avoiding crushed blacks.
@@ -39,7 +42,9 @@ public sealed class CompanionAppearance : UIState {
     internal void Confirm()=>Submit();
     public void Submit(){
         if(!CompanionNaming.Rename(state,Text)){nameError?.SetText(L("NameEmpty"));FocusName();return;}
-        state.HoodColor=Draft;state.Bonded=true;CompanionNetwork.UpdateIdentity(state);Finish();
+        state.HoodColor=Draft;state.Bonded=true;
+        if(first)ModContent.GetInstance<CompanionConfig>().SelectAttributeMode(draftMode);
+        CompanionNetwork.UpdateIdentity(state);Finish();
     }
     public void Cancel(){if(first){state.Bonded=true;CompanionNetwork.UpdateIdentity(state);}Finish();}
     internal void Close()=>Cancel();
@@ -55,7 +60,7 @@ public sealed class CompanionAppearance : UIState {
     }
     public override void OnDeactivate(){PlayerInput.WritingText=false;if(Current==this)Current=null;base.OnDeactivate();}
     public override void OnInitialize(){
-        var panel=new UIPanel();panel.Width.Set(520,0);panel.Height.Set(316,0);panel.HAlign=panel.VAlign=.5f;Append(panel);
+        var panel=new UIPanel();panel.Width.Set(520,0);panel.Height.Set(first?470:316,0);panel.HAlign=panel.VAlign=.5f;Append(panel);
         var title=new UIText(Language.GetText("Mods.PalicoCompanion.UI."+(first?"AppearanceMeetTitle":"AppearanceTitle")),1f);title.Top.Set(7,0);title.Left.Set(8,0);panel.Append(title);
         void Button(string label,float x,float y,float width,Action action){var b=new CenteredTextButton(Language.GetText("Mods.PalicoCompanion.UI."+label));b.Left.Set(x,0);b.Top.Set(y,0);b.Width.Set(width,0);b.Height.Set(34,0);b.OnLeftClick+=(_,_)=>action();panel.Append(b);navigation.Add((label,b,false));}
         void Label(string text,int row){var label=new RowLabel(Language.GetText("Mods.PalicoCompanion.UI."+text));label.Left.Set(180,0);label.Top.Set(40+row*36,0);label.Width.Set(112,0);label.Height.Set(34,0);panel.Append(label);}
@@ -81,9 +86,37 @@ public sealed class CompanionAppearance : UIState {
             swatch.Left.Set(180+i*52,0);swatch.Top.Set(195,0);swatch.Width.Set(40,0);swatch.Height.Set(32,0);swatch.OnLeftClick+=(_,_)=>SetColor(rgb);panel.Append(swatch);
             navigation.Add(("preset-"+i,swatch,false));
         }
-        Button("AppearanceReset",8,245,152,()=>SetColor(CompanionPalette.Default));
-        Button(first?"AppearanceLater":"AppearanceCancel",172,245,152,Cancel);Button(first?"AppearanceStart":"AppearanceConfirm",336,245,152,Confirm);
+        if(first)AddModeChoice(panel);
+        int bottom=first?399:245;
+        Button("AppearanceReset",8,bottom,152,()=>SetColor(CompanionPalette.Default));
+        Button(first?"AppearanceLater":"AppearanceCancel",172,bottom,152,Cancel);Button(first?"AppearanceStart":"AppearanceConfirm",336,bottom,152,Confirm);
         previousLeft=Main.mouseLeft;Main.clrInput();
+    }
+    void AddModeChoice(UIPanel panel) {
+        var heading=new UIText(Language.GetText("Mods.PalicoCompanion.Settings.MeetMode"),.85f);
+        heading.Left.Set(8,0);heading.Top.Set(245,0);panel.Append(heading);
+        var description=new UIText("",.75f){IsWrapped=true};
+        description.Left.Set(8,0);description.Top.Set(319,0);description.Width.Set(480,0);description.Height.Set(42,0);panel.Append(description);
+        void Describe()=>description.SetText(Language.GetTextValue("Mods.PalicoCompanion.Settings.Meet"+draftMode));
+        Describe();
+        int column=0;
+        foreach(var mode in new[]{CompanionAttributeMode.Inherited,CompanionAttributeMode.Independent}) {
+            var button=new CenteredTextButton(Language.GetText("Mods.PalicoCompanion.Equipment."+mode));
+            button.Left.Set(8+column++*244,0);button.Top.Set(273,0);button.Width.Set(236,0);button.Height.Set(34,0);
+            button.OnLeftClick+=(_,_)=>{
+                if(draftMode!=mode)Terraria.Audio.SoundEngine.PlaySound(Terraria.ID.SoundID.MenuTick);
+                draftMode=mode;nameFocused=false;Describe();
+            };
+            void Style(){
+                bool selected=draftMode==mode;
+                button.BackgroundColor=selected?new Color(48,85,108):button.IsMouseHovering?UICommon.DefaultUIBlueMouseOver:UICommon.DefaultUIBlue;
+                button.BorderColor=selected?new Color(143,203,207):Color.Black;
+            }
+            button.OnUpdate+=_=>Style();Style();
+            panel.Append(button);navigation.Add(("mode-"+mode,button,false));
+        }
+        var hint=new UIText(Language.GetText("Mods.PalicoCompanion.Settings.MeetModeHint"),.7f){TextColor=new Color(190,200,220),IsWrapped=true};
+        hint.Left.Set(8,0);hint.Top.Set(365,0);hint.Width.Set(480,0);panel.Append(hint);
     }
     public override void Update(GameTime gameTime){
         base.Update(gameTime);frames++;Main.LocalPlayer.mouseInterface=true;

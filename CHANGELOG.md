@@ -1,5 +1,35 @@
 # Changelog
 
+## 1.2 — 2026-11-08
+
+- 新增独立配装模式，可为呆猫装备护甲和饰品；也可继续选择继承玩家属性，切换模式时保留装备。
+- 新增首次见面的属性模式选择、属性面板和套装奖励提示，调整相关设置的分类与显示。
+- 接入护甲、套装及饰品的多种被动效果，补充灾厄、瑟银相关适配。
+- 补齐法狗装备的被动效果、计时和资源恢复，修正多人服务器上的效果执行中断；修复装备致死保命、生命／魔力基础值及切换模式清空保命冷却的问题。
+- 部分支援装备升级后会缩短冷却时间。
+- 新增传送音效独立开关，并调整反复传送相关处理。
+- 呆猫拾取物品时也会遵守主人的负重石限制。
+- 修复与 MEAC 同开时，永夜刃等武器可能朝向错误，以及挥剑中断后呆猫无法继续攻击或召唤的问题。
+- 修复 Koishi 原版武器重做中部分枪械打空弹匣后不换弹的问题，并修正联机换弹状态同步。
+- 修复同时装备召唤武器时，反复尝试召唤可能打断弑君等武器预热的问题。
+- 修复与灾厄、法狗同开时，清理呆猫弹幕可能报错、导致突变体转阶段中断的问题。
+- 修复呆猫接触终灾黑洞后反复触发玩家死亡提示、却不正常倒地的问题；保留黑洞原本的持续伤害和呆猫复活保护。
+- 更新呆猫指南及中英文提示，补充属性模式、装备与收藏共用等说明。
+
+- Added independent equipment mode with armor and accessory slots, alongside player-stat inheritance. Equipment is retained when switching modes.
+- Added an attribute-mode choice on first meeting, a stats panel and armor-set bonus tooltips; reorganized related settings and conditional visibility.
+- Added support for various passive armor, set and accessory effects, including additional Calamity and Thorium integrations.
+- Added missing Fargo equipment passives, timers and resource recovery, and fixed interrupted effect updates on dedicated servers. Fixed equipment death prevention, permanent life/mana baselines and revival cooldowns being cleared when switching modes.
+- Upgrading selected support gadgets now reduces their cooldowns.
+- Added a separate teleport-sound toggle and adjusted repeated-teleport handling.
+- Companion item pickups now respect the owner's Encumbering Stone.
+- Fixed incorrect aiming with MEAC weapons such as Night's Edge, and companions becoming unable to attack or summon after an interrupted melee attack.
+- Fixed some guns from Koishi's vanilla weapon rework failing to reload after emptying their magazines, and corrected multiplayer reload-state synchronization.
+- Fixed repeated summon attempts interrupting weapon windup, including Kingsbane, when a summon weapon is also equipped.
+- Fixed errors during companion projectile cleanup with Calamity and Fargo's Souls that could interrupt the Mutant's phase transition.
+- Fixed repeated player-death notifications without proper companion knockdown when the Palico touches Supreme Calamitas's maelstrom. Native continuous damage and companion respawn protection are preserved.
+- Updated the Palico Guide and bilingual tooltips for attribute modes, equipment and shared favorites.
+
 ## 1.1.7 — 2026-11-07
 
 - 新增战斗属性继承比例（0%～100%），按武器职业继承主人的伤害、暴击、攻速、击退、穿甲等数值加成；新配置默认 100%，旧配置维持原有行为，可自行开启。护甲、饰品的特殊触发效果不随之复制。

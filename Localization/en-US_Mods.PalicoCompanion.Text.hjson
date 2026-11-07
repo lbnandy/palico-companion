@@ -111,6 +111,8 @@ CompanionNetworkInventory: {
 }
 
 CompanionPickup: {
+	StoneLocked: While in the Palico's backpack, prevents the Palico from collecting ordinary ground items
+	StoneUnlocked: Unlocked; does not restrict Palico item pickup
 	LootBlocked: Cannot reach those items; continuing other tasks
 	PickingUp: "Collecting "
 }
@@ -290,15 +292,15 @@ TreeAssist: {
 }
 
 Catalog: {
-	GigaBarrelBomb: Hoists a large barrel and charges nearby ground enemies, dealing 240 / 960 / 2400 damage in an 18×18-tile area; 30-second cooldown. Before upgrading, base damage rises to 480 in Hardmode. Automatically targets groups or grounded bosses; manual use also targets single enemies. Requires a safe ground route. Airborne use first finds a safe place to land; this can also happen automatically during combat. Cancelled charges do not spend the full cooldown. Does not damage tiles, players or your Palico.
-	HoneyCage: Restores 15 / 30 / 50 life to you immediately, then another 5 / 10 / 15 life over 5 seconds. Triggers at 70% life or below when you are missing at least 20 / 40 / 65 life. 60-second cooldown. Works during Potion Sickness.
-	GuardShield: Blocks one heavy hit against you, preventing up to 15 / 30 / 40 damage. 45-second cooldown. When you are above 70% life, it can instead protect your Palico at 35% life or below, or from a lethal hit. Both uses share a cooldown.
-	CleansingPot: Removes one common debuff from you, such as Poisoned, On Fire! or Slow, prioritizing more harmful effects. Grants immunity to that debuff for 2 / 3 / 4 seconds afterward. 40-second cooldown. Minor debuffs about to expire do not trigger it. Does not remove Potion Sickness or Mana Sickness.
-	CheerBell: Restores 20 / 40 / 60 mana to you or your Palico and reduces the recipient's mana cost by 10% / 15% / 20% for 6 seconds. 35-second cooldown. Prioritizes you when casting below half mana; otherwise helps your Palico while casting or waiting for mana. The recipient must be missing at least the restoration amount or half their maximum mana, whichever is lower.
-	BattleDrum: Triggers when your Palico starts attacking: +20% / 25% / 30% damage and +10% / 15% / 20% attack speed for 10 seconds. 45-second cooldown. During the effect, your Palico's summons deal +25% / 35% / 45% damage.
-	PiercingBoomerang: On hit, you and your Palico gain 4 / 8 / 12 armor penetration against the target for 15 / 18 / 20 seconds. 25-second cooldown. Prioritizes stronger enemies and avoids targets with plenty of time left on this effect. Multiple applications do not stack.
-	UpdraftBag: While you are airborne, unmounted and holding Jump with little flight time left, restores 0.6 / 0.9 / 1.2 seconds of flight. Without wings, gives you a small upward boost instead. 30-second cooldown.
-	BombPot: Your Palico throws a bomb dealing 120 / 480 / 1200 area damage in a 10×10-tile area. Before upgrading, base damage rises to 240 in Hardmode. 18-second cooldown. Does not destroy blocks. Aims ahead of moving targets and prioritizes nearby groups of visible enemies.
+	GigaBarrelBomb: Hoists a large barrel and charges nearby ground enemies, dealing 240 / 960 / 2400 damage in an 18×18-tile area; <cooldown>-second cooldown. Before upgrading, base damage rises to 480 in Hardmode. Automatically targets groups or grounded bosses; manual use also targets single enemies. Requires a safe ground route. Airborne use first finds a safe place to land; this can also happen automatically during combat. Cancelled charges do not spend the full cooldown. Does not damage tiles, players or your Palico.
+	HoneyCage: Restores 15 / 30 / 50 life to you immediately, then another 5 / 10 / 15 life over 5 seconds. Triggers at 70% life or below when you are missing at least 20 / 40 / 65 life. <cooldown>-second cooldown. Works during Potion Sickness.
+	GuardShield: Blocks one heavy hit against you, preventing up to 15 / 30 / 40 damage. <cooldown>-second cooldown. When you are above 70% life, it can instead protect your Palico at 35% life or below, or from a lethal hit. Both uses share a cooldown.
+	CleansingPot: Removes one common debuff from you, such as Poisoned, On Fire! or Slow, prioritizing more harmful effects. Grants immunity to that debuff for 2 / 3 / 4 seconds afterward. <cooldown>-second cooldown. Minor debuffs about to expire do not trigger it. Does not remove Potion Sickness or Mana Sickness.
+	CheerBell: Restores 20 / 40 / 60 mana to you or your Palico and reduces the recipient's mana cost by 10% / 15% / 20% for 6 seconds. <cooldown>-second cooldown. Prioritizes you when casting below half mana; otherwise helps your Palico while casting or waiting for mana. The recipient must be missing at least the restoration amount or half their maximum mana, whichever is lower.
+	BattleDrum: Triggers when your Palico starts attacking: +20% / 25% / 30% damage and +10% / 15% / 20% attack speed for 10 seconds. <cooldown>-second cooldown. During the effect, your Palico's summons deal +25% / 35% / 45% damage.
+	PiercingBoomerang: On hit, you and your Palico gain 4 / 8 / 12 armor penetration against the target for 15 / 18 / 20 seconds. <cooldown>-second cooldown. Prioritizes stronger enemies and avoids targets with plenty of time left on this effect. Multiple applications do not stack.
+	UpdraftBag: While you are airborne, unmounted and holding Jump with little flight time left, restores 0.6 / 0.9 / 1.2 seconds of flight. Without wings, gives you a small upward boost instead. <cooldown>-second cooldown.
+	BombPot: Your Palico throws a bomb dealing 120 / 480 / 1200 area damage in a 10×10-tile area. Before upgrading, base damage rises to 240 in Hardmode. <cooldown>-second cooldown. Does not destroy blocks. Aims ahead of moving targets and prioritizes nearby groups of visible enemies.
 	PlunderKnife: Enemies damaged by you or your Palico can drop extra loot on defeat, regardless of the distance between you. Normal enemies have a 10% / 12% / 15% chance to drop 1 extra stackable loot item. Vanilla boss materials yield an average of 5% / 7.5% / 10% extra. Excludes Treasure Bags, unstackable items, coins, Hearts, Stars, biome keys, and normal enemies' Cyan-rarity or higher items. Does not trigger on friendly creatures or statue-spawned enemies. With multiple players, normal enemies use only the highest tier; boss bag materials are checked separately for each player.
 	MiningKit: Your Palico mines 20% / 25% / 30% faster. Ore detection, digging assistance and pickaxe reach each extend by 1 / 2 / 3 tiles. Does not increase pickaxe power or change your own mining stats.
 	GardenKit: Chopping trees or harvesting mature herbs with either you or your Palico yields extra resources, regardless of the distance between you. Average extra yield: 8% / 12% / 16% wood and 20% / 30% / 40% herbs, awarded at random. Does not increase seeds, gems or furniture drops, or apply to placed wood blocks. Your Palico gains 5 / 10 / 15 fishing power.
@@ -340,10 +342,11 @@ Guide: {
 	Multiplayer:
 		'''
 		[Your own companion]
-		Each player's inventory, upgrades and loadouts are saved separately. Private chatter is only shown to the owner. Automatic tasks follow each player's settings.
+		Each player's inventory, upgrades and loadouts are saved separately. Each player chooses their attribute mode. Private chatter is only shown to the owner.
 
-		[Passing items]
-		Items dropped by players have a 10-second handoff window. Use a direct collection order to pick them up immediately.
+		[Settings and multiplayer]
+		Personal options such as automatic work are set individually. The host or server administrator controls shared ability settings, including damage and inheritance ratios.
+		The server and all players need this mod installed.
 		'''
 	RecipeBrowser:
 		'''
@@ -352,15 +355,20 @@ Guide: {
 		'''
 	Equipment:
 		'''
+		[Two attribute modes]
+		Player-stat inheritance uses bonuses for the weapon's class at the configured ratios. Equipment trigger effects are not copied.
+		Independent equipment uses the Palico's own armor, accessories and set effects, without stacking owner equipment bonuses. Base life and mana follow your permanent upgrades.
+		Switch in Companion abilities. Armor and accessories are kept but inactive in inheritance mode.
+
+		[Armor and accessories]
+		Independent equipment has 3 armor and 5 base accessory slots. Extra slots follow the owner's vanilla unlock rules. Active keybind skills are not automated; some modded effects still need integration.
+
 		[Three loadouts]
-		Each stores its own weapon, work gear and support gear. Dye is shared. Switching does not reset cooldowns.
+		Weapons, armor, accessories, work and support gear are saved separately; dye is shared. Favorites are shared with matching empty slots in other loadouts. Unfavoriting keeps the item in the current loadout. Switching does not reset cooldowns.
 
-		[More support slots]
-		The Expanded Toolbelt adds 1 support slot. Using a Demon Heart adds another in Expert or Master worlds.
-		In Classic worlds, gear from the extra Expert slot returns to the inventory, or is held safely if it is full.
-
-		[Upgrades]
-		Improved and Masterwork Toolkits permanently strengthen gear. Improved is required before Masterwork. See Upgrades & crafting for recipes.
+		[Support slots and upgrades]
+		The Expanded Toolbelt adds 1 support slot. Using a Demon Heart adds another in Expert or Master worlds. In Classic worlds, gear from the extra Expert slot returns to the backpack, or is held safely if full.
+		Use Improved then Masterwork Toolkits to strengthen work and support gear. Some skill cooldowns also decrease. See Upgrades & crafting for recipes.
 		'''
 	Reserves:
 		'''
@@ -377,8 +385,9 @@ Guide: {
 		'''
 	Storage:
 		'''
-		[Quick transfer]
-		With the Palico inventory open, Shift-click items in your inventory or a chest to transfer them. Favorited items stay put during quick transfers; your Palico can still use and consume them from its own inventory.
+		[Transfers and favorites]
+		With the panel open, Shift-click non-favorited items in your inventory or a chest to transfer them to your Palico.
+		Backpack favorites stay put during bulk withdrawal but remain usable and consumable. Equipment favorites are shared between loadouts; see Equipment & growth.
 
 		[Supply chests]
 		Open a chest and click the cat icon to allow access. You can allow several chests. While you are nearby and the chest is closed, your Palico stores matching items and restocks consumables.
@@ -399,19 +408,21 @@ Guide: {
 	Exploring:
 		'''
 		[Collecting and sharing]
-		Items dropped by players have a 10-second handoff window. A direct collection order bypasses it. Exclude unwanted items in settings.
-		New loot tops up your existing stacks. Usable upgrades, such as Life Crystals, are handed over too. Your Palico keeps supplies first; favorited and manually stored items stay put.
+		Player-dropped items have a 10-second handoff window; a direct collection order bypasses it. Exclude unwanted items in settings, or put an Encumbering Stone in the Palico backpack to block ordinary pickups. Unlock it to resume.
+		New loot tops up your existing stacks; usable Life Crystals and similar upgrades are handed over too. Your Palico keeps supplies first; favorited and manually stored items stay put.
 
 		[Exploring and lighting]
-		Points out Life Crystals, chests and other finds, and brings nearby Hearts or Stars when you need them.
-		Put Torches or Glowsticks in the Palico inventory for light. Holding them does not consume them.
+		Points out Life Crystals, chests and other finds, and brings nearby Hearts or Stars when needed. Put Torches or Glowsticks in its backpack for light; holding them does not consume them.
+
+		[Fly a kite]
+		Hold a vanilla kite and right-click your idle Palico nearby. Hold left-click to let out line, right-click to reel in; switch items to finish.
 		'''
 	HarvestAndBuild:
 		'''
 
 
 		[Logging and herbs]
-		Chops mature trees and harvests blooming herbs. Replants when seeds and space are available; gathering still works without seeds. Favorited materials in the Palico inventory remain usable.
+		Chops mature trees and harvests blooming herbs. Replants when seeds and space are available; gathering still works without seeds.
 
 		[Building assistance]
 		Can extend the platforms or ropes you are placing. Enable each in settings.
@@ -426,14 +437,15 @@ Guide: {
 		[Digging and mining]
 		Your Palico helps nearby while you swing a pickaxe, and gathers exposed ore and gems while idle.
 		Uses the strongest pickaxe you carry, or a basic tool if you have none. If mining stalls, check pickaxe power and access. Exclude unwanted blocks in settings.
+		The pickaxe button at the top of the panel pauses or resumes automatic digging, logging, planting and placement.
 		'''
 	Summons:
 		'''
 
 
 		[Minions and sentries]
-		The slot beside the main weapon accepts either a minion or sentry weapon. Your Palico returns to the main weapon after summoning or deploying. Replacing the summon weapon dismisses its summons.
-		Both limits match yours, with a minimum of 1. They do not use your own slots.
+		The slot beside the main weapon accepts a minion or sentry weapon. Your Palico returns to its main weapon after summoning or deploying. Replacing the summon weapon dismisses its summons.
+		Limits follow the owner in inheritance mode, or the Palico's equipment in independent mode. Both have a minimum of 1 and do not use your own slots.
 		Old One's Army weapons follow vanilla unlock rules. During the event, keep Etherian Mana in the Palico inventory.
 		'''
 	QotAmmo:
@@ -444,17 +456,24 @@ Guide: {
 	Thorium:
 		'''
 
+
 		[Thorium class weapons]
-		Instruments use the Palico's own inspiration, with a maximum based on your permanent upgrades. They recover when depleted, and nearby allies receive the instrument's native empowerments.
-		Healing tools prioritize the injured owner and can heal nearby teammates. Self-healing spells heal the Palico. Bonus healing follows the owner; mana comes from the Palico.
-		Throwing weapons retain their native consumption and exhaustion. The Palico rests when exhausted. Life-cost weapons spend the Palico's health.
+		Instruments use separate inspiration, with base capacity following your permanent upgrades. It recovers when depleted; nearby allies receive native empowerments.
+		Healing tools prioritize the injured owner and can heal nearby allies. Self-healing spells heal the Palico. Healing bonuses follow the attribute mode; the Palico pays its own mana and life costs.
+		You can heal your Palico with ally-healing weapons, subject to their usual range and contact requirements.
+		Throwing weapons retain native consumption and exhaustion, resting when overexerted.
 		'''
 	Combat:
 		'''
-		Support skills activate automatically. You can also click a status-card icon to use one; the Shield and Updraft Pouch are automatic only.
+		[Combat modes]
+		Click the sword button to cycle modes. Proactive seeks nearby enemies. Assist attacks targets you hit or mark, and retaliates when you or your Palico are hit. Passive still allows work, pickup and healing.
 
-		[Weapons and supplies]
-		Equip throwing weapons as a stack. Keep ammunition and potions in the Palico inventory.
+		[Weapons and support]
+		Equip throwing weapons as a stack. Keep ammo and potions in the Palico inventory. Support skills activate automatically or on request through their status-card icons; the Shield and Updraft Pouch are automatic only.
+
+		[Recovery and fainting]
+		Inheritance mode uses the configured share of your bonus regeneration, 50% by default. Independent equipment uses the Palico's own equipment regeneration. Recovery timing follows its own injuries in both modes.
+		Your Palico retreats when defeated and returns after recovering.
 		'''
 	DirectAndRecover:
 		'''
@@ -462,16 +481,15 @@ Guide: {
 		Tasks pause during combat. Recall cancels them; moving away resumes following.
 
 		[Feeding]
-		Hold vanilla food, such as cooked fish or fruit, and right-click your Palico nearby to feed one serving. Out-of-combat health regeneration increases by 25% for the food's usual duration. Feeding again does not stack the effect or add to its duration.
-
-		[Health regeneration and fainting]
-		Your Palico keeps their own regeneration and gains 50% of your additive regeneration bonuses from equipment, Regeneration Potions and standard mod regeneration hooks. Recovery timing follows the Palico's own injuries; your natural recovery timer, damage over time and life steal are not inherited.
-		Your Palico retreats when defeated and returns after recovering.
+		Hold vanilla food, such as cooked fish or fruit, and right-click your Palico nearby. One serving increases out-of-combat health regeneration by 25% for the food's usual duration. Neither the effect nor its duration stacks.
 		'''
 	Introduction:
 		'''
-		[Inventory]
-		Right-click your Palico nearby, or click the status card. Click the portrait or name in the inventory title to change their name and colour.
+		[Open the panel]
+		Right-click your Palico nearby or click the status card. Click the portrait or name in the panel header to rename or recolor it; open Stats to see current bonuses.
+
+		[Status card and controls]
+		Hold Alt to drag the status card; reset its position in settings. Bind panel, recall, stow / call out and status-card keys in Controls. Gamepad controls are supported too.
 
 		[Give a task]
 
@@ -501,55 +519,55 @@ ItemTooltips: {
 		'''
 		Charges ground enemies with a barrel, dealing {0} damage in an 18×18-tile area
 		Automatically targets groups or grounded bosses; can also be used manually
-		Safe for tiles, players and your Palico; 30-second cooldown
+		Safe for tiles, players and your Palico; <cooldown>-second cooldown
 		'''
 	HoneyCage:
 		'''
 		Heals you for {0} life, then another {1} over 5 seconds
 		Triggers at 70% life or below when at least {2} life is missing
-		60-second cooldown; works during Potion Sickness
+		<cooldown>-second cooldown; works during Potion Sickness
 		'''
 	GuardShield:
 		'''
 		Blocks up to {0} damage from one heavy hit
 		Can protect your Palico instead when you are healthy
-		45-second shared cooldown
+		<cooldown>-second shared cooldown
 		'''
 	CleansingPot:
 		'''
 		Removes one common debuff and grants {0} seconds of immunity to it
 		Does not remove Potion Sickness or Mana Sickness
-		40-second cooldown
+		<cooldown>-second cooldown
 		'''
 	CheerBell:
 		'''
 		Restores {0} mana while you or your Palico casts, or while your Palico waits for mana
 		Reduces the recipient's mana cost by {1} for 6 seconds
-		35-second cooldown
+		<cooldown>-second cooldown
 		'''
 	BattleDrum:
 		'''
 		In combat, increases your Palico's damage by {0} and attack speed by {1}
 		Its summons gain {2} damage during the effect
-		Lasts 10 seconds; 45-second cooldown
+		Lasts 10 seconds; <cooldown>-second cooldown
 		'''
 	PiercingBoomerang:
 		'''
 		You and your Palico gain {0} armor penetration against the target hit
 		Lasts {1} seconds; multiple applications do not stack
-		25-second cooldown
+		<cooldown>-second cooldown
 		'''
 	UpdraftBag:
 		'''
 		Hold Jump near the end of your flight to regain {0} seconds of flight
 		Gives a small boost without wings; cannot be used while mounted
-		30-second cooldown
+		<cooldown>-second cooldown
 		'''
 	BombPot:
 		'''
 		Throws a bomb dealing {0} damage in a 10×10-tile area
 		Does not destroy blocks
-		18-second cooldown
+		<cooldown>-second cooldown
 		'''
 	PlunderKnife:
 		'''

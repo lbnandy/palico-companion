@@ -83,17 +83,19 @@ public sealed class ThoriumCompanionBridge:ModSystem {
         // Stats supplies resource limits on every peer; only the authority
         // advances the companion's own resource and recovery clocks.
         tp.bardResource=Math.Clamp(tp.bardResource,0,tp.bardResourceMax2);
-        // Thorium 1.7.2 keeps these clocks inline in PostUpdateEquips. Advance
-        // only those clocks once per simulation tick; running that entire hook
-        // would also mutate shared UI/world state and trigger equipment effects.
-        if(tp.bardResource<tp.bardResourceMax2){
-            if(tp.inspirationRegenTimer<8)tp.inspirationRegenTimer+=(int)((1+tp.inspirationRegenBase)*tp.inspirationRegenBonus);
-            else {tp.inspirationRegenBase=Math.Min(5,tp.inspirationRegenBase+.15f);tp.inspirationRegenTimer=0;tp.bardResource++;}
-            if(tp.bardResource==tp.bardResourceMax2)tp.inspirationRegenBase=0;
+        // Independent equipment already runs Thorium's PostUpdateEquips.
+        // In inheritance mode retain the resource-only path, without running
+        // equipment effects or advancing the same clocks a second time.
+        if(!CompanionEquipment.Independent(use.State)){
+            if(tp.bardResource<tp.bardResourceMax2){
+                if(tp.inspirationRegenTimer<8)tp.inspirationRegenTimer+=(int)((1+tp.inspirationRegenBase)*tp.inspirationRegenBonus);
+                else {tp.inspirationRegenBase=Math.Min(5,tp.inspirationRegenBase+.15f);tp.inspirationRegenTimer=0;tp.bardResource++;}
+                if(tp.bardResource==tp.bardResourceMax2)tp.inspirationRegenBase=0;
+            }
+            if(!tp.throwerExhaustionPenalty)tp.throwerExhaustionDamage=1;
+            tp.throwerExhaustion=Math.Max(0,tp.throwerExhaustion-(tp.throwerExhaustionPenalty?tp.throwerExhaustionMax/1200f:1+tp.throwerExhaustionRegenBonus));
+            if(tp.throwerExhaustion==0)tp.throwerExhaustionPenalty=false;
         }
-        if(!tp.throwerExhaustionPenalty)tp.throwerExhaustionDamage=1;
-        tp.throwerExhaustion=Math.Max(0,tp.throwerExhaustion-(tp.throwerExhaustionPenalty?tp.throwerExhaustionMax/1200f:1+tp.throwerExhaustionRegenBonus));
-        if(tp.throwerExhaustion==0)tp.throwerExhaustionPenalty=false;
         if(actor.HeldItem.ModItem is ThoriumItem {isHealer:true})
             using(new CompanionNativeUse.Scope(use))findAlly(tp);
     }

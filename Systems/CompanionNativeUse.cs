@@ -98,7 +98,9 @@ public sealed partial class CompanionNativeUse {
     void CountOwnedProjectiles(){
         // Native caches also carry summon damage (e.g. Tiger and Abigail).
         // Counting types alone silently leaves those native damage fields zero.
-        using(new Scope(this)){ResetProjectileCache(Actor);UpdateProjectileCache(Actor,Actor.whoAmI);}
+        // Rebuilding a cache must not reset health or equipment maxima while
+        // ResetEffects -> buffs -> equipment is still being evaluated.
+        using(new Scope(this,false)){ResetProjectileCache(Actor);UpdateProjectileCache(Actor,Actor.whoAmI);}
     }
     public bool Busy=>Actor.itemAnimation>0;
     public static CompanionNativeUse Current {get;private set;}
@@ -117,6 +119,16 @@ public sealed partial class CompanionNativeUse {
     internal void ReleaseActorSlot(){Cancel(preserveSkills:false);CompanionActorSlots.Release(this,slot);slot=-1;}
     bool initialized;
     bool ResetEffects(){
+        // Native ResetEffects starts from the permanent maxima, then lets
+        // ModPlayer hooks add this frame's equipment effects. Do not erase
+        // those additions afterwards (Thorium evaluates some here).
+        bool independent=CompanionEquipment.Independent(State);
+        Actor.ConsumedLifeCrystals=State.Player.ConsumedLifeCrystals;
+        Actor.ConsumedLifeFruit=State.Player.ConsumedLifeFruit;
+        Actor.ConsumedManaCrystals=State.Player.ConsumedManaCrystals;
+        Actor.statLifeMax=independent?Math.Max(100,State.Player.statLifeMax):State.Vitals.MaxHealth;
+        Actor.statManaMax=independent?Math.Max(20,State.Player.statManaMax):State.Vitals.MaxMana;
+        Actor.statLife=State.Vitals.Health;Actor.statMana=State.Vitals.Mana;
         // On a server both the projectile actor and Main.myPlayer use 255.
         // ModPlayer resets must not mistake that sentinel for a local human
         // and touch client UI. Borrow the existing non-player slot allocator
@@ -126,7 +138,18 @@ public sealed partial class CompanionNativeUse {
         int resetSlot=borrow?CompanionActorSlots.Acquire(this):previousSlot;
         if(resetSlot<0)return false;
         var previous=Main.player[resetSlot];
-        try {Actor.whoAmI=resetSlot;Main.player[resetSlot]=Actor;Actor.ResetEffects();}
+        try {
+            Actor.whoAmI=resetSlot;Main.player[resetSlot]=Actor;Actor.ResetEffects();
+            if(independent){
+                // ModifyMaxStats rebuilds permanent maxima from progression.
+                // Keep the owner's permanent mod upgrades too, without copying
+                // their equipment bonuses or discarding this actor's reset effects.
+                Actor.statLifeMax2+=State.Player.statLifeMax-Actor.statLifeMax;
+                Actor.statManaMax2+=State.Player.statManaMax-Actor.statManaMax;
+                Actor.statLifeMax=State.Player.statLifeMax;
+                Actor.statManaMax=State.Player.statManaMax;
+            }
+        }
         finally {
             Main.player[resetSlot]=previous;Actor.whoAmI=previousSlot;
             if(borrow)CompanionActorSlots.Release(this,resetSlot);
@@ -147,8 +170,8 @@ public sealed partial class CompanionNativeUse {
         }
         lastActorPosition=Actor.position;lastActorVelocity=Actor.velocity;
     }
-    public static int MinionLimit(Player owner)=>Math.Max(1,owner.maxMinions);
-    public static int SentryLimit(Player owner)=>Math.Max(1,owner.maxTurrets);
+    public static int MinionLimit(Player owner)=>CompanionEquipment.Independent(owner.GetModPlayer<CompanionPlayer>())?owner.GetModPlayer<CompanionPlayer>().Equipment.Minions:Math.Max(1,owner.maxMinions);
+    public static int SentryLimit(Player owner)=>CompanionEquipment.Independent(owner.GetModPlayer<CompanionPlayer>())?owner.GetModPlayer<CompanionPlayer>().Equipment.Sentries:Math.Max(1,owner.maxTurrets);
     public static bool Summoning(Item item)=>item.shoot>ProjectileID.None&&ContentSamples.ProjectilesByType.TryGetValue(item.shoot,out var p)&&p.minion;
     public static bool DistanceWeapon(Item item)=>CompanionCombatReach.Distance(item);
     // Range chooses tactics, not arm animation. Projectile-emitting swords
@@ -157,17 +180,35 @@ public sealed partial class CompanionNativeUse {
     internal bool Present=>Cat is {active:true}&&Cat.ModProjectile is CompanionCat c&&ReferenceEquals(c.Weapons,this)&&State is {Enabled:true,Paused:false}&&!State.Vitals.Downed&&!State.Player.dead;
     public bool Available=>Present&&State.Combat;
     internal bool CanMaintainShot(Projectile p)=>Present&&(State.Combat||p.ModProjectile is TrainingDart or TrainingBomb or TrainingBarrelBlast);
+    ulong nativeClockTick=ulong.MaxValue,replicaEffectsTick=ulong.MaxValue;
+    void AdvanceNativeClocks(){
+        // Network snapshots may bind an actor more than once in a frame.
+        // Resource clocks still advance once, including on visual replicas.
+        if(nativeClockTick==Main.GameUpdateCount)return;
+        nativeClockTick=Main.GameUpdateCount;
+        CompanionEquipment.AdvanceClocks(this);
+        CompanionCrossMod.BeforeReset?.Invoke(this);
+    }
     internal void BindReplica(Player owner,CompanionPlayer state,Projectile cat){
         Cat=cat;State=state;EnsureActorSlot();
+        LocateActor(cat);
         Actor.MinionAttackTargetNPC=cat.ModProjectile is CompanionCat companion?companion.CombatTargetIndex:-1;
         if(!initialized){Actor.inventory=InventoryTransfer.Empty(59);initialized=true;}
         HeldGearSlot=replicaPose.HeldGearSlot;var item=HeldGearSlot==CompanionWeapons.SummonSlot?CompanionWeapons.Summon(state.Gear):CompanionWeapons.Active(state.Gear);if(Actor.inventory[0].type!=item.type||Actor.inventory[0].prefix!=item.prefix)Actor.inventory[0]=item.Clone();
         // ResetEffects clears the projectile caches too. Match Player.Update's
         // order: reset, rebuild caches, then update buffs which maintain minions.
-        if(!ResetEffects())return;
-        ApplyCombatModifiers(Actor,state,item);
-        CountOwnedProjectiles();
-        using(new Scope(this))Actor.UpdateBuffs(Actor.whoAmI);Actor.maxMinions=MinionLimit(owner);Actor.maxTurrets=SentryLimit(owner);
+        if(replicaEffectsTick!=Main.GameUpdateCount){
+            AdvanceNativeClocks();
+            if(!ResetEffects())return;
+            MapBag(state,item);
+            CountOwnedProjectiles();
+            state.Equipment.Apply(this);
+            ApplyCombatModifiers(Actor,state,item);
+            CountOwnedProjectiles();
+            if(!CompanionEquipment.Independent(state))using(new Scope(this))Actor.UpdateBuffs(Actor.whoAmI);
+            Actor.maxMinions=MinionLimit(owner);Actor.maxTurrets=SentryLimit(owner);
+            replicaEffectsTick=Main.GameUpdateCount;
+        }
         Actor.slotsMinions=0;Actor.numMinions=0;
         Actor.selectedItem=0;LocateActor(cat);ApplyReplicaPose();ApplyReplicaInput();Actor.dead=false;
         Actor.statMana=state.Vitals.Mana;Actor.statManaMax2=state.Vitals.MaxMana;Actor.statLife=state.Vitals.Health;
@@ -177,7 +218,7 @@ public sealed partial class CompanionNativeUse {
         Cat=cat;State=state;
         if(!EnsureActorSlot()){Cancel();return;}
         if(!initialized){Actor.inventory=InventoryTransfer.Empty(59);Actor.whoAmI=slot;if(!ResetEffects())return;initialized=true;}
-        if(!Available){Cancel();return;}
+        if(!Present){Cancel();return;}
         Item weapon=SelectWeapon(owner,target,allowSummons);
         CompanionRestock.Maintain(state);
         if(type!=weapon.type||prefix!=weapon.prefix) {
@@ -193,7 +234,7 @@ public sealed partial class CompanionNativeUse {
         LocateActor(cat);
         // Rebuild temporary effects before applying buffs, as Player.Update
         // does. Additive effects must not accumulate on a persistent actor.
-        CompanionCrossMod.BeforeReset?.Invoke(this);
+        AdvanceNativeClocks();
         if(!ResetEffects()){Cancel();return;}
         // Repeated AI attacks use vanilla's hold-to-repeat policy. ItemCheck
         // owns cadence, reuse delay and CanAutoReuseItem overrides; manually
@@ -202,24 +243,26 @@ public sealed partial class CompanionNativeUse {
         // Native trailing mode 4 translates old trail points by player movement.
         // Leaving oldPosition at (0,0) stretches Zenith trails across the world.
         Actor.direction=cat.direction;Actor.gravDir=1;Actor.dead=false;Actor.selectedItem=0;
-        Actor.statLife=state.Vitals.Health;Actor.statLifeMax=Actor.statLifeMax2=state.Vitals.MaxHealth;
-        Actor.statMana=state.Vitals.Mana;Actor.statManaMax=Actor.statManaMax2=state.Vitals.MaxMana;
         if(weapon.consumable)Actor.inventory[0].stack=weapon.stack;
         Actor.maxMinions=MinionLimit(owner);Actor.maxTurrets=SentryLimit(owner);
         Actor.downedDD2EventAnyDifficulty=owner.downedDD2EventAnyDifficulty;
-        ApplyCombatModifiers(Actor,state,weapon);
         // Map only the cat's bag. Mod weapons may consume materials rather than
         // ammo (for example Wulfrum scrap); never borrow the human inventory.
         // Like native ChooseAmmo/QuickHeal, favorites remain usable. Transfer
         // and trash protection belong to the inventory operations instead.
-        for(int i=1;i<59;i++)Actor.inventory[i]=Empty;
-        bool materials=weapon.ModItem!=null||CompanionWeaponPolicy.Sentry(weapon);
-        for(int i=0;i<Math.Min(state.Bag.Length,49);i++)if(materials||state.Bag[i].ammo>0)Actor.inventory[i+1]=state.Bag[i];
+        bool materials=MapBag(state,weapon);
+        CountOwnedProjectiles();
+        state.Equipment.Apply(this);
+        ApplyCombatModifiers(Actor,state,weapon);
         // Follow native limit changes and DD2 persistence in this cat's scope.
         using(new Scope(this))Actor.UpdateMaxTurrets();
         CountOwnedProjectiles();
-        using(new Scope(this))Actor.UpdateBuffs(slot);
+        if(!CompanionEquipment.Independent(state))using(new Scope(this))Actor.UpdateBuffs(slot);
         CompanionCrossMod.UpdateResources?.Invoke(this);
+        if(Main.GameUpdateCount%15==0)State.Stats.Capture(this);
+        // Disabling combat must not disable armor stats and regeneration.
+        // Evaluate equipment first, then stop native weapon use as before.
+        if(!State.Combat){Cancel();return;}
         Actor.tileSpeed=1/Math.Clamp(Actor.tileSpeed,1,3);
         Actor.wallSpeed=1/Math.Clamp(Actor.wallSpeed,1,3);
         Actor.slotsMinions=SummonSlots;
@@ -299,8 +342,18 @@ public sealed partial class CompanionNativeUse {
     // Shared by authoritative attacks, network presentation and an inactive
     // companion's tooltip. Copy numerical modifiers before the cat's own
     // effects; do not run the owner's equipment hooks on a second actor.
+    bool MapBag(CompanionPlayer state,Item weapon){
+        // UpdateEquips includes native inventory effects. Give it the current
+        // bag before evaluating equipment, including on network replicas.
+        for(int i=1;i<59;i++)Actor.inventory[i]=Empty;
+        bool materials=CompanionEquipment.Independent(state)||weapon.ModItem!=null||CompanionWeaponPolicy.Sentry(weapon);
+        for(int i=0;i<Math.Min(state.Bag.Length,49);i++)if(materials||state.Bag[i].ammo>0)Actor.inventory[i+1]=state.Bag[i];
+        return materials;
+    }
+
     internal static void ApplyCombatModifiers(Player actor,CompanionPlayer state,Item weapon) {
-        CompanionCombatInheritance.Apply(actor,state.Player);
+        if(!CompanionEquipment.Independent(state))CompanionCombatInheritance.Apply(actor,state.Player);
+        else if(!ReferenceEquals(actor,(state.Cat?.ModProjectile as CompanionCat)?.Weapons.Actor)&&state.Equipment.Preview is {} preview)CompanionCombatInheritance.CopyEquipment(actor,preview);
         bool summon=weapon.CountsAsClass(DamageClass.Summon);
         actor.GetDamage(DamageClass.Generic)*=summon?1:state.Training.Damage(state);
         actor.GetAttackSpeed(DamageClass.Generic)+=(summon?1:state.Training.Speed(state))-1;
@@ -327,7 +380,13 @@ public sealed partial class CompanionNativeUse {
             // Stop child spawns during cancellation; no resource refund/duplication.
             Retire(p);
         }
-        if(!preserveSummons){Array.Clear(Actor.buffType);Array.Clear(Actor.buffTime);summonRetryAt=0;}
+        if(!preserveSummons){
+            // Cancelling equipment or switching attribute modes must not
+            // refresh native dodge/revival cooldowns, which are debuffs.
+            for(int i=Actor.buffType.Length-1;i>=0;i--)
+                if(Actor.buffType[i]>0&&!Main.debuff[Actor.buffType[i]])Actor.DelBuff(i);
+            summonRetryAt=0;
+        }
     }
     public void Draw(Color light) {
         if(!Available||!EnsureActorSlot())return;
@@ -394,7 +453,8 @@ public sealed partial class CompanionNativeUse {
             actorSlot=use.slot;actorActive=use.Actor.active;projectiles=new CompanionProjectileScope(actorSlot,p=>CompanionOwnedShot.Of(p)==use);
             if(Current!=use){
                 if(Main.netMode!=Terraria.ID.NetmodeID.SinglePlayer)hitCooldowns=use.HitCooldowns.Enter(actorSlot);
-                healthScope=trackHealing;healthBefore=CompanionWeaponRecovery.Begin(use);
+                healthScope=trackHealing;
+                if(healthScope)healthBefore=CompanionWeaponRecovery.Begin(use);
             }
             context=use;previous=Current;backup=Main.player[use.slot];myPlayer=Main.myPlayer;mouseX=Main.mouseX;mouseY=Main.mouseY;
             blockMouse=Main.blockMouse;
@@ -545,8 +605,8 @@ public sealed class CompanionCombatTerrain : GlobalTile {
     public override bool CanExplode(int i,int j,int type)=>CompanionNativeUse.Current==null;
 }
 public sealed class CompanionNativeHooks : ModSystem {
-    public override void Load(){IL_Player.ItemCheck_Shoot+=HeadlessShoot;IL_Player.ItemCheck_ApplyUseStyle_Inner+=HeadlessGeometry;IL_Player.ItemCheck_GetMeleeHitbox+=HeadlessGeometry;On_Item.GetDrawHitbox+=DrawHitbox;On_Player.GetItemDrawFrame+=ItemFrame;On_NetMessage.SendData+=SendNative;On_Player.ItemCheck_PlayInstruments+=Instruments;On_Projectile.Update+=UpdateShot;On_Main.DrawProj_Inner+=DrawShot;On_Player.ItemCheck_CutTiles+=CutTiles;On_Main.GetPlayerArmPosition+=ArmPosition;IL_Main.SortBabyBirdProjectiles+=FinchDrawOwner;On_NPC.PlayerInteraction+=Interaction;On_Player.HealEffect+=Heal;On_Player.ManaEffect+=ManaFeedback;}
-    public override void Unload(){IL_Player.ItemCheck_Shoot-=HeadlessShoot;IL_Player.ItemCheck_ApplyUseStyle_Inner-=HeadlessGeometry;IL_Player.ItemCheck_GetMeleeHitbox-=HeadlessGeometry;On_Item.GetDrawHitbox-=DrawHitbox;On_Player.GetItemDrawFrame-=ItemFrame;On_NetMessage.SendData-=SendNative;On_Player.ItemCheck_PlayInstruments-=Instruments;On_Projectile.Update-=UpdateShot;On_Main.DrawProj_Inner-=DrawShot;On_Player.ItemCheck_CutTiles-=CutTiles;On_Main.GetPlayerArmPosition-=ArmPosition;IL_Main.SortBabyBirdProjectiles-=FinchDrawOwner;On_NPC.PlayerInteraction-=Interaction;On_Player.HealEffect-=Heal;On_Player.ManaEffect-=ManaFeedback;}
+    public override void Load(){IL_Player.ItemCheck_Shoot+=HeadlessShoot;IL_Player.ItemCheck_ApplyUseStyle_Inner+=HeadlessGeometry;IL_Player.ItemCheck_GetMeleeHitbox+=HeadlessGeometry;On_Item.GetDrawHitbox+=DrawHitbox;On_Player.GetItemDrawFrame+=ItemFrame;On_NetMessage.SendData+=SendNative;On_Player.ItemCheck_PlayInstruments+=Instruments;On_Projectile.Update+=UpdateShot;On_Projectile.Kill+=KillShot;On_Main.DrawProj_Inner+=DrawShot;On_Player.ItemCheck_CutTiles+=CutTiles;On_Main.GetPlayerArmPosition+=ArmPosition;IL_Main.SortBabyBirdProjectiles+=FinchDrawOwner;On_NPC.PlayerInteraction+=Interaction;On_Player.HealEffect+=Heal;On_Player.ManaEffect+=ManaFeedback;}
+    public override void Unload(){IL_Player.ItemCheck_Shoot-=HeadlessShoot;IL_Player.ItemCheck_ApplyUseStyle_Inner-=HeadlessGeometry;IL_Player.ItemCheck_GetMeleeHitbox-=HeadlessGeometry;On_Item.GetDrawHitbox-=DrawHitbox;On_Player.GetItemDrawFrame-=ItemFrame;On_NetMessage.SendData-=SendNative;On_Player.ItemCheck_PlayInstruments-=Instruments;On_Projectile.Update-=UpdateShot;On_Projectile.Kill-=KillShot;On_Main.DrawProj_Inner-=DrawShot;On_Player.ItemCheck_CutTiles-=CutTiles;On_Main.GetPlayerArmPosition-=ArmPosition;IL_Main.SortBabyBirdProjectiles-=FinchDrawOwner;On_NPC.PlayerInteraction-=Interaction;On_Player.HealEffect-=Heal;On_Player.ManaEffect-=ManaFeedback;}
     // These two native methods contain server early-outs for human rendering.
     // Their geometry is also used by melee hits and replicated held weapons.
     // Override only the branch value during the companion actor scope; never
@@ -570,7 +630,7 @@ public sealed class CompanionNativeHooks : ModSystem {
         // Suppress the borrowed actor's player packets, not another mod's real
         // player updates triggered synchronously during ItemCheck/projectile AI.
         var actor=CompanionNativeUse.Current?.Actor??CompanionFishing.Current?.Actor;
-        if(actor!=null&&n==actor.whoAmI&&Main.netMode!=NetmodeID.SinglePlayer&&msg is MessageID.PlayerControls or MessageID.SyncEquipment or MessageID.PlayerMana or MessageID.PlayerBuffs or MessageID.PlayerLifeMana or 41 or 66)return;
+        if(actor!=null&&n==actor.whoAmI&&Main.netMode!=NetmodeID.SinglePlayer&&msg is MessageID.PlayerControls or MessageID.SyncEquipment or MessageID.PlayerMana or MessageID.PlayerBuffs or MessageID.PlayerLifeMana or 41 or 62 or 66 or 84)return;
         orig(msg,remote,ignore,text,n,n2,n3,n4,n5,n6,n7);
     }
     static void ManaFeedback(On_Player.orig_ManaEffect orig,Player p,int amount){if(CompanionNativeUse.Current?.Actor==p)return;orig(p,amount);}
@@ -630,7 +690,7 @@ public sealed class CompanionNativeHooks : ModSystem {
         var trail=instant&&CompanionNetwork.Server?p.GetGlobalProjectile<CompanionInstantShot>():null;
         trail?.Begin(p);
         float previousRotation=context.Actor.itemRotation;
-        try {using(new CompanionNativeUse.Scope(context))orig(p,index);}
+        try {using(new CompanionNativeUse.Scope(context))using(new CompanionEquipment.ProjectileAnchor(p,context))orig(p,index);}
         finally {
             // A returning tether can coincide with its owner's mounted center.
             // Native DirectionFrom then has no direction; retain the last arm
@@ -638,6 +698,17 @@ public sealed class CompanionNativeHooks : ModSystem {
             if(!float.IsFinite(context.Actor.itemRotation))context.Actor.itemRotation=float.IsFinite(previousRotation)?previousRotation:0;
             if(!CompanionNetwork.Client)context.CommitProjectileMana();trail?.End(p);
         }
+    }
+    static void KillShot(On_Projectile.orig_Kill orig,Projectile p){
+        var context=CompanionOwnedShot.Of(p);
+        if(context==null||CompanionNativeUse.Current==context&&p.owner==context.Actor.whoAmI){orig(p);return;}
+        // Boss transitions and other projectiles can kill a shot outside its
+        // own Update. Run its native death effects with its actual actor too.
+        // Another actor's scope may temporarily mask this shared owner index.
+        if(!context.EnsureActorSlot()){p.active=false;return;}
+        int owner=p.owner;p.owner=context.Actor.whoAmI;
+        try{using(new CompanionNativeUse.Scope(context))orig(p);}
+        finally{p.owner=owner;}
     }
     // DrawProjDirect is a thin wrapper that optimized callers can inline before
     // hooks load. Scope the actual draw body so global projectile hooks always

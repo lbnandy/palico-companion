@@ -13,12 +13,19 @@ namespace PalicoCompanion.Systems;
 public sealed class CompanionItemTooltip : ModSystem {
     static Item hovered;
     static Player subject;
-    static bool sharedSlot;
+    static bool sharedSlot,backpackSlot;
     static Player inactive;
-    internal static void Clear(){hovered=null;subject=null;sharedSlot=false;}
-    internal static void Hover(CompanionPlayer owner,bool sharing=false){
+    internal static void Clear(){hovered=null;subject=null;sharedSlot=backpackSlot=false;}
+    internal static void Hover(CompanionPlayer owner,bool sharing=false,bool wornArmor=false,bool backpack=false){
         if(Main.HoverItem.IsAir)return;
-        hovered=Main.HoverItem;sharedSlot=sharing;
+        hovered=Main.HoverItem;sharedSlot=sharing;backpackSlot=backpack;
+        if(wornArmor){
+            // BankItem remains the interaction context. Only its hover clone
+            // needs vanilla's equipped-armor flag and the cat's evaluated set.
+            hovered.wornArmor=true;
+            if(CompanionEquipment.Independent(owner)&&owner.Cat?.ModProjectile is CompanionCat equipped&&equipped.Weapons.Present){subject=equipped.Weapons.Actor;return;}
+            inactive??=new Player {whoAmI=255};inactive.setBonus="";subject=inactive;return;
+        }
         if(hovered.damage<=0)return;
         if(owner.Cat?.ModProjectile is CompanionCat cat&&cat.Weapons.Available&&
             cat.Weapons.Actor.HeldItem.type==hovered.type&&cat.Weapons.Actor.HeldItem.prefix==hovered.prefix){subject=cat.Weapons.Actor;return;}
@@ -32,6 +39,7 @@ public sealed class CompanionItemTooltip : ModSystem {
         subject=inactive;
     }
     internal static bool Shared(Item item)=>sharedSlot&&ReferenceEquals(item,hovered)&&ReferenceEquals(item,Main.HoverItem);
+    internal static bool PickupStone(Item item)=>backpackSlot&&ReferenceEquals(item,hovered)&&ReferenceEquals(item,Main.HoverItem)&&CompanionInventoryOperations.CanTogglePickupStone(item,0);
     public override void Load()=>IL_Main.MouseText_DrawItemTooltip_GetLinesInfo+=UseCompanion;
     public override void Unload(){IL_Main.MouseText_DrawItemTooltip_GetLinesInfo-=UseCompanion;Clear();inactive=null;}
     public override void OnWorldUnload(){Clear();inactive=null;}
@@ -53,6 +61,7 @@ public sealed class CompanionItemTooltip : ModSystem {
 
 public sealed class CompanionSharingTooltip:GlobalItem {
     public override void ModifyTooltips(Item item,List<TooltipLine> lines){
+        if(CompanionItemTooltip.PickupStone(item))lines.Add(new(Mod,"PickupStone",CompanionText.Get("CompanionPickup."+(item.type==Terraria.ID.ItemID.EncumberingStone?"StoneLocked":"StoneUnlocked"))));
         if(!CompanionItemTooltip.Shared(item))return;
         // Keep vanilla's favorite marker, but explain its equipment meaning.
         lines.RemoveAll(line=>line.Mod=="Terraria"&&line.Name=="FavoriteDesc");

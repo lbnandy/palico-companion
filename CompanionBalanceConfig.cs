@@ -29,6 +29,10 @@ public enum CompanionStrengthPreset {
 public sealed class CompanionBalanceConfig : ModConfig {
     public override ConfigScope Mode => ConfigScope.ServerSide;
 
+    // Presentation only: personal mode must never enter the server config.
+    [Header("Attributes"),JsonIgnore,ShowDespiteJsonIgnore,CustomModConfigItem(typeof(Systems.CompanionAttributeModeElement))]
+    public bool PersonalMode { get; set; }
+
     // Only the underlying values are saved and synchronized. Loading a config
     // must never reapply a preset over the player's individual adjustments.
     [Header("Presets"),JsonIgnore,ShowDespiteJsonIgnore,CustomModConfigItem(typeof(Systems.CompanionPresetElement))]
@@ -50,14 +54,16 @@ public sealed class CompanionBalanceConfig : ModConfig {
     }
 
     [Header("Strength")]
+    [DefaultValue(75),Range(10,200),Increment(5),Slider] public int DamagePercent { get; set; } = 75;
+    [DefaultValue(75),Range(10,200),Increment(5),Slider] public int HealthPercent { get; set; } = 75;
+    [DefaultValue(100),Range(50,150),Increment(5),Slider] public int TargetingRangePercent { get; set; } = 100;
+
+    [Header("Inheritance")]
     [DefaultValue(100),Range(0,100),Increment(5),Slider]
     [JsonProperty(DefaultValueHandling=DefaultValueHandling.Include)]
     public int CombatInheritancePercent { get=>combatInheritancePercent; set {combatInheritancePercent=value;inheritanceSpecified=true;} }
-    [DefaultValue(75),Range(10,200),Increment(5),Slider] public int DamagePercent { get; set; } = 75;
-    [DefaultValue(75),Range(10,200),Increment(5),Slider] public int HealthPercent { get; set; } = 75;
     [DefaultValue(75),Range(0,200),Increment(5),Slider] public int DefensePercent { get; set; } = 75;
     [DefaultValue(50),Range(0,100),Increment(5),Slider] public int RegenInheritancePercent { get; set; } = 50;
-    [DefaultValue(100),Range(50,150),Increment(5),Slider] public int TargetingRangePercent { get; set; } = 100;
 
     [Header("Movement")]
     [DefaultValue(75),Range(25,150),Increment(5),Slider] public int CombatMovementPercent { get; set; } = 75;

@@ -31,7 +31,7 @@ public sealed class TrainingHudFeedback : ModPlayer {
             // A fresh cast jumps back by almost a whole cooldown. Small server
             // corrections (including 0 -> a few ticks) are not new casts.
             // Initial/equipped snapshots establish a baseline without flashing.
-            if(!sustained&&!changed&&cooldown-cell.Cooldown>CompanionTraining.CooldownSeconds(kind)*30){cell.Pulsed=true;cell.PulseAt=Main.GameUpdateCount;}
+            if(!sustained&&!changed&&cooldown-cell.Cooldown>CompanionTraining.CooldownSeconds(kind,s.Training.Tier)*30){cell.Pulsed=true;cell.PulseAt=Main.GameUpdateCount;}
             bool active=TrainingStatus.Effect(s,kind)>0;
             cell.Glow=Math.Clamp(cell.Glow+(active?1/RiseTicks:-1/FadeTicks),0,1);
             cell.Cooldown=cooldown;

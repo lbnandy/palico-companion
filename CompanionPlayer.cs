@@ -20,6 +20,7 @@ public sealed class CompanionPlayer : ModPlayer
     internal bool HasNetworkProfile;
     internal bool NetGarden=true,NetCatch=true,NetFishing=true,NetSupplies=true,NetDark;
     internal CompanionStock NetStock=CompanionStock.Default;
+    internal bool NetIndependent;
     internal bool NetEnabled=true,NetMining=true,NetDigging=true,NetForestry=true,NetAutoHeal=true;
     internal bool NetChatter=true,NetEmotes=true;
     internal ulong NetMaterialAt;
@@ -36,10 +37,12 @@ public sealed class CompanionPlayer : ModPlayer
     }
     public int HoodColor=CompanionPalette.Default;
     public Item[] Dyes = InventoryTransfer.Empty(1);
+    internal CompanionStats Stats = new();
     public Item[] Gear = InventoryTransfer.Empty(CompanionWeapons.EquipmentCount);
     public CompanionVitals Vitals = new();
     public CompanionTraining Training = new();
     internal CompanionLoadouts Loadouts=new();
+    internal readonly CompanionEquipment Equipment=new();
     internal CompanionDirective Directive=new();
     internal System.Collections.Generic.List<Item> DeliveryRemainder=new();
     internal int DeliveryTicks;
@@ -195,7 +198,7 @@ public sealed class CompanionPlayer : ModPlayer
     // Only explicit, visible companion inventory sessions redirect shift-click.
     public override bool ShiftClickSlot(Item[] inventory,int context,int slot) {
         if(!PanelOpen || slot<0 || slot>=inventory.Length)return false;
-        if(CompanionNetwork.Client){if(ReferenceEquals(inventory,Player.inventory)&&slot<50){CompanionNetwork.Transfer(this,true,slot,(byte)(TrainingCatalog.Id(inventory[slot]) is >=0 and <13?3:0));return true;}return false;}
+        if(CompanionNetwork.Client){if(ReferenceEquals(inventory,Player.inventory)&&slot<50){CompanionNetwork.Transfer(this,true,slot,(byte)3);return true;}return false;}
         bool player=ReferenceEquals(inventory,Player.inventory)&&slot<50&&context==Terraria.UI.ItemSlot.Context.InventoryItem;
         bool chest=Player.chest>=0&&Main.chest[Player.chest] is {} c&&ReferenceEquals(inventory,c.item);
         if(!player&&!chest)return false;

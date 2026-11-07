@@ -7,8 +7,8 @@ using Terraria.ModLoader;
 
 namespace PalicoCompanion.Systems;
 
-// Observe the real owner's normal update once. Never replay equipment or
-// regeneration hooks on a proxy, and never import the owner's recovery timer.
+// Observe the real owner's normal update once for inheritance mode. Never
+// replay the owner's hooks or import their recovery timer into the companion.
 public sealed class CompanionRegeneration:ModSystem {
     sealed class Sample {internal int Bonus;internal long Pending;internal ulong Tick;internal bool Capturing;}
     static ConditionalWeakTable<Player,Sample> samples=new();

@@ -31,7 +31,7 @@ public sealed partial class CompanionTraining {
     // Old item flags remain readable for material refunds, but no longer select modes.
     public bool CanUpgrade(int kind)=>kind==13&&!Expanded||kind==14&&Tier==0||kind==15&&Tier==1;
     public bool Ready(CompanionPlayer s,int kind)=>Active(s)&&Find(s,kind) is int i&&i>=0&&Cooldowns[kind]<=0&&SlotCooldowns[i]<=0;
-    public bool Use(CompanionPlayer s,int kind,int seconds,Vector2? at=null){if(!Ready(s,kind))return false;int i=Find(s,kind);Cooldowns[kind]=SlotCooldowns[i]=SlotCooldownTotals[i]=seconds*60;if(!CompanionNetwork.Client)Cue(s,kind,at);return true;}
+    public bool Use(CompanionPlayer s,int kind,Vector2? at=null){if(!Ready(s,kind))return false;int i=Find(s,kind);Cooldowns[kind]=SlotCooldowns[i]=SlotCooldownTotals[i]=CooldownSeconds(kind,Tier)*60;if(!CompanionNetwork.Client)Cue(s,kind,at);return true;}
     public bool Accepts(CompanionPlayer s,Item item,int slot){if(slot<0||slot>3)return false;if(item.IsAir)return true;int k=TrainingCatalog.Id(item);if(slot==3)return TrainingCatalog.WorkGear(k);if(slot>=Count(s.Player)||!TrainingCatalog.Support(k))return false;for(int i=0;i<3;i++)if(i!=slot&&TrainingCatalog.Id(Slots[i])==k)return false;return true;}
     internal bool TryEquip(CompanionPlayer s,Item item){if(item.IsAir)return false;for(int i=0;i<4;i++)if(Slots[i].IsAir&&Accepts(s,item,i)){Slots[i]=item.Clone();Slots[i].stack=1;if(--item.stack<=0)item.TurnToAir();return true;}return false;}
     public bool Apply(Item material,int slot){int k=TrainingCatalog.Id(material);bool ok=false;
@@ -44,7 +44,12 @@ public sealed partial class CompanionTraining {
     public int MiningReach=>Work(9)?Tier+1:0;
     public float Damage(CompanionPlayer s)=>Active(s)&&Find(s,4)>=0&&Drum>0?1.2f+.05f*Tier:1;
     public float Speed(CompanionPlayer s)=>Damage(s)>1?1.1f+.05f*Tier:1;
-    internal static int CooldownSeconds(int kind)=>kind switch {0=>60,1 or 4=>45,2=>40,3=>35,5=>25,6 or TrainingCatalog.Barrel=>30,7=>18,_=>0};
+    // Keep cooldown selection shared by activation, tooltips and HUD. Existing
+    // timers are left intact when upgrading; only the next use gets the new value.
+    internal static int CooldownSeconds(int kind,int tier=0){
+        tier=Math.Clamp(tier,0,2);
+        return kind switch {0=>60,1 or 4=>45,2=>tier switch {0=>40,1=>38,_=>35},3=>35,5=>25,6=>30,TrainingCatalog.Barrel=>30-2*tier,7=>18-tier,_=>0};
+    }
     public float Summon(CompanionPlayer s)=>Active(s)&&Find(s,4)>=0&&Drum>0?new[]{1.25f,1.35f,1.45f}[Tier]:1;
     internal void ReturnLocked(CompanionPlayer s){if(!Slots[3].IsAir&&TrainingCatalog.Id(Slots[3]) is not (>=8 and <=10))InventoryTransfer.Move(Slots[3],s.Bag);for(int i=Count(s.Player);i<3;i++)if(!Slots[i].IsAir)InventoryTransfer.Move(Slots[i],s.Bag);}
     public TagCompound Save()=>new(){["tier"]=Tier,["expanded"]=Expanded,["items"]=Slots.Select(ItemIO.Save).ToList(),["cooldowns"]=Cooldowns,["slotCooldowns"]=SlotCooldowns,["slotCooldownTotals"]=SlotCooldownTotals};
@@ -102,18 +107,18 @@ public sealed partial class CompanionTraining {
         if(CompanionNetwork.Client&&kind is 0 or 1)NetMessage.SendData(kind==1?MessageID.PlayerMana:MessageID.PlayerLifeMana,-1,-1,null,p.whoAmI);
     }
     internal static void Cue(CompanionPlayer s,int kind,Vector2? at=null)=>CompanionFeedback.Show(6,at??(CatFor(s)?.Center??s.Player.Center),kind,"cast");
-    internal int Shield(CompanionPlayer s,int damage,bool cat,bool consume=true){if(!Ready(s,1)||cat&&(s.Player.statLife<=s.Player.statLifeMax2*.7f||s.Vitals.Health>s.Vitals.MaxHealth*.35f&&damage<s.Vitals.Health)||damage<Math.Max(20,(cat?s.Vitals.MaxHealth:s.Player.statLifeMax2)/10)&&damage<(cat?s.Vitals.Health:s.Player.statLife))return damage;if(consume){if(!Use(s,1,CooldownSeconds(1),cat?CatFor(s)?.Center:s.Player.Center))return damage;s.Expression.GearUsed(s,1,cat);}return Math.Max(1,damage-new[]{15,30,40}[Tier]);}
+    internal int Shield(CompanionPlayer s,int damage,bool cat,bool consume=true){if(!Ready(s,1)||cat&&(s.Player.statLife<=s.Player.statLifeMax2*.7f||s.Vitals.Health>s.Vitals.MaxHealth*.35f&&damage<s.Vitals.Health)||damage<Math.Max(20,(cat?s.Vitals.MaxHealth:s.Player.statLifeMax2)/10)&&damage<(cat?s.Vitals.Health:s.Player.statLife))return damage;if(consume){if(!Use(s,1,cat?CatFor(s)?.Center:s.Player.Center))return damage;s.Expression.GearUsed(s,1,cat);}return Math.Max(1,damage-new[]{15,30,40}[Tier]);}
 }
 
 public sealed class TrainingHooks:ModPlayer {
     bool guarded;int jumpIntent,airTicks;
-    public override void OnHurt(Player.HurtInfo info){if(guarded){guarded=false;if(State.Training.Use(State,1,CompanionTraining.CooldownSeconds(1),Player.Center)){if(CompanionNetwork.Client)CompanionNetwork.TrainingSpent(1);else State.Expression.GearUsed(State,1);}}}
+    public override void OnHurt(Player.HurtInfo info){if(guarded){guarded=false;if(State.Training.Use(State,1,Player.Center)){if(CompanionNetwork.Client)CompanionNetwork.TrainingSpent(1);else State.Expression.GearUsed(State,1);}}}
     CompanionPlayer State=>Player.GetModPlayer<CompanionPlayer>();
     public override void PostUpdate(){if(ReferenceEquals(Player,CompanionNativeUse.Current?.Actor)||ReferenceEquals(Player,CompanionFishing.Current?.Actor))return;var s=State;if(CompanionNetwork.Server&&(!s.NetReady||s.NetLeaving))return;s.Training.Tick(s);
         bool airborne=Player.velocity.Y!=0;
         airTicks=airborne?airTicks+1:0;jumpIntent=airborne&&Player.controlJump?jumpIntent+1:0;
         bool climbing=Player.wingTimeMax>0?airTicks>=30&&jumpIntent>=18&&Player.wingTime<=2:airTicks>=35&&jumpIntent>=30&&Player.velocity.Y*Player.gravDir>=-1;
-        if(Player.whoAmI==Main.myPlayer&&!Main.dedServ&&s.Training.Ready(s,6)&&!Player.mount.Active&&climbing&&Player.jump==0){if(s.Training.Use(s,6,30,Player.Center)){CompanionTraining.ApplyOwner(s,3,0);if(CompanionNetwork.Client)CompanionNetwork.TrainingSpent(6);else s.Expression.GearUsed(s,6);}}
+        if(Player.whoAmI==Main.myPlayer&&!Main.dedServ&&s.Training.Ready(s,6)&&!Player.mount.Active&&climbing&&Player.jump==0){if(s.Training.Use(s,6,Player.Center)){CompanionTraining.ApplyOwner(s,3,0);if(CompanionNetwork.Client)CompanionNetwork.TrainingSpent(6);else s.Expression.GearUsed(s,6);}}
     }
     public override void PostUpdateMiscEffects(){var s=State;var t=s.Training;if(!t.Active(s))return;if(t.Find(s,3)>=0&&t.ManaDance>0&&t.ManaTarget==0)Player.manaCost*=.9f-.05f*t.Tier;if(t.Find(s,2)>=0&&t.CleanseTime>0&&t.CleanseType>0&&t.CleanseType<Player.buffImmune.Length)Player.buffImmune[t.CleanseType]=true;}
     public override void ModifyHurt(ref Player.HurtModifiers modifiers){if(Player.whoAmI!=Main.myPlayer||ReferenceEquals(Player,CompanionNativeUse.Current?.Actor))return;modifiers.ModifyHurtInfo+=(ref Player.HurtInfo info)=>{int before=info.Damage;info.Damage=State.Training.Shield(State,info.Damage,false,false);guarded=info.Damage<before;};}

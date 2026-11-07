@@ -45,7 +45,7 @@ UI: {
 	NameEmpty: Enter a name to continue
 	DefaultName: Kit
 	DyeSlot: Dye
-	DyeHint: Dyes your Palico, kite and status-card portrait
+	DyeHint: Dyes your Palico and status-card portrait; adjust clothing and kite dye settings separately
 	SortBag: Sort items
 	SortDone: Backpack sorted
 	SortUnavailable: Sorting unavailable; items remain unchanged
@@ -82,7 +82,7 @@ UI: {
 	GardenReplantBlocked: Replant blocked; seed and normal drops retained.
 	GardenBlocked: Harvest blocked; seed retained.
 	QuickStack: Quick stack
-	NativeBagHint: While this panel is open, Shift-click in your inventory or a chest transfers to the companion. Favorites are protected from quick transfers, but your Palico can still use and consume favorites in its own inventory.
+	NativeBagHint: Shift-click non-favorited items in your inventory or a chest to transfer them here. Backpack favorites stay during bulk withdrawal but remain usable and consumable.
 	Transferred: Transferred {0} items
 	Recovering: Recovering: back in {0}s
 	GearHint: Equip throwing weapons as a stack; keep ammo in the Palico inventory
@@ -159,6 +159,8 @@ Configs: {
 		DisplayName: Companion abilities
 
 		Headers: {
+			Attributes: "[palicoitem:IronChainmail] Attributes and equipment"
+			Inheritance: "[palicoitem:AvengerEmblem] Inherited mode only"
 			Presets: "[palicohead:icon] Quick presets"
 			Strength: "[palicohead:icon] Combat abilities"
 			Movement: "[palicoitem:HermesBoots] Movement and evasion"
@@ -170,7 +172,7 @@ Configs: {
 			Label: Strength preset
 			Tooltip:
 				'''
-				Choose a preset to adjust damage, health, defense, both movement speeds and evasion, then save to apply
+				Adjusts damage, health, both movement speeds and evasion, plus defense inheritance in Inherited mode; save to apply
 				You can still adjust each value; unmatched settings appear as Custom
 				All presets keep following and work movement at 100%
 				In multiplayer, only the host can change these settings in-game; they apply to every Palico on the server
@@ -195,8 +197,8 @@ Configs: {
 		}
 
 		HealthPercent: {
-			Label: Health inherited (%)
-			Tooltip: Maximum health as a percentage of the owner's maximum health. Changing this preserves the current health percentage and does not revive a downed Palico.
+			Label: Health (%)
+			Tooltip: Scales maximum health: the owner's maximum in Inherited mode, or permanent health upgrades plus your Palico's own equipment in Independent mode. Preserves the current health percentage and does not revive a downed Palico.
 		}
 
 		DefensePercent: {
@@ -355,6 +357,11 @@ Configs: {
 			Tooltip: Your Palico wheels you home on the death screen. Occasionally: the first eligible death each session, then at least 5 minutes apart. No extra coin loss or respawn delay. Skipped for Hardcore characters or less than 3 seconds of waiting.
 		}
 
+		TeleportSounds: {
+			Label: Teleport sounds
+			Tooltip: Play sounds when a Palico teleports, is recalled or stowed, or reappears. Turning this off keeps the particles and does not affect meows or player teleport sounds. In multiplayer, this only changes what you hear.
+		}
+
 		CatSounds: {
 			Label: Palico sounds
 			Tooltip: Quiet Terraria cat sounds when chatting, hurt or petted, with limits on repeated playback.
@@ -362,7 +369,7 @@ Configs: {
 
 		Fishing: {
 			Label: Automatic fishing
-			Tooltip: Fishes when you linger by water or cast your own line, using bait from the Palico inventory, including favorites. Moving nearby or opening your inventory does not interrupt it. Water, honey and lava use the usual fishing requirements.
+			Tooltip: Fishes when you linger by water or cast a line, using its own bait (including favorites) and the best rod you carry. Never uses Truffle Worms or fishes up enemies; lava fishing requires suitable gear or bait.
 		}
 
 		DeliverRecoveryDrops: {
@@ -387,7 +394,7 @@ Configs: {
 
 		AutoHeal: {
 			Label: Use recovery potions
-			Tooltip: Drinks Healing Potions at half life and Mana Potions when a spell needs mana. Uses Palico supplies, including favorites. Potion cooldowns and Mana Sickness are saved.
+			Tooltip: Drinks Healing Potions at half life and Mana Potions when a spell needs mana. Uses Palico supplies, including favorites. Potion cooldowns and Mana Sickness are separate from yours.
 		}
 
 		Chatter: {
@@ -474,7 +481,7 @@ Configs: {
 
 		Combat: {
 			Label: Fight enemies
-			Tooltip: Uses its equipped weapon, or a Copper Shortsword if the slot is empty. When turned off, your Palico still follows you and works.
+			Tooltip: Fights according to the combat mode selected in the panel, using a Copper Shortsword if the main slot is empty. Turning this off stops attacks and summoning but keeps following and work.
 		}
 
 		Torches: {
@@ -1390,7 +1397,7 @@ EvasionChoices: {
 	Agile: Agile
 }
 
-BalanceHostOnly: Only the host can change companion abilities in multiplayer. Dedicated-server owners can edit the server configuration.
+BalanceHostOnly: Only the host can change shared ability values in multiplayer. Each player chooses their own attribute mode. Dedicated-server owners can edit the server configuration.
 
 StrengthPresets: {
 	Assist: {
@@ -1398,7 +1405,7 @@ StrengthPresets: {
 		Tooltip:
 			'''
 			Take the lead in combat, with your Palico lending a hand
-			Damage: 50%; inherited health/defense and combat movement: 75%
+			Damage: 50%; health and combat movement: 75%; defense inheritance: 75%
 			Standard evasion; following and work movement: 100%
 			'''
 	}
@@ -1408,7 +1415,7 @@ StrengthPresets: {
 		Tooltip:
 			'''
 			Fight side by side, or let your Palico take care of the odd enemy (default)
-			Damage, inherited health/defense and combat movement: 75%
+			Damage, health and combat movement: 75%; defense inheritance: 75%
 			Standard evasion; following and work movement: 100%
 			'''
 	}
@@ -1418,7 +1425,7 @@ StrengthPresets: {
 		Tooltip:
 			'''
 			For a more relaxed playthrough, with your Palico doing more of the fighting
-			Damage, inherited health/defense and combat movement: 100%
+			Damage, health and combat movement: 100%; defense inheritance: 100%
 			Agile evasion; following and work movement: 100%
 			'''
 	}

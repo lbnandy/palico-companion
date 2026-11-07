@@ -38,7 +38,7 @@ internal static partial class CompanionNetwork {
         // Like native dye slots, classify dyes on the rendering client. A
         // dedicated server has no armor shader registrations (Item.dye is 0).
         if(group==2&&!CompanionDye.Accepts(Main.mouseItem))return;
-        if(group==1&&!CompanionVitals.Accepts(Main.mouseItem,index))return;
+        if(group==1&&!CompanionInventoryOperations.Accepts(s,Main.mouseItem,group,index))return;
         var p=Packet(Slot);pending=++sequence;p.Write(pending);p.Write(group);p.Write((ushort)index);p.Write(right);p.Write(favorite);
         ItemIO.Send(items[index],p,true,true);escrow=Main.mouseItem;Main.mouseItem=new Item();ItemIO.Send(escrow,p,true,true);RememberRequest(p);p.Send();
     }

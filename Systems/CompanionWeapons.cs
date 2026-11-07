@@ -3,8 +3,8 @@ using Terraria;
 using Terraria.ID;
 namespace PalicoCompanion.Systems;
 public static class CompanionWeapons {
-    // Keep retired armor indices 1..3 readable; append new equipment after them.
-    internal const int SummonSlot=4,EquipmentCount=5;
+    // Retain armor indices 1..3 and summon index 4 for existing saves.
+    internal const int SummonSlot=4,EquipmentCount=12;
     internal static bool SummonWeapon(Item item)=>!item.IsAir&&Supports(item)&&(CompanionNativeUse.Summoning(item)||CompanionWeaponPolicy.Sentry(item));
     internal static Item Summon(Item[] gear)=>gear.Length>SummonSlot?gear[SummonSlot]:empty;
     static readonly Item empty=new();

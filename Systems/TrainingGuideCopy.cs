@@ -18,14 +18,19 @@ internal static class TrainingGuideCopy {
     };
     internal static string Detail(int kind,int tier,bool compare=false){
         string text=TrainingCatalog.Entries[kind].Detail;
-        return compare?text:TierValues.Replace(text,m=>TierValue(m,kind,tier));
+        return CooldownText(compare?text:TierValues.Replace(text,m=>TierValue(m,kind,tier)),kind,tier,compare);
     }
     internal static string Tooltip(int kind,int tier,bool compare=false){
         // Short copy reuses the guide's tier values; balance numbers have one
         // localized source, rather than drifting between two descriptions.
         var entry=TrainingCatalog.Entries[kind];
         object[] values=TierValues.Matches(entry.Detail).Select(m=>(object)(compare?m.Value:TierValue(m,kind,tier))).ToArray();
-        return CompanionText.Get("ItemTooltips."+entry.Key,values);
+        return CooldownText(CompanionText.Get("ItemTooltips."+entry.Key,values),kind,tier,compare);
+    }
+    static string CooldownText(string text,int kind,int tier,bool compare){
+        int first=CompanionTraining.CooldownSeconds(kind,0),last=CompanionTraining.CooldownSeconds(kind,2);
+        string value=compare&&first!=last?$"{first} / {CompanionTraining.CooldownSeconds(kind,1)} / {last}":CompanionTraining.CooldownSeconds(kind,tier).ToString();
+        return text.Replace("<cooldown>",value);
     }
     internal static string DirectInstruction(){
         var keys=PalicoCompanion.DirectKey?.GetAssignedKeys();

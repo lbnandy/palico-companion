@@ -25,10 +25,10 @@ public sealed class CompanionConfigLayout : ModSystem {
         ["AutoLogistics"]="Chest",["StockTorches"]="Torch",["StockGlowsticks"]="Glowstick",["StockPlatforms"]="WoodPlatform",["StockRopes"]="Rope",
         ["StockHealing"]="HealingPotion",["StockMana"]="ManaPotion",["StockAmmo"]="WoodenArrow",["StockAcorns"]="Acorn",["StockBait"]="Worm",
         ["CompanionHud"]="head",["ShowActivityStatus"]="Stopwatch",["CompanionMarker"]="Compass",["Discoveries"]="MetalDetector",
-        ["Chatter"]="Sign",["Emotes"]="WhoopieCushion",["CatSounds"]="Bell",["CatCart"]="Minecart",["TrainingHints"]="Book",
+        ["Chatter"]="Sign",["Emotes"]="WhoopieCushion",["CatSounds"]="Bell",["TeleportSounds"]="MagicMirror",["CatCart"]="Minecart",["TrainingHints"]="Book",
         ["DyeClothesOnly"]="BlueDye",["DyeKite"]="KiteBlue",
         ["RunInBackground"]="Stopwatch",["AdvancedOrders"]="Ruler",
-        ["Preset"]="head",["CombatInheritancePercent"]="AvengerEmblem",["DamagePercent"]="GoldBroadsword",["HealthPercent"]="LifeCrystal",["DefensePercent"]="IronChainmail",["RegenInheritancePercent"]="BandofRegeneration",["TargetingRangePercent"]="Binoculars",
+        ["AttributeMode"]="IronChainmail",["Preset"]="head",["CombatInheritancePercent"]="AvengerEmblem",["DamagePercent"]="GoldBroadsword",["HealthPercent"]="LifeCrystal",["DefensePercent"]="IronChainmail",["RegenInheritancePercent"]="BandofRegeneration",["TargetingRangePercent"]="Binoculars",
         ["CombatMovementPercent"]="HermesBoots",["TravelMovementPercent"]="Aglet",["Evasion"]="MasterNinjaGear",["WorkSpeedPercent"]="GoldPickaxe",["FishingSpeedPercent"]="WoodFishingPole",
         ["BossHealthBoost"]="SuspiciousLookingEye",["BossHealthPercent"]="LifeCrystal"
     };
@@ -39,7 +39,7 @@ public sealed class CompanionConfigLayout : ModSystem {
     public override void Load() {
         if (Main.dedServ) return;
         var editorType = typeof(ModConfig).Assembly.GetType("Terraria.ModLoader.Config.UI.UIModConfig", true);
-        foreach (string name in new[] { "modConfig", "pendingConfig", "mainConfigItems", "filterTextField", "headerTextPanel" })
+        foreach (string name in new[] { "modConfig", "pendingConfig", "mainConfigItems", "filterTextField", "headerTextPanel", "updateNeeded" })
             fields[name] = editorType.GetField(name, Private);
         MonoModHooks.Add(editorType.GetMethod("OnActivate"), (Action<Action<UIState>, UIState>)Activate);
     }
@@ -70,6 +70,14 @@ public sealed class CompanionConfigLayout : ModSystem {
         foreach (var pair in Get<List<Tuple<UIElement, UIElement>>>(self, "mainConfigItems")) {
             if (pair.Item2 is not ConfigElement control) continue;
             var field = (PropertyFieldWrapper)member.GetValue(control);
+            var pending=Get<ModConfig>(self,"pendingConfig");
+            Func<string> unavailable=field.Name switch {
+                "StockTorches" or "StockGlowsticks" or "StockPlatforms" or "StockRopes" or "StockHealing" or "StockMana" or "StockAmmo" or "StockAcorns" or "StockBait"
+                    when pending is CompanionConfig personal=>()=>personal.AutoLogistics?null:"EnableRestocking",
+                "BossHealthPercent" when pending is CompanionBalanceConfig balance=>()=>balance.BossHealthBoost?null:"EnableBossHealth",
+                _=>null
+            };
+            if(unavailable!=null)pair.Item1.Append(new CompanionSettingDependency(control,unavailable));
             if(config is CompanionBalanceConfig && field.Name==nameof(CompanionBalanceConfig.Evasion))
                 SyncBalanceChoice(control,field,Get<ModConfig>(self,"pendingConfig"));
             if (!OptionIcons.TryGetValue(field.Name, out string icon)) continue;
@@ -77,6 +85,50 @@ public sealed class CompanionConfigLayout : ModSystem {
             string tag = icon == "head" ? "[palicohead:icon] " : $"[palicoitem:{icon}] ";
             display.SetValue(control, (Func<string>)(() => tag + original()));
         }
+        if(config is CompanionBalanceConfig) BindInheritanceVisibility(self,member);
+    }
+
+    void BindInheritanceVisibility(UIState editor,PropertyInfo member) {
+        var items=Get<List<Tuple<UIElement,UIElement>>>(editor,"mainConfigItems");
+        var all=items.ToArray();
+        var inheritance=new HashSet<Tuple<UIElement,UIElement>>(all.Where(pair=>
+            pair.Item2 is ConfigElement control && ((PropertyFieldWrapper)member.GetValue(control)).Name is
+                nameof(CompanionBalanceConfig.CombatInheritancePercent) or nameof(CompanionBalanceConfig.DefensePercent) or nameof(CompanionBalanceConfig.RegenInheritancePercent)));
+        int first=Array.FindIndex(all,inheritance.Contains);
+        if(first>0 && all[first-1].Item2.GetType().Name=="HeaderElement") {
+            var pair=all[first-1];
+            if(Main.netMode==Terraria.ID.NetmodeID.MultiplayerClient) {
+                // Recreate only the native header, whose text is immutable.
+                var header=(UIElement)Activator.CreateInstance(pair.Item2.GetType(),Language.GetTextValue("Mods.PalicoCompanion.Settings.SharedInheritance"));
+                pair.Item1.RemoveChild(pair.Item2);pair.Item1.Append(header);
+                header.Recalculate();
+                pair.Item1.Height.Set(header.GetOuterDimensions().Height,0);
+                all[first-1]=Tuple.Create(pair.Item1,header);
+                var tooltip=typeof(ConfigElement).GetProperty("TooltipFunction",BindingFlags.Instance|BindingFlags.Public|BindingFlags.NonPublic);
+                foreach(var row in inheritance) {
+                    var original=(Func<string>)tooltip.GetValue(row.Item2);
+                    tooltip.SetValue(row.Item2,(Func<string>)(()=>Language.GetTextValue("Mods.PalicoCompanion.Settings.SharedInheritanceHelp")+"\n"+original()));
+                }
+            }
+            inheritance.Add(all[first-1]);
+        }
+        bool? previous=null;
+        void Refresh(UIElement _) {
+            // Multiplayer values belong to the whole server, including players
+            // using the other mode. Only personal single-player settings disappear.
+            bool visible=Main.netMode==Terraria.ID.NetmodeID.MultiplayerClient ||
+                ModContent.GetInstance<CompanionConfig>().AttributeMode==CompanionAttributeMode.Inherited;
+            if(previous==visible)return;
+            previous=visible;
+            items.Clear();
+            items.AddRange(all.Where(pair=>visible||!inheritance.Contains(pair)));
+            // Reuse the native filter and layout, keeping the same pending controls
+            // so switching modes cannot discard unsaved slider values.
+            fields["updateNeeded"].SetValue(editor,true);
+        }
+        editor.OnUpdate+=Refresh;
+        restore.Add(()=>editor.OnUpdate-=Refresh);
+        Refresh(editor);
     }
 
     static void SyncBalanceChoice(ConfigElement control,PropertyFieldWrapper field,ModConfig pending) {

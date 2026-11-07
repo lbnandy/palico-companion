@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Linq;
 using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.Audio;
@@ -64,8 +65,13 @@ public sealed class CompanionPickup {
     internal static bool HasRoom(Item item,CompanionPlayer state)=>
         CompanionRestock.Thrown(state,item)&&InventoryTransfer.HasRoom(item,CompanionRestock.Destination(state,item))||
         InventoryTransfer.HasRoom(item,state.Bag);
+    // Player.CanAcceptItemIntoInventory's native exception set, with the
+    // companion's own inventory supplying the lock instead of the owner's.
+    internal static bool AllowsGroundPickup(Item item,CompanionPlayer state)=>
+        ItemID.Sets.IgnoresEncumberingStone[item.type]||!state.Bag.Any(i=>!i.IsAir&&i.type==ItemID.EncumberingStone);
     internal static bool CanCollect(Item i,Player owner,CompanionPlayer state,bool requireRoom=true)=>
         i.active&&!i.IsAir&&Ordinary(i)&&!ItemID.Sets.IsAPickup[i.type]&&i.type!=ItemID.Heart&&i.type!=ItemID.Star&&
+        AllowsGroundPickup(i,state)&&
         !state.ExcludedPickup.Contains(i.type)&&!i.favorited&&
         (i.playerIndexTheItemIsReservedFor==255||i.playerIndexTheItemIsReservedFor==owner.whoAmI)&&
         Vector2.DistanceSquared(i.Center,state.WorkAnchor)<(480*480)&&(!requireRoom||HasRoom(i,state))&&

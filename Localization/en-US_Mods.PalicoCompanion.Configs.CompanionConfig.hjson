@@ -1,0 +1,6 @@
+{
+    "AttributeMode": {
+        "Label": "Attribute mode",
+        "Tooltip": "Player inheritance: share player attributes using the companion ability settings.\nIndependent equipment: 3 armor and 5 base accessory slots (with extra slots following your vanilla unlocks) provide the cat’s own bonuses, without inherited combat bonuses. Base life and mana still follow your permanent upgrades.\nSwitching modes keeps all items; stored armor and accessories are inactive in inheritance mode."
+    }
+}

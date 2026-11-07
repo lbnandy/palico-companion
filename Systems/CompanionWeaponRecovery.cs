@@ -35,6 +35,7 @@ internal static class CompanionWeaponRecovery {
             foreach(var n in Main.ActiveNPCs)if(n.soulDrain&&Vector2.DistanceSquared(n.Center,actor.position)<1100*1100)count++;
         actor.soulDrain=count;
         if(count==0)return;
+        if(CompanionEquipment.Independent(use.State))return; // Own UpdateLifeRegen already evaluates this term.
         // NPC.UpdateLifeRegen locates human wielders in Main.player; our actor
         // is absent there between scopes. Match its count and Player's existing
         // Soul Drain regen term without running a full player update twice.

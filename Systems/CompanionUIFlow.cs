@@ -9,5 +9,5 @@ internal static class CompanionUIFlow {
     internal static void Bag(CompanionPlayer state){TrainingPanel.Open=false;Main.playerInventory=true;state.PanelOpen=true;}
     internal static void Toggle(CompanionPlayer state){if(state.PanelOpen){state.PanelOpen=false;return;}Bag(state);}
     internal static bool Covers(Rectangle area)=>Visible&&
-        (TrainingPanel.Open&&TrainingPanel.HitBounds.Intersects(area)||Main.LocalPlayer.GetModPlayer<CompanionPlayer>().PanelOpen&&ModContent.GetInstance<CompanionPanel>().HitBounds.Intersects(area));
+        (TrainingPanel.Open&&TrainingPanel.HitBounds.Intersects(area)||Main.LocalPlayer.GetModPlayer<CompanionPlayer>().PanelOpen&&ModContent.GetInstance<CompanionPanel>().Covers(area));
 }

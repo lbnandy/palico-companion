@@ -10,7 +10,7 @@ namespace PalicoCompanion.Systems;
 
 // Gameplay returns a result; only the owner's presentation layer plays it.
 // In multiplayer the result travels with the transaction acknowledgement.
-internal enum InventoryCue : byte { None, Grab, Tick, Delivery, BankDelivery, DeliveryReturn }
+internal enum InventoryCue : byte { None, Grab, Tick, Delivery, BankDelivery, DeliveryReturn, Toggle }
 internal readonly record struct InventoryOutcome(InventoryCue Cue, int Moved=0) {
     internal void Write(BinaryWriter w){w.Write((byte)Cue);w.Write(Moved);}
     internal static InventoryOutcome Read(BinaryReader r)=>new((InventoryCue)r.ReadByte(),r.ReadInt32());
@@ -18,7 +18,7 @@ internal readonly record struct InventoryOutcome(InventoryCue Cue, int Moved=0) 
         if(Main.dedServ||CompanionNetwork.Server||s.Player.whoAmI!=Main.myPlayer)return;
         if(report)s.Report(CompanionText.MessageFull("Mods.PalicoCompanion.UI.Transferred",Moved));
         if(Cue==InventoryCue.None)return;
-        SoundEngine.PlaySound(Cue==InventoryCue.Tick?SoundID.MenuTick:SoundID.Grab);
+        SoundEngine.PlaySound(Cue==InventoryCue.Toggle?SoundID.Mech:Cue==InventoryCue.Tick?SoundID.MenuTick:SoundID.Grab);
         Recipe.FindRecipes();
     }
     internal static InventoryOutcome Transfer(int count)=>new(count>0?InventoryCue.Grab:InventoryCue.None,count);
@@ -28,12 +28,13 @@ internal static class CompanionInventoryOperations {
     static bool SameKind(Item a,Item b)=>a.netID==b.netID&&a.type==b.type;
     internal static Item[] Slots(CompanionPlayer s,byte group)=>group switch {0=>s.Bag,1=>s.Gear,2=>s.Dyes,3=>s.Training.Slots,_=>null};
     internal static byte Group(CompanionPlayer s,Item[] items)=>ReferenceEquals(items,s.Bag)?(byte)0:ReferenceEquals(items,s.Gear)?(byte)1:ReferenceEquals(items,s.Dyes)?(byte)2:(byte)3;
-    internal static bool SharedSlot(byte group,int index)=>group==3&&index is >=0 and <4||group==1&&(index==0||index==CompanionWeapons.SummonSlot);
+    internal static bool SharedSlot(byte group,int index)=>group==3&&index is >=0 and <4||group==1&&(index==0||index==CompanionWeapons.SummonSlot||CompanionEquipment.IsSlot(index));
     internal static bool CanFavorite(byte group,int index)=>group==0||SharedSlot(group,index);
     internal static bool Accepts(CompanionPlayer s,Item item,byte group,int index)=>group switch {
-        0=>true,1=>CompanionVitals.Accepts(item,index),2=>CompanionDye.Accepts(item),3=>s.Training.Accepts(s,item,index),_=>false
+        0=>true,1=>CompanionEquipment.IsSlot(index)?CompanionEquipment.Accepts(s,item,index):CompanionVitals.Accepts(item,index),2=>CompanionDye.Accepts(item),3=>s.Training.Accepts(s,item,index),_=>false
     };
     internal static bool CanSplit(Item item,byte group,int index)=>item.maxStack>1&&(group==0||group==2||group==1&&index==0&&item.consumable);
+    internal static bool CanTogglePickupStone(Item item,byte group)=>group==0&&!item.IsAir&&item.type is ItemID.EncumberingStone or ItemID.UncumberingStone;
 
     // Shared BankItem-style cursor transaction, preserving item favorites.
     // Never run client-only ItemSlot on a server by swapping player/input globals.
@@ -45,6 +46,12 @@ internal static class CompanionInventoryOperations {
             item.favorited=!item.favorited;return new(InventoryCue.Tick);
         }
         if(right){
+            if(cursor.IsAir&&CanTogglePickupStone(item,group)){
+                // Same transformation as ItemSlot.TryItemSwap, without its
+                // client input/audio globals. The existing receipt owns sound.
+                item.ChangeItemType(item.type==ItemID.EncumberingStone?ItemID.UncumberingStone:ItemID.EncumberingStone);
+                return new(InventoryCue.Toggle);
+            }
             if(item.IsAir||!CanSplit(item,group,index)||!cursor.IsAir&&(!SameKind(cursor,item)||!ItemLoader.CanStack(cursor,item)||cursor.stack>=cursor.maxStack))return default;
             int before=item.stack;
             if(cursor.IsAir)cursor=ItemLoader.TransferWithLimit(item,1);else ItemLoader.StackItems(cursor,item,out _,false,1);
@@ -63,7 +70,7 @@ internal static class CompanionInventoryOperations {
         foreach(var item in offered){
             if(item.IsAir||item.favorited||matchingOnly&&!s.Bag.Any(b=>!b.IsAir&&b.type==item.type))continue;
             if(!preserveFresh)PickupCredit.Clear(item);int before=item.stack;
-            if(equip)s.Training.TryEquip(s,item);
+            if(equip&&!s.Training.TryEquip(s,item))CompanionEquipment.TryEquip(s,item);
             InventoryTransfer.Move(item,s.Bag);
             moved+=before-(item.IsAir?0:item.stack);
         }

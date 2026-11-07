@@ -2,14 +2,16 @@ using System;
 namespace PalicoCompanion.Systems;
 
 internal static class TrainingStatus {
-    static int CooldownSeconds(int kind)=>CompanionTraining.CooldownSeconds(kind);
     internal static float Recharge(CompanionPlayer s,int slot){
         int kind=TrainingCatalog.Id(s.Training.Slots[slot]);if(!TrainingCatalog.Support(kind))return 1;
-        float family=s.Training.Cooldowns[kind]/(60f*CooldownSeconds(kind));
+        int seconds=CompanionTraining.CooldownSeconds(kind,s.Training.Tier);
         int total=s.Training.SlotCooldownTotals[slot];
         // Older saves predate totals. Their skill timer is exact when it still
         // belongs to this item; transferred locks conservatively use 60 seconds.
-        if(total<=0)total=s.Training.SlotCooldowns[slot]==s.Training.Cooldowns[kind]?60*CooldownSeconds(kind):3600;
+        if(total<=0)total=s.Training.SlotCooldowns[slot]==s.Training.Cooldowns[kind]?60*seconds:3600;
+        // An upgrade must not reset the visible progress of an existing cast.
+        int familyTotal=s.Training.SlotCooldowns[slot]==s.Training.Cooldowns[kind]?total:60*seconds;
+        float family=s.Training.Cooldowns[kind]/(float)Math.Max(1,familyTotal);
         float slotLock=s.Training.SlotCooldowns[slot]/(float)Math.Max(1,total);
         return Math.Clamp(1-Math.Max(family,slotLock),0,1);
     }

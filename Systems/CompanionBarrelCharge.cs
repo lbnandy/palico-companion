@@ -161,7 +161,7 @@ internal sealed class CompanionBarrelCharge {
             id=Projectile.NewProjectile(p.GetSource_FromThis(),p.Center+new Vector2(p.direction*12,-6),Vector2.Zero,ModContent.ProjectileType<TrainingBarrelBlast>(),Damage(s.Training.Tier),6,use.Actor.whoAmI);
         if(id>=Main.maxProjectiles){Cancel(cat);return;}
         Main.projectile[id].netUpdate=true;
-        s.Training.Use(s,TrainingCatalog.Barrel,CompanionTraining.CooldownSeconds(TrainingCatalog.Barrel));
+        s.Training.Use(s,TrainingCatalog.Barrel);
         CompanionFeedback.Show(6,Main.projectile[id].Center,TrainingCatalog.Barrel,"impact");
         p.velocity=new Vector2(-p.direction*4.8f,-4.8f);target=-1;
         Change(cat,Stage.Recover);

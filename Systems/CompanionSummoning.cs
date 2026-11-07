@@ -2,6 +2,7 @@ using System;
 using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.ID;
+using Terraria.ModLoader;
 
 namespace PalicoCompanion.Systems;
 
@@ -28,11 +29,34 @@ public sealed partial class CompanionNativeUse {
     bool NeedsSummon(Player owner,NPC target,bool allowed) {
         var item=CompanionWeapons.Summon(State.Gear);
         if(!allowed||!CompanionWeapons.SummonWeapon(item)||Main.GameUpdateCount<summonRetryAt)return false;
-        if(Summoning(item))return SummonSlots+Math.Max(.01f,ItemID.Sets.StaffMinionSlotsRequired[item.type])<=MinionLimit(owner);
+        if(Summoning(item)){
+            if(SummonSlots+Math.Max(.01f,ItemID.Sets.StaffMinionSlotsRequired[item.type])>MinionLimit(owner))return false;
+            return CanEquipSummon(item,owner);
+        }
         if(target==null)return false;
         Actor.maxTurrets=SentryLimit(owner);
         var point=target.Center;
-        return CompanionWeaponPolicy.Plan(item,this,target,ref point);
+        return CompanionWeaponPolicy.Plan(item,this,target,ref point)&&CanEquipSummon(item,owner);
+    }
+    bool CanEquipSummon(Item item,Player owner){
+        // Free slots do not imply another summon is allowed (some staffs own
+        // one group). Ask the native item before interrupting the main weapon.
+        // ItemCheck still performs the actual use, payment and projectile spawn.
+        CountOwnedProjectiles();
+        int selected=Actor.selectedItem;
+        Item held=Actor.inventory[selected];
+        int minions=Actor.maxMinions,turrets=Actor.maxTurrets;
+        try{
+            Actor.inventory[selected]=item;
+            Actor.maxMinions=MinionLimit(owner);Actor.maxTurrets=SentryLimit(owner);
+            bool allowed;
+            using(new Scope(this))allowed=CombinedHooks.CanUseItem(Actor,item);
+            if(!allowed)summonRetryAt=Main.GameUpdateCount+60;
+            return allowed;
+        }finally{
+            Actor.inventory[selected]=held;
+            Actor.maxMinions=minions;Actor.maxTurrets=turrets;
+        }
     }
     Item SelectWeapon(Player owner,NPC target,bool allowed) {
         automaticSwitch=false;ReconcileSummonEquipment();

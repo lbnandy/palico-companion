@@ -1,0 +1,12 @@
+{
+    "PersonalMode": "Attribute mode (personal; applies immediately)",
+    "ModeHelp": "Inherited: use the inheritance percentages below.\nIndependent: use armor and accessory slots for the Palico’s own bonuses.\nSwitching retains equipment. This choice only affects your Palico; the host controls the ability values below.",
+    "EnableRestocking": "Enable automatic restocking to adjust these amounts. Saved values are retained.",
+    "EnableBossHealth": "Enable boss health scaling to adjust this value. Saved values are retained.",
+    "SharedInheritance": "Inheritance (server-wide)",
+    "SharedInheritanceHelp": "Set by the host for all Palicos in Inherited mode. These values do not apply to Independent mode.",
+    "MeetMode": "Attribute mode",
+    "MeetInherited": "Inherit a share of your stats, without separate armor or accessories.",
+    "MeetIndependent": "Equip your Palico with its own armor and accessories for combat bonuses.",
+    "MeetModeHint": "You can switch later in Companion abilities."
+}

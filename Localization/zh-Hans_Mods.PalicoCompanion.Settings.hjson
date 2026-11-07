@@ -1,0 +1,12 @@
+{
+    "PersonalMode": "属性模式（个人，选择后立即生效）",
+    "ModeHelp": "继承玩家属性：使用下方的继承比例。\n独立配装：启用护甲与饰品栏，使用呆猫自己的装备加成。\n切换保留装备。此项仅影响你的呆猫；下方能力数值由房主统一设置。",
+    "EnableRestocking": "开启自动补给后可调整，已有数量会保留",
+    "EnableBossHealth": "开启 Boss 生命增强后可调整，已有比例会保留",
+    "SharedInheritance": "继承比例（服务器共用）",
+    "SharedInheritanceHelp": "由房主统一设置，仅影响选择继承玩家属性的呆猫。独立配装不使用这些比例。",
+    "MeetMode": "属性模式",
+    "MeetInherited": "按设置比例继承你的属性，无需另配护甲和饰品。",
+    "MeetIndependent": "为呆猫搭配护甲和饰品，由这些装备提供战斗加成。",
+    "MeetModeHint": "之后可在「呆猫能力」设置中切换。"
+}

@@ -20,6 +20,12 @@ internal static class CompanionCombatInheritance {
 
     internal static void Apply(Player actor,Player owner){
         float ratio=CompanionBalanceConfig.Current.CombatInheritanceScale;
+        Copy(actor,owner,ratio);
+    }
+
+    internal static void Copy(Player actor,Player owner,float ratio)=>CopyModifiers(actor,owner,ratio,true);
+    internal static void CopyEquipment(Player actor,Player equipped)=>CopyModifiers(actor,equipped,1,false);
+    static void CopyModifiers(Player actor,Player owner,float ratio,bool removeOwnerManaSickness){
         CompanionCrossMod.InheritStats?.Invoke(actor,owner,ratio);
         if(ratio<=0)return;
         for(int i=0;i<DamageClassLoader.DamageClassCount;i++){
@@ -27,7 +33,7 @@ internal static class CompanionCombatInheritance {
             var damage=owner.GetDamage(type);
             // Remove the owner's potion penalty before scaling bonuses. The
             // companion applies its own mana sickness in the native-use path.
-            if(type==DamageClass.Magic&&owner.manaSick)damage/=Math.Max(.01f,1-owner.manaSickReduction);
+            if(removeOwnerManaSickness&&type==DamageClass.Magic&&owner.manaSick)damage/=Math.Max(.01f,1-owner.manaSickReduction);
             actor.GetDamage(type)=Blend(actor.GetDamage(type),damage,ratio);
             actor.GetCritChance(type)=Blend(actor.GetCritChance(type),owner.GetCritChance(type),ratio);
             actor.GetAttackSpeed(type)=Blend(actor.GetAttackSpeed(type),owner.GetAttackSpeed(type),ratio);

@@ -61,7 +61,7 @@ public sealed partial class CompanionTraining {
                 break;
         }
         if(CompanionNetwork.Client){message=CompanionText.Message("CompanionSkillActivation.ServerPending");return false;}
-        if(!Use(s,kind,CooldownSeconds(kind),kind is 0 or 2||kind==3&&manaTarget==0?p.Center:null))return false;
+        if(!Use(s,kind,kind is 0 or 2||kind==3&&manaTarget==0?p.Center:null))return false;
         switch(kind) {
             case 0:OwnerEffect(s,0,new[]{15,30,50}[Tier]);SlowHealing=EffectDuration(0);break;
             case 2:CleanseType=debuff;CleanseTime=EffectDuration(2);OwnerEffect(s,2,debuff);break;

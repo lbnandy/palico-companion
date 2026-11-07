@@ -11,13 +11,20 @@
 
 ## Equipment and inventory
 
-Equip your Palico and save multiple loadouts to switch between. Main weapons and summon weapons have separate slots; after summoning minions or deploying sentries, your Palico switches back to its main weapon. Favorite weapons or support equipment to share them with loadouts whose matching slot is empty.
+Choose between two attribute modes:
+
+- **Player-stat inheritance**: Use the owner's stats without preparing a separate set of armor and accessories.
+- **Independent equipment**: Equip your Palico with its own armor and accessories to gain their stats and effects.
+
+Switch modes in **Companion abilities**; equipped items are kept.
+
+Save multiple loadouts and switch between them. Main weapons and summon weapons have separate slots; after summoning minions or deploying sentries, your Palico switches back to its main weapon. When switching loadouts, empty slots keep the matching favorited equipment.
 
 Unused main weapons are carried on the back or waist and move with your Palico. You can turn this off in the appearance settings.
 
 Your Palico has its own backpack for supplies and loot. Favorited items remain usable and stay in its backpack when you retrieve everything else. Give it access to selected chests, and it can put items away alongside others of the same type and restock its supplies.
 
-![Equipment and inventory](docs/images/04-equipment-en-compact.png)
+![Equipment and inventory (independent equipment)](docs/images/04-equipment-independent-en.png)
 
 ## Installation and first steps
 
@@ -27,23 +34,25 @@ By default, `P` opens the panel, `K` recalls your Palico, and holding `V` while 
 
 You can also bind a key to stow or call out your Palico. The panel supports gamepad controls, and clicking its sword button cycles through proactive, assist and passive modes. Passive mode keeps work, pickup and healing available.
 
-Gather materials to craft and upgrade your Palico’s gear. The in-game Palico Guide explains how to craft, use and upgrade equipment.
+Craft and upgrade your Palico's work and support gear with collected materials. The in-game Palico Guide covers recipes, uses and upgrades.
 
 ![Palico Guide](docs/images/05-guide-en-compact.png)
 
 ## Customize your Palico’s abilities
 
-The **Companion abilities** settings offer three strength presets: choose **Support** if you want to take the lead in combat, **Standard** to fight side by side, or **Strong** if you want to take it easy and let your Palico carry you. Standard is the default.
+Both attribute modes support three strength presets in **Companion abilities**: choose **Support** if you want to take the lead in combat, **Standard** to fight side by side, or **Strong** if you want to take it easy and let your Palico carry you. Standard is the default.
 
-You can also fine-tune your Palico’s damage, health, defense, inherited health regeneration, targeting range, movement speeds in and out of combat, ability to dodge attacks, work speed and fishing speed individually. Targeting range is adjustable from 50% to 150% (default 100%); it does not change the weapon's own reach and is unaffected by strength presets.
+You can also adjust damage, survivability, targeting range, movement, dodging, work and fishing speeds individually. Targeting range does not change a weapon's own reach.
 
-Combat-stat inheritance is adjustable from 0% to 100% (0% disables it). New configurations default to 100%; existing configurations retain their previous behavior. It follows the weapon’s damage class and does not copy armor or accessory trigger effects; see the [compatibility notes](docs/COMPATIBILITY.md#english).
+**Player-stat inheritance:** Your Palico inherits bonuses for its weapon's damage class, adjustable from 0% to 100%. Armor and accessory trigger effects are not copied. It also inherits 50% of the owner's standard bonus health regeneration by default; set this to 0 to keep only its own regeneration. Recovery after taking damage uses a separate timer.
 
-Your Palico inherits 50% of the owner's standard bonus health regeneration by default, adjustable from 0% to 100%. Set it to 0 to keep only the Palico's own regeneration. Recovery after damage uses its own timer, and strength presets leave this percentage unchanged.
+**Independent equipment:** Defense, combat bonuses and equipment-based regeneration come from the Palico's own armor and accessories. Base life and mana still follow the owner's permanent upgrades.
+
+Open **Stats** in the panel to see current values. See the [compatibility notes](docs/COMPATIBILITY.md#english) for inheritance rules and supported mod equipment.
 
 An optional boss health bonus adds a little more challenge when fighting together. It is off by default.
 
-In multiplayer, the host or server administrator manages these settings for every Palico on the server.
+In multiplayer, each player chooses their own attribute mode. The host or server administrator manages shared settings such as strength multipliers.
 
 ## Optional integrations
 
@@ -52,15 +61,14 @@ None of these mods are required:
 - [Magic Storage](https://steamcommunity.com/sharedfiles/filedetails/?id=2563309347): let your Palico use your storage to put items away and restock its supplies.
 - [Quality of Terraria](https://steamcommunity.com/sharedfiles/filedetails/?id=2797518634): your Palico follows its rules for unlimited ammo and other consumable items.
 - [Calamity](https://steamcommunity.com/sharedfiles/filedetails/?id=2824688072): your Palico has dialogue for its biomes and bosses, and can use some of its special weapon mechanics.
-- [Thorium](https://steamcommunity.com/sharedfiles/filedetails/?id=2909886416): class support for instruments, healing tools and throwing weapons, including separate inspiration, ally healing and throwing exhaustion, plus dialogue for bosses, exploration and support actions. You can also heal it with weapons that heal allies. See the compatibility notes below for special-input limits.
+- [Thorium](https://steamcommunity.com/sharedfiles/filedetails/?id=2909886416): supports instruments, healing tools and throwing weapons, with dialogue for Thorium content. Your Palico can provide empowerments and heal allies; you can also heal it with ally-healing weapons.
+- Secrets of the Shadows (SOTS): supports blade trails and void weapons, using a separate void meter for the Palico.
 
 See [compatibility notes](docs/COMPATIBILITY.md#english) for weapon support and known limits.
 
-Secrets of the Shadows (SOTS) blade trails and void weapons are also supported, using a separate void meter for the Palico.
-
 ## Feedback and development
 
-When [reporting a bug](https://github.com/lbnandy/palico-companion/issues), please include your game and mod versions, which other mods you're using, whether you're playing solo or in multiplayer, and how to reproduce the problem. For weapon problems, include the weapon's name. A screenshot helps with visual issues.
+When [reporting a bug](https://github.com/lbnandy/palico-companion/issues), please include your game and mod versions, which other mods you're using, whether you're playing solo or in multiplayer, how to reproduce the problem, and the log from that session. For weapon problems, include the weapon's name. A screenshot helps with visual issues.
 
 [Building and development](docs/DEVELOPMENT.md#english) · [Contributing](CONTRIBUTING.md#english) · [Changelog](CHANGELOG.md) · [Third-party licenses](ThirdParty/README.md)
 

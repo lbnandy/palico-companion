@@ -18,12 +18,12 @@ internal static partial class CompanionNetwork {
         var state=EquipmentState(s);int owner=s.Player.whoAmI;
         if(equipmentState[owner]==null||!state.AsSpan().SequenceEqual(equipmentState[owner])){Send(s);return;}
         Cache(s);using var p=Packet(Pulse);p.Write((byte)owner);p.Write(s.Stowed);p.Write(s.Enabled);p.Write(s.Paused);p.Write(s.Status??"");p.Write(s.Vitals.EffectiveDefense);Vitals(p,s.Vitals);s.Training.WriteTimers(p);
-        p.Write((ulong)Main.GameUpdateCount);p.Write(s.Enabled&&!s.Player.dead&&!s.NetLeaving&&s.Cat?.ModProjectile is CompanionCat cat?cat.NetworkInstance:0UL);p.Send();
+        p.Write((ulong)Main.GameUpdateCount);p.Write(s.Enabled&&!s.Player.dead&&!s.NetLeaving&&s.Cat?.ModProjectile is CompanionCat cat?cat.NetworkInstance:0UL);s.Stats.Write(p,s);p.Send();
     }
     static void ReadPulse(BinaryReader r){
         int owner=r.ReadByte();var s=Main.player[owner].GetModPlayer<CompanionPlayer>();
         bool stowed=r.ReadBoolean(),enabled=r.ReadBoolean(),paused=r.ReadBoolean();string status=r.ReadString();int defense=r.ReadInt32();var vitals=new CompanionVitals();Vitals(r,vitals);
-        s.Training.ReadTimers(r);ulong time=r.ReadUInt64(),token=r.ReadUInt64();CompanionRoster.Confirm(owner,token,time);
+        s.Training.ReadTimers(r);ulong time=r.ReadUInt64(),token=r.ReadUInt64();CompanionRoster.Confirm(owner,token,time);s.Stats=CompanionStats.Read(r);
         s.Stowed=stowed;s.Enabled=enabled;s.Paused=paused;s.Status=status;s.Vitals=vitals;s.Vitals.EffectiveDefense=defense;
     }
     internal static void ClearPulse(){Array.Clear(equipmentState);}
