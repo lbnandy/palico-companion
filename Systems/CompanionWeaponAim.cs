@@ -37,10 +37,7 @@ internal static class CompanionWeaponAim {
         Vector2 hand=CompanionSprite.Hand(use.Cat);
         Vector2 point=CompanionCombatReach.AimPoint(item,hand,target);
         if(item.channel)return point;
-        int type=item.shoot;float speed=item.shootSpeed;
-        if(item.useAmmo>0)using(new CompanionNativeUse.Scope(use)) {
-            if(!use.Actor.PickAmmo(item,out type,out speed,out _,out _,out _,dontConsume:true))return point;
-        }
+        if(!use.PreviewShot(item,out int type,out float speed))return point;
         bool arrow=type is ProjectileID.WoodenArrowFriendly or ProjectileID.FireArrow or ProjectileID.UnholyArrow or ProjectileID.HellfireArrow;
         bool straight=type is ProjectileID.Bullet or ProjectileID.MeteorShot or ProjectileID.BulletHighVelocity;
         if(speed<=0||!ContentSamples.ProjectilesByType.TryGetValue(type,out var sample))return point;

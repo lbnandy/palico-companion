@@ -104,6 +104,16 @@ public sealed partial class CompanionNativeUse {
     }
     public bool Busy=>Actor.itemAnimation>0;
     public static CompanionNativeUse Current {get;private set;}
+    // Both native drawing and optional off-screen render passes must wait for
+    // network ownership/AI and use the same live companion actor.
+    internal static bool DrawContext(Projectile projectile,out CompanionNativeUse context){
+        context=null;
+        if(projectile.TryGetGlobalProjectile<CompanionOwnedShot>(out var tag)&&
+            (tag.Context!=null||tag.CatIdentity>=0)&&
+            (tag.Context==null||!tag.HasRunAI))return false;
+        context=CompanionOwnedShot.Of(projectile);
+        return context==null||context.CanMaintainShot(projectile)&&context.EnsureActorSlot()&&projectile.active;
+    }
     internal readonly CompanionHitCooldowns HitCooldowns=new();
     int type=-1,prefix=-1,slot=-1;
     internal bool EnsureActorSlot() {
@@ -126,6 +136,8 @@ public sealed partial class CompanionNativeUse {
         Actor.ConsumedLifeCrystals=State.Player.ConsumedLifeCrystals;
         Actor.ConsumedLifeFruit=State.Player.ConsumedLifeFruit;
         Actor.ConsumedManaCrystals=State.Player.ConsumedManaCrystals;
+        Actor.usedAegisCrystal=State.Player.usedAegisCrystal;
+        Actor.usedArcaneCrystal=State.Player.usedArcaneCrystal;
         Actor.statLifeMax=independent?Math.Max(100,State.Player.statLifeMax):State.Vitals.MaxHealth;
         Actor.statManaMax=independent?Math.Max(20,State.Player.statManaMax):State.Vitals.MaxMana;
         Actor.statLife=State.Vitals.Health;Actor.statMana=State.Vitals.Mana;
@@ -271,7 +283,8 @@ public sealed partial class CompanionNativeUse {
         // alone may cost zero or only part of the creature's slots.
         float slots=summon?ItemID.Sets.StaffMinionSlotsRequired[weapon.type]:0;
         bool wants=(HeldGearSlot==CompanionWeapons.SummonSlot?allowSummons:allowAttack)&&(summon?Actor.slotsMinions+Math.Max(.01f,slots)<=Actor.maxMinions:target!=null);
-        ObserveReach(weapon,target,wants&&target!=null&&CompanionCombatReach.Clear(cat.Center,target.Center));
+        bool attackPath=target==null||CompanionAttackPath.Clear(weapon,this,cat.Center,target.Center);
+        ObserveReach(weapon,target,wants&&target!=null&&attackPath);
         Aim=summon?CompanionWeaponAim.SummonPoint(cat,target):target!=null?CompanionWeaponAim.Point(weapon,this,target):cat.Center+new Vector2(cat.direction*80,-24);
         Vector2 plannedAim=Aim;
         bool planned=CompanionWeaponPolicy.Plan(weapon,this,target,ref plannedAim);
@@ -280,7 +293,9 @@ public sealed partial class CompanionNativeUse {
         // Release the input as soon as a persistent projectile is in flight.
         wants&=planned;
         if(yieldToSummon||HeldGearSlot==CompanionWeapons.SummonSlot&&Busy)wants=false;
-        if(target!=null&&!CompanionCombatReach.Clear(cat.Center,target.Center))wants=false;
+        // A summon is placed beside the cat, not fired at this target. Its own
+        // AI decides whether it can pursue enemies behind terrain.
+        if(!summon&&!attackPath)wants=false;
         if(CompanionWeapons.Support(weapon)){
             var ally=allowSupport?CompanionCrossMod.SupportTarget?.Invoke(this):null;
             wants=ally!=null;
@@ -339,9 +354,13 @@ public sealed partial class CompanionNativeUse {
         // Consumption mutates mapped Items. Never copy cloned counts back.
     }
     static readonly Item Empty=new();
-    // Shared by authoritative attacks, network presentation and an inactive
-    // companion's tooltip. Copy numerical modifiers before the cat's own
-    // effects; do not run the owner's equipment hooks on a second actor.
+    internal bool PreviewShot(Item weapon,out int projectile,out float speed){
+        projectile=weapon.shoot;speed=weapon.shootSpeed;
+        if(weapon.useAmmo<=0)return true;
+        if(!initialized||State==null||!Present)return false;
+        MapBag(State,weapon);
+        using(new Scope(this,trackHealing:false))return Actor.PickAmmo(weapon,out projectile,out speed,out _,out _,out _,dontConsume:true);
+    }
     bool MapBag(CompanionPlayer state,Item weapon){
         // UpdateEquips includes native inventory effects. Give it the current
         // bag before evaluating equipment, including on network replicas.
@@ -351,6 +370,9 @@ public sealed partial class CompanionNativeUse {
         return materials;
     }
 
+    // Shared by authoritative attacks, network presentation and an inactive
+    // companion's tooltip. Copy numerical modifiers before the cat's own
+    // effects; do not run the owner's equipment hooks on a second actor.
     internal static void ApplyCombatModifiers(Player actor,CompanionPlayer state,Item weapon) {
         if(!CompanionEquipment.Independent(state))CompanionCombatInheritance.Apply(actor,state.Player);
         else if(!ReferenceEquals(actor,(state.Cat?.ModProjectile as CompanionCat)?.Weapons.Actor)&&state.Equipment.Preview is {} preview)CompanionCombatInheritance.CopyEquipment(actor,preview);
@@ -439,7 +461,7 @@ public sealed partial class CompanionNativeUse {
         readonly int actorSlot;readonly CompanionProjectileScope projectiles;
         readonly CompanionCombatTargets combatTargets;
         readonly IDisposable hitCooldowns;readonly bool healthScope;readonly int healthBefore;
-        public Scope(CompanionNativeUse use,bool trackHealing=true) {
+        public Scope(CompanionNativeUse use,bool trackHealing=true,bool equipmentOwner=false) {
             if(!use.EnsureActorSlot())throw new InvalidOperationException("No free native companion actor slot");
             // This actor runs native item/projectile code, not Player.Update.
             // Reuse the owner's native clock for colour cycles and idle motion.
@@ -461,7 +483,12 @@ public sealed partial class CompanionNativeUse {
             mouseLeft=Main.mouseLeft;mouseLeftRelease=Main.mouseLeftRelease;mouseRight=Main.mouseRight;mouseRightRelease=Main.mouseRightRelease;
             triggers=PlayerInput.Triggers.Current;triggerLeft=triggers.MouseLeft;triggerRight=triggers.MouseRight;
             if(use.Cat is {active:true})use.LocateActor(use.Cat);
-            Main.player[use.slot]=use.Actor;use.Actor.active=true;Main.myPlayer=CompanionNetwork.Client?myPlayer:use.slot;Current=use;
+            // Some composite accessories evaluate their child effects only on
+            // the owner. Replicas need those same flags to maintain/draw the
+            // server's projectiles. This opt-in is limited to equipment;
+            // OnSpawn still rejects replica gameplay spawns, and projectile AI
+            // retains its normal remote-owner checks.
+            Main.player[use.slot]=use.Actor;use.Actor.active=true;Main.myPlayer=CompanionNetwork.Client&&!equipmentOwner?myPlayer:use.slot;Current=use;
             Main.mouseX=(int)(use.Aim.X-Main.screenPosition.X);Main.mouseY=(int)(use.Aim.Y-Main.screenPosition.Y);
             Main.mouseLeft=use.Actor.controlUseItem;Main.mouseLeftRelease=!use.Actor.controlUseItem||use.PressedThisTick;
             Main.mouseRight=use.Actor.controlUseTile;Main.mouseRightRelease=false;
@@ -546,6 +573,10 @@ public sealed class CompanionOwnedShot : GlobalProjectile {
     public override bool CanHitPlayer(Projectile projectile,Player target)=>Context==null&&CatIdentity<0;
     public override bool ShouldUpdatePosition(Projectile p)=>Context==null||!CompanionGrip.ShortStab(p);
     public override void PostAI(Projectile p) {
+        // Native spawn packets are sent before NewProjectile returns. Modded
+        // weapons may then fill in chain IDs or other shot data. Publish the
+        // completed first update once, through the engine's normal sync path.
+        if(!HasRunAI&&Context!=null&&CompanionNetwork.Server)p.netUpdate=true;
         HasRunAI=true;
         if(Context?.Available==true){CompanionGrip.FitStab(p,Context);CompanionGrip.FitHeld(p,Context);}
     }
@@ -717,12 +748,8 @@ public sealed class CompanionNativeHooks : ModSystem {
         // A network projectile can reach drawing before its first AI update.
         // Modded holdouts may initialize cached owner/item references in AI.
         // Wait for the normal update instead of running AI from a draw pass.
-        if(projectile.TryGetGlobalProjectile<CompanionOwnedShot>(out var tag)&&
-            (tag.Context!=null||tag.CatIdentity>=0)&&
-            (tag.Context==null||!tag.HasRunAI))return;
-        var context=CompanionOwnedShot.Of(projectile);
+        if(!CompanionNativeUse.DrawContext(projectile,out var context))return;
         if(context==null){orig(self,projectile);return;}
-        if(!context.CanMaintainShot(projectile)||!context.EnsureActorSlot()||!projectile.active)return;
         using(new CompanionNativeUse.ReplicaDrawScope(context))
         using(new CompanionNativeUse.Scope(context)) {
             self.PrepareDrawnProjectileDrawing(projectile);

@@ -58,6 +58,8 @@ public sealed class CompanionCatching {
         goal=cat.Center;((CompanionCat)cat.ModProjectile).FaceWork(Target);
         if(SwingTicks==0){Duration=CompanionWorkTiming.Ticks(Math.Clamp(Tool.useAnimation,12,60));SwingTicks=Duration;CompanionItemVisual.BeginUse(Tool,cat.Center);}
         if(--SwingTicks==Duration/3) {
+            actor.Center=cat.Center;
+            if(!CompanionActorSlots.Initialize(actor)){Cancel();return false;}
             // Never replace a live player. Scope is synchronous and restored even on hook failure.
             int slot=CompanionNetwork.Server?owner.whoAmI:254;if(!CompanionNetwork.Server&&Main.player[slot].active){Cancel();return false;}
             Player backup=Main.player[slot];int mine=Main.myPlayer;

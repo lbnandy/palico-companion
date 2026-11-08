@@ -359,6 +359,7 @@ Guide: {
 		Player-stat inheritance uses bonuses for the weapon's class at the configured ratios. Equipment trigger effects are not copied.
 		Independent equipment uses the Palico's own armor, accessories and set effects, without stacking owner equipment bonuses. Base life and mana follow your permanent upgrades.
 		Switch in Companion abilities. Armor and accessories are kept but inactive in inheritance mode.
+		Independent mode shares your regular potion buffs by default; turn this off in Companion abilities. Food still needs to be fed to your Palico.
 
 		[Armor and accessories]
 		Independent equipment has 3 armor and 5 base accessory slots. Extra slots follow the owner's vanilla unlock rules. Active keybind skills are not automated; some modded effects still need integration.
@@ -445,7 +446,7 @@ Guide: {
 
 		[Minions and sentries]
 		The slot beside the main weapon accepts a minion or sentry weapon. Your Palico returns to its main weapon after summoning or deploying. Replacing the summon weapon dismisses its summons.
-		Limits follow the owner in inheritance mode, or the Palico's equipment in independent mode. Both have a minimum of 1 and do not use your own slots.
+		Limits follow the owner in inheritance mode, or the Palico's equipment and buffs in independent mode. Both have a minimum of 1 and do not use your own slots.
 		Old One's Army weapons follow vanilla unlock rules. During the event, keep Etherian Mana in the Palico inventory.
 		'''
 	QotAmmo:
@@ -472,7 +473,7 @@ Guide: {
 		Equip throwing weapons as a stack. Keep ammo and potions in the Palico inventory. Support skills activate automatically or on request through their status-card icons; the Shield and Updraft Pouch are automatic only.
 
 		[Recovery and fainting]
-		Inheritance mode uses the configured share of your bonus regeneration, 50% by default. Independent equipment uses the Palico's own equipment regeneration. Recovery timing follows its own injuries in both modes.
+		Inheritance mode uses the configured share of your bonus regeneration, 50% by default. Independent equipment uses the Palico's own equipment and buff regeneration. Recovery timing follows its own injuries in both modes.
 		Your Palico retreats when defeated and returns after recovering.
 		'''
 	DirectAndRecover:

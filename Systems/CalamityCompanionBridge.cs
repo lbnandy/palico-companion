@@ -11,6 +11,7 @@ using CalamityMod.Projectiles.Melee;
 using CalamityMod.Items.Weapons.Rogue;
 using CalamityMod.Projectiles.Ranged;
 using CalamityMod.Projectiles.Rogue;
+using CalamityMod.Projectiles.BaseProjectiles;
 
 namespace PalicoCompanion.Systems;
 
@@ -65,8 +66,10 @@ public sealed class CalamityCompanionBridge:ModSystem {
         if(weapon.ModItem is DeathsAscension)return Terraria.ID.ContentSamples.ProjectilesByType[ModContent.ProjectileType<DeathsAscensionSwing>()].width-26f;
         if(weapon.ModItem is DevilsSunrise)return weapon.shootSpeed*5.5f;
         if(weapon.ModItem is TheFinalDawn)return Terraria.ID.ContentSamples.ProjectilesByType[ModContent.ProjectileType<FinalDawnFireSlash>()].width*.5f;
-        if(weapon.ModItem is HolyCollider&&CompanionCombatReach.Sample(weapon) is {} shot&&shot.ModProjectile is HolyColliderHoldout hammer)
-            return (hammer.HitboxOutset+hammer.HitboxSize.X*.5f)*shot.scale*.85f;
+        // Held melee projectiles describe their own collision geometry. Use
+        // that reach for the whole native family, including Earth and Collider.
+        if(weapon.CountsAsClass(DamageClass.Melee)&&CompanionCombatReach.Sample(weapon) is {} shot&&shot.ModProjectile is BaseCustomUseStyleProjectile held)
+            return (held.HitboxOutset+held.HitboxSize.X*.5f)*shot.scale*.85f;
         return null;
     }
     // Only report native completion. Shared input policy owns release latching

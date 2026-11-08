@@ -186,6 +186,12 @@ public sealed class CompanionCat : ModProjectile
             CancelTransitWork(state);Navigation.HoldReturn(Projectile);
             Light.Update(owner,state,Projectile,true);state.Status=state.Paused?"Paused":CompanionText.Message("CompanionCat.Recovering");return;
         }
+        if(!state.Paused&&Navigation.EscapeLava(Projectile,owner)){
+            // Preserve pending mining, but release transient work while escaping.
+            SuspendTransientWork(state);
+            Weapons.Tick(owner,state,Projectile,null,false);Light.Update(owner,state,Projectile,true);
+            state.Status=CompanionText.Message("CompanionCat.CatchingUp");return;
+        }
         // Directed mining returns below, so collect nearby drops before either
         // work branch takes ownership of movement. Pickup never changes its goal.
         if(!state.Paused&&!state.Vitals.Downed&&state.Pickup&&(state.Digging.Active||state.Mining.Active)) {
@@ -274,7 +280,7 @@ public sealed class CompanionCat : ModProjectile
             // long-distance catch-up clears the owner's current digging intention;
             // nearby combat suspends a still-valid mining job.
             if(Vector2.DistanceSquared(owner.Center,Projectile.Center)>=480*480)CancelTransitWork(state);
-            else if(airborneTarget!=null){SuspendWorkForCombat(state);state.Mining.Tick(owner,Projectile.Center,false,true);}
+            else if(airborneTarget!=null){SuspendTransientWork(state);state.Mining.Tick(owner,Projectile.Center,false,true);}
             targetItem=-1;
             var airTarget=airborneTarget??FindThreat(owner);
             Weapons.Tick(owner,state,Projectile,airTarget,state.AttacksEnabled&&(CompanionNativeUse.Summoning(airWeapon)||CompanionCombatReach.CanUse(airWeapon,Projectile,airTarget)),allowSupport:true,allowSummons:state.AttacksEnabled);
@@ -296,7 +302,7 @@ public sealed class CompanionCat : ModProjectile
         // Respect native focus marks and retain nearby targets across small movements.
         NPC target=FindThreat(owner);
         bool threat=target!=null;
-        if(threat)SuspendWorkForCombat(state);
+        if(threat)SuspendTransientWork(state);
         animationThreat=threat;
         Light.Update(owner,state,Projectile,threat);
         if(target is {} npc) {
@@ -421,14 +427,14 @@ public sealed class CompanionCat : ModProjectile
     public void StopWork(CompanionPlayer s){Kite.Stop(this);targeting.Clear();tactics.Update(s,false);CancelTransitWork(s);Weapons.Cancel();}
     // Ground and flight share the same interruption contract: preserve pending
     // world work and its progress, relinquish movement and transient tool use.
-    void SuspendWorkForCombat(CompanionPlayer s) {
+    void SuspendTransientWork(CompanionPlayer s) {
         Fishing.Cancel();Supplies.Cancel();Catching.Cancel();
         if(s.Trees.Active||s.Trees.ReplantPending)s.Trees.Suspend();
         targetItem=-1;workFacingTicks=0;
     }
     void CancelTransitWork(CompanionPlayer s) {
         s.Directive.Clear(s);
-        SuspendWorkForCombat(s);
+        SuspendTransientWork(s);
         s.Construction.Cancel();s.Order.Cancel();s.Storage.Cancel();s.Garden.Cancel();s.Trees.Cancel();s.Travel.ClearGoal();
         s.Mining.Cancel();s.Digging.Clear(s);attackVisualTicks=0;
     }
@@ -493,7 +499,7 @@ public sealed class CompanionCat : ModProjectile
             // The light belongs to the near hand, in front of far-hand props.
             if(!Barrel.Active&&!ActionVisual.Eating&&Light.HoldingGlowstick)Light.Glow.Draw(Projectile,Light.HeldItem,pose,lightColor);
             else if(!Barrel.Active&&!ActionVisual.Eating&&Light.Holding)
-                CompanionTorchDrawing.Draw(Main.spriteBatch,position,pose,Projectile.direction,lightColor,Lighting.GetColor(Light.Hand(Projectile).ToTileCoordinates()),tick,item:Light.HeldItem);
+                CompanionTorchDrawing.Draw(Main.spriteBatch,position,pose,Projectile.direction,lightColor,Lighting.GetColor(Light.Hand(Projectile).ToTileCoordinates()),Light.Glow.Actor,item:Light.HeldItem);
         }
         if(state.Vitals.Downed) {
             Main.instance.DrawHealthBar(Projectile.Center.X,Projectile.Bottom.Y+10+Projectile.gfxOffY,Math.Max(1,state.Vitals.RecoveryProgress),state.Vitals.RecoveryTotal,1f,1f);

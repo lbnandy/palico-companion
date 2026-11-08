@@ -1,15 +1,10 @@
-1.2 Update
+1.2.1 Update
 
-- Added independent equipment mode with armor and accessory slots, alongside player-stat inheritance. Equipment is retained when switching modes.
-- Added an attribute-mode choice on first meeting, a stats panel and armor-set bonus tooltips; reorganized related settings and conditional visibility.
-- Added support for various passive armor, set and accessory effects, including additional Calamity and Thorium integrations.
-- Added missing Fargo equipment passives, timers and resource recovery, and fixed interrupted effect updates on dedicated servers. Fixed equipment death prevention, permanent life/mana baselines and revival cooldowns being cleared when switching modes.
-- Upgrading selected support gadgets now reduces their cooldowns.
-- Added a separate teleport-sound toggle and adjusted repeated-teleport handling.
-- Companion item pickups now respect the owner's Encumbering Stone.
-- Fixed incorrect aiming with MEAC weapons such as Night's Edge, and companions becoming unable to attack or summon after an interrupted melee attack.
-- Fixed some guns from Koishi's vanilla weapon rework failing to reload after emptying their magazines, and corrected multiplayer reload-state synchronization.
-- Fixed repeated summon attempts interrupting weapon windup, including Kingsbane, when a summon weapon is also equipped.
-- Fixed errors during companion projectile cleanup with Calamity and Fargo's Souls that could interrupt the Mutant's phase transition.
-- Fixed repeated player-death notifications without proper companion knockdown when the Palico touches Supreme Calamitas's maelstrom. Native continuous damage and companion respawn protection are preserved.
-- Updated the Palico Guide and bilingual tooltips for attribute modes, equipment and shared favorites.
+- Added a default-on option to share the owner's potion buffs in independent equipment mode, with additional permanent resource and regeneration upgrades.
+- Weapons that can pass through terrain can now acquire and attack targets through walls; ordinary weapons retain their obstruction checks.
+- Fixed torch, glowstick and fishing issues with some mod combinations, and improved multiplayer held-item presentation.
+- Fixed repeated teleporting near lava by using return flight to escape lava and find a safe landing position.
+- Added automatic module selection for Ares' Exoskeleton and fixed multiplayer visibility, follow positioning and Tesla arc synchronization.
+- Adjusted attack reach, motion and sound for held melee weapons including Earth.
+- Adjusted carried-weapon size limits and selected carrying poses to reduce excessive shrinking of thin weapons.
+- Fixed rendering crashes from some Calamity and Fargo composite accessory effects, along with related multiplayer effects and damage-over-time handling.

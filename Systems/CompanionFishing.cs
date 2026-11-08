@@ -73,7 +73,7 @@ public sealed class CompanionFishing {
     }
     public static int WaterCount(Point cell){Pond(cell.X,cell.Y,out bool lava,out bool honey,out int water,out _);return lava||honey?0:water;}
     public void Cancel(){if(Active){Bobber.ai[1]=0;if(CompanionNetwork.Server)NetMessage.SendData(MessageID.KillProjectile,-1,-1,null,Bobber.identity,Bobber.owner);Bobber.active=false;}Bobber=null;Approaching=false;idle=age=biteDelay=gesture=0;recast=30;}
-    internal void BindReplica(Projectile cat,Projectile bobber,int rod){Cat=cat;State=Main.player[CompanionCat.OwnerOf(cat)].GetModPlayer<CompanionPlayer>();Bobber=bobber;if(Rod?.type!=rod)Rod=new Item(rod);Actor.inventory[0]=Rod;Prepare();}
+    internal bool BindReplica(Projectile cat,Projectile bobber,int rod){Cat=cat;State=Main.player[CompanionCat.OwnerOf(cat)].GetModPlayer<CompanionPlayer>();Bobber=bobber;if(Rod?.type!=rod)Rod=new Item(rod);Actor.inventory[0]=Rod;Prepare();return CompanionActorSlots.Initialize(Actor);}
     public void Maintain(Player p,CompanionPlayer s,Projectile cat){
         Cat=cat;State=s;
         // Native bobber callbacks temporarily replace Main.myPlayer with the
@@ -91,6 +91,10 @@ public sealed class CompanionFishing {
         if(gesture>0)gesture--;
         Cat=cat;State=s;
         if(!Available||(Main.netMode==NetmodeID.SinglePlayer&&Main.player[Slot].active)){Cancel();return false;}
+        if(!CompanionActorSlots.Initialized(Actor)){
+            Actor.Center=cat.Center;
+            if(!CompanionActorSlots.Initialize(Actor)){Cancel();return false;}
+        }
         if(!Active){
             if(recast>0){recast--;return false;}
             if(idle==0||Vector2.DistanceSquared(visitAnchor,p.Center)>128*128){visitAnchor=p.Center;idle=0;}
@@ -200,13 +204,14 @@ public sealed class CompanionFishing {
     readonly List<DrawData> cache=new();
     public Vector2 DrawShift(Color light){
         cache.Clear();
+        if(!CompanionActorSlots.Initialized(Actor))return Vector2.Zero;
         var info=new PlayerDrawSet{drawPlayer=Actor,heldItem=Rod,DrawDataCache=cache,Position=Actor.position,ItemLocation=Actor.itemLocation,
             itemColor=light,itemEffect=Cat.direction<0?SpriteEffects.FlipHorizontally:SpriteEffects.None};
         PlayerDrawLayers.DrawPlayer_27_HeldItem(ref info);
         return cache.Count==0?Vector2.Zero:CompanionSprite.Hand(Cat)-Main.screenPosition-CompanionGrip.DrawnGrip(cache[0]);
     }
     public void Draw(Color light){
-        if(!Active||Rod==null)return;
+        if(!Active||Rod==null||!CompanionActorSlots.Initialized(Actor))return;
         using var scope=new Scope(this);
         PrepareVisual();
         var c=(CompanionCat)Cat.ModProjectile;var hand=CompanionSprite.Hand(Cat);
@@ -217,7 +222,7 @@ public sealed class CompanionFishing {
     internal void PrepareVisual(){
         // Remote replicas do not run ItemCheck, which can reel/consume bait.
         // These native visual-only steps restore holdStyle and the rod tip.
-        if(CompanionNetwork.Client&&Rod!=null){HoldStyle(Actor,Rod);HoldPose(Actor,0,Rod,Actor.GetItemDrawFrame(Rod.type));Actor.lastVisualizedSelectedItem=Rod;}
+        if(CompanionNetwork.Client&&Rod!=null&&CompanionActorSlots.Initialized(Actor)){HoldStyle(Actor,Rod);HoldPose(Actor,0,Rod,Actor.GetItemDrawFrame(Rod.type));Actor.lastVisualizedSelectedItem=Rod;}
     }
     public sealed class Scope:IDisposable{
         readonly CompanionFishing c,previous;readonly Player backup;readonly int mine;readonly CompanionProjectileScope projectiles;
@@ -251,7 +256,7 @@ public sealed class CompanionFishingBobber:GlobalProjectile{
         if(identity<0)return true;
         if(Context?.Cat is {active:true,ModProjectile:CompanionCat bound}&&bound.NetworkInstance==instance)return true;
         Context=null;
-        foreach(var cat in Main.projectile)if(cat.active&&cat.ModProjectile is CompanionCat c&&c.OwnerIndex==bondOwner&&c.NetworkInstance==instance){Context=c.Fishing;Context.BindReplica(cat,p,rod);wait=0;return true;}
+        foreach(var cat in Main.projectile)if(cat.active&&cat.ModProjectile is CompanionCat c&&c.OwnerIndex==bondOwner&&c.NetworkInstance==instance){if(!c.Fishing.BindReplica(cat,p,rod))return false;Context=c.Fishing;wait=0;return true;}
         if(CompanionRoster.Retired(bondOwner,instance)||++wait>180)p.active=false;
         return false;
     }

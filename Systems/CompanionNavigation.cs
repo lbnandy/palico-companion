@@ -17,12 +17,27 @@ public sealed class CompanionNavigation
     public static float FollowSpeed(float ownerHorizontalSpeed)=>Math.Clamp(Math.Abs(ownerHorizontalSpeed)+1.5f,3.8f,9f);
     public static Vector2 FollowGoal(Player owner,Vector2 catCenter) {
         Vector2 behind=owner.Center-new Vector2(owner.direction*52,0);
+        // Empty air over lava is not a place to stop walking. Prefer the other
+        // side of a shore rather than repeatedly stepping back into the pool.
+        if(LavaBelow(behind)){
+            var ahead=owner.Center+new Vector2(owner.direction*52,0);
+            return Fits(ahead)&&!LavaBelow(ahead)&&Reachability.Clear(ahead,owner.Center)?ahead:owner.Center;
+        }
         // A collision-free pocket behind the player may be on the far side of
         // a cave wall. Reaching it must not count as successfully following.
         return Math.Abs(owner.Center.Y-catCenter.Y)>48||!Fits(behind)||!Reachability.Clear(behind,owner.Center)?owner.Center:behind;
     }
     public bool Riding { get; private set; }
     public bool WorkFlying {get;private set;}
+    static bool LavaBelow(Vector2 center,int width=Width,int height=Height)=>
+        Collision.LavaCollision(center-new Vector2(width/2f,height/2f)+new Vector2(0,16),width,height);
+    internal bool EscapeLava(Projectile cat,Player owner){
+        // Like vanilla AI_026's lava return, use the existing flight state.
+        // Test current collision, not lavaWet left over from an earlier position.
+        if(!Collision.LavaCollision(cat.position,cat.width,cat.height))return false;
+        if(!Riding){ResumeFlight(cat);Puff(cat.Center);}
+        return UpdateReturn(cat,owner);
+    }
     internal void HoldFishingPosition(Projectile cat){
         if(!Riding&&!Supported(cat.position,cat.width,cat.height)&&Fits(cat.Center)){Riding=true;Puff(cat.Center);}
         if(Riding){WorkFlying=true;cat.tileCollide=true;DropThrough=false;cat.velocity*=.5f;if(cat.velocity.LengthSquared()<.01f)cat.velocity=Vector2.Zero;}
@@ -90,10 +105,20 @@ public sealed class CompanionNavigation
                 if(Fits(candidate)&&Reachability.Clear(candidate,owner.Center)){destination=candidate;break;}
             }
         }
+        // A lava-immune owner may stand below the surface. Keep the same return
+        // flight, but seek a dry pocket above them instead of hovering in lava.
+        if(!Fits(destination)&&Collision.LavaCollision(owner.position,owner.width,owner.height)){
+            for(int up=64;up<=320;up+=16){
+                var candidate=owner.Center-new Vector2(0,up);
+                if(Fits(candidate)&&Reachability.Clear(candidate,owner.Center)){destination=candidate;break;}
+            }
+            if(!Fits(destination)&&Fits(cat.Center))destination=cat.Center;
+        }
         bool engage=weapon!=null&&combatTarget!=null&&(obscured||cautious||!CompanionCombatReach.Distance(weapon)||
             Vector2.DistanceSquared(destination,combatTarget.Hitbox.ClosestPointInRect(destination))>MathF.Pow(CompanionCombatReach.EffectiveRange(weapon,cat,combatTarget)*.8f,2)||
             combatTarget.Hitbox.Intersects(new Rectangle((int)destination.X-cat.width/2,(int)destination.Y-cat.height/2,cat.width,cat.height)))&&Vector2.DistanceSquared(combatTarget.Center,owner.Center)<CompanionCombatReach.TrackingRange*CompanionCombatReach.TrackingRange&&
-            separation.LengthSquared()<CompanionCombatReach.TrackingRange*CompanionCombatReach.TrackingRange&&(obscured||CompanionCombatReach.Clear(cat.Center,combatTarget.Center));
+            separation.LengthSquared()<CompanionCombatReach.TrackingRange*CompanionCombatReach.TrackingRange&&
+            (obscured||CompanionAttackPath.Clear(weapon,(cat.ModProjectile as CompanionCat)?.Weapons,cat.Center,combatTarget.Center));
         if(engage) {
             destination=obscured?cat.Center:CompanionCombatReach.Stand(weapon,cat,combatTarget,cautious);
         }
@@ -110,7 +135,7 @@ public sealed class CompanionNavigation
             foreach(int dx in new[]{-32,32,-48,48,0,-64,64})
             foreach(int dy in new[]{0,-16,16}) {
                 var candidate=owner.Bottom+new Vector2(dx,dy-cat.height/2f);
-                if(!TryStand(candidate,out var stand)||!Reachability.Clear(stand,owner.Center))continue;
+                if(!TryStand(candidate,out var stand)||LavaBelow(stand,cat.width,cat.height)||!Reachability.Clear(stand,owner.Center))continue;
                 destination=stand;landing=true;goto LandingFound;
             }
         }
@@ -174,6 +199,9 @@ public sealed class CompanionNavigation
     public static bool Fits(Vector2 center,int width=Width,int height=Height) =>
         WorldGen.InWorld((int)(center.X/16),(int)(center.Y/16),10) &&
         !Collision.SolidCollision(center-new Vector2(width/2f,height/2f),width,height) &&
+        // WetCollision probes a reduced central box; lava contact uses the
+        // full body. A dry center alone is not a safe landing or work position.
+        !Collision.LavaCollision(center-new Vector2(width/2f,height/2f),width,height) &&
         !Collision.WetCollision(center-new Vector2(width/2f,height/2f),width,height);
 
     public bool Update(Projectile cat,Vector2 goal,Player owner,bool working,bool combat=false)
@@ -221,7 +249,7 @@ public sealed class CompanionNavigation
         cat.velocity.Y=Math.Min(10,cat.velocity.Y+0.35f);
         bool far=Vector2.DistanceSquared(owner.Center,cat.Center)>900*900;
         bool extreme=Vector2.DistanceSquared(owner.Center,cat.Center)>2000*2000;
-        if(extreme||(recoveryCooldown==0&&(far||noProgress>=150||cat.lavaWet))) {
+        if(extreme||(recoveryCooldown==0&&(far||noProgress>=150))) {
             // Work is cancelled by the caller before any later hit/placement.
             // Prefer grounded positions near the owner, with an empty body box.
             for(int pass=0;pass<2;pass++)

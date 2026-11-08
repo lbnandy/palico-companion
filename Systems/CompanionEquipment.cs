@@ -29,6 +29,7 @@ internal sealed class CompanionEquipment {
     internal int Defense,HealthBonus,ManaBonus,Regen,Minions=1,Sentries=1;
     int foodRemainder;
     bool wasIndependent;
+    readonly CompanionPotionBuffs.Sharing potions=new();
     internal void FoodRegeneration(Player actor,int units,bool fed){
         if(!fed||units<=0||actor.statLife>=actor.statLifeMax2){foodRemainder=0;return;}
         foodRemainder+=units;actor.lifeRegenCount+=foodRemainder/4;foodRemainder%=4;
@@ -89,6 +90,7 @@ internal sealed class CompanionEquipment {
     internal void Apply(CompanionNativeUse use){
         var actor=use.Actor;var state=use.State;
         bool independent=Independent(state);
+        potions.Update(actor,state.Player,independent&&CompanionBalanceConfig.Current.SharePotionBuffs);
         if(wasIndependent!=independent){
             // Positive equipment buffs cannot carry into inheritance mode.
             // Keep debuffs and dodge cooldowns: switching modes is not a cleanse
@@ -110,7 +112,7 @@ internal sealed class CompanionEquipment {
         int healthChange,manaBefore=actor.statMana=state.Vitals.Mana,manaChange;
         // Equipment hooks run in the existing actor/ownership scope, like
         // ItemCheck. Do not register a second human or copy the owner's armor.
-        using(new CompanionNativeUse.Scope(use,false)){
+        using(new CompanionNativeUse.Scope(use,trackHealing:false,equipmentOwner:true)){
             // Equipment is evaluated before the shared health multiplier.
             // Preserve the cat's injury percentage for low-life conditions.
             int before=actor.statLife=HealthAtEquipmentScale();

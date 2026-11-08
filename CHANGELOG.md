@@ -1,5 +1,29 @@
 # Changelog
 
+## 1.2.1 — 2026-11-08
+
+### 简体中文
+
+- 独立配装模式新增共享玩家药水增益的开关，默认开启；同步补齐部分永久资源与恢复升级。
+- 能穿透地形的武器现在可以隔墙索敌并攻击，普通武器仍遵守原有阻挡规则。
+- 修复部分模组组合下持火把、荧光棒及钓鱼相关的异常，改善联机持物显示。
+- 修复岩浆附近可能反复传送的问题，改为利用飞行离开岩浆并寻找安全落点。
+- 补齐阿瑞斯外骨骼的自动模块选择，修复联机显示、跟随位置及特斯拉连线同步。
+- 调整无限大地等持握近战武器的攻击距离与动作、音效表现。
+- 调整背负武器的大小限制和部分携带姿势，减少细长武器被过度缩小的情况。
+- 修复部分灾厄及法狗复合饰品效果导致的绘制崩溃，并补齐相关联机效果与持续伤害处理。
+
+### English
+
+- Added a default-on option to share the owner's potion buffs in independent equipment mode, with additional permanent resource and regeneration upgrades.
+- Weapons that can pass through terrain can now acquire and attack targets through walls; ordinary weapons retain their obstruction checks.
+- Fixed torch, glowstick and fishing issues with some mod combinations, and improved multiplayer held-item presentation.
+- Fixed repeated teleporting near lava by using return flight to escape lava and find a safe landing position.
+- Added automatic module selection for Ares' Exoskeleton and fixed multiplayer visibility, follow positioning and Tesla arc synchronization.
+- Adjusted attack reach, motion and sound for held melee weapons including Earth.
+- Adjusted carried-weapon size limits and selected carrying poses to reduce excessive shrinking of thin weapons.
+- Fixed rendering crashes from some Calamity and Fargo composite accessory effects, along with related multiplayer effects and damage-over-time handling.
+
 ## 1.2 — 2026-11-08
 
 ### 简体中文

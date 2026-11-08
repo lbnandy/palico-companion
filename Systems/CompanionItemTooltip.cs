@@ -15,16 +15,25 @@ public sealed class CompanionItemTooltip : ModSystem {
     static Player subject;
     static bool sharedSlot,backpackSlot;
     static Player inactive;
+    public override void PostUpdatePlayers(){
+        if(Main.dedServ||Main.gameMenu)return;
+        inactive??=new Player {whoAmI=255};
+        if(!CompanionActorSlots.Initialized(inactive)){
+            inactive.Center=Main.LocalPlayer.Center;
+            CompanionActorSlots.Initialize(inactive);
+        }
+    }
     internal static void Clear(){hovered=null;subject=null;sharedSlot=backpackSlot=false;}
     internal static void Hover(CompanionPlayer owner,bool sharing=false,bool wornArmor=false,bool backpack=false){
         if(Main.HoverItem.IsAir)return;
-        hovered=Main.HoverItem;sharedSlot=sharing;backpackSlot=backpack;
+        hovered=Main.HoverItem;subject=null;sharedSlot=sharing;backpackSlot=backpack;
         if(wornArmor){
             // BankItem remains the interaction context. Only its hover clone
             // needs vanilla's equipped-armor flag and the cat's evaluated set.
             hovered.wornArmor=true;
             if(CompanionEquipment.Independent(owner)&&owner.Cat?.ModProjectile is CompanionCat equipped&&equipped.Weapons.Present){subject=equipped.Weapons.Actor;return;}
-            inactive??=new Player {whoAmI=255};inactive.setBonus="";subject=inactive;return;
+            if(inactive==null||!CompanionActorSlots.Initialized(inactive))return;
+            inactive.setBonus="";subject=inactive;return;
         }
         if(hovered.damage<=0)return;
         if(owner.Cat?.ModProjectile is CompanionCat cat&&cat.Weapons.Available&&
@@ -32,7 +41,7 @@ public sealed class CompanionItemTooltip : ModSystem {
         // An inactive companion or a different backpack weapon needs a preview.
         // Do not borrow weapon-specific live effects (e.g. the drum's different
         // summon multiplier), advance buffs, or mutate the real attack actor.
-        inactive??=new Player {whoAmI=255};
+        if(inactive==null||!CompanionActorSlots.Initialized(inactive))return;
         inactive.inventory[0]=hovered;inactive.selectedItem=0;
         CompanionCombatInheritance.ResetPreview(inactive);
         CompanionNativeUse.ApplyCombatModifiers(inactive,owner,hovered);

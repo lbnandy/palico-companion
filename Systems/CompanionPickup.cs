@@ -13,7 +13,7 @@ namespace PalicoCompanion.Systems;
 // remains transactional; never invoke player pickup side effects.
 public sealed class CompanionPickup {
     // Stable exposes this as private; cache its actual implementation once.
-    // This isolated anchor never enters Main.player and owns no inventory.
+    // The isolated anchor only borrows a player slot for initialization.
     static readonly Action<Player,Item,float> PullNative=typeof(Player).GetMethod("PullItem_Common",BindingFlags.Instance|BindingFlags.NonPublic)!.CreateDelegate<Action<Player,Item,float>>();
     readonly Player anchor=new();
     static readonly Dictionary<Type,bool> ordinaryTypes=new();
@@ -118,6 +118,7 @@ public sealed class CompanionPickup {
         float pursuitRange=selection==null?400:960;
         int target=-1,trailing=-1;float nearest=pursuitRange*pursuitRange,nearestTrailing=nearest;bool took=false,coin=false,valuable=false,blocked=false;PulledThisTick=0;
         anchor.position=cat.position;anchor.width=cat.width;anchor.height=cat.height;anchor.velocity=cat.velocity;
+        if(!CompanionActorSlots.Initialize(anchor))return -1;
         // Fresh NewItem results can precede the update that assigns whoAmI.
         // Use the authoritative array slot even during that first frame.
         for(int slot=0;slot<Main.maxItems;slot++) {

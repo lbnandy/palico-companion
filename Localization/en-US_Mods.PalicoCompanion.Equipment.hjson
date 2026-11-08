@@ -3,8 +3,8 @@
     "Independent": "Independent equipment",
     "Armor": "Armor",
     "Accessories": "Accessories",
-    "HealthHint": "Base life follows your permanent upgrades, then applies the cat’s equipment and health multiplier.",
-    "ManaHint": "Base mana follows your permanent upgrades, plus the cat’s own equipment bonuses.",
-    "DefenseHint": "Defense from the cat’s armor, accessories and set bonuses.",
-    "SummonHint": "Capacity comes from the cat’s equipment, without inheriting your minion or sentry slots."
+    "HealthHint": "Base life follows your permanent upgrades, then applies the cat’s equipment, buffs and health multiplier.",
+    "ManaHint": "Base mana follows your permanent upgrades, plus the cat’s own equipment and buffs.",
+    "DefenseHint": "Defense from the cat’s armor, accessories, set bonuses and buffs.",
+    "SummonHint": "Capacity comes from the cat’s equipment and buffs, without inheriting your minion or sentry slots."
 }

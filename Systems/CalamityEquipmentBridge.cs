@@ -6,6 +6,8 @@ using System.Reflection;
 using CalamityMod.CalPlayer;
 using CalamityMod.Cooldowns;
 using CalamityMod.DataStructures;
+using CalamityMod.Buffs.DamageOverTime;
+using CalamityMod.Projectiles.Summon;
 using Terraria;
 using Terraria.Audio;
 using Terraria.ModLoader;
@@ -15,6 +17,7 @@ namespace PalicoCompanion.Systems;
 [ExtendsFromMod("CalamityMod")]
 [JITWhenModsEnabled("CalamityMod")]
 public sealed class CalamityEquipmentBridge : ModSystem {
+    delegate void StackingDebuff(NPC npc,int buffType,ref int buffIndex,ref int damage);
     Action<CalamityPlayer> buffs,shields,defense,limits;
     static Action<CalamityPlayer> Native(string name)=>typeof(CalamityPlayer)
         .GetMethod(name,BindingFlags.Instance|BindingFlags.NonPublic)!.CreateDelegate<Action<CalamityPlayer>>();
@@ -23,6 +26,8 @@ public sealed class CalamityEquipmentBridge : ModSystem {
         // UI and input in PostUpdateMiscEffects. Reuse just those stages.
         buffs=Native("OtherBuffEffects");shields=Native("EnergyShields");
         defense=Native("DefenseEffects");limits=Native("Limits");
+        MonoModHooks.Add(((StackingDebuff)ShellfishClaps.ShellfishStacking).Method,
+            (StackingDebuffHook)ShellfishOwner);
         CompanionCrossMod.BeforeReset+=Tick;
         CompanionCrossMod.UpdateEquipment+=UpdateEquipment;
         MonoModHooks.Add(typeof(GemTechArmorState).GetProperty(nameof(GemTechArmorState.HasInvalidOwner)).GetMethod,
@@ -40,6 +45,23 @@ public sealed class CalamityEquipmentBridge : ModSystem {
         CompanionCrossMod.BeforeReset-=Tick;
         CompanionCrossMod.UpdateEquipment-=UpdateEquipment;
         buffs=shields=defense=limits=null;
+    }
+    delegate void StackingDebuffHook(StackingDebuff orig,NPC npc,int buffType,ref int buffIndex,ref int damage);
+    static void ShellfishOwner(StackingDebuff orig,NPC npc,int buffType,ref int buffIndex,ref int damage){
+        // NPC regeneration runs outside projectile AI. Match the native
+        // last-attached-projectile owner selection, then reuse its complete
+        // stacking/scaling calculation with that companion's actor installed.
+        Projectile source=null;
+        foreach(var shot in Main.ActiveProjectiles)
+            if(shot.type==ModContent.ProjectileType<Shellfish>()&&shot.ai[0]==1f&&shot.ai[1]==npc.whoAmI)source=shot;
+        // No attached shellfish means zero contribution. Native code otherwise
+        // reads player 255 while a lingering debuff waits to expire.
+        if(source==null)return;
+        if(source.TryGetGlobalProjectile<CompanionOwnedShot>(out var tag)&&tag.CatIdentity>=0&&tag.Context==null)return;
+        var use=CompanionOwnedShot.Of(source);
+        if(use==null){orig(npc,buffType,ref buffIndex,ref damage);return;}
+        if(!use.EnsureActorSlot())return;
+        using(new CompanionNativeUse.Scope(use,trackHealing:false))orig(npc,buffType,ref buffIndex,ref damage);
     }
     void UpdateEquipment(CompanionNativeUse use){
         var player=use.Actor.GetModPlayer<CalamityPlayer>();

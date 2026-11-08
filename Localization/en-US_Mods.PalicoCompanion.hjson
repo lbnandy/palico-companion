@@ -91,7 +91,7 @@ UI: {
 	LegacyArmorHint: Legacy armor is withdrawal-only; defense now scales with the player
 	Weapon: Weapon
 	HealthHint: Maximum health is {0}% of your maximum health
-	ManaHint: Maximum mana matches yours (minimum 20), with separate spending and recovery. When out of mana and unable to drink a mana potion, your Palico waits for a full refill before casting again
+	ManaHint: Maximum mana follows yours in Inherited mode, or your permanent upgrades plus the Palico's own equipment and buffs in Independent mode. Mana is spent and recovered separately. Without a usable mana potion, your Palico waits for a full refill before casting again
 	DefenseHint: Defense is {0}% of the player
 	HealthLabel: Life
 	ManaLabel: Mana
@@ -160,6 +160,7 @@ Configs: {
 
 		Headers: {
 			Attributes: "[palicoitem:IronChainmail] Attributes and equipment"
+			IndependentEquipment: "[palicoitem:WrathPotion] Independent equipment only"
 			Inheritance: "[palicoitem:AvengerEmblem] Inherited mode only"
 			Presets: "[palicohead:icon] Quick presets"
 			Strength: "[palicohead:icon] Combat abilities"
@@ -198,7 +199,7 @@ Configs: {
 
 		HealthPercent: {
 			Label: Health (%)
-			Tooltip: Scales maximum health: the owner's maximum in Inherited mode, or permanent health upgrades plus your Palico's own equipment in Independent mode. Preserves the current health percentage and does not revive a downed Palico.
+			Tooltip: Scales maximum health: the owner's maximum in Inherited mode, or permanent health upgrades plus your Palico's own equipment and buffs in Independent mode. Preserves the current health percentage and does not revive a downed Palico.
 		}
 
 		DefensePercent: {
@@ -206,6 +207,10 @@ Configs: {
 			Tooltip: Defense as a percentage of the owner's defense. This is not a percentage reduction in incoming damage.
 		}
 
+		SharePotionBuffs: {
+			Label: Share player potion buffs
+			Tooltip: In Independent mode, share the owner's active regular potion buffs until they end. The same buff does not stack. Excludes food, pets, mounts, equipment effects, and Calamity's Rage and Adrenaline bursts. Inherited mode still uses the stat inheritance percentages.
+		}
 		RegenInheritancePercent: {
 			Label: Health regeneration inherited (%)
 			Tooltip:

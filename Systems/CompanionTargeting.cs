@@ -27,24 +27,33 @@ internal sealed class CompanionTargeting {
     static bool InReach(Player owner,Vector2 cat,NPC npc,float range)=>npc is {active:true}&&(npc.CanBeChasedBy()||Destructible(npc))&&
         Vector2.DistanceSquared(npc.Center,owner.Center)<range*range&&Vector2.DistanceSquared(npc.Center,cat)<range*range;
     internal static bool Valid(Player owner,Vector2 cat,NPC npc)=>Valid(owner,cat,npc,CompanionCombatReach.SearchRange);
+    // Support skills share this validator; their visibility must not inherit
+    // the primary weapon's ability to attack through terrain.
     internal static bool Valid(Player owner,Vector2 cat,NPC npc,float range)=>InReach(owner,cat,npc,range)&&CompanionCombatReach.Clear(cat,npc.Center);
+    internal static bool Attackable(Player owner,Vector2 cat,NPC npc,float range)=>InReach(owner,cat,npc,range)&&
+        (CompanionCombatReach.Clear(cat,npc.Center)||CompanionAttackPath.ThroughWalls(owner));
     internal static NPC Marked(Player owner,Vector2 cat){
         int id=owner.MinionAttackTargetNPC;
-        return owner.GetModPlayer<CompanionPlayer>().AttacksEnabled&&id>=0&&id<Main.maxNPCs&&Valid(owner,cat,Main.npc[id],CompanionCombatReach.TrackingRange)?Main.npc[id]:null;
+        return owner.GetModPlayer<CompanionPlayer>().AttacksEnabled&&id>=0&&id<Main.maxNPCs&&Attackable(owner,cat,Main.npc[id],CompanionCombatReach.TrackingRange)?Main.npc[id]:null;
     }
     internal NPC Select(Player owner,Vector2 cat,bool working){
         if(owner.GetModPlayer<CompanionPlayer>().CombatMode==CompanionCombatMode.Passive)return Remember(null);
         if(Marked(owner,cat) is {} marked)return Remember(marked);
         bool retained=SameTarget;
+        // Resolve ammunition only if a blocked candidate needs it, at most
+        // once per selection rather than once for every NPC.
+        bool? throughWalls=null;
+        bool Reachable(NPC npc,float range)=>InReach(owner,cat,npc,range)&&
+            (CompanionCombatReach.Clear(cat,npc.Center)||(throughWalls??=CompanionAttackPath.ThroughWalls(owner)));
         if(owner.GetModPlayer<CompanionPlayer>().CooperativeCombat){
-            if(retained&&Valid(owner,cat,current,CompanionCombatReach.TrackingRange))return Remember(current);
+            if(retained&&Reachable(current,CompanionCombatReach.TrackingRange))return Remember(current);
             if(retained&&InReach(owner,cat,current,CompanionCombatReach.TrackingRange)&&Main.GameUpdateCount-lastSeen<SightGrace){Obscured=true;return current;}
             return Remember(null);
         }
         bool Intercept(NPC n)=>Incoming(n,owner.Center)||Incoming(n,cat);
         // A target crossing the acquisition boundary remains engaged until
         // the wider release boundary. Identity includes NPC slot reuse.
-        bool Eligible(NPC n)=>Valid(owner,cat,n,retained&&n==current?CompanionCombatReach.TrackingRange:CompanionCombatReach.SearchRange)&&
+        bool Eligible(NPC n)=>Reachable(n,retained&&n==current?CompanionCombatReach.TrackingRange:CompanionCombatReach.SearchRange)&&
             (!working||Intercept(n)||CompanionThreat.InterruptsWork(n,owner,cat));
         bool Protect(NPC n)=>Vector2.DistanceSquared(n.Center,owner.Center)<160*160&&CompanionCombatReach.Clear(owner.Center,n.Center);
         float Distance(NPC n)=>Vector2.Distance(n.Center,Protect(n)?owner.Center:cat);
@@ -52,8 +61,8 @@ internal sealed class CompanionTargeting {
         foreach(var n in Main.npc)if(Eligible(n)&&
             (best==null||Intercept(n)&&!Intercept(best)||Intercept(n)==Intercept(best)&&(Protect(n)&&!Protect(best)||Protect(n)==Protect(best)&&Distance(n)<Distance(best))))best=n;
         if(retained&&Eligible(current)&&best!=null&&Intercept(current)==Intercept(best)&&Protect(current)==Protect(best)&&Distance(current)<=Distance(best)+48)best=current;
-        // A brief occlusion retains combat ownership, not permission to shoot
-        // through a wall or track an unseen enemy's current position.
+        // Weapons requiring an open path retain ownership briefly on occlusion,
+        // but gain no permission to fire until a usable path is available.
         if(best==null&&retained&&InReach(owner,cat,current,CompanionCombatReach.TrackingRange)&&
             !CompanionCombatReach.Clear(cat,current.Center)&&Main.GameUpdateCount-lastSeen<SightGrace){Obscured=true;return current;}
         return Remember(best);

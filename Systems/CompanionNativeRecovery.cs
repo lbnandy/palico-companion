@@ -14,7 +14,7 @@ public sealed partial class CompanionNativeUse {
             (mana?(required<=0||required>v.MaxMana||v.Mana>=required):(v.PotionDelay>0||v.Health>v.MaxHealth/2)))return 0;
         Func<Item,bool> valid=mana?CompanionRecovery.ManaPotion:CompanionRecovery.Supported;
         if(!EnsureActorSlot())return 0;
-        if(!initialized){Actor.inventory=InventoryTransfer.Empty(59);Actor.ResetEffects();initialized=true;}
+        if(!initialized){Actor.inventory=InventoryTransfer.Empty(59);if(!ResetEffects())return 0;initialized=true;}
         Actor.dead=false;Actor.statMana=v.Mana;Actor.statManaMax=Actor.statManaMax2=v.MaxMana;
         Actor.statLife=v.Health;Actor.statLifeMax=Actor.statLifeMax2=v.MaxHealth;Actor.potionDelay=v.PotionDelay;
         int before=mana?v.Mana:v.Health;

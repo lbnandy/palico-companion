@@ -18,11 +18,13 @@ public sealed class SotsCompanionBridge:ModSystem {
         // Update is an inlineable one-line wrapper. Scope its call site so
         // every trail subclass retains its own OnUpdate implementation.
         if(!Main.dedServ)trailUpdate=new ILHook(typeof(PrimTrailManager).GetMethod(nameof(PrimTrailManager.UpdateTrails))!,ScopeTrails);
+        CompanionCrossMod.BeforeReset+=PermanentResources;
         CompanionCrossMod.UpdateResources+=Resources;
         CompanionCrossMod.ResourceReady+=Ready;
     }
     public override void Unload(){
         trailUpdate?.Dispose();trailUpdate=null;
+        CompanionCrossMod.BeforeReset-=PermanentResources;
         CompanionCrossMod.UpdateResources-=Resources;
         CompanionCrossMod.ResourceReady-=Ready;
     }
@@ -41,14 +43,19 @@ public sealed class SotsCompanionBridge:ModSystem {
         }
         using(new CompanionNativeUse.Scope(use))trail.Update();
     }
+    static void PermanentResources(CompanionNativeUse use){
+        var resource=use.Actor.GetModPlayer<VoidPlayer>();
+        var owner=use.State.Player.GetModPlayer<VoidPlayer>();
+        // ResetEffects rebuilds the maximum; supply permanent progression
+        // beforehand so later potion and equipment bonuses are not overwritten.
+        resource.voidMeterMax=Math.Max(100,owner.voidMeterMax);
+        resource.voidAnkh=owner.voidAnkh;resource.voidStar=owner.voidStar;resource.voidSoul=owner.voidSoul;
+    }
     static void Resources(CompanionNativeUse use){
         if(CompanionNetwork.Client)return;
         var resource=use.Actor.GetModPlayer<VoidPlayer>();
-        var owner=use.State.Player.GetModPlayer<VoidPlayer>();
-        // Permanent progression only; never borrow the owner's current meter
-        // or equipment effects. SOTS.ResetEffects already advances regeneration.
-        resource.voidMeterMax=resource.voidMeterMax2=Math.Max(100,owner.voidMeterMax);
-        resource.voidAnkh=owner.voidAnkh;resource.voidStar=owner.voidStar;resource.voidSoul=owner.voidSoul;
+        // SOTS.ResetEffects advances regeneration. Only reserve this cat's
+        // minion capacity here; never borrow the owner's current meter.
         using(new CompanionNativeUse.Scope(use))resource.VoidMinionConsumption=resource.RegisterVoidMinions();
         resource.voidMeterMax2-=resource.VoidMinionConsumption;
         resource.safetySwitch=true;

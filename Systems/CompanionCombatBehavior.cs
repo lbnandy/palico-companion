@@ -28,7 +28,7 @@ public sealed class CompanionCombatBehavior:ModPlayer {
     static bool Ready(CompanionPlayer s)=>s.CooperativeCombat&&s.Combat&&s.Enabled&&!s.Stowed&&!s.Paused&&!s.Vitals.Downed&&s.Player.active&&!s.Player.dead&&!s.NetLeaving;
     internal static void Engage(CompanionPlayer s,NPC npc){
         if(CompanionNetwork.Client||!Ready(s)||s.Cat?.ModProjectile is not CompanionCat cat||
-            !CompanionTargeting.Valid(s.Player,cat.Projectile.Center,npc,CompanionCombatReach.TrackingRange))return;
+            !CompanionTargeting.Attackable(s.Player,cat.Projectile.Center,npc,CompanionCombatReach.TrackingRange))return;
         cat.Engage(npc);
     }
     internal static bool Allows(CompanionPlayer s,NPC npc)=>s.CombatMode!=CompanionCombatMode.Passive&&(!s.CooperativeCombat||

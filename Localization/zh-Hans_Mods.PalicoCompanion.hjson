@@ -91,7 +91,7 @@ UI: {
 	LegacyArmorHint: 旧版防具仅供取回，防御现在随玩家成长
 	Weapon: 武器
 	HealthHint: 呆猫的生命上限为玩家的 {0}%
-	ManaHint: 呆猫的法力上限与玩家相同，至少为 20；独立消耗和恢复。缺蓝且没有可用蓝药时，回满后继续施法
+	ManaHint: 继承模式的法力上限跟随玩家，独立配装按玩家的永久提升和呆猫自身装备、增益计算。法力独立消耗和恢复；缺蓝且没有可用蓝药时，回满后继续施法
 	DefenseHint: 呆猫的防御为玩家的 {0}%
 	HealthLabel: 生命
 	ManaLabel: 法力
@@ -165,6 +165,7 @@ Configs: {
 
 		Headers: {
 			Attributes: "[palicoitem:IronChainmail] 属性与装备"
+			IndependentEquipment: "[palicoitem:WrathPotion] 独立配装专用"
 			Inheritance: "[palicoitem:AvengerEmblem] 继承模式专用"
 			Presets: "[palicohead:icon] 快速预设"
 			Strength: "[palicohead:icon] 战斗能力"
@@ -202,7 +203,7 @@ Configs: {
 
 		HealthPercent: {
 			Label: 生命倍率（%）
-			Tooltip: 继承模式以主人的生命上限为基准；独立配装以主人的永久生命提升加上呆猫自身装备为基准。调整时保留当前血量比例，不会立即复活。
+			Tooltip: 继承模式以主人的生命上限为基准；独立配装以主人的永久生命提升加上呆猫自身装备与增益为基准。调整时保留当前血量比例，不会立即复活。
 		}
 
 		DefensePercent: {
@@ -210,6 +211,10 @@ Configs: {
 			Tooltip: 呆猫的防御占主人防御的比例，不代表受到的伤害减少多少。
 		}
 
+		SharePotionBuffs: {
+			Label: 共享玩家药水增益
+			Tooltip: 独立配装时共享玩家当前的常规药水增益，效果结束后停止共享，同种效果不叠加。不共享食物、宠物、坐骑、装备效果，以及灾厄的怒气、肾上腺素爆发。继承模式仍按属性继承比例计算。
+		}
 		RegenInheritancePercent: {
 			Label: 回血继承比例（%）
 			Tooltip:

@@ -58,6 +58,9 @@ public sealed class CompanionBalanceConfig : ModConfig {
     [DefaultValue(75),Range(10,200),Increment(5),Slider] public int HealthPercent { get; set; } = 75;
     [DefaultValue(100),Range(50,150),Increment(5),Slider] public int TargetingRangePercent { get; set; } = 100;
 
+    [Header("IndependentEquipment")]
+    [DefaultValue(true)] public bool SharePotionBuffs { get; set; } = true;
+
     [Header("Inheritance")]
     [DefaultValue(100),Range(0,100),Increment(5),Slider]
     [JsonProperty(DefaultValueHandling=DefaultValueHandling.Include)]

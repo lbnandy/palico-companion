@@ -9,7 +9,7 @@ public sealed partial class CompanionNativeUse {
     internal bool ShouldConsume(CompanionPlayer state,Item item){
         Cat=state.Cat;State=state;
         if(!EnsureActorSlot())return true;
-        if(!initialized){Actor.inventory=InventoryTransfer.Empty(59);Actor.ResetEffects();initialized=true;}
+        if(!initialized){Actor.inventory=InventoryTransfer.Empty(59);if(!ResetEffects())return true;initialized=true;}
         var inventory=Actor.inventory;int selected=Actor.selectedItem;
         try{
             Actor.inventory=InventoryTransfer.Empty(59);Actor.inventory[0]=item;Actor.selectedItem=0;

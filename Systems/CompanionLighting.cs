@@ -66,6 +66,7 @@ public sealed class CompanionLighting {
                 if(Status.StartsWith(SafeConstruction.SuccessPrefix)){Holding=false;cooldown=CompanionWorkTiming.Ticks(120);}
             }
         }
+        if(Holding&&!Glow.Update(cat,HeldItem)){Holding=false;return;}
         if(HoldingGlowstick){Glow.Emit(cat,HeldItem,Flame(cat));Status=CompanionText.Message("CompanionLighting.HoldingGlowstick");}
         // Held torch emission is performed after the current pose/facing is set in PostAI.
     }

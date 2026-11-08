@@ -10,15 +10,13 @@ namespace PalicoCompanion.Systems;
 
 // Use native held-item layers for the companion torch and its flame.
 public static class CompanionTorchDrawing {
-    static readonly Player proxy=new();
     static readonly List<DrawData> cache=new();
-    static int lastFlameTick=-100;
     public const int ForwardReach=2;
     public static Vector2 Offset(int direction)=>new(direction<0?-ForwardReach:ForwardReach,0);
     public static Vector2 Origin(Texture2D torch,int direction) => new(direction<0?torch.Width-1:1,torch.Height-2);
-    public static void Draw(SpriteBatch batch,Vector2 feet,int pose,int direction,Color bodyLight,Color torchLight,int tick,Item item) {
+    public static void Draw(SpriteBatch batch,Vector2 feet,int pose,int direction,Color bodyLight,Color torchLight,Player proxy,Item item) {
         Item held=item;
-        if(!CompanionLighting.Torch(held))return;
+        if(!CompanionLighting.Torch(held)||!CompanionActorSlots.Initialized(proxy))return;
         Main.instance.LoadItem(held.type);if(held.flame)Main.instance.LoadItemFlames(held.type);
         var torch=TextureAssets.Item[held.type].Value;
         var off=CompanionSpriteLayout.OffHand[pose];
@@ -35,12 +33,6 @@ public static class CompanionTorchDrawing {
         proxy.inventory[0]=held;proxy.selectedItem=0;
         proxy.direction=facing;proxy.gravDir=1;proxy.heldProj=-1;proxy.itemRotation=0;
         proxy.Center=feet+Main.screenPosition;proxy.itemLocation=hand+Main.screenPosition;
-        // LegacyPlayerRenderer refreshes these seven offsets every five frames.
-        // Maintain our own sequence: the owner may be holding a sword, not a torch.
-        if(tick<lastFlameTick||tick-lastFlameTick>=5) {
-            lastFlameTick=tick;
-            for(int i=0;i<7;i++)proxy.itemFlamePos[i]=new Vector2(Main.rand.Next(-10,11)*0.15f,Main.rand.Next(-10,1)*0.35f);
-        }
         cache.Clear();
         var info=new PlayerDrawSet{drawPlayer=proxy,heldItem=held,DrawDataCache=cache,
             Position=proxy.position,ItemLocation=proxy.itemLocation,itemColor=torchLight,itemEffect=flip};

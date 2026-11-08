@@ -42,6 +42,7 @@ public sealed class ThoriumCompanionBridge:ModSystem {
         healing=new Hook(typeof(PlayerHelper).GetMethod("HealLife")!,Healed);
         CompanionCrossMod.SupportTool=Support;CompanionCrossMod.SafeThrow+=Throw;
         CompanionCrossMod.InheritStats+=Stats;
+        CompanionCrossMod.BeforeReset+=PermanentInspiration;
         CompanionCrossMod.UpdateResources+=Update;CompanionCrossMod.SupportTarget=Target;
         CompanionCrossMod.ResourceReady+=Ready;CompanionCrossMod.WeaponEffect=Effect;
         CompanionCrossMod.PlanUse=Plan;CompanionCrossMod.WeaponReach+=Range;
@@ -52,10 +53,20 @@ public sealed class ThoriumCompanionBridge:ModSystem {
         playerLookup?.Dispose();mouseLookup?.Dispose();playerLookup=mouseLookup=null;
         healing?.Dispose();healing=null;
         CompanionCrossMod.InheritStats-=Stats;
+        CompanionCrossMod.BeforeReset-=PermanentInspiration;
         CompanionCrossMod.UpdateResources-=Update;CompanionCrossMod.SupportTool=null;CompanionCrossMod.SafeThrow-=Throw;
         CompanionCrossMod.SupportTarget=null;CompanionCrossMod.ResourceReady-=Ready;CompanionCrossMod.WeaponEffect=null;
         CompanionCrossMod.PlanUse=null;CompanionCrossMod.WeaponReach-=Range;
         resources=new();empower=null;playSound=null;findAlly=null;
+    }
+    static void PermanentInspiration(CompanionNativeUse use){
+        if(!CompanionEquipment.Independent(use.State))return;
+        var target=use.Actor.GetModPlayer<ThoriumPlayer>();
+        var source=use.State.Player.GetModPlayer<ThoriumPlayer>();
+        // Supply permanent progression before Thorium.ResetEffects rebuilds
+        // the maximum. Its equipment/buff hooks add the cat's own bonuses.
+        target.bardResourceMax=Math.Clamp(source.bardResourceMax,10,40);
+        target.consumedInspirationGem=source.consumedInspirationGem;
     }
     static void Stats(Player actor,Player owner,float ratio){
         var target=actor.GetModPlayer<ThoriumPlayer>();var source=owner.GetModPlayer<ThoriumPlayer>();
@@ -226,5 +237,21 @@ public sealed class ThoriumCompanionItem:GlobalItem {
         // also needs clearance despite not using tile collision in flight.
         if(!drum)return;
         CompanionWeaponAim.ClearLaunchFloor(ref position,shot);
+    }
+}
+
+[ExtendsFromMod("ThoriumMod")]
+[JITWhenModsEnabled("ThoriumMod")]
+public sealed class ThoriumCompanionProgression:ModPlayer {
+    bool inspirationGem;
+    public override void PostUpdate(){
+        if(Main.netMode==NetmodeID.SinglePlayer||Main.netMode==NetmodeID.MultiplayerClient&&Player.whoAmI!=Main.myPlayer)return;
+        var thorium=Player.GetModPlayer<ThoriumPlayer>();
+        // Thorium syncs this permanent upgrade on join, but its incremental
+        // inspiration packet omits it. Reuse its full sync on change, relaying
+        // the server's received value to the other clients as well.
+        if(thorium.consumedInspirationGem==inspirationGem)return;
+        inspirationGem=thorium.consumedInspirationGem;
+        thorium.SyncPlayer(-1,Main.netMode==NetmodeID.Server?Player.whoAmI:-1,false);
     }
 }
