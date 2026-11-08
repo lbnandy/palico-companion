@@ -20,7 +20,7 @@ public sealed partial class CompanionNativeUse {
             Actor.dead=false;Actor.immune=false;Actor.immuneTime=0;
             int before=Actor.statLife=state.Vitals.Health;ReceivingHit=true;
             bool allowed=npc!=null?NPCLoader.CanHitPlayer(npc,Actor,ref cooldown):ProjectileLoader.CanHitPlayer(shot,Actor);
-            if(allowed&&CompanionEquipment.Independent(state))
+            if(allowed)
                 allowed=npc!=null?PlayerLoader.CanBeHitByNPC(Actor,npc,ref cooldown):PlayerLoader.CanBeHitByProjectile(Actor,shot);
             // Some hazards apply life loss inside CanHitPlayer and return false
             // to bypass ordinary hit damage. Preserve that loss without adding

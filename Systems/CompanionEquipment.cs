@@ -45,7 +45,6 @@ internal sealed class CompanionEquipment {
     }
 
     internal static void AdvanceClocks(CompanionNativeUse use){
-        if(!Independent(use.State))return;
         // Player.Update owns these passive proc cooldowns, outside ItemCheck
         // and UpdateArmorSets. Advance them once with the actor's native clock;
         // the native hit/use code still decides when and what to spawn.
@@ -90,7 +89,6 @@ internal sealed class CompanionEquipment {
     internal void Apply(CompanionNativeUse use){
         var actor=use.Actor;var state=use.State;
         bool independent=Independent(state);
-        potions.Update(actor,state.Player,independent&&CompanionBalanceConfig.Current.SharePotionBuffs);
         if(wasIndependent!=independent){
             // Positive equipment buffs cannot carry into inheritance mode.
             // Keep debuffs and dodge cooldowns: switching modes is not a cleanse
@@ -100,36 +98,48 @@ internal sealed class CompanionEquipment {
             actor.lifeRegenTime=0;actor.lifeRegenCount=0;foodRemainder=0;
             wasIndependent=independent;
         }
+        potions.Update(actor,state.Player,CompanionBalanceConfig.Current.SharePotionBuffs);
         for(int i=0;i<actor.armor.Length;i++)actor.armor[i]=Empty;
         if(!independent){
             Preview=null;actor.head=actor.body=actor.legs=-1;actor.beetleDefense=actor.beetleOffense=actor.setSolar=false;
+            // Evaluate shared potion mechanics before replacing inherited stat
+            // groups. Native passive hooks run once, without the owner's gear.
+            using(new CompanionNativeUse.Scope(use)){
+                actor.UpdateBuffs(actor.whoAmI);
+                PlayerLoader.PostUpdateEquips(actor);
+            }
             actor.statLifeMax=actor.statLifeMax2=state.Vitals.MaxHealth;
             actor.statManaMax=actor.statManaMax2=state.Vitals.MaxMana;
+            actor.statDefense=Player.DefenseStat.Default;actor.statDefense+=state.Vitals.EffectiveDefense;
+            actor.endurance=state.Vitals.EffectiveEndurance;
             return;
         }
         for(int i=1;i<state.Gear.Length;i++)if(IsSlot(i)&&CompanionEquipmentSlots.Unlocked(state,i))actor.armor[ArmorIndex(i)]=state.Gear[i];
         int HealthAtEquipmentScale()=>(int)((long)state.Vitals.Health*actor.statLifeMax2/Math.Max(1,state.Vitals.MaxHealth));
         int healthChange,manaBefore=actor.statMana=state.Vitals.Mana,manaChange;
-        // Equipment hooks run in the existing actor/ownership scope, like
-        // ItemCheck. Do not register a second human or copy the owner's armor.
+        // Preserve the cat's injury percentage for low-life conditions.
+        int healthBeforeBuffs=actor.statLife=HealthAtEquipmentScale();
+        actor.maxMinions=actor.maxTurrets=1;
+        // Buffs precede equipment, but retain native remote-owner checks.
+        // Unlike equipment flags, aura damage must not run on visual replicas.
+        using(new CompanionNativeUse.Scope(use,trackHealing:false))actor.UpdateBuffs(actor.whoAmI);
+        // Composite items need local-owner checks to reconstruct their flags
+        // on replicas. Limit that override to the item/set calculation.
         using(new CompanionNativeUse.Scope(use,trackHealing:false,equipmentOwner:true)){
-            // Equipment is evaluated before the shared health multiplier.
-            // Preserve the cat's injury percentage for low-life conditions.
-            int before=actor.statLife=HealthAtEquipmentScale();
-            actor.maxMinions=actor.maxTurrets=1;
-            // Player.Update applies buffs before equipment. Armor sets inspect
-            // those flags to remove their own buffs when a set is unequipped.
-            actor.UpdateBuffs(actor.whoAmI);
             actor.head=actor.armor[0].headSlot;actor.body=actor.armor[1].bodySlot;actor.legs=actor.armor[2].legSlot;
             // These set flags are cleared by Player.Update, not ResetEffects.
             actor.beetleDefense=actor.beetleOffense=actor.setSolar=false;
             actor.UpdateEquips(actor.whoAmI);
             actor.UpdateArmorSets(actor.whoAmI);
+        }
+        // Passive effects may deal damage or apply NPC buffs. Keep their native
+        // remote-owner checks, just as for buffs and projectile AI.
+        using(new CompanionNativeUse.Scope(use,trackHealing:false)){
             PlayerLoader.PostUpdateEquips(actor);
             // Max-life equipment must not make a healthy cat appear injured
             // to conditional passives. Preserve actual healing separately.
-            healthChange=actor.statLife-before;
-            before=HealthAtEquipmentScale();actor.statLife=before+healthChange;
+            healthChange=actor.statLife-healthBeforeBuffs;
+            int before=HealthAtEquipmentScale();actor.statLife=before+healthChange;
             CompanionCrossMod.UpdateEquipment?.Invoke(use);
             healthChange=actor.statLife-before;
             manaChange=actor.statMana-manaBefore;
@@ -140,7 +150,7 @@ internal sealed class CompanionEquipment {
             Regen=Math.Max(0,actor.lifeRegen);
             Minions=Math.Max(1,actor.maxMinions);Sentries=Math.Max(1,actor.maxTurrets);
             Preview??=new Player();
-            CompanionCombatInheritance.ResetPreview(Preview);
+            CompanionCombatInheritance.ResetModifiers(Preview);
             CompanionCombatInheritance.CopyEquipment(Preview,actor);
         }
         state.Vitals.Sync(state.Player,state.Gear);

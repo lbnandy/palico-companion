@@ -45,7 +45,7 @@ public sealed class CompanionFeedback {
     public bool Hurt(CompanionPlayer state,Projectile cat,int damage,bool boss,float penetration=0) {
         if(damage<=0||state.Vitals.Downed||state.Vitals.Immunity>0)return false;
         damage=CompanionVitals.AfterDefense(damage,state.Vitals.EffectiveDefense,penetration);
-        if(CompanionEquipment.Independent(state))damage=Math.Max(1,(int)(damage*(1-state.Equipment.Endurance)));
+        damage=Math.Max(1,(int)(damage*(1-state.Vitals.EffectiveEndurance)));
         damage=state.Training.Shield(state,damage,true);
         return HurtFinal(state,cat,damage,boss);
     }

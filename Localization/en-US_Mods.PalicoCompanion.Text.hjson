@@ -359,7 +359,7 @@ Guide: {
 		Player-stat inheritance uses bonuses for the weapon's class at the configured ratios. Equipment trigger effects are not copied.
 		Independent equipment uses the Palico's own armor, accessories and set effects, without stacking owner equipment bonuses. Base life and mana follow your permanent upgrades.
 		Switch in Companion abilities. Armor and accessories are kept but inactive in inheritance mode.
-		Independent mode shares your regular potion buffs by default; turn this off in Companion abilities. Food still needs to be fed to your Palico.
+		Both modes share your regular potion and station buffs by default; turn this off in Companion abilities. Food still needs to be fed to your Palico.
 
 		[Armor and accessories]
 		Independent equipment has 3 armor and 5 base accessory slots. Extra slots follow the owner's vanilla unlock rules. Active keybind skills are not automated; some modded effects still need integration.

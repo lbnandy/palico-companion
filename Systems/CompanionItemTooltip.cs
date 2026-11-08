@@ -43,7 +43,7 @@ public sealed class CompanionItemTooltip : ModSystem {
         // summon multiplier), advance buffs, or mutate the real attack actor.
         if(inactive==null||!CompanionActorSlots.Initialized(inactive))return;
         inactive.inventory[0]=hovered;inactive.selectedItem=0;
-        CompanionCombatInheritance.ResetPreview(inactive);
+        CompanionCombatInheritance.ResetModifiers(inactive);
         CompanionNativeUse.ApplyCombatModifiers(inactive,owner,hovered);
         subject=inactive;
     }

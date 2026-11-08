@@ -108,7 +108,7 @@ public sealed partial class CompanionNativeUse {
     // network ownership/AI and use the same live companion actor.
     internal static bool DrawContext(Projectile projectile,out CompanionNativeUse context){
         context=null;
-        if(projectile.TryGetGlobalProjectile<CompanionOwnedShot>(out var tag)&&
+        if(CompanionProjectileData.TryGet<CompanionOwnedShot>(projectile,out var tag)&&
             (tag.Context!=null||tag.CatIdentity>=0)&&
             (tag.Context==null||!tag.HasRunAI))return false;
         context=CompanionOwnedShot.Of(projectile);
@@ -198,6 +198,9 @@ public sealed partial class CompanionNativeUse {
         // Resource clocks still advance once, including on visual replicas.
         if(nativeClockTick==Main.GameUpdateCount)return;
         nativeClockTick=Main.GameUpdateCount;
+        // Player.Update advances this before buffs: Inferno checks every 60
+        // ticks within its 180-tick cycle. It must not stay at the initial zero.
+        if(++Actor.infernoCounter>=180)Actor.infernoCounter=0;
         CompanionEquipment.AdvanceClocks(this);
         CompanionCrossMod.BeforeReset?.Invoke(this);
     }
@@ -217,7 +220,6 @@ public sealed partial class CompanionNativeUse {
             state.Equipment.Apply(this);
             ApplyCombatModifiers(Actor,state,item);
             CountOwnedProjectiles();
-            if(!CompanionEquipment.Independent(state))using(new Scope(this))Actor.UpdateBuffs(Actor.whoAmI);
             Actor.maxMinions=MinionLimit(owner);Actor.maxTurrets=SentryLimit(owner);
             replicaEffectsTick=Main.GameUpdateCount;
         }
@@ -266,10 +268,10 @@ public sealed partial class CompanionNativeUse {
         CountOwnedProjectiles();
         state.Equipment.Apply(this);
         ApplyCombatModifiers(Actor,state,weapon);
+        Actor.maxMinions=MinionLimit(owner);Actor.maxTurrets=SentryLimit(owner);
         // Follow native limit changes and DD2 persistence in this cat's scope.
         using(new Scope(this))Actor.UpdateMaxTurrets();
         CountOwnedProjectiles();
-        if(!CompanionEquipment.Independent(state))using(new Scope(this))Actor.UpdateBuffs(slot);
         CompanionCrossMod.UpdateResources?.Invoke(this);
         if(Main.GameUpdateCount%15==0)State.Stats.Capture(this);
         // Disabling combat must not disable armor stats and regeneration.
@@ -566,7 +568,7 @@ public sealed class CompanionOwnedShot : GlobalProjectile {
         if(CompanionRoster.Retired(BondOwner,CatInstance)||++unboundTicks>180)p.active=false;
         return true;
     }
-    public static CompanionNativeUse Of(Projectile p)=>p.TryGetGlobalProjectile<CompanionOwnedShot>(out var tag)?tag.Context:null;
+    public static CompanionNativeUse Of(Projectile p)=>CompanionProjectileData.TryGet<CompanionOwnedShot>(p,out var tag)?tag.Context:null;
     // Ownership can arrive before the cat replica. Block friendly fire during
     // that interval too, without changing team data used by support weapons.
     public override bool CanHitPvp(Projectile projectile,Player target)=>Context==null&&CatIdentity<0;
@@ -615,8 +617,8 @@ public sealed class CompanionOwnedShot : GlobalProjectile {
         }
         Summoned=Context!=null&&(p.minion||p.sentry||
             source is EntitySource_ItemUse itemUse&&ReferenceEquals(itemUse.Entity,Context.Actor)&&Context.HeldGearSlot==CompanionWeapons.SummonSlot||
-            source is EntitySource_Parent summonedParent&&summonedParent.Entity is Projectile summonedFrom&&summonedFrom.GetGlobalProjectile<CompanionOwnedShot>().Summoned);
-        Thrown=Context!=null&&(Context.Actor.HeldItem.consumable||source is EntitySource_Parent parentShot&&parentShot.Entity is Projectile from&&from.GetGlobalProjectile<CompanionOwnedShot>().Thrown);
+            source is EntitySource_Parent summonedParent&&summonedParent.Entity is Projectile summonedFrom&&CompanionProjectileData.TryGet<CompanionOwnedShot>(summonedFrom,out var summonTag)&&summonTag.Summoned);
+        Thrown=Context!=null&&(Context.Actor.HeldItem.consumable||source is EntitySource_Parent parentShot&&parentShot.Entity is Projectile from&&CompanionProjectileData.TryGet<CompanionOwnedShot>(from,out var thrownTag)&&thrownTag.Thrown);
     }
 }
 public sealed class CompanionPlayerSafety : GlobalItem {
@@ -661,7 +663,7 @@ public sealed class CompanionNativeHooks : ModSystem {
         // Suppress the borrowed actor's player packets, not another mod's real
         // player updates triggered synchronously during ItemCheck/projectile AI.
         var actor=CompanionNativeUse.Current?.Actor??CompanionFishing.Current?.Actor;
-        if(actor!=null&&n==actor.whoAmI&&Main.netMode!=NetmodeID.SinglePlayer&&msg is MessageID.PlayerControls or MessageID.SyncEquipment or MessageID.PlayerMana or MessageID.PlayerBuffs or MessageID.PlayerLifeMana or 41 or 62 or 66 or 84)return;
+        if(actor!=null&&n==actor.whoAmI&&Main.netMode!=NetmodeID.SinglePlayer&&msg is MessageID.SyncPlayer or MessageID.PlayerControls or MessageID.SyncEquipment or MessageID.PlayerMana or MessageID.PlayerBuffs or MessageID.PlayerLifeMana or 41 or 62 or 66 or 84)return;
         orig(msg,remote,ignore,text,n,n2,n3,n4,n5,n6,n7);
     }
     static void ManaFeedback(On_Player.orig_ManaEffect orig,Player p,int amount){if(CompanionNativeUse.Current?.Actor==p)return;orig(p,amount);}
@@ -708,7 +710,7 @@ public sealed class CompanionNativeHooks : ModSystem {
         if(CompanionNativeUse.Current?.Actor==p)return;orig(p,item,box,ignore);
     }
     static void UpdateShot(On_Projectile.orig_Update orig,Projectile p,int index) {
-        if(p.TryGetGlobalProjectile<CompanionOwnedShot>(out var tag)){tag.Resolve(p);if(tag.Waiting(p))return;}
+        if(CompanionProjectileData.TryGet<CompanionOwnedShot>(p,out var tag)){tag.Resolve(p);if(tag.Waiting(p))return;}
         var context=CompanionOwnedShot.Of(p);
         if(context==null){orig(p,index);return;}
         if(!context.CanMaintainShot(p)||!context.EnsureActorSlot()||!p.active){p.active=false;return;}

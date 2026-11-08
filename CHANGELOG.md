@@ -1,5 +1,27 @@
 # Changelog
 
+## 1.2.2 — 2026-11-09
+
+### 简体中文
+
+- 两种属性模式均可共享常规药水及利器站、弹药箱、水晶球、施法桌、战争桌的增益；修正继承模式中部分属性重复计算的问题。
+- 新增减伤继承比例设置，默认 100%，设为 0 可关闭常规减伤继承。
+- 修复共享狱火药水时伤害触发过于频繁的问题，并补上呆猫周围的原版火圈显示。
+- 补齐共享药水的部分受击效果，以及瑟银灵感、耗竭和药水冷却的更新处理。
+- 呆猫使用瑟银吟游诗人武器时，面板改为显示自身灵感；调整属性面板的信息和间距，使其与呆猫面板等高。
+- 修复部分模组组合下，异常弹幕数据导致呆猫召唤失败、反复闪光传送的问题，并加固相关钓鱼和弹幕处理。
+- 修正部分法狗装备效果可能触发的异常玩家同步，补齐中英文设置及指南说明。
+
+### English
+
+- Both attribute modes can now share ordinary potion buffs and buffs from Sharpening Stations, Ammo Boxes, Crystal Balls, Bewitching Tables and War Tables. Fixed some stat bonuses being applied twice in inheritance mode.
+- Added a damage-reduction inheritance setting, defaulting to 100%; set it to 0 to disable ordinary damage-reduction inheritance.
+- Fixed shared Inferno Potions dealing damage too frequently and added the native fire-ring visual around the Palico.
+- Added missing on-hit effects from shared potions and corrected Thorium inspiration, exhaustion and potion-cooldown updates.
+- When using a Thorium bard weapon, the companion panels now show the Palico's own inspiration. Refined the stats layout to match the main panel's height.
+- Fixed malformed projectile data in some mod combinations preventing companion summons and causing repeated teleport flashes, with related fishing and projectile handling fixes.
+- Fixed unintended player synchronization from some Fargo equipment effects, and updated bilingual settings and guide text.
+
 ## 1.2.1 — 2026-11-08
 
 ### 简体中文

@@ -21,6 +21,7 @@ public sealed class CompanionVitals {
     public static int RespawnTicks(bool expert,bool boss=false)=>(expert?900:600)*(boss?2:1);
     public int EffectiveDefense { get; internal set; }
     internal float RecoveryPerSecond;
+    internal float EffectiveEndurance;
     public void Sync(Player owner,Item[] gear) {
         var state=owner.GetModPlayer<CompanionPlayer>();
         bool independent=CompanionEquipment.Independent(state);
@@ -34,6 +35,7 @@ public sealed class CompanionVitals {
         if(mana!=MaxMana){Mana=MaxMana>0?(int)((long)Mana*mana/MaxMana):0;MaxMana=mana;}
         Health=Math.Clamp(Health,0,MaxHealth);Mana=Math.Clamp(Mana,0,MaxMana);
         EffectiveDefense=independent?state.Equipment.Defense:Math.Clamp((int)owner.statDefense,0,10000)*balance.DefenseRatio/100;
+        EffectiveEndurance=independent?state.Equipment.Endurance:Math.Clamp(owner.endurance,0,1)*balance.DamageReductionInheritanceScale;
         independentRegen=independent;
     }
     public int AttackDamage(Item[] gear,int experience) => Attack(gear,experience);

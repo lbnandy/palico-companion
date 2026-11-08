@@ -11,7 +11,7 @@ namespace PalicoCompanion.Systems;
 internal static class CompanionCombatInheritance {
     static readonly Action<Player> ResetDamageClasses=typeof(Player).GetMethod("ResetDamageClassData",BindingFlags.Instance|BindingFlags.NonPublic)!.CreateDelegate<Action<Player>>();
 
-    internal static void ResetPreview(Player actor){
+    internal static void ResetModifiers(Player actor){
         // Reset only value data. Running ModPlayer.ResetEffects on a tooltip
         // player can execute unrelated UI/world code before entering a world.
         ResetDamageClasses(actor);
@@ -20,7 +20,12 @@ internal static class CompanionCombatInheritance {
 
     internal static void Apply(Player actor,Player owner){
         float ratio=CompanionBalanceConfig.Current.CombatInheritanceScale;
+        // Buffs already ran for their mechanics. The owner already includes
+        // their stat bonuses, so replace these groups from native baselines,
+        // including at zero inheritance, rather than adding them twice.
+        ResetModifiers(actor);
         Copy(actor,owner,ratio);
+        actor.usedArcaneCrystal=owner.usedArcaneCrystal;
     }
 
     internal static void Copy(Player actor,Player owner,float ratio)=>CopyModifiers(actor,owner,ratio,true);

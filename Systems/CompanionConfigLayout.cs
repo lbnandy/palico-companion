@@ -28,7 +28,7 @@ public sealed class CompanionConfigLayout : ModSystem {
         ["Chatter"]="Sign",["Emotes"]="WhoopieCushion",["CatSounds"]="Bell",["TeleportSounds"]="MagicMirror",["CatCart"]="Minecart",["TrainingHints"]="Book",
         ["DyeClothesOnly"]="BlueDye",["DyeKite"]="KiteBlue",
         ["RunInBackground"]="Stopwatch",["AdvancedOrders"]="Ruler",
-        ["SharePotionBuffs"]="WrathPotion",["AttributeMode"]="IronChainmail",["Preset"]="head",["CombatInheritancePercent"]="AvengerEmblem",["DamagePercent"]="GoldBroadsword",["HealthPercent"]="LifeCrystal",["DefensePercent"]="IronChainmail",["RegenInheritancePercent"]="BandofRegeneration",["TargetingRangePercent"]="Binoculars",
+        ["SharePotionBuffs"]="WrathPotion",["AttributeMode"]="IronChainmail",["Preset"]="head",["CombatInheritancePercent"]="AvengerEmblem",["DamagePercent"]="GoldBroadsword",["HealthPercent"]="LifeCrystal",["DefensePercent"]="IronChainmail",["DamageReductionInheritancePercent"]="EndurancePotion",["RegenInheritancePercent"]="BandofRegeneration",["TargetingRangePercent"]="Binoculars",
         ["CombatMovementPercent"]="HermesBoots",["TravelMovementPercent"]="Aglet",["Evasion"]="MasterNinjaGear",["WorkSpeedPercent"]="GoldPickaxe",["FishingSpeedPercent"]="WoodFishingPole",
         ["BossHealthBoost"]="SuspiciousLookingEye",["BossHealthPercent"]="LifeCrystal"
     };
@@ -93,11 +93,7 @@ public sealed class CompanionConfigLayout : ModSystem {
         var all=items.ToArray();
         var inheritance=new HashSet<Tuple<UIElement,UIElement>>(all.Where(pair=>
             pair.Item2 is ConfigElement control && ((PropertyFieldWrapper)member.GetValue(control)).Name is
-                nameof(CompanionBalanceConfig.CombatInheritancePercent) or nameof(CompanionBalanceConfig.DefensePercent) or nameof(CompanionBalanceConfig.RegenInheritancePercent)));
-        var independent=new HashSet<Tuple<UIElement,UIElement>>(all.Where(pair=>
-            pair.Item2 is ConfigElement control && ((PropertyFieldWrapper)member.GetValue(control)).Name==nameof(CompanionBalanceConfig.SharePotionBuffs)));
-        int equipmentFirst=Array.FindIndex(all,independent.Contains);
-        if(equipmentFirst>0&&all[equipmentFirst-1].Item2.GetType().Name=="HeaderElement")independent.Add(all[equipmentFirst-1]);
+                nameof(CompanionBalanceConfig.CombatInheritancePercent) or nameof(CompanionBalanceConfig.DefensePercent) or nameof(CompanionBalanceConfig.DamageReductionInheritancePercent) or nameof(CompanionBalanceConfig.RegenInheritancePercent)));
         int first=Array.FindIndex(all,inheritance.Contains);
         if(first>0 && all[first-1].Item2.GetType().Name=="HeaderElement") {
             var pair=all[first-1];
@@ -125,8 +121,7 @@ public sealed class CompanionConfigLayout : ModSystem {
             if(previous==visible)return;
             previous=visible;
             items.Clear();
-            items.AddRange(all.Where(pair=>(visible||!inheritance.Contains(pair))&&
-                (Main.netMode==Terraria.ID.NetmodeID.MultiplayerClient||!visible||!independent.Contains(pair))));
+            items.AddRange(all.Where(pair=>visible||!inheritance.Contains(pair)));
             // Reuse the native filter and layout, keeping the same pending controls
             // so switching modes cannot discard unsaved slider values.
             fields["updateNeeded"].SetValue(editor,true);

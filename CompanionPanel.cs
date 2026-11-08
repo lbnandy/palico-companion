@@ -61,7 +61,7 @@ public sealed class CompanionPanel : ModSystem
         var body=new Rectangle(x,y,width,height);
         var details=showStats?CompanionStatsPanel.Beside(body,CompanionStatsPanel.Width,screenW,screenH):Rectangle.Empty;
         bool inline=showStats&&details.IsEmpty;
-        if(inline){body.Width=510;body.Height=Math.Max(height,CompanionStatsPanel.Height);body.Y=Math.Clamp(y,4,Math.Max(4,screenH-body.Height-4));}
+        if(inline){body.Width=510;body.Height=height;body.Y=Math.Clamp(y,4,Math.Max(4,screenH-body.Height-4));}
         return (body,details,inline);
     }
     internal int PanelHeight(CompanionPlayer state)=>(tab==1?410:536+BackpackHeaderSpacing+(CompanionEquipment.Independent(state)?42:0)-(HasHeaderRow(state)?0:36))-ActivityOffset+16;
@@ -375,7 +375,8 @@ public sealed class CompanionPanel : ModSystem
             // Independent equipment uses the right column; move stats beneath the bag.
             int statLeft=independent?16:328,statRight=independent?299:width-32,statOffset=independent?42:0;
             Stat(L("HealthLabel"),$"{s.Vitals.Health} / {s.Vitals.MaxHealth}",statLeft,statRight,top+statOffset+230,s.Vitals.Health<=s.Vitals.MaxHealth/4?Color.LightCoral:Ink,independent?Language.GetTextValue("Mods.PalicoCompanion.Equipment.HealthHint"):L("HealthHint",CompanionBalanceConfig.Current.HealthRatio));
-            Stat(L("ManaLabel"),$"{s.Vitals.Mana} / {s.Vitals.MaxMana}",statLeft,statRight,top+statOffset+256,s.Vitals.Mana<=s.Vitals.MaxMana/4?Color.LightSkyBlue:Ink,independent?Language.GetTextValue("Mods.PalicoCompanion.Equipment.ManaHint"):L("ManaHint"));
+            var resource=CompanionResourceDisplay.Read(s);
+            Stat(resource.Label,resource.Value,statLeft,statRight,top+statOffset+256,resource.Low?Color.LightSkyBlue:Ink,resource.Hint);
             Stat(L("Defense"),$"{s.Vitals.EffectiveDefense}",statLeft,statRight,top+statOffset+282,Ink,independent?Language.GetTextValue("Mods.PalicoCompanion.Equipment.DefenseHint"):L("DefenseHint",CompanionBalanceConfig.Current.DefenseRatio));
             bool sentry=CompanionWeaponPolicy.Sentry(CompanionWeapons.Summon(s.Gear));
             var use=(s.Cat?.ModProjectile as CompanionCat)?.Weapons;

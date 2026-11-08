@@ -15,7 +15,7 @@ public sealed class CompanionCombatBehavior:ModPlayer {
     public override void OnHitNPCWithItem(Item item,NPC target,NPC.HitInfo hit,int damageDone){if(damageDone>0)Report(target);}
     public override void OnHitNPCWithProj(Projectile proj,NPC target,NPC.HitInfo hit,int damageDone){if(damageDone>0&&CompanionOwnedShot.Of(proj)==null)Report(target);}
     public override void OnHitByNPC(NPC npc,Player.HurtInfo hurtInfo){if(hurtInfo.Damage>0)Report(npc);}
-    public override void OnHitByProjectile(Projectile proj,Player.HurtInfo hurtInfo){if(hurtInfo.Damage>0)Report(proj.GetGlobalProjectile<CompanionAttackSource>().Attacker);}
+    public override void OnHitByProjectile(Projectile proj,Player.HurtInfo hurtInfo){if(hurtInfo.Damage>0)Report(CompanionAttackSource.Of(proj));}
     void Report(NPC npc){
         if(CompanionNetwork.Server||Player.whoAmI!=Main.myPlayer||CompanionNativeUse.Current!=null||CompanionFishing.Current!=null)return;
         var state=Player.GetModPlayer<CompanionPlayer>();
@@ -39,13 +39,14 @@ public sealed class CompanionCombatBehavior:ModPlayer {
 // unrelated nearby enemy for traps, environmental damage or an unknown source.
 public sealed class CompanionAttackSource:GlobalProjectile {
     public override bool InstancePerEntity=>true;
+    internal static NPC Of(Projectile projectile)=>CompanionProjectileData.TryGet<CompanionAttackSource>(projectile,out var tag)?tag.Attacker:null;
     NPC source;CompanionNpcEpoch epoch;
     internal NPC Attacker=>source is {active:true}&&ReferenceEquals(epoch,source.GetGlobalNPC<CompanionNpcEpoch>())?source:null;
     void Bind(NPC npc){source=npc;epoch=npc?.GetGlobalNPC<CompanionNpcEpoch>();}
     public override void OnSpawn(Projectile projectile,IEntitySource origin){
         if(origin is EntitySource_Parent parent){
             if(parent.Entity is NPC npc)Bind(npc);
-            else if(parent.Entity is Projectile ancestor)Bind(ancestor.GetGlobalProjectile<CompanionAttackSource>().Attacker);
+            else if(parent.Entity is Projectile ancestor)Bind(Of(ancestor));
         }
     }
     public override void SendExtraAI(Projectile p,BitWriter bits,BinaryWriter w){

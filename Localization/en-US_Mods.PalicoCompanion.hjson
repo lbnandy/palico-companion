@@ -160,7 +160,7 @@ Configs: {
 
 		Headers: {
 			Attributes: "[palicoitem:IronChainmail] Attributes and equipment"
-			IndependentEquipment: "[palicoitem:WrathPotion] Independent equipment only"
+			SharedBuffs: "[palicoitem:WrathPotion] Shared buffs"
 			Inheritance: "[palicoitem:AvengerEmblem] Inherited mode only"
 			Presets: "[palicohead:icon] Quick presets"
 			Strength: "[palicohead:icon] Combat abilities"
@@ -208,8 +208,12 @@ Configs: {
 		}
 
 		SharePotionBuffs: {
-			Label: Share player potion buffs
-			Tooltip: In Independent mode, share the owner's active regular potion buffs until they end. The same buff does not stack. Excludes food, pets, mounts, equipment effects, and Calamity's Rage and Adrenaline bursts. Inherited mode still uses the stat inheritance percentages.
+			Label: Share potion and station buffs
+			Tooltip: Both modes share the owner's regular potion buffs and buffs from the Sharpening Station, Ammo Box, Crystal Ball, Bewitching Table and War Table until they end. Identical buffs do not stack. Inherited stats still use their own percentages, even with sharing disabled. Excludes food, pets, mounts, equipment procs and class bursts.
+		}
+		DamageReductionInheritancePercent: {
+			Label: Damage reduction inherited (%)
+			Tooltip: Percentage of the owner's ordinary damage reduction to inherit. For example, 50% of the owner's 20% reduction gives your Palico 10% reduction. Set to 0 to disable. Excludes dodges, shields and mod-specific conditional reductions.
 		}
 		RegenInheritancePercent: {
 			Label: Health regeneration inherited (%)

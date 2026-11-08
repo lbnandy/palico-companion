@@ -44,7 +44,7 @@ public sealed class CompanionIncomingDamage : ModSystem {
             if(!body.Hitbox.Intersects(hitbox)||!float.IsFinite(multiplier)||multiplier<=0||
                 !cat.Weapons.CanReceiveHit(state,body,enemy,null,ref cooldown))continue;
             int damage=Main.DamageVar(enemy.damage*multiplier);
-            bool hit=CompanionEquipment.Independent(state)?cat.Weapons.EquipmentHit(damage,boss,enemy,null,cooldown):cat.Feedback.Hurt(state,body,damage,boss);
+            bool hit=cat.Weapons.EquipmentHit(damage,boss,enemy,null,cooldown);
             if(hit){CompanionCombatBehavior.Engage(state,enemy);break;}
             if(state.Vitals.Immunity>0)break;
         }
@@ -63,9 +63,9 @@ public sealed class CompanionIncomingDamage : ModSystem {
             // Stable vanilla's hostile projectile path doubles the stored
             // projectile damage, after randomization. The cat has no luck gear.
             int damage=(int)Math.Min(int.MaxValue,(long)Main.DamageVar(shot.damage)*2);
-            bool hit=CompanionEquipment.Independent(state)?cat.Weapons.EquipmentHit(damage,BossNear(owner),null,shot,cooldown):cat.Feedback.Hurt(state,p,damage,BossNear(owner),shot.ArmorPenetration);
+            bool hit=cat.Weapons.EquipmentHit(damage,BossNear(owner),null,shot,cooldown);
             if(hit)
-                CompanionCombatBehavior.Engage(state,shot.GetGlobalProjectile<CompanionAttackSource>().Attacker);
+                CompanionCombatBehavior.Engage(state,CompanionAttackSource.Of(shot));
         }
     }
 }

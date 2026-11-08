@@ -1,10 +1,9 @@
-1.2.1 Update
+1.2.2 Update
 
-- Added a default-on option to share the owner's potion buffs in independent equipment mode, with additional permanent resource and regeneration upgrades.
-- Weapons that can pass through terrain can now acquire and attack targets through walls; ordinary weapons retain their obstruction checks.
-- Fixed torch, glowstick and fishing issues with some mod combinations, and improved multiplayer held-item presentation.
-- Fixed repeated teleporting near lava by using return flight to escape lava and find a safe landing position.
-- Added automatic module selection for Ares' Exoskeleton and fixed multiplayer visibility, follow positioning and Tesla arc synchronization.
-- Adjusted attack reach, motion and sound for held melee weapons including Earth.
-- Adjusted carried-weapon size limits and selected carrying poses to reduce excessive shrinking of thin weapons.
-- Fixed rendering crashes from some Calamity and Fargo composite accessory effects, along with related multiplayer effects and damage-over-time handling.
+- Both attribute modes can now share ordinary potion buffs and buffs from Sharpening Stations, Ammo Boxes, Crystal Balls, Bewitching Tables and War Tables. Fixed some stat bonuses being applied twice in inheritance mode.
+- Added a damage-reduction inheritance setting, defaulting to 100%; set it to 0 to disable ordinary damage-reduction inheritance.
+- Fixed shared Inferno Potions dealing damage too frequently and added the native fire-ring visual around the Palico.
+- Added missing on-hit effects from shared potions and corrected Thorium inspiration, exhaustion and potion-cooldown updates.
+- When using a Thorium bard weapon, the companion panels now show the Palico's own inspiration. Refined the stats layout to match the main panel's height.
+- Fixed malformed projectile data in some mod combinations preventing companion summons and causing repeated teleport flashes, with related fishing and projectile handling fixes.
+- Fixed unintended player synchronization from some Fargo equipment effects, and updated bilingual settings and guide text.

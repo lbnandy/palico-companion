@@ -165,7 +165,7 @@ Configs: {
 
 		Headers: {
 			Attributes: "[palicoitem:IronChainmail] 属性与装备"
-			IndependentEquipment: "[palicoitem:WrathPotion] 独立配装专用"
+			SharedBuffs: "[palicoitem:WrathPotion] 增益共享"
 			Inheritance: "[palicoitem:AvengerEmblem] 继承模式专用"
 			Presets: "[palicohead:icon] 快速预设"
 			Strength: "[palicohead:icon] 战斗能力"
@@ -212,8 +212,12 @@ Configs: {
 		}
 
 		SharePotionBuffs: {
-			Label: 共享玩家药水增益
-			Tooltip: 独立配装时共享玩家当前的常规药水增益，效果结束后停止共享，同种效果不叠加。不共享食物、宠物、坐骑、装备效果，以及灾厄的怒气、肾上腺素爆发。继承模式仍按属性继承比例计算。
+			Label: 共享药水与增益站效果
+			Tooltip: 两种模式均可共享主人的常规药水，以及利器站、弹药箱、水晶球、施法桌和战争桌增益；随主人的效果结束，同种效果不叠加。继承模式的属性仍按对应比例计算，关闭此项也不会移除已包含在主人属性中的加成。不共享食物、宠物、坐骑、装备触发效果及职业爆发。
+		}
+		DamageReductionInheritancePercent: {
+			Label: 减伤继承比例（%）
+			Tooltip: 继承主人常规伤害减免的比例。例如主人有 20% 减伤，设为 50% 时呆猫获得 10% 减伤。设为 0 不继承；不包含闪避、护盾和模组专用的条件减伤。
 		}
 		RegenInheritancePercent: {
 			Label: 回血继承比例（%）

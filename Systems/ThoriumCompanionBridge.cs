@@ -42,6 +42,7 @@ public sealed class ThoriumCompanionBridge:ModSystem {
         healing=new Hook(typeof(PlayerHelper).GetMethod("HealLife")!,Healed);
         CompanionCrossMod.SupportTool=Support;CompanionCrossMod.SafeThrow+=Throw;
         CompanionCrossMod.InheritStats+=Stats;
+        CompanionCrossMod.CaptureResources+=CaptureResources;CompanionCrossMod.UsesInspiration=UsesInspiration;
         CompanionCrossMod.BeforeReset+=PermanentInspiration;
         CompanionCrossMod.UpdateResources+=Update;CompanionCrossMod.SupportTarget=Target;
         CompanionCrossMod.ResourceReady+=Ready;CompanionCrossMod.WeaponEffect=Effect;
@@ -53,14 +54,20 @@ public sealed class ThoriumCompanionBridge:ModSystem {
         playerLookup?.Dispose();mouseLookup?.Dispose();playerLookup=mouseLookup=null;
         healing?.Dispose();healing=null;
         CompanionCrossMod.InheritStats-=Stats;
+        CompanionCrossMod.CaptureResources-=CaptureResources;CompanionCrossMod.UsesInspiration=null;
         CompanionCrossMod.BeforeReset-=PermanentInspiration;
         CompanionCrossMod.UpdateResources-=Update;CompanionCrossMod.SupportTool=null;CompanionCrossMod.SafeThrow-=Throw;
         CompanionCrossMod.SupportTarget=null;CompanionCrossMod.ResourceReady-=Ready;CompanionCrossMod.WeaponEffect=null;
         CompanionCrossMod.PlanUse=null;CompanionCrossMod.WeaponReach-=Range;
         resources=new();empower=null;playSound=null;findAlly=null;
     }
+    static bool UsesInspiration(Item item)=>item.ModItem is BardItem;
+    static void CaptureResources(CompanionNativeUse use,CompanionStats stats){
+        var player=use.Actor.GetModPlayer<ThoriumPlayer>();
+        stats.InspirationMax=Math.Max(0,player.bardResourceMax2);
+        stats.Inspiration=Math.Clamp(player.bardResource,0,stats.InspirationMax);
+    }
     static void PermanentInspiration(CompanionNativeUse use){
-        if(!CompanionEquipment.Independent(use.State))return;
         var target=use.Actor.GetModPlayer<ThoriumPlayer>();
         var source=use.State.Player.GetModPlayer<ThoriumPlayer>();
         // Supply permanent progression before Thorium.ResetEffects rebuilds
@@ -94,19 +101,8 @@ public sealed class ThoriumCompanionBridge:ModSystem {
         // Stats supplies resource limits on every peer; only the authority
         // advances the companion's own resource and recovery clocks.
         tp.bardResource=Math.Clamp(tp.bardResource,0,tp.bardResourceMax2);
-        // Independent equipment already runs Thorium's PostUpdateEquips.
-        // In inheritance mode retain the resource-only path, without running
-        // equipment effects or advancing the same clocks a second time.
-        if(!CompanionEquipment.Independent(use.State)){
-            if(tp.bardResource<tp.bardResourceMax2){
-                if(tp.inspirationRegenTimer<8)tp.inspirationRegenTimer+=(int)((1+tp.inspirationRegenBase)*tp.inspirationRegenBonus);
-                else {tp.inspirationRegenBase=Math.Min(5,tp.inspirationRegenBase+.15f);tp.inspirationRegenTimer=0;tp.bardResource++;}
-                if(tp.bardResource==tp.bardResourceMax2)tp.inspirationRegenBase=0;
-            }
-            if(!tp.throwerExhaustionPenalty)tp.throwerExhaustionDamage=1;
-            tp.throwerExhaustion=Math.Max(0,tp.throwerExhaustion-(tp.throwerExhaustionPenalty?tp.throwerExhaustionMax/1200f:1+tp.throwerExhaustionRegenBonus));
-            if(tp.throwerExhaustion==0)tp.throwerExhaustionPenalty=false;
-        }
+        // Both modes run the native passive update once. It owns inspiration,
+        // exhaustion and potion cooldowns; do not advance them a second time.
         if(actor.HeldItem.ModItem is ThoriumItem {isHealer:true})
             using(new CompanionNativeUse.Scope(use))findAlly(tp);
     }

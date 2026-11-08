@@ -6,12 +6,15 @@ using Terraria.ModLoader;
 
 namespace PalicoCompanion.Systems;
 
-// Discover potion buffs from item metadata, then let native UpdateBuffs apply
-// their effects. Equipment procs and class meters are not potion sources.
+// Potion sources come from item metadata. The native click-to-activate stations
+// are explicit sources too; equipment procs, pets and class meters are not.
 public sealed class CompanionPotionBuffs : ModSystem {
     static readonly HashSet<int> potions=new();
     public override void PostSetupContent(){
         potions.Clear();
+        // These are player-activated station buffs, not environmental auras.
+        // Keep their native effects and expiration; no synthetic permanent buffs.
+        potions.UnionWith(new[]{BuffID.Sharpened,BuffID.AmmoBox,BuffID.Clairvoyance,BuffID.Bewitched,BuffID.WarTable});
         foreach(var item in ContentSamples.ItemsByType.Values){
             int type=item.buffType;
             if(!item.consumable||item.buffTime<=0||type<=0||item.useStyle!=ItemUseStyleID.DrinkLiquid||

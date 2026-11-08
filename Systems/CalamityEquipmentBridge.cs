@@ -57,7 +57,7 @@ public sealed class CalamityEquipmentBridge : ModSystem {
         // No attached shellfish means zero contribution. Native code otherwise
         // reads player 255 while a lingering debuff waits to expire.
         if(source==null)return;
-        if(source.TryGetGlobalProjectile<CompanionOwnedShot>(out var tag)&&tag.CatIdentity>=0&&tag.Context==null)return;
+        if(CompanionProjectileData.TryGet<CompanionOwnedShot>(source,out var tag)&&tag.CatIdentity>=0&&tag.Context==null)return;
         var use=CompanionOwnedShot.Of(source);
         if(use==null){orig(npc,buffType,ref buffIndex,ref damage);return;}
         if(!use.EnsureActorSlot())return;

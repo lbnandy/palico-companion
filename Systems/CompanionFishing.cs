@@ -261,7 +261,7 @@ public sealed class CompanionFishingBobber:GlobalProjectile{
         return false;
     }
 
-    public static CompanionFishing Of(Projectile p)=>p.TryGetGlobalProjectile<CompanionFishingBobber>(out var g)?g.Context:null;
+    public static CompanionFishing Of(Projectile p)=>CompanionProjectileData.TryGet<CompanionFishingBobber>(p,out var g)?g.Context:null;
 }
 public sealed class CompanionFishingHooks:ModSystem{
     public override void Load(){On_Projectile.Update+=Update;On_Main.DrawProj_Inner+=Draw;On_Player.GetItem+=GetItem;On_Main.DrawProj_FishingLine+=Line;}
@@ -284,7 +284,7 @@ public sealed class CompanionFishingHooks:ModSystem{
         return remainder; // Native GiveItemToPlayer drops any remainder, never discard it.
     }
     static void Update(On_Projectile.orig_Update orig,Projectile p,int index){
-        if(p.TryGetGlobalProjectile<CompanionFishingBobber>(out var tag)&&!tag.Resolve(p))return;
+        if(CompanionProjectileData.TryGet<CompanionFishingBobber>(p,out var tag)&&!tag.Resolve(p))return;
         var c=CompanionFishingBobber.Of(p);if(c==null){orig(p,index);return;}
         if(!c.Available||Main.netMode==NetmodeID.SinglePlayer&&Main.player[c.Actor.whoAmI].active){p.ai[1]=0;p.active=false;return;}
         using(new CompanionFishing.Scope(c))orig(p,index);
