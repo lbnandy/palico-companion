@@ -1,11 +1,4 @@
-1.2.4 Update
-
-- Added Stay / Follow commands. Your Palico can fight and work near its assigned position; recalling or stowing it restores Follow mode.
-- Added pickup blacklist, whitelist, and coins-only modes.
-- Added lighting choices: off, hold torches only, or place torches automatically.
-- Added native accessory visibility toggles, saved per loadout and respecting each accessory's own hide-visual behavior.
-- Improved combat following and evasion to reduce leaving safe positions just to catch up with the owner.
-- Completed handling of the Palico's own debuffs, including some Fargo combat-environment penalties.
-- Added support for faster recovery from Calamity and Quality of Terraria in safe conditions, while retaining the recovery wait during combat.
-- Added situational dialogue for traps, lava, repeated knockouts, and Boss rematches.
-- Further fixed crashes caused by deferred drawing of Calamity projectile effects.
+- Fixed a compatibility issue with Ultimate Pet Force that could make the Palico disappear in multiplayer.
+- In independent equipment mode, mining, woodcutting, building, and fishing bonuses now use the Palico's own equipment effects.
+- Fixed some armor set effects remaining active after removing armor.
+- Added native visuals and animations for ice, beetle, and solar shields.

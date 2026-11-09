@@ -136,11 +136,22 @@ internal sealed class CompanionEquipment {
         // Composite items need local-owner checks to reconstruct their flags
         // on replicas. Limit that override to the item/set calculation.
         using(new CompanionNativeUse.Scope(use,trackHealing:false,equipmentOwner:true)){
-            actor.head=actor.armor[0].headSlot;actor.body=actor.armor[1].bodySlot;actor.legs=actor.armor[2].legSlot;
+            // TurnToAir can leave equip-slot metadata behind. Empty slots must
+            // not keep granting the set bonus of their previous armor.
+            actor.head=actor.armor[0].IsAir?-1:actor.armor[0].headSlot;
+            actor.body=actor.armor[1].IsAir?-1:actor.armor[1].bodySlot;
+            actor.legs=actor.armor[2].IsAir?-1:actor.armor[2].legSlot;
             // These set flags are cleared by Player.Update, not ResetEffects.
             actor.beetleDefense=actor.beetleOffense=actor.setSolar=false;
             actor.UpdateEquips(actor.whoAmI);
             actor.UpdateArmorSets(actor.whoAmI);
+            // Player.Update clears Holy Protection when its granting set is
+            // removed. Keep the cooldown, but do not carry a free dodge into
+            // another loadout (or an empty armor slot).
+            if(actor.shadowDodge&&!actor.onHitDodge){
+                actor.ClearBuff(BuffID.ShadowDodge);
+                actor.shadowDodge=false;
+            }
         }
         // Passive effects may deal damage or apply NPC buffs. Keep their native
         // remote-owner checks, just as for buffs and projectile AI.
@@ -150,6 +161,9 @@ internal sealed class CompanionEquipment {
             // to conditional passives. Preserve actual healing separately.
             healthChange=actor.statLife-healthBeforeBuffs;
             int before=HealthAtEquipmentScale();actor.statLife=before+healthChange;
+            // Player.Update applies this limit before PostUpdateMiscEffects.
+            // Preserve that order so later mod hooks can still alter it.
+            actor.pickSpeed=Math.Max(.3f,actor.pickSpeed);
             CompanionCrossMod.UpdateEquipment?.Invoke(use);
             healthChange=actor.statLife-before;
             manaChange=actor.statMana-manaBefore;

@@ -52,7 +52,7 @@ public sealed class ConstructionAssist {
         s.Status=CompanionText.Message("ConstructionAssist.HelpingBuild");
         if(!reachable){cadence=0;return true;}
         (cat.ModProjectile as CompanionCat)?.FaceWork(Target);
-        if(++cadence<CompanionWorkTiming.Ticks(Math.Max(4,CombinedHooks.TotalUseTime(material.useTime,p,material)/s.Training.WorkSpeed(12))))return true;
+        if(++cadence<CompanionWorkTiming.Ticks(Math.Max(4,CompanionWorkAttributes.UseTime(p,material)/s.Training.WorkSpeed(12))))return true;
         cadence=0;
         string result=SafeConstruction.TryPlace(p,cat.Center,s.Bag,next.X,next.Y,type,ownerRequested:true);
         if(!result.StartsWith(SafeConstruction.SuccessPrefix,StringComparison.Ordinal)){Cancel();return false;}

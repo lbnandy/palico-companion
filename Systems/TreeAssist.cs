@@ -114,7 +114,7 @@ public sealed class TreeAssist
         }
         MoveTarget=cat.Center;Status=s.Status=CompanionText.Message("TreeAssist.Chopping");
         (cat.ModProjectile as CompanionCat)?.FaceWork(Target);
-        if(cadence==0)interval=CompanionWorkTiming.Ticks(Math.Clamp(CombinedHooks.TotalUseTime(axe.useTime,p,axe),1,300));
+        if(cadence==0)interval=CompanionWorkTiming.Ticks(Math.Clamp(CompanionWorkAttributes.UseTime(p,axe),1,300));
         int windup=Math.Max(1,(int)(interval*0.6f));cadence++;
         if(cadence==interval-windup+1){SwingDuration=Math.Max(1,(int)Math.Ceiling(windup/0.6f));SwingTicks=SwingDuration;SwingItemType=axe.type;SwingItem=axe;CompanionItemVisual.BeginUse(axe,cat.Center);}
         if(cadence<interval)return true;cadence=0;

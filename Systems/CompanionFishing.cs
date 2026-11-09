@@ -50,7 +50,7 @@ public sealed class CompanionFishing {
     public bool Approaching {get;private set;}
     public Vector2 MoveTarget {get;private set;}
     internal static bool OwnerFishing(Player p)=>Main.projectile.Any(q=>q.active&&q.owner==p.whoAmI&&q.bobber&&CompanionFishingBobber.Of(q)==null);
-    internal static bool LiquidAllowed(int liquid,Item rod,Item bait,Player p)=>liquid==LiquidID.Water||liquid==LiquidID.Honey||liquid==LiquidID.Lava&&(ItemID.Sets.CanFishInLava[rod.type]||ItemID.Sets.IsLavaBait[bait.type]||p.accLavaFishing);
+    internal static bool LiquidAllowed(int liquid,Item rod,Item bait,Player p)=>liquid==LiquidID.Water||liquid==LiquidID.Honey||liquid==LiquidID.Lava&&(ItemID.Sets.CanFishInLava[rod.type]||ItemID.Sets.IsLavaBait[bait.type]||CompanionWorkAttributes.Source(p.GetModPlayer<CompanionPlayer>()).accLavaFishing);
     public bool Gesture=>Active&&gesture>0;
     public float GestureProgress=>gestureMax>0?1-gesture/(float)gestureMax:0;
     Item bait;
@@ -187,15 +187,18 @@ public sealed class CompanionFishing {
     }
     void Prepare(){
         Actor.whoAmI=Slot;Actor.itemLocation+=CompanionSprite.Hand(Cat)-Actor.Center;Actor.Center=CompanionSprite.Hand(Cat);Actor.direction=Cat.direction;Actor.gravDir=1;
-        Actor.accLavaFishing=State.Player.accLavaFishing;
+        var attributes=CompanionWorkAttributes.Source(State);
+        Actor.accLavaFishing=attributes.accLavaFishing;
+        Actor.accFishingLine=attributes.accFishingLine;Actor.accTackleBox=attributes.accTackleBox;
+        Actor.sonarPotion=attributes.sonarPotion;
         Actor.dead=false;Actor.selectedItem=0;Actor.itemRotation=0;Actor.heldProj=-1;
-        Actor.fishingSkill=State.Player.fishingSkill+(State.Training.Work(10)?5*(State.Training.Tier+1):0);
+        Actor.fishingSkill=attributes.fishingSkill+(State.Training.Work(10)?5*(State.Training.Tier+1):0);
         var p=State.Player;Actor.name=p.name;
         // Native reward rolls read these separately from GetFishingConditions.
-        // Copy the native biome flags together so ocean/dungeon/mushroom catches
-        // follow the same rules as the owner's other fishing bonuses.
+        // Biome/luck retain the existing environment source; equipment bonuses
+        // above and crate chance below follow the chosen attribute mode.
         Actor.zone1=p.zone1;Actor.zone2=p.zone2;Actor.zone3=p.zone3;Actor.zone4=p.zone4;Actor.zone5=p.zone5;
-        Actor.cratePotion=p.cratePotion;Actor.luck=p.luck;
+        Actor.cratePotion=attributes.cratePotion;Actor.luck=p.luck;
         // HasItem suppresses duplicate quest fish. Expose the cat's actual bag,
         // not the owner's inventory; native bait selection still uses slot 54.
         for(int i=1;i<50;i++)Actor.inventory[i]=i<=State.Bag.Length?State.Bag[i-1]:empty;

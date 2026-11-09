@@ -129,6 +129,7 @@ public sealed partial class CompanionNativeUse {
     }
     internal void ReleaseActorSlot(){Cancel(preserveSkills:false);CompanionActorSlots.Release(this,slot);slot=-1;}
     bool initialized;
+    internal bool AttributesReady=>initialized&&State!=null;
     bool ResetEffects(){
         // Native ResetEffects starts from the permanent maxima, then lets
         // ModPlayer hooks add this frame's equipment effects. Do not erase

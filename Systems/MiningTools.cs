@@ -25,7 +25,7 @@ public static class MiningTools
     // Same calculation used by stable Player.ApplyItemTime(item, pickSpeed).
     // This reads timing hooks without using the item or changing player input.
     public static float ExactInterval(Player player,Item tool) => CompanionWorkTiming.Exact(Math.Clamp(
-        CombinedHooks.TotalUseTime(tool.useTime*player.pickSpeed,player,tool)/player.GetModPlayer<CompanionPlayer>().Training.WorkSpeed(9),1,600));
+        CompanionWorkAttributes.UseTime(player,tool,mining:true)/player.GetModPlayer<CompanionPlayer>().Training.WorkSpeed(9),1,600));
     public static int Interval(Player player,Item tool) => (int)Math.Ceiling(ExactInterval(player,tool));
 
     // Vanilla's player/tool reach rectangle, plus two tiles of companion assistance.
@@ -33,10 +33,11 @@ public static class MiningTools
     public static Point Range(Player player,Item tool,bool autonomous=false) {
         // Apply equipment after the baseline bounds so both the minimum scan
         // range and unusually long tools retain the advertised +1/+2/+3 tiles.
-        int bonus=player.GetModPlayer<CompanionPlayer>().Training.MiningReach;
+        var state=player.GetModPlayer<CompanionPlayer>();
+        int bonus=state.Training.MiningReach,blockRange=CompanionWorkAttributes.Source(state).blockRange;
         return new(
-            Math.Clamp(Player.tileRangeX+tool.tileBoost+player.blockRange+2,autonomous?12:2,14)+bonus,
-            Math.Clamp(Player.tileRangeY+tool.tileBoost+player.blockRange+2,autonomous?10:2,14)+bonus);
+            Math.Clamp(Player.tileRangeX+tool.tileBoost+blockRange+2,autonomous?12:2,14)+bonus,
+            Math.Clamp(Player.tileRangeY+tool.tileBoost+blockRange+2,autonomous?10:2,14)+bonus);
     }
 
     public static bool InRange(Player player,Item tool,Point tile,bool autonomous=false)

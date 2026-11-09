@@ -1,5 +1,21 @@
 # Changelog
 
+## 1.2.5 — 2026-11-10
+
+### 简体中文
+
+- 修复与东方小祖宗（Ultimate Pet Force）同开时，呆猫在联机中可能消失的问题。
+- 独立配装下，挖矿、砍树、建造和钓鱼相关加成改为使用呆猫自身装备的效果。
+- 修复卸下护甲后部分套装效果可能残留的问题。
+- 补齐冰盾、甲虫护盾和日耀护盾的显示，沿用原版效果与动画。
+
+### English
+
+- Fixed a compatibility issue with Ultimate Pet Force that could make the Palico disappear in multiplayer.
+- In independent equipment mode, mining, woodcutting, building, and fishing bonuses now use the Palico's own equipment effects.
+- Fixed some armor set effects remaining active after removing armor.
+- Added native visuals and animations for ice, beetle, and solar shields.
+
 ## 1.2.4 — 2026-11-09
 
 ### 简体中文

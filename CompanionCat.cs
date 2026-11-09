@@ -28,6 +28,7 @@ public sealed class CompanionCat : ModProjectile
     public readonly CompanionEvasion Evasion=new();
     public readonly CompanionDivingVisual Diving=new();
     readonly CompanionFace face=new();
+    readonly System.Collections.Generic.List<Terraria.DataStructures.DrawData> equipmentVisuals=new();
     public readonly CompanionFishing Fishing=new();
     readonly CompanionTargeting targeting=new();
     int attackVisualTicks,attackVisualDuration=1;
@@ -507,6 +508,7 @@ public sealed class CompanionCat : ModProjectile
         }
         else if(ShowWorldHealth(state.Vitals)&&Main.HealthBarDrawSettings!=0)
             Main.instance.DrawHealthBar(Projectile.Center.X,Projectile.Bottom.Y+10+Projectile.gfxOffY,state.Vitals.Health,state.Vitals.MaxHealth,1f,1f);
+        CompanionBuffVisuals.Equipment(this,lightColor,equipmentVisuals);
         return false;
     }
 

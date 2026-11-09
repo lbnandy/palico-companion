@@ -1,13 +1,34 @@
 using System;
+using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 using Terraria.GameContent;
+using Terraria.DataStructures;
 using Terraria.ModLoader;
 
 namespace PalicoCompanion.Systems;
 
 public sealed class CompanionBuffVisuals:ModSystem {
+    // Only native, self-contained status layers. Do not run the complete
+    // player renderer, vanity hooks or equipment updates while drawing a cat.
+    internal static void Equipment(CompanionCat cat,Color light,List<DrawData> cache){
+        cache.Clear();
+        if(!cat.Weapons.Present||cat.Weapons.State.Stowed||cat.Weapons.State.Vitals.Downed)return;
+        var actor=cat.Weapons.Actor;
+        var center=cat.Projectile.Center+new Vector2(0,cat.Projectile.gfxOffY);
+        var info=new PlayerDrawSet{drawPlayer=actor,Position=center-actor.Size/2,
+            DrawDataCache=cache,colorArmorBody=light,
+            playerEffect=cat.Projectile.direction<0?SpriteEffects.FlipHorizontally:SpriteEffects.None};
+        PlayerDrawLayers.DrawPlayer_26_SolarShield(ref info);
+        PlayerDrawLayers.DrawPlayer_37_BeetleBuff(ref info);
+        // IceBarrier is anchored to the humanoid body frame rather than its
+        // center. Translate that anchor only; retain native texture/animation.
+        info.Position.Y-=actor.height/2f-actor.bodyFrame.Height/2f+4+actor.bodyPosition.Y;
+        info.Position.X-=actor.bodyPosition.X;
+        PlayerDrawLayers.DrawPlayer_35_IceBarrier(ref info);
+        foreach(var data in cache)data.Draw(Main.spriteBatch);
+    }
     public override void Load(){if(!Main.dedServ)On_Main.DrawInfernoRings+=DrawInfernoRings;}
     public override void Unload()=>On_Main.DrawInfernoRings-=DrawInfernoRings;
 
