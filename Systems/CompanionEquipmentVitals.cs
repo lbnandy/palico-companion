@@ -34,7 +34,7 @@ public sealed partial class CompanionNativeUse {
                 dodgeable:npc?.IsDamageDodgeable()??true,armorPenetration:shot?.ArmorPenetration??0,knockback:0);
             if(dealt>0&&!Actor.dead){
                 if(npc!=null){Actor.StatusFromNPC(npc);NPCLoader.OnHitPlayer(npc,Actor,info);PlayerLoader.OnHitByNPC(Actor,npc,info);}
-                else {ProjectileLoader.OnHitPlayer(shot,Actor,info);PlayerLoader.OnHitByProjectile(Actor,shot,info);}
+                else {shot.StatusPlayer(Actor.whoAmI);ProjectileLoader.OnHitPlayer(shot,Actor,info);PlayerLoader.OnHitByProjectile(Actor,shot,info);}
             }
             v.Mana=Math.Clamp(Actor.statMana,0,v.MaxMana);
             return CommitHitHealth(before,boss,60,CompanionNetwork.Server);
@@ -62,7 +62,7 @@ public sealed partial class CompanionNativeUse {
     }
 
     internal void EquipmentRegeneration(){
-        if(CompanionNetwork.Client||!CompanionEquipment.Independent(State)||!Present)return;
+        if(CompanionNetwork.Client||!Present)return;
         var v=State.Vitals;
         using var scope=new Scope(this,false);
         bool receiving=ReceivingHit;
@@ -78,6 +78,12 @@ public sealed partial class CompanionNativeUse {
             Actor.sleeping.isSleeping=((CompanionCat)Cat.ModProjectile).Animation.Motion==CatMotion.Rest;
             Actor.UpdateLifeRegen();
             int units=(Actor.statLife-before)*120+Actor.lifeRegenCount-count;
+            if(!CompanionEquipment.Independent(State)&&Actor.lifeRegen>=0&&units>=0){
+                // Inheritance mode retains Vitals' existing recovery formula.
+                // Native regeneration still evaluates all damage-over-time hooks.
+                Actor.statLife=before;Actor.lifeRegenCount=Math.Min(0,Actor.lifeRegenCount);return;
+            }
+            if(Actor.lifeRegen<0||units<0){v.QuietTicks=0;v.LifeCounter=0;}
             State.Equipment.FoodRegeneration(Actor,units,v.FoodTime>0&&CompanionFeeding.CanRecover(State,(CompanionCat)Cat.ModProjectile));
             if(Actor.statLife<=0){
                 // Damage over time does not respect ordinary hit immunity.

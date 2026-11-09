@@ -14,8 +14,8 @@ internal sealed class CompanionBarrelLanding {
     bool wasRiding;
     // Do not drop behind an owner who is already flying away. Use the same
     // owner leash and the existing lift duration, without a second speed limit.
-    internal static bool KeepsUp(Player owner,Vector2 point)=>Vector2.DistanceSquared(owner.Center,point)<480*480&&
-        Vector2.DistanceSquared(owner.Center+owner.velocity*CompanionBarrelCharge.LiftTicks,point)<480*480;
+    internal static bool KeepsUp(Player owner,Vector2 point)=>Vector2.DistanceSquared(CompanionStation.Origin(owner),point)<480*480&&
+        Vector2.DistanceSquared(CompanionStation.Origin(owner)+CompanionStation.Velocity(owner)*CompanionBarrelCharge.LiftTicks,point)<480*480;
     internal bool KeepsUp(Player owner)=>KeepsUp(owner,goal);
     internal bool Find(Projectile cat,Player owner,NPC enemy,float speed,out Vector2 landing){
         landing=default;float best=float.MaxValue;
@@ -24,7 +24,7 @@ internal sealed class CompanionBarrelLanding {
             if(!CompanionNavigation.TryStand(candidate,out var stand))continue;
             // Only the first supporting surface in a column is a landing.
             float score=Vector2.DistanceSquared(cat.Center,stand);
-            if(score<best&&Vector2.DistanceSquared(owner.Center,stand)<480*480&&
+            if(score<best&&CompanionStation.Contains(owner.GetModPlayer<CompanionPlayer>(),stand)&&Vector2.DistanceSquared(CompanionStation.Origin(owner),stand)<480*480&&
                 Vector2.DistanceSquared(enemy.Hitbox.ClosestPointInRect(stand),stand)<=320*320&&
                 CompanionBarrelNavigation.Plan(stand-Half,Vector2.Zero,cat.direction,enemy,speed,CompanionBarrelCharge.RushTicks,stand.Y-Half.Y,out _)&&
                 route.Next(cat.Center,stand,out _)){

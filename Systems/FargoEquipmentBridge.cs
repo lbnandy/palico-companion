@@ -3,6 +3,7 @@ using FargowiltasSouls.Content.UI.Elements;
 using FargowiltasSouls.Core.AccessoryEffectSystem;
 using FargowiltasSouls.Core.ModPlayers;
 using FargowiltasSouls.Core.Toggler;
+using FargowiltasSouls.Core.Globals;
 using FargowiltasSouls.Core.Systems;
 using Terraria;
 using Terraria.ModLoader;
@@ -15,19 +16,35 @@ namespace PalicoCompanion.Systems;
 [ExtendsFromMod("FargowiltasSouls")]
 [JITWhenModsEnabled("FargowiltasSouls")]
 public sealed class FargoEquipmentBridge : ModSystem {
-    Hook cooldownBar,dashes;
+    Hook cooldownBar,dashes,auras;
+    delegate void Aura(NPC npc,float radius,bool reverse,int dust,Color color,int[] buffs);
     delegate void ActivateBar(string name,Texture2D texture,Color color,Func<float> ratio,bool full,int delay,Func<bool> active,int frames);
     public override void Load(){
         cooldownBar=new Hook(((ActivateBar)CooldownBarManager.Activate).Method,ShowCooldownBar);
+        auras=new Hook(((Aura)EModeGlobalNPC.Aura).Method,ApplyAura);
         dashes=new Hook(((Action<Player>)DashManager.ManageDashes).Method,ManageDashes);
         CompanionCrossMod.BeforeReset+=BeforeReset;
         CompanionCrossMod.UpdateEquipment+=UpdateEquipment;
+        CompanionCrossMod.UpdateInheritedStatus+=UpdateInheritedStatus;
     }
     public override void Unload(){
+        auras?.Dispose();auras=null;
         cooldownBar?.Dispose();cooldownBar=null;
         dashes?.Dispose();dashes=null;
         CompanionCrossMod.BeforeReset-=BeforeReset;
         CompanionCrossMod.UpdateEquipment-=UpdateEquipment;
+        CompanionCrossMod.UpdateInheritedStatus-=UpdateInheritedStatus;
+    }
+    static void ApplyAura(Aura orig,NPC npc,float radius,bool reverse,int dust,Color color,int[] buffs){
+        orig(npc,radius,reverse,dust,color,buffs);
+        if(CompanionNativeUse.Current!=null||Main.gameMenu)return;
+        // Reuse Fargo's live radius, reverse-area rules, duration and immunity
+        // checks. Do not replay NPC AI or copy the human owner's debuffs.
+        foreach(var projectile in Main.ActiveProjectiles){
+            if(projectile.ModProjectile is not CompanionCat cat||!cat.Weapons.Present)continue;
+            using(new CompanionNativeUse.Scope(cat.Weapons,false,equipmentOwner:true))
+                orig(npc,radius,reverse,-1,color,buffs);
+        }
     }
     static void ManageDashes(Action<Player> orig,Player player){
         // Companion movement belongs to its AI, not the local player's dash
@@ -63,6 +80,10 @@ public sealed class FargoEquipmentBridge : ModSystem {
         if(player.HurtTimer>0)player.HurtTimer--;
         player.IsStandingStill=Math.Abs(use.Actor.velocity.X)<.05f&&Math.Abs(use.Actor.velocity.Y)<.05f;
         use.Actor.GetModPlayer<AccessoryEffectPlayer>().PreUpdate();
+    }
+    static void UpdateInheritedStatus(CompanionNativeUse use){
+        // Native curse/resource processing also applies without independent gear.
+        use.Actor.GetModPlayer<FargoSoulsPlayer>().PostUpdateMiscEffects();
     }
     static void UpdateEquipment(CompanionNativeUse use){
         var player=use.Actor.GetModPlayer<FargoSoulsPlayer>();

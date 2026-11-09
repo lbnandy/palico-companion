@@ -32,7 +32,7 @@ public sealed class DiggingIntent
     public void Observe(Player p,Point cell,int type,Vector2? mouse=null) {
         if(!Allowed(type))return;
         var s=p.GetModPlayer<CompanionPlayer>();
-        if(s.Directive.Active||s.EnvironmentPaused||!s.Enabled||s.Paused||s.Vitals.Downed||p.dead||
+        if(!CompanionStation.Contains(s,cell.ToWorldCoordinates())||s.Directive.Active||s.EnvironmentPaused||!s.Enabled||s.Paused||s.Vitals.Downed||p.dead||
             !(CompanionNetwork.Server?s.NetDigging:ModContent.GetInstance<CompanionConfig>().DiggingAssist))return;
         Point dir=Axis(cell.ToWorldCoordinates()-p.Center);
         // Repeated hits on one repair block never count as forward excavation.
@@ -69,6 +69,7 @@ public sealed class DiggingIntent
         if(s.Mining.Active&&s.Mining.Terrain)s.Mining.Cancel();
     }
     internal void ObserveConstruction(CompanionPlayer s) {
+        if(s.Stationed)return;
         var p=s.Player;
         bool usingBuildingItem=!p.mouseInterface&&(p.controlUseItem||p.itemAnimation>0)&&
             (p.HeldItem.createTile>=0||p.HeldItem.createWall>0);
@@ -90,7 +91,7 @@ public sealed class DiggingIntent
         // a cave wall must not repeatedly erase the owner's digging intention.
         // Jump is also wing/mount ascent. The real pick stroke remains valid
         // while airborne; distance, lifetime and a different tool end it.
-        if(!s.Enabled||s.Paused||s.EnvironmentPaused||s.Vitals.Downed||p.dead||otherUse||
+        if(!CompanionStation.Contains(s,p.Center)||!s.Enabled||s.Paused||s.EnvironmentPaused||s.Vitals.Downed||p.dead||otherUse||
             !(CompanionNetwork.Server?s.NetDigging:ModContent.GetInstance<CompanionConfig>().DiggingAssist)||Active&&Vector2.DistanceSquared(anchor,p.Center)>80*80||
             s.Order.Active||s.Order.HasPreview){Clear(s);return;}
         if(!Active){if(strokeCount>0&&Main.GameUpdateCount-strokeAt>180)strokeCount=0;return;}

@@ -59,7 +59,7 @@ public sealed class TravelAssist {
         Active=false;
         if(cooldown>0)cooldown--;
         Status="";
-        if(s.EnvironmentPaused||Vector2.DistanceSquared(p.Center,cat.Center)>160*160||p.itemAnimation>0)return;
+        if(s.Stationed||s.EnvironmentPaused||Vector2.DistanceSquared(p.Center,cat.Center)>160*160||p.itemAnimation>0)return;
         Point target;int type;
         if(s.Ropes&&RopeTarget(p,out target))type=ItemID.Rope;
         else if(s.Bridges&&BridgeTarget(p,out target))type=ItemID.WoodPlatform;

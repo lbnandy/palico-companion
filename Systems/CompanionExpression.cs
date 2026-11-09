@@ -13,6 +13,7 @@ public sealed partial class CompanionExpression {
     int ownedBubble=-1;
     int bubblePriority;
     bool ownerReturning;
+    int lastOwnerDeath=-36000,recentOwnerDeaths;
     Projectile visualAnchor;
     int previousOwnerHealth=-1;
     bool bossNearby,workingLast,greeted;
@@ -37,9 +38,24 @@ public sealed partial class CompanionExpression {
         pacing.Spoken(tick,CompanionSpeechPacing.Priority.Life);flavorAt=tick+1800;return true;
     }
     internal void OwnerDied(CompanionPlayer s,Projectile cat){
+        recentOwnerDeaths=tick-lastOwnerDeath<=18000?recentOwnerDeaths+1:1;lastOwnerDeath=tick;
+        bosses.OwnerDied(tick);
         ClearPendingWork();ownerReturning=s.Introduced;
         if(s.Player.GetModPlayer<CompanionCartPlayer>().ReplacesDeathSpeech)return;
         TrySay(s,cat,"OwnerHurt",EmoteID.EmoteSadness,variant:"Death");
+    }
+    internal void OwnerHit(CompanionPlayer s,Projectile cat,Terraria.DataStructures.PlayerDeathReason source){
+        int index=source.SourceProjectileLocalIndex;
+        bool trap=index>=0&&index<Main.maxProjectiles&&Main.projectile[index].trap ||
+            source.SourceProjectileType is ProjectileID.Boulder or ProjectileID.MiniBoulder or ProjectileID.BouncyBoulder;
+        if(trap&&!s.Player.dead)TrySay(s,cat,"OwnerHurt",EmoteID.EmotionAlert,variant:Main.getGoodWorld||Main.zenithWorld?"TrapSeed":"Trap");
+    }
+    internal static bool WorkingNearLava(CompanionPlayer s){
+        if(!s.Player.ZoneUnderworldHeight||!(s.Mining.Active||s.Digging.Active))return false;
+        var center=s.Player.Center.ToTileCoordinates();
+        for(int x=center.X-6;x<=center.X+6;x++)for(int y=center.Y-4;y<=center.Y+5;y++)
+            if(WorldGen.InWorld(x,y,1)&&Main.tile[x,y] is {} tile&&tile.LiquidAmount>0&&tile.LiquidType==LiquidID.Lava)return true;
+        return false;
     }
     // Dialogue is a personal report. Remote cat visuals must not advance another
     // player's introduction, dialogue history, pending reports or text cooldowns.
@@ -76,7 +92,7 @@ public sealed partial class CompanionExpression {
         if(!s.Vitals.Downed&&wasDown)Say(s,cat,"Recovered",EmoteID.EmoteHappiness);
         wasDown=s.Vitals.Downed;
         if(!s.Paused&&!s.Vitals.Downed) {
-            if(ownerReturning&&!s.Player.dead&&TrySay(s,cat,"Welcome",EmoteID.EmoteHappiness,variant:"Revived")){
+            if(ownerReturning&&!s.Player.dead&&TrySay(s,cat,"Welcome",EmoteID.EmoteHappiness,variant:recentOwnerDeaths>=2?"RepeatedDeath":"Revived")){
                 ownerReturning=false;greeted=true;previousOwnerHealth=s.Player.statLife;
             }
             // Wait for naming to close. Only a line actually shown completes the
@@ -98,8 +114,8 @@ public sealed partial class CompanionExpression {
             // owner is hurt and then announce that same help a moment later.
             if(previousOwnerHealth>0&&previousOwnerHealth-s.Player.statLife>=System.Math.Max(10,s.Player.statLifeMax2/10))
                 Say(s,cat,"OwnerHurt",EmoteID.ItemLifePotion);
-            bool working=s.Mining.Active||s.Trees.Active||s.Garden.Active||(cat.ModProjectile is CompanionCat worker&&(worker.Catching.Active||worker.Fishing.Active));
-            if(working&&!workingLast)Say(s,cat,"Working",EmoteID.EmoteNote);
+            bool working=s.Mining.Active||s.Digging.Active||s.Trees.Active||s.Garden.Active||(cat.ModProjectile is CompanionCat worker&&(worker.Catching.Active||worker.Fishing.Active));
+            if(working&&!workingLast)TrySay(s,cat,"Working",EmoteID.EmoteNote,variant:WorkingNearLava(s)?"Lava":null);
             workingLast=working;
         }
         previousOwnerHealth=s.Player.statLife;
@@ -159,7 +175,7 @@ public sealed partial class CompanionExpression {
         bool localChat=IsLocalListener(s)||CompanionNetwork.Server;
         // Keep the first spoken line a proper introduction, not incidental loot.
         if(localChat&&chat&&chatter&&greeting&&!s.Introduced&&key!="FirstMeet")return false;
-        bool lifeEvent=key=="OwnerHurt"&&variant=="Death"||key=="Welcome"&&variant=="Revived";
+        bool lifeEvent=key=="OwnerHurt"&&variant=="Death"||key=="Welcome"&&variant is "Revived" or "RepeatedDeath";
         bool bagFull=key=="Working"&&variant=="BagFull";
         bool gear=variant!=null&&variant.StartsWith("Gear");
         bool food=key=="Pet"&&variant!=null&&variant.StartsWith("Food");

@@ -19,6 +19,7 @@ namespace PalicoCompanion.Systems;
 // Independently implemented; no third-party source copied.
 public sealed partial class CompanionNativeUse {
     public readonly Player Actor=new();
+    internal readonly CompanionDebuffs.Modifiers Debuffs=new();
     public Projectile Cat {get;private set;}
     public CompanionPlayer State {get;private set;}
     public Vector2 Aim {get;private set;}
@@ -182,8 +183,8 @@ public sealed partial class CompanionNativeUse {
         }
         lastActorPosition=Actor.position;lastActorVelocity=Actor.velocity;
     }
-    public static int MinionLimit(Player owner)=>CompanionEquipment.Independent(owner.GetModPlayer<CompanionPlayer>())?owner.GetModPlayer<CompanionPlayer>().Equipment.Minions:Math.Max(1,owner.maxMinions);
-    public static int SentryLimit(Player owner)=>CompanionEquipment.Independent(owner.GetModPlayer<CompanionPlayer>())?owner.GetModPlayer<CompanionPlayer>().Equipment.Sentries:Math.Max(1,owner.maxTurrets);
+    public static int MinionLimit(Player owner)=>owner.GetModPlayer<CompanionPlayer>().Cat!=null?owner.GetModPlayer<CompanionPlayer>().Equipment.Minions:Math.Max(0,owner.maxMinions);
+    public static int SentryLimit(Player owner)=>owner.GetModPlayer<CompanionPlayer>().Cat!=null?owner.GetModPlayer<CompanionPlayer>().Equipment.Sentries:Math.Max(0,owner.maxTurrets);
     public static bool Summoning(Item item)=>item.shoot>ProjectileID.None&&ContentSamples.ProjectilesByType.TryGetValue(item.shoot,out var p)&&p.minion;
     public static bool DistanceWeapon(Item item)=>CompanionCombatReach.Distance(item);
     // Range chooses tactics, not arm animation. Projectile-emitting swords
@@ -376,8 +377,12 @@ public sealed partial class CompanionNativeUse {
     // companion's tooltip. Copy numerical modifiers before the cat's own
     // effects; do not run the owner's equipment hooks on a second actor.
     internal static void ApplyCombatModifiers(Player actor,CompanionPlayer state,Item weapon) {
-        if(!CompanionEquipment.Independent(state))CompanionCombatInheritance.Apply(actor,state.Player);
+        if(!CompanionEquipment.Independent(state)&&!ReferenceEquals(actor,(state.Cat?.ModProjectile as CompanionCat)?.Weapons.Actor)){
+            CompanionCombatInheritance.Apply(actor,state.Player);
+            if((state.Cat?.ModProjectile as CompanionCat)?.Weapons is {} native)native.Debuffs.ApplyCombat(actor);
+        }
         else if(!ReferenceEquals(actor,(state.Cat?.ModProjectile as CompanionCat)?.Weapons.Actor)&&state.Equipment.Preview is {} preview)CompanionCombatInheritance.CopyEquipment(actor,preview);
+        if(actor.witheredWeapon)actor.GetDamage(DamageClass.Generic)*=.5f;
         bool summon=weapon.CountsAsClass(DamageClass.Summon);
         actor.GetDamage(DamageClass.Generic)*=summon?1:state.Training.Damage(state);
         actor.GetAttackSpeed(DamageClass.Generic)+=(summon?1:state.Training.Speed(state))-1;

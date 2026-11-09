@@ -72,9 +72,9 @@ public sealed class CompanionPickup {
     internal static bool CanCollect(Item i,Player owner,CompanionPlayer state,bool requireRoom=true)=>
         i.active&&!i.IsAir&&Ordinary(i)&&!ItemID.Sets.IsAPickup[i.type]&&i.type!=ItemID.Heart&&i.type!=ItemID.Star&&
         AllowsGroundPickup(i,state)&&
-        !state.ExcludedPickup.Contains(i.type)&&!i.favorited&&
+        CompanionExclusions.Pickup(i,state)&&!i.favorited&&
         (i.playerIndexTheItemIsReservedFor==255||i.playerIndexTheItemIsReservedFor==owner.whoAmI)&&
-        Vector2.DistanceSquared(i.Center,state.WorkAnchor)<(480*480)&&(!requireRoom||HasRoom(i,state))&&
+        CompanionStation.Contains(state,i.Center)&&Vector2.DistanceSquared(i.Center,state.WorkAnchor)<(480*480)&&(!requireRoom||HasRoom(i,state))&&
         ItemLoader.CanPickup(i,owner);
     public static bool Eligible(Item i,Player owner,CompanionPlayer state,Projectile cat,bool requireRoom=true)=>
         CanCollect(i,owner,state,requireRoom)&&i.noGrabDelay==0&&i.shimmerTime==0&&(!i.shimmered||i.velocity.Length()<.2f)&&Reachability.Clear(cat.Center,i.Center);

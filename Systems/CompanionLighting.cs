@@ -7,6 +7,8 @@ namespace PalicoCompanion.Systems;
 // Separate held light from permanent placement. Bounded search, no terrain replacement.
 // Design references: AutoTorchPlus candidate/occlusion checks; TerraGuardians offhand light.
 public sealed class CompanionLighting {
+    internal static CompanionLightingMode Valid(byte mode)=>Enum.IsDefined((CompanionLightingMode)mode)?(CompanionLightingMode)mode:CompanionLightingMode.Automatic;
+    internal static bool CanPlace(CompanionPlayer s)=>s.Lighting==CompanionLightingMode.Automatic&&!s.EnvironmentPaused;
     public bool Holding {get;private set;}
     public Item HeldItem {get;private set;}
     public bool HoldingGlowstick=>Holding&&IsGlowstick(HeldItem);
@@ -61,7 +63,7 @@ public sealed class CompanionLighting {
             bool existing=HasVisibleLight(cat.Center);
             Holding=CompanionNetwork.Server?s.NetDark:WantsLight(cat.Center,Holding);
             if(!Holding)Status="";
-            if(!s.EnvironmentPaused&&Holding&&!existing&&Available(HeldItem)&&clock%60==0&&cooldown==0&&!danger&&Vector2.DistanceSquared(cat.Center,p.Center)<160*160) {
+            if(CanPlace(s)&&Holding&&!existing&&Available(HeldItem)&&clock%60==0&&cooldown==0&&!danger&&Vector2.DistanceSquared(cat.Center,p.Center)<160*160) {
                 Status=TryNearby(p,s,cat.Center,HeldItem);
                 if(Status.StartsWith(SafeConstruction.SuccessPrefix)){Holding=false;cooldown=CompanionWorkTiming.Ticks(120);}
             }

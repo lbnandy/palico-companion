@@ -6,8 +6,8 @@ namespace PalicoCompanion.Systems;
 // job range and native tool checks still decide whether a target is workable.
 internal static class CompanionWorkOpportunity {
     internal static bool KeepingUp(Player owner,Projectile cat)=>cat!=null&&
-        Vector2.DistanceSquared(cat.Center,owner.Center)<480*480&&
-        Vector2.DistanceSquared(cat.Center,owner.Center+owner.velocity*30)<480*480;
+        Vector2.DistanceSquared(cat.Center,CompanionStation.Origin(owner))<480*480&&
+        Vector2.DistanceSquared(cat.Center,CompanionStation.Origin(owner)+CompanionStation.Velocity(owner)*30)<480*480;
     internal static bool RemainsNearby(Player owner,Vector2 target,float radius)=>
-        Vector2.DistanceSquared(target,owner.Center+owner.velocity*30)<=radius*radius;
+        Vector2.DistanceSquared(target,CompanionStation.Origin(owner)+CompanionStation.Velocity(owner)*30)<=radius*radius;
 }

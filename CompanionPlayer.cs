@@ -10,10 +10,16 @@ using PalicoCompanion.Systems;
 namespace PalicoCompanion;
 public sealed class CompanionPlayer : ModPlayer
 {
-    internal readonly System.Collections.Generic.HashSet<int> ExcludedMining=new(),ExcludedPickup=new();
+    internal readonly System.Collections.Generic.HashSet<int> ExcludedMining=new(),ExcludedPickup=new(),AllowedPickup=new();
+    internal PickupFilterMode PickupFilter;
+    public override void OnHurt(Player.HurtInfo info){
+        if(!CompanionNetwork.Client&&Enabled&&!Stowed&&!Vitals.Downed&&Cat is {} cat)
+            Expression.OwnerHit(this,cat,info.DamageSource);
+    }
     internal string NetSession="";internal TagCompound NetResume=new();
     public override void PlayerDisconnect()=>CompanionNetwork.Cache(this);
     public override void Kill(double damage,int hitDirection,bool pvp,Terraria.DataStructures.PlayerDeathReason damageSource){
+        Stationed=false;
         if(!CompanionNetwork.Client&&Enabled&&!Stowed&&!Vitals.Downed&&Cat is {} cat)Expression.OwnerDied(this,cat);
     }
     internal CompanionProfile NetworkProfile;
@@ -47,7 +53,9 @@ public sealed class CompanionPlayer : ModPlayer
     internal System.Collections.Generic.List<Item> DeliveryRemainder=new();
     internal int DeliveryTicks;
     public Item[] Bag = InventoryTransfer.Empty(24);
-    public bool Enabled, Paused, Pickup=true, Combat=true, Torches=true, Bridges, Ropes;
+    public bool Enabled, Paused, Pickup=true, Combat=true, Bridges, Ropes;
+    public CompanionLightingMode Lighting=CompanionLightingMode.Automatic;
+    public bool Torches { get=>Lighting!=CompanionLightingMode.Off; set=>Lighting=value?(Torches?Lighting:CompanionLightingMode.Automatic):CompanionLightingMode.Off; }
     public bool EnvironmentPaused;
     public CompanionCombatMode CombatMode;
     public bool CooperativeCombat {get=>CombatMode==CompanionCombatMode.Assist;set=>CombatMode=value?CompanionCombatMode.Assist:CompanionCombatMode.Proactive;}
@@ -62,7 +70,9 @@ public sealed class CompanionPlayer : ModPlayer
     int maintenanceTick;
     public bool PanelOpen;
     public bool Bonded, Stowed, Introduced; public Vector2 RecoveryPosition; public string RecoveryWorld=""; int meetingTicks; bool meetingShown;
-    public Vector2 WorkAnchor=>Player.Center;
+    public bool Stationed;
+    public Vector2 StationPoint;
+    public Vector2 WorkAnchor=>Stationed?StationPoint:Player.Center;
     public string Notice=""; public int NoticeTicks;
     public void Report(string text) {Notice=text;NoticeTicks=300;}
     public WorkOrders Order=new();
@@ -89,7 +99,7 @@ public sealed class CompanionPlayer : ModPlayer
         tag["environmentPaused"]=EnvironmentPaused;
         tag["combatMode"]=(int)CombatMode;
         tag["enabled"]=Enabled; tag["paused"]=Paused; tag["name"]=CatName;
-        tag["pickup"]=Pickup; tag["combat"]=Combat; tag["torches"]=Torches; tag["bridges"]=Bridges; tag["ropes"]=Ropes;
+        tag["pickup"]=Pickup; tag["combat"]=Combat; tag["lighting"]=(byte)Lighting; tag["bridges"]=Bridges; tag["ropes"]=Ropes;
         tag["xp"]=Experience; tag["fur"]=Fur; tag["home"]=Home; tag["homeWorld"]=HomeWorld;
         tag["chestPermissions"]=Chests.Save();
     }
@@ -129,11 +139,12 @@ public sealed class CompanionPlayer : ModPlayer
         Enabled=tag.GetBool("enabled"); Paused=tag.GetBool("paused");
         CatName=tag.ContainsKey("name")?tag.GetString("name"):CompanionLife.L("DefaultName");
         Pickup=!tag.ContainsKey("pickup")||tag.GetBool("pickup"); Combat=!tag.ContainsKey("combat")||tag.GetBool("combat");
-        Torches=!tag.ContainsKey("torches")||tag.GetBool("torches"); Bridges=tag.GetBool("bridges"); Ropes=tag.GetBool("ropes");
+        Lighting=tag.ContainsKey("lighting")?Systems.CompanionLighting.Valid(tag.GetByte("lighting")):(!tag.ContainsKey("torches")||tag.GetBool("torches")?CompanionLightingMode.Automatic:CompanionLightingMode.Off); Bridges=tag.GetBool("bridges"); Ropes=tag.GetBool("ropes");
         Experience=tag.GetInt("xp"); Fur=tag.GetInt("fur"); Home=tag.Get<Vector2>("home"); HomeWorld=tag.GetString("homeWorld");
         Chests=new();Chests.Load(tag);
     }
     public override void OnEnterWorld() {
+        Stationed=false;
         CompanionNetwork.Enter(this);
         var config=ModContent.GetInstance<CompanionConfig>();
         config.Bridges=Bridges;config.Ropes=Ropes;config.Apply(this);
@@ -179,7 +190,7 @@ public sealed class CompanionPlayer : ModPlayer
             var companion=Cat?.ModProjectile as CompanionCat;
             Vitals.Tick(Cat?.velocity.X??0,Cat?.velocity.Y??0,
                 companion?.Weapons.Busy==true&&companion.Weapons.Actor.HeldItem.mana>0,
-                companion?.Animation.Motion==CatMotion.Rest,Main.expertMode,companion?.Weapons.Actor,CompanionFeeding.CanRecover(this,companion));
+                companion?.Animation.Motion==CatMotion.Rest,Main.expertMode,companion?.Weapons.Actor,CompanionFeeding.CanRecover(this,companion),Player);
             if(++maintenanceTick%30==0)CompanionCoins.Maintain(this);
         }
         if(PetCooldown>0) PetCooldown--;

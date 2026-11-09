@@ -555,3 +555,33 @@ WorkingGearThoriumRest: {
 	Line1: "Give me a moment to find my tune..."
 	Line2: "A quick breather, then back to the music."
 }
+
+OwnerHurtTrap: {
+	Line1: "Boss, watch your step, meow!"
+	Line2: "Which one of us stepped on that switch...?"
+	Line3: "Boss, I think the thing hitting us is part of the floor."
+}
+
+OwnerHurtTrapSeed: {
+	Line1: "Boss, even the floor wants a fight here!"
+	Line2: "These traps work harder than the monsters, meow..."
+	Line3: "Boss, can we check the floor before the next step?"
+}
+
+WelcomeRepeatedDeath: {
+	Line1: "Back already, boss...? Maybe take a breather, meow."
+	Line2: "Boss, I know the way home by heart now."
+	Line3: "I will stay close this time. You be careful too, boss."
+}
+
+WorkingLava: {
+	Line1: "I will get the ore, boss. Just leave us a path out of the lava!"
+	Line2: "Boss, this ore is hot on the paws!"
+	Line3: "A little longer down here and I will be well done, meow..."
+}
+
+BossRetry: {
+	Line1: "That one again, boss! Let us be careful this time."
+	Line2: "I remember that last attack, meow... Do you, boss?"
+	Line3: "One more try, boss. I am still with you."
+}

@@ -51,7 +51,7 @@ internal sealed class CompanionDirective {
         message=CompanionText.Message("CompanionDirective.CannotWork");
         if(CompanionNetwork.Client||!s.Enabled||s.Stowed||s.Paused||s.Player.dead||s.Vitals.Downed||s.Cat?.ModProjectile is not CompanionCat cat)return false;
         message=CompanionText.Message("CompanionDirective.TooFar");
-        if(!WorldGen.InWorld(cell.X,cell.Y,10)||Vector2.DistanceSquared(cell.ToWorldCoordinates(),s.Player.Center)>480*480)return false;
+        if(!CompanionStation.Contains(s,cell.ToWorldCoordinates())||!WorldGen.InWorld(cell.X,cell.Y,10)||Vector2.DistanceSquared(cell.ToWorldCoordinates(),s.Player.Center)>480*480)return false;
         if(Kind==kind&&Cell==cell){message=CompanionText.Message("CompanionDirective.AlreadyWorking");return true;}
         FieldAssist mining=null;
         var selected=new List<Item>();
@@ -88,7 +88,7 @@ internal sealed class CompanionDirective {
     internal bool Tick(CompanionPlayer s,CompanionCat cat,bool danger,out Vector2 goal) {
         goal=cat.Projectile.Center;if(!Active)return false;
         if(!s.Enabled||s.Stowed||s.Player.dead||s.Vitals.Downed){Clear(s);return false;}
-        if(Vector2.DistanceSquared(s.Player.Center,Cell.ToWorldCoordinates())>480*480){Clear(s);s.Report(CompanionText.Message("CompanionDirective.LeftWorksite"));return false;}
+        if(Vector2.DistanceSquared(s.WorkAnchor,Cell.ToWorldCoordinates())>480*480){Clear(s);s.Report(CompanionText.Message("CompanionDirective.LeftWorksite"));return false;}
         if(danger){if(Kind==DirectiveKind.Fish)cat.Fishing.Cancel();return false;}
         if(s.Paused)return false;
         string done=null;

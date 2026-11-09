@@ -13,7 +13,7 @@ namespace PalicoCompanion.Systems;
 [ExtendsFromMod("ImproveGame")]
 [JITWhenModsEnabled("ImproveGame")]
 public sealed class QualityCompanionBridge:ModSystem {
-    public override void Load(){CompanionCrossMod.InfiniteStack=Threshold;CompanionCrossMod.MinedOre=Chain;}
+    public override void Load(){CompanionCrossMod.PeacefulRespawnLimit+=PeacefulRespawn; CompanionCrossMod.InfiniteStack=Threshold;CompanionCrossMod.MinedOre=Chain;}
     ModPlayer placement;
     FieldInfo tileSpeed,wallSpeed;
     public override void PostSetupContent(){
@@ -26,7 +26,13 @@ public sealed class QualityCompanionBridge:ModSystem {
         if(tileSpeed!=null&&wallSpeed!=null)CompanionCrossMod.PrepareActor+=PreparePlacement;
     }
     void PreparePlacement(Player actor,Vector2 aim){var cache=actor.GetModPlayer(placement);tileSpeed.SetValue(cache,actor.tileSpeed);wallSpeed.SetValue(cache,actor.wallSpeed);}
-    public override void Unload(){CompanionCrossMod.InfiniteStack=null;CompanionCrossMod.MinedOre=null;CompanionCrossMod.PrepareActor-=PreparePlacement;placement=null;tileSpeed=wallSpeed=null;}
+    public override void Unload(){CompanionCrossMod.PeacefulRespawnLimit-=PeacefulRespawn; CompanionCrossMod.InfiniteStack=null;CompanionCrossMod.MinedOre=null;CompanionCrossMod.PrepareActor-=PreparePlacement;placement=null;tileSpeed=wallSpeed=null;}
+    static int PeacefulRespawn(int normal){
+        var config=ModContent.GetInstance<ImproveConfigs>();
+        int reduction=System.Math.Clamp(config.ResurrectionTimeShortened,0,100);
+        // Reuse QoT's configured reduction and its non-boss UpdateDead cap.
+        return reduction==0?normal:System.Math.Min(System.Math.Max(90,normal*(100-reduction)/100),900*(100-reduction)/100);
+    }
     static void Chain(Player owner,Point cell,int type){
         if(CompanionNetwork.Client||!ModContent.GetInstance<ImproveConfigs>().SimpleVeinMining||ModLoader.HasMod("BAM")||ModLoader.HasMod("OreExcavator")||
             !FieldAssist.AllowedOre(type)||!CompanionExclusions.CanChain(owner,type))return;

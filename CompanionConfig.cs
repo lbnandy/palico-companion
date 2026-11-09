@@ -26,6 +26,18 @@ public enum CompanionAttributeMode {
     [LabelKey("$Mods.PalicoCompanion.Equipment.Inherited")] Inherited,
     [LabelKey("$Mods.PalicoCompanion.Equipment.Independent")] Independent
 }
+[JsonConverter(typeof(StringEnumConverter))]
+public enum PickupFilterMode {
+    [LabelKey("$Mods.PalicoCompanion.PickupFilters.Blacklist")] Blacklist,
+    [LabelKey("$Mods.PalicoCompanion.PickupFilters.Whitelist")] Whitelist,
+    [LabelKey("$Mods.PalicoCompanion.PickupFilters.Coins")] Coins
+}
+[JsonConverter(typeof(StringEnumConverter))]
+public enum CompanionLightingMode {
+    [LabelKey("$Mods.PalicoCompanion.LightingChoices.Off")] Off,
+    [LabelKey("$Mods.PalicoCompanion.LightingChoices.Held")] Held,
+    [LabelKey("$Mods.PalicoCompanion.LightingChoices.Automatic")] Automatic
+}
 public sealed class CompanionConfig : ModConfig {
     public override ConfigScope Mode => ConfigScope.ClientSide;
     [Header("Companion")]
@@ -46,10 +58,19 @@ public sealed class CompanionConfig : ModConfig {
     [DefaultValue(true)] public bool CatchCritters = true;
     [DefaultValue(true)] public bool Fishing = true;
     public List<ItemDefinition> MiningBlacklist = new();
+    [DefaultValue(PickupFilterMode.Blacklist),Dropdown] public PickupFilterMode PickupFilter=PickupFilterMode.Blacklist;
     public List<ItemDefinition> PickupBlacklist = new();
+    public List<ItemDefinition> PickupWhitelist = new();
 
     [Header("Building")]
-    [DefaultValue(true)] public bool Torches = true;
+    [DefaultValue(CompanionLightingMode.Automatic),Dropdown] public CompanionLightingMode Lighting=CompanionLightingMode.Automatic;
+    // Read the former switch without writing it back or showing a second control.
+    bool? legacyTorches;
+    [JsonProperty("Torches",DefaultValueHandling=DefaultValueHandling.Ignore)] bool? LegacyTorches { set=>legacyTorches=value; }
+    [OnDeserialized] void RestoreLighting(StreamingContext context){
+        if(legacyTorches is bool enabled)Lighting=enabled?CompanionLightingMode.Automatic:CompanionLightingMode.Off;
+        legacyTorches=null;
+    }
     [DefaultValue(false)] public bool Bridges;
     [DefaultValue(false)] public bool Ropes;
 
@@ -97,7 +118,7 @@ public sealed class CompanionConfig : ModConfig {
     public void Apply(CompanionPlayer s) {
         Systems.CompanionExclusions.Apply(this,s);
         if(!Systems.CompanionNetwork.Client)Systems.CompanionEquipment.SetMode(s,AttributeMode==CompanionAttributeMode.Independent);
-        s.Enabled=Enabled&&!s.Stowed;s.Pickup=Pickup;s.Combat=Combat;s.Torches=Torches;s.Bridges=Bridges;s.Ropes=Ropes;s.AutoLogistics=AutoLogistics;Systems.CompanionNetwork.Configure(s);
+        s.Enabled=Enabled&&!s.Stowed;s.Pickup=Pickup;s.Combat=Combat;s.Lighting=Systems.CompanionLighting.Valid((byte)Lighting);s.Bridges=Bridges;s.Ropes=Ropes;s.AutoLogistics=AutoLogistics;Systems.CompanionNetwork.Configure(s);
     }
     bool savingDisplay;
     internal void SelectAttributeMode(CompanionAttributeMode mode) {

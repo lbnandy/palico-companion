@@ -25,7 +25,7 @@ internal sealed class CompanionTargeting {
         return t>0&&Vector2.DistanceSquared(npc.Center+npc.velocity*t,point)<48*48;
     }
     static bool InReach(Player owner,Vector2 cat,NPC npc,float range)=>npc is {active:true}&&(npc.CanBeChasedBy()||Destructible(npc))&&
-        Vector2.DistanceSquared(npc.Center,owner.Center)<range*range&&Vector2.DistanceSquared(npc.Center,cat)<range*range;
+        CompanionStation.Contains(owner.GetModPlayer<CompanionPlayer>(),npc.Center)&&Vector2.DistanceSquared(npc.Center,CompanionStation.Origin(owner))<range*range&&Vector2.DistanceSquared(npc.Center,cat)<range*range;
     internal static bool Valid(Player owner,Vector2 cat,NPC npc)=>Valid(owner,cat,npc,CompanionCombatReach.SearchRange);
     // Support skills share this validator; their visibility must not inherit
     // the primary weapon's ability to attack through terrain.
@@ -50,13 +50,13 @@ internal sealed class CompanionTargeting {
             if(retained&&InReach(owner,cat,current,CompanionCombatReach.TrackingRange)&&Main.GameUpdateCount-lastSeen<SightGrace){Obscured=true;return current;}
             return Remember(null);
         }
-        bool Intercept(NPC n)=>Incoming(n,owner.Center)||Incoming(n,cat);
+        bool Intercept(NPC n)=>Incoming(n,CompanionStation.Origin(owner))||Incoming(n,cat);
         // A target crossing the acquisition boundary remains engaged until
         // the wider release boundary. Identity includes NPC slot reuse.
         bool Eligible(NPC n)=>Reachable(n,retained&&n==current?CompanionCombatReach.TrackingRange:CompanionCombatReach.SearchRange)&&
             (!working||Intercept(n)||CompanionThreat.InterruptsWork(n,owner,cat));
-        bool Protect(NPC n)=>Vector2.DistanceSquared(n.Center,owner.Center)<160*160&&CompanionCombatReach.Clear(owner.Center,n.Center);
-        float Distance(NPC n)=>Vector2.Distance(n.Center,Protect(n)?owner.Center:cat);
+        bool Protect(NPC n)=>Vector2.DistanceSquared(n.Center,CompanionStation.Origin(owner))<160*160&&CompanionCombatReach.Clear(CompanionStation.Origin(owner),n.Center);
+        float Distance(NPC n)=>Vector2.Distance(n.Center,Protect(n)?CompanionStation.Origin(owner):cat);
         NPC best=null;
         foreach(var n in Main.npc)if(Eligible(n)&&
             (best==null||Intercept(n)&&!Intercept(best)||Intercept(n)==Intercept(best)&&(Protect(n)&&!Protect(best)||Protect(n)==Protect(best)&&Distance(n)<Distance(best))))best=n;

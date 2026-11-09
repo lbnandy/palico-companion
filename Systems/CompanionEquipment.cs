@@ -100,18 +100,28 @@ internal sealed class CompanionEquipment {
         }
         potions.Update(actor,state.Player,CompanionBalanceConfig.Current.SharePotionBuffs);
         for(int i=0;i<actor.armor.Length;i++)actor.armor[i]=Empty;
+        Array.Clear(actor.hideVisibleAccessory);
+        if(independent)for(int i=AccessoryStart;i<AccessoryStart+AccessoryCount;i++)actor.hideVisibleAccessory[ArmorIndex(i)]=state.Loadouts.Hidden(i);
         if(!independent){
             Preview=null;actor.head=actor.body=actor.legs=-1;actor.beetleDefense=actor.beetleOffense=actor.setSolar=false;
-            // Evaluate shared potion mechanics before replacing inherited stat
-            // groups. Native passive hooks run once, without the owner's gear.
-            using(new CompanionNativeUse.Scope(use)){
-                actor.UpdateBuffs(actor.whoAmI);
-                PlayerLoader.PostUpdateEquips(actor);
-            }
             actor.statLifeMax=actor.statLifeMax2=state.Vitals.MaxHealth;
             actor.statManaMax=actor.statManaMax2=state.Vitals.MaxMana;
             actor.statDefense=Player.DefenseStat.Default;actor.statDefense+=state.Vitals.EffectiveDefense;
             actor.endurance=state.Vitals.EffectiveEndurance;
+            actor.maxMinions=Math.Max(0,state.Player.maxMinions);actor.maxTurrets=Math.Max(0,state.Player.maxTurrets);
+            using(new CompanionNativeUse.Scope(use)){
+                CompanionDebuffs.Update(use);
+                CompanionCombatInheritance.Apply(actor,state.Player);
+                use.Debuffs.ApplyCombat(actor);
+                // Native post-buff/equipment status hooks must see the final
+                // inherited base, rather than have their penalties overwritten.
+                PlayerLoader.PostUpdateEquips(actor);
+                CompanionCrossMod.UpdateInheritedStatus?.Invoke(use);
+            }
+            Minions=Math.Max(0,actor.maxMinions);Sentries=Math.Max(0,actor.maxTurrets);
+            CompanionDebuffs.RemoveExpiredOrImmune(actor);
+            CompanionDebuffs.ApplyDefense(actor);
+            use.EquipmentRegeneration();
             return;
         }
         for(int i=1;i<state.Gear.Length;i++)if(IsSlot(i)&&CompanionEquipmentSlots.Unlocked(state,i))actor.armor[ArmorIndex(i)]=state.Gear[i];
@@ -122,7 +132,7 @@ internal sealed class CompanionEquipment {
         actor.maxMinions=actor.maxTurrets=1;
         // Buffs precede equipment, but retain native remote-owner checks.
         // Unlike equipment flags, aura damage must not run on visual replicas.
-        using(new CompanionNativeUse.Scope(use,trackHealing:false))actor.UpdateBuffs(actor.whoAmI);
+        using(new CompanionNativeUse.Scope(use,trackHealing:false))CompanionDebuffs.Update(use);
         // Composite items need local-owner checks to reconstruct their flags
         // on replicas. Limit that override to the item/set calculation.
         using(new CompanionNativeUse.Scope(use,trackHealing:false,equipmentOwner:true)){
@@ -148,11 +158,13 @@ internal sealed class CompanionEquipment {
             HealthBonus=actor.statLifeMax2-actor.statLifeMax;
             ManaBonus=actor.statManaMax2-actor.statManaMax;
             Regen=Math.Max(0,actor.lifeRegen);
-            Minions=Math.Max(1,actor.maxMinions);Sentries=Math.Max(1,actor.maxTurrets);
+            Minions=Math.Max(0,actor.maxMinions);Sentries=Math.Max(0,actor.maxTurrets);
             Preview??=new Player();
             CompanionCombatInheritance.ResetModifiers(Preview);
             CompanionCombatInheritance.CopyEquipment(Preview,actor);
         }
+        CompanionDebuffs.ApplyDefense(actor);
+        Defense=Math.Max(0,(int)actor.statDefense);
         state.Vitals.Sync(state.Player,state.Gear);
         if(!CompanionNetwork.Client&&manaChange!=0)
             state.Vitals.Mana=Math.Clamp(state.Vitals.Mana+manaChange,0,state.Vitals.MaxMana);
@@ -163,6 +175,7 @@ internal sealed class CompanionEquipment {
         }
         actor.statLife=state.Vitals.Health;actor.statLifeMax=actor.statLifeMax2=state.Vitals.MaxHealth;
         actor.statMana=state.Vitals.Mana;actor.statManaMax=actor.statManaMax2=state.Vitals.MaxMana;
+        CompanionDebuffs.RemoveExpiredOrImmune(actor);
         use.EquipmentRegeneration();
     }
 }

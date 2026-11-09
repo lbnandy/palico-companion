@@ -8,6 +8,14 @@ namespace PalicoCompanion.Systems;
 
 public sealed class CompanionCrossMod:ModSystem {
     internal static Action<Player,Vector2> PrepareActor;
+    // Optional non-combat respawn limits, queried without running death hooks.
+    internal static Func<int,int> PeacefulRespawnLimit;
+    internal static int PeacefulRespawnTicks(int normal){
+        int limit=normal;
+        if(PeacefulRespawnLimit!=null)foreach(Func<int,int> cap in PeacefulRespawnLimit.GetInvocationList())
+            limit=Math.Min(limit,Math.Clamp(cap(normal),1,normal));
+        return limit;
+    }
     internal static Func<Item,bool> SupportTool,SafeThrow;
     internal static bool AllowsThrow(Item item){
         if(SafeThrow==null)return false;
@@ -18,6 +26,7 @@ public sealed class CompanionCrossMod:ModSystem {
     internal static Action<CompanionNativeUse,CompanionStats> CaptureResources;
     internal static Func<Item,bool> UsesInspiration;
     internal static Action<CompanionNativeUse> UpdateEquipment;
+    internal static Action<CompanionNativeUse> UpdateInheritedStatus;
     internal static Action<Player,Player,float> InheritStats;
     internal static Action<CompanionNativeUse> BeforeReset;
     internal static Func<CompanionNativeUse,Player> SupportTarget;
@@ -61,5 +70,5 @@ public sealed class CompanionCrossMod:ModSystem {
         var result=recipes.Call("AddItemCategory",Language.ActiveCulture.Name=="zh-Hans"?"呆猫装备":"Palico equipment","",icon,(Predicate<Item>)(item=>item.ModItem is TrainingItem));
         RecipeCategoryRegistered=result is string status&&status=="Success";
     }
-    public override void Unload(){PrepareActor=null;CaptureResources=null;UsesInspiration=null;SupportTool=null;SafeThrow=null;UpdateResources=null;UpdateEquipment=null;InheritStats=null;BeforeReset=null;SupportTarget=null;ResourceReady=null;PlanUse=null;MaintainHeldWeapon=null;WeaponReach=null;ProjectileFlight=null;WeaponEffect=null;Storage=null;UsesPerMaterial=null;ChargeComplete.Clear();InfiniteStack=null;MinedOre=null;RecipeCategoryRegistered=false;CompanionRecovery.Unload();}
+    public override void Unload(){PeacefulRespawnLimit=null;PrepareActor=null;CaptureResources=null;UsesInspiration=null;SupportTool=null;SafeThrow=null;UpdateResources=null;UpdateEquipment=null;UpdateInheritedStatus=null;InheritStats=null;BeforeReset=null;SupportTarget=null;ResourceReady=null;PlanUse=null;MaintainHeldWeapon=null;WeaponReach=null;ProjectileFlight=null;WeaponEffect=null;Storage=null;UsesPerMaterial=null;ChargeComplete.Clear();InfiniteStack=null;MinedOre=null;RecipeCategoryRegistered=false;CompanionRecovery.Unload();}
 }

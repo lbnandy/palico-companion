@@ -12,17 +12,29 @@ namespace PalicoCompanion.Systems;
 // Resolve tile exclusions from placeable items, so ore/gem mod IDs need no strings.
 internal static class CompanionExclusions {
     internal static void Apply(CompanionConfig config,CompanionPlayer state){
-        state.ExcludedMining.Clear();state.ExcludedPickup.Clear();
+        state.ExcludedMining.Clear();state.ExcludedPickup.Clear();state.AllowedPickup.Clear();
+        state.PickupFilter=Enum.IsDefined(config.PickupFilter)?config.PickupFilter:PickupFilterMode.Blacklist;
         foreach(var item in (config.MiningBlacklist??new()).Take(256))if(item.Type>0)state.ExcludedMining.Add(item.Type);
         foreach(var item in (config.PickupBlacklist??new()).Take(256))if(item.Type>0)state.ExcludedPickup.Add(item.Type);
+        foreach(var item in (config.PickupWhitelist??new()).Take(256))if(item.Type>0)state.AllowedPickup.Add(item.Type);
     }
+    // Shared by ordinary pickups and carried recovery drops, not fishing/chests.
+    internal static bool Pickup(Item item,CompanionPlayer state)=>state.PickupFilter switch {
+        PickupFilterMode.Whitelist=>state.AllowedPickup.Contains(item.type),
+        PickupFilterMode.Coins=>item.type is ItemID.CopperCoin or ItemID.SilverCoin or ItemID.GoldCoin or ItemID.PlatinumCoin,
+        _=>!state.ExcludedPickup.Contains(item.type)
+    };
     internal static void Write(BinaryWriter writer,CompanionPlayer state){
-        foreach(var set in new[]{state.ExcludedMining,state.ExcludedPickup}){
+        writer.Write((byte)state.PickupFilter);
+        foreach(var set in new[]{state.ExcludedMining,state.ExcludedPickup,state.AllowedPickup}){
             writer.Write((ushort)set.Count);foreach(int type in set.OrderBy(x=>x))writer.Write(type);
         }
     }
     internal static void Read(BinaryReader reader,CompanionPlayer state){
-        foreach(var set in new[]{state.ExcludedMining,state.ExcludedPickup}){
+        var mode=(PickupFilterMode)reader.ReadByte();
+        if(!Enum.IsDefined(mode))throw new InvalidDataException("Invalid pickup filter");
+        state.PickupFilter=mode;
+        foreach(var set in new[]{state.ExcludedMining,state.ExcludedPickup,state.AllowedPickup}){
             int count=reader.ReadUInt16();if(count>256)throw new InvalidDataException("Too many companion exclusions");
             set.Clear();for(int n=0;n<count;n++){int type=reader.ReadInt32();if(type>=0)set.Add(type);}
         }

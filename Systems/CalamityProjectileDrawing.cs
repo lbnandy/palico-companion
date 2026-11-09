@@ -20,16 +20,17 @@ namespace PalicoCompanion.Systems;
 [ExtendsFromMod("CalamityMod")]
 [JITWhenModsEnabled("CalamityMod")]
 public sealed class CalamityProjectileDrawing:ModSystem {
-    ILHook primitives;
+    ILHook primitives, queuedDispatch;
     Hook queuedDrawers;
     static readonly Dictionary<Type,FieldInfo[]> capturedProjectiles=new();
     delegate void Queue(Action<Matrix> draw,GeneralDrawLayer layer,BlendState blend);
     public override void Load(){
         if(Main.dedServ)return;
         primitives=new ILHook(typeof(PrimitivePixelationSystem).GetMethod("DrawPrimsToRenderTarget",BindingFlags.NonPublic|BindingFlags.Static)!,ScopePrimitives);
+        queuedDispatch=new ILHook(typeof(PixelationManager).GetMethod("DrawCollectionsToTarget",BindingFlags.NonPublic|BindingFlags.Static)!,ScopeQueuedDraws);
         queuedDrawers=new Hook(typeof(PixelationManager).GetMethod(nameof(PixelationManager.AddPixelatedDrawer))!,Capture);
     }
-    public override void Unload(){primitives?.Dispose();queuedDrawers?.Dispose();primitives=null;queuedDrawers=null;capturedProjectiles.Clear();}
+    public override void Unload(){primitives?.Dispose();queuedDispatch?.Dispose();queuedDrawers?.Dispose();primitives=null;queuedDispatch=null;queuedDrawers=null;capturedProjectiles.Clear();}
     static void ScopePrimitives(ILContext il){
         var cursor=new ILCursor(il);
         if(!cursor.TryGotoNext(i=>i.MatchCallvirt<IPixelatedPrimitiveRenderer>(nameof(IPixelatedPrimitiveRenderer.RenderPixelatedPrimitives))))
@@ -49,24 +50,54 @@ public sealed class CalamityProjectileDrawing:ModSystem {
         // In that case the callback's projectile, not the ambient execution
         // context, identifies its owner. Only inspect typed captures in compiler
         // closures; never search arbitrary object graphs or guess from owner 255.
-        var projectile=CapturedProjectile(draw.Target);
+        var projectile=CapturedProjectile(draw.Target,out bool stale);
+        if(stale)return;
         var use=CompanionNativeUse.Current;
         if(projectile!=null&&!CompanionNativeUse.DrawContext(projectile,out use))return;
         if(use==null){orig(draw,layer,blend);return;}
-        var renderer=projectile?.ModProjectile;
-        // The callback often closes over a projectile, but executes next frame,
-        // after its original PreDraw scope has restored the native player slot.
-        orig(matrix=>{
+        orig(new QueuedDraw(draw,use,projectile).Invoke,layer,blend);
+    }
+    // Guard execution as well as registration: a native/third-party drawer may
+    // reach the collection without passing our registration hook. Never infer
+    // ownership from a vacant player slot; use the captured projectile tag.
+    static void ScopeQueuedDraws(ILContext il){
+        var cursor=new ILCursor(il);
+        if(!cursor.TryGotoNext(i=>i.MatchCallvirt<Action<Matrix>>(nameof(Action<Matrix>.Invoke))))
+            throw new InvalidOperationException("Calamity queued draw dispatch was not found");
+        cursor.Remove();
+        cursor.EmitDelegate<Action<Action<Matrix>,Matrix>>(DrawQueued);
+    }
+    static void DrawQueued(Action<Matrix> draw,Matrix matrix){
+        if(draw.Target is QueuedDraw){draw(matrix);return;}
+        var projectile=CapturedProjectile(draw.Target,out bool stale);
+        if(stale)return;
+        if(projectile==null){draw(matrix);return;}
+        if(!projectile.active)return;
+        if(!CompanionNativeUse.DrawContext(projectile,out var use))return;
+        if(use==null){draw(matrix);return;}
+        using(new CompanionNativeUse.ReplicaDrawScope(use))
+        using(new CompanionNativeUse.Scope(use,trackHealing:false))draw(matrix);
+    }
+    sealed class QueuedDraw {
+        readonly Action<Matrix> draw;
+        readonly CompanionNativeUse use;
+        readonly Projectile projectile;
+        readonly ModProjectile renderer;
+        internal QueuedDraw(Action<Matrix> draw,CompanionNativeUse use,Projectile projectile){
+            this.draw=draw;this.use=use;this.projectile=projectile;renderer=projectile?.ModProjectile;
+        }
+        internal void Invoke(Matrix matrix){
             if(!use.Present||!use.EnsureActorSlot())return;
             // A queued draw can outlive the projectile or its slot can be reused.
             if(projectile!=null&&(!ReferenceEquals(projectile.ModProjectile,renderer)||
                 !CompanionNativeUse.DrawContext(projectile,out var live)||live!=use))return;
             using(new CompanionNativeUse.ReplicaDrawScope(use))
             using(new CompanionNativeUse.Scope(use,trackHealing:false))draw(matrix);
-        },layer,blend);
+        }
     }
-    static Projectile CapturedProjectile(object target){
-        if(target is ModProjectile renderer)return renderer.Projectile;
+    static Projectile CapturedProjectile(object target,out bool stale){
+        stale=false;
+        if(target is ModProjectile renderer){stale=!ReferenceEquals(renderer.Projectile.ModProjectile,renderer);return renderer.Projectile;}
         if(target is Projectile projectile)return projectile;
         if(target==null)return null;
         var type=target.GetType();
@@ -82,6 +113,7 @@ public sealed class CalamityProjectileDrawing:ModSystem {
             var value=field.GetValue(target);
             var candidate=value is ModProjectile shot?shot.Projectile:value as Projectile;
             if(candidate==null)continue;
+            if(value is ModProjectile captured&&!ReferenceEquals(candidate.ModProjectile,captured))stale=true;
             if(result!=null&&!ReferenceEquals(result,candidate))return null;
             result=candidate;
         }

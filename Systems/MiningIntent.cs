@@ -23,6 +23,7 @@ public sealed class MiningIntent
     public void Tick(Player p,CompanionPlayer s)
     {
         if(s.Directive.Active)return;
+        if(!CompanionStation.Contains(s,p.Center)){if(s.Mining.Active&&!s.Mining.OwnerRequested)s.Mining.Cancel();Clear();return;}
         if(s.EnvironmentPaused){if(s.Mining.Active&&!s.Mining.OwnerRequested)s.Mining.Cancel();Clear();return;}
         clock++;if(preferenceTicks>0)preferenceTicks--;
         if(Main.netMode==NetmodeID.MultiplayerClient||!(CompanionNetwork.Server?s.NetMining:ModContent.GetInstance<CompanionConfig>().MiningAssist)||!s.Enabled||s.Paused||s.Vitals.Downed||p.dead) {
@@ -43,7 +44,7 @@ public sealed class MiningIntent
         for(int x=center.X-range.X-1;x<=center.X+range.X+1;x++)
         for(int y=center.Y-range.Y-2;y<=center.Y+range.Y+2;y++) {
             var cell=new Point(x,y);
-            if(!WorldGen.InWorld(x,y,10)||deferred.ContainsKey(cell)||!MiningTools.InRange(p,tool,cell,true))continue;
+            if(!CompanionStation.Contains(s,cell.ToWorldCoordinates())||!WorldGen.InWorld(x,y,10)||deferred.ContainsKey(cell)||!MiningTools.InRange(p,tool,cell,true))continue;
             var tile=Main.tile[cell];
             if(!tile.HasTile||!CompanionExclusions.Mine(p,cell)||!FieldAssist.AllowedOre(tile.TileType)||!CompanionWorkOpportunity.RemainsNearby(p,cell.ToWorldCoordinates(),System.Math.Max(range.X,range.Y)*16))continue;
             if(!VanillaMiningSelector.CanDamage(p,cell,tool))continue;

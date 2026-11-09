@@ -1,5 +1,31 @@
 # Changelog
 
+## 1.2.4 — 2026-11-09
+
+### 简体中文
+
+- 新增驻守／跟随切换，呆猫可留在驻守点附近战斗和工作；召回或收起后恢复跟随。
+- 拾取设置新增黑名单、白名单和仅钱币模式。
+- 照明可选择关闭、仅手持火把或自动放置火把。
+- 饰品栏新增原版可见性开关，随配装保存，并沿用饰品自身的隐藏规则。
+- 改善战斗中的跟随和闪避，减少为追随主人而放弃安全位置的情况。
+- 补齐呆猫自身负面效果的处理，包括部分法狗战斗环境施加的减益。
+- 在安全环境下适配灾厄、更好的体验的复活加速，战斗中仍保留恢复等待。
+- 新增部分陷阱、岩浆、反复倒地和再次挑战 Boss 时的情景台词。
+- 进一步修复灾厄弹幕延后绘制特效时可能引发的崩溃。
+
+### English
+
+- Added Stay / Follow commands. Your Palico can fight and work near its assigned position; recalling or stowing it restores Follow mode.
+- Added pickup blacklist, whitelist, and coins-only modes.
+- Added lighting choices: off, hold torches only, or place torches automatically.
+- Added native accessory visibility toggles, saved per loadout and respecting each accessory's own hide-visual behavior.
+- Improved combat following and evasion to reduce leaving safe positions just to catch up with the owner.
+- Completed handling of the Palico's own debuffs, including some Fargo combat-environment penalties.
+- Added support for faster recovery from Calamity and Quality of Terraria in safe conditions, while retaining the recovery wait during combat.
+- Added situational dialogue for traps, lava, repeated knockouts, and Boss rematches.
+- Further fixed crashes caused by deferred drawing of Calamity projectile effects.
+
 ## 1.2.3 — 2026-11-09
 
 ### 简体中文

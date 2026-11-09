@@ -85,7 +85,7 @@ public sealed class CompanionFishing {
                 variant:item.questItem?"Quest":ItemID.Sets.IsFishingCrate[type]?"Crate":null);
         }
         if(!Available||s.Digging.Active||s.Mining.Active||s.Order.Active||s.Construction.Active||s.Storage.Active||s.Trees.Active||s.Garden.Active||
-            Vector2.DistanceSquared(p.Center,Active?Aim:cat.Center)>640*640||CompanionThreat.WorkDanger(p,cat.Center))Cancel();
+            Vector2.DistanceSquared(CompanionStation.Origin(p),Active?Aim:cat.Center)>640*640||CompanionThreat.WorkDanger(p,cat.Center))Cancel();
     }
     public bool Tick(Player p,CompanionPlayer s,Projectile cat){
         if(gesture>0)gesture--;
@@ -97,10 +97,10 @@ public sealed class CompanionFishing {
         }
         if(!Active){
             if(recast>0){recast--;return false;}
-            if(idle==0||Vector2.DistanceSquared(visitAnchor,p.Center)>128*128){visitAnchor=p.Center;idle=0;}
+            if(idle==0||Vector2.DistanceSquared(visitAnchor,CompanionStation.Origin(p))>128*128){visitAnchor=CompanionStation.Origin(p);idle=0;}
             idle++;bool ownerFishing=OwnerFishing(p);
             if(!RequestedWater.HasValue&&!ownerFishing&&idle<120)return false;
-            if(Approaching&&Vector2.DistanceSquared(MoveTarget,p.Center)>480*480)Approaching=false;
+            if(Approaching&&Vector2.DistanceSquared(MoveTarget,CompanionStation.Origin(p))>480*480)Approaching=false;
             if(idle%(ownerFishing?15:30)!=0){
                 // A completed reel leaves a brief gap before the next cast.
                 // Keep the shore position during that gap while the owner fishes.
@@ -162,7 +162,7 @@ public sealed class CompanionFishing {
             var t=Main.tile[x,y];var above=Main.tile[x,y-1];
             if(WorldGen.SolidTile(x,y)||t.LiquidType==LiquidID.Shimmer||t.LiquidAmount==0||WorldGen.SolidTile(x,y-1)||above.LiquidAmount>0)continue;
             Vector2 at=new(x*16+8,y*16+16-t.LiquidAmount/255f*16+2);
-            if(Vector2.DistanceSquared(at,p.Center)>320*320||Vector2.DistanceSquared(at,from)>320*320||!Reachability.Clear(from,at-new Vector2(0,8)))continue;
+            if(Vector2.DistanceSquared(at,CompanionStation.Origin(p))>320*320||Vector2.DistanceSquared(at,from)>320*320||!Reachability.Clear(from,at-new Vector2(0,8)))continue;
             float d=Vector2.DistanceSquared(at,from);if(d>=best)continue;
             Item candidateRod=Rod,candidateBait=bait;
             if(t.LiquidType==LiquidID.Lava&&!LiquidAllowed(t.LiquidType,candidateRod,candidateBait,p)){
@@ -176,11 +176,11 @@ public sealed class CompanionFishing {
         if(best==float.MaxValue)return false;Rod=bestRod.Clone();bait=bestBait;return true;
     }
     bool FindShore(Projectile cat,Player p){
-        if(!FindPond(p.Center,p,out var water))return false;
+        if(!FindPond(CompanionStation.Origin(p),p,out var water))return false;
         var tile=water.ToTileCoordinates();float best=float.MaxValue;Vector2 goal=default;
         for(int dx=-18;dx<=18;dx+=3)for(int dy=-8;dy<=0;dy+=2){
             Vector2 candidate=new((tile.X+dx)*16+8,(tile.Y+dy)*16-CompanionNavigation.Height/2f);
-            if(!CompanionNavigation.TryStand(candidate,out candidate)||Vector2.DistanceSquared(candidate,p.Center)>480*480||Vector2.DistanceSquared(candidate,water)>288*288||!Reachability.Clear(candidate-new Vector2(0,6),water-new Vector2(0,8)))continue;
+            if(!CompanionStation.Contains(State,candidate)||!CompanionNavigation.TryStand(candidate,out candidate)||Vector2.DistanceSquared(candidate,CompanionStation.Origin(p))>480*480||Vector2.DistanceSquared(candidate,water)>288*288||!Reachability.Clear(candidate-new Vector2(0,6),water-new Vector2(0,8)))continue;
             float distance=Vector2.DistanceSquared(candidate,cat.Center);if(distance<best){best=distance;goal=candidate;}
         }
         if(best==float.MaxValue)return false;MoveTarget=goal;return true;

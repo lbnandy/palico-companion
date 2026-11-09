@@ -20,7 +20,7 @@ public sealed class CompanionConfigLayout : ModSystem {
         ["Enabled"]="head",["Combat"]="GoldBroadsword",["AutoHeal"]="HealingPotion",
         ["DiggingAssist"]="GoldPickaxe",["MiningAssist"]="IronOre",["Forestry"]="GoldAxe",["Gardening"]="StaffofRegrowth",
         ["Pickup"]="TreasureMagnet",["CatchCritters"]="BugNet",["Fishing"]="WoodFishingPole",["MiningBlacklist"]="StoneBlock",["PickupBlacklist"]="TrashCan",
-        ["Torches"]="Torch",["Bridges"]="WoodPlatform",["Ropes"]="Rope",
+        ["Lighting"]="Torch",["Bridges"]="WoodPlatform",["Ropes"]="Rope",
         ["DeliverRecoveryDrops"]="Heart",["ShareNewPickups"]="TreasureMagnet",["CoinDestination"]="GoldCoin",
         ["AutoLogistics"]="Chest",["StockTorches"]="Torch",["StockGlowsticks"]="Glowstick",["StockPlatforms"]="WoodPlatform",["StockRopes"]="Rope",
         ["StockHealing"]="HealingPotion",["StockMana"]="ManaPotion",["StockAmmo"]="WoodenArrow",["StockAcorns"]="Acorn",["StockBait"]="Worm",
@@ -86,6 +86,25 @@ public sealed class CompanionConfigLayout : ModSystem {
             display.SetValue(control, (Func<string>)(() => tag + original()));
         }
         if(config is CompanionBalanceConfig) BindInheritanceVisibility(self,member);
+        if(config is CompanionConfig) BindPickupVisibility(self,member);
+    }
+
+    void BindPickupVisibility(UIState editor,PropertyInfo member){
+        var items=Get<List<Tuple<UIElement,UIElement>>>(editor,"mainConfigItems");var all=items.ToArray();
+        var pending=(CompanionConfig)Get<ModConfig>(editor,"pendingConfig");
+        PickupFilterMode? previous=null;
+        void Refresh(UIElement _){
+            if(previous==pending.PickupFilter)return;
+            previous=pending.PickupFilter;
+            items.Clear();items.AddRange(all.Where(pair=>pair.Item2 is not ConfigElement control ||
+                ((PropertyFieldWrapper)member.GetValue(control)).Name switch {
+                    nameof(CompanionConfig.PickupBlacklist)=>pending.PickupFilter==PickupFilterMode.Blacklist,
+                    nameof(CompanionConfig.PickupWhitelist)=>pending.PickupFilter==PickupFilterMode.Whitelist,
+                    _=>true
+                }));
+            fields["updateNeeded"].SetValue(editor,true);
+        }
+        editor.OnUpdate+=Refresh;restore.Add(()=>editor.OnUpdate-=Refresh);Refresh(editor);
     }
 
     void BindInheritanceVisibility(UIState editor,PropertyInfo member) {

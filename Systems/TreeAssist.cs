@@ -38,12 +38,13 @@ public sealed class TreeAssist
     }
     public bool Assist(Player p,Point at,bool manual=false) {
         var s=p.GetModPlayer<CompanionPlayer>();
+        if(!CompanionStation.Contains(s,at.ToWorldCoordinates()))return false;
         if(!manual&&(s.Directive.Active||s.EnvironmentPaused)||Main.netMode==NetmodeID.MultiplayerClient||!s.Enabled||s.Paused||s.Vitals.Downed||
             !manual&&!(CompanionNetwork.Server?s.NetForestry:ModContent.GetInstance<CompanionConfig>().Forestry)||!Mature(at,out _))return false;
         if(requested&&Active&&root==at)return true; // Repeated axe hits must not reset the helper's swing.
         Cancel();root=at;requested=true;requestedManual=manual;requestedType=Main.tile[root].TileType;Active=true;cooldown=0;axe=BestAxe(p);
         s.Construction.Cancel();s.Mining.Cancel();s.Digging.Clear(s);s.Garden.Cancel();s.Storage.Cancel();s.Order.Cancel();
-        MoveTarget=Target;Stand(s.Cat?.Center??p.Center,out var stand);if(stand!=default)MoveTarget=stand;
+        MoveTarget=Target;Stand(s.Cat?.Center??CompanionStation.Origin(p),out var stand);if(stand!=default)MoveTarget=stand;
         Status=CompanionText.Message("TreeAssist.Helping");return true;
     }
     public void FailRoute(){Cancel();cooldown=600;Status=CompanionText.Message("TreeAssist.Blocked");}
@@ -94,18 +95,18 @@ public sealed class TreeAssist
         if(!Active) {
             if(!CompanionWorkOpportunity.KeepingUp(p,cat)){Status="";return false;}
             cooldown=60;Status="";axe=BestAxe(p);
-            Point center=p.Center.ToTileCoordinates();float best=320*320;
+            Point center=CompanionStation.Origin(p).ToTileCoordinates();float best=320*320;
             for(int x=center.X-20;x<=center.X+20;x++)for(int y=center.Y-7;y<=center.Y+8;y++) {
                 Point cell=new(x,y);
                 if(!Mature(cell,out int top)||TreeSpecies.Decorative(Main.tile[cell].TileType)||Protected(p,cell,top)||!CompanionWorkOpportunity.RemainsNearby(p,cell.ToWorldCoordinates(),320))continue;
-                float d=Vector2.DistanceSquared(p.Center,cell.ToWorldCoordinates());if(d>=best)continue;
+                float d=Vector2.DistanceSquared(CompanionStation.Origin(p),cell.ToWorldCoordinates());if(d>=best)continue;
                 Point previous=root;root=cell;if(!Stand(cat.Center,out var stand)){root=previous;continue;}best=d;MoveTarget=stand;Active=true;
             }
             if(!Active)return false;cooldown=elapsed=cadence=0;
         }
         var current=BestAxe(p);
         if(!ReferenceEquals(axe,current)){axe=current;cadence=SwingTicks=0;}
-        if(++elapsed>CompanionWorkTiming.Timeout(600)||axe==null||Vector2.DistanceSquared(p.Center,Target)>320*320||
+        if(++elapsed>CompanionWorkTiming.Timeout(600)||axe==null||Vector2.DistanceSquared(CompanionStation.Origin(p),Target)>320*320||
             !Mature(root,out int treeTopY)||(!requested&&Protected(p,root,treeTopY))) {Cancel();return false;}
         if(Vector2.DistanceSquared(cat.Center,Target)>56*56||!Reachability.Clear(cat.Center,Target)) {
             cadence=0;if(elapsed%15==0&&Stand(cat.Center,out var stand))MoveTarget=stand;
@@ -136,7 +137,7 @@ public sealed class TreeAssist
     }
     bool TryReplant(Player p,CompanionPlayer s,Projectile cat){
         Active=false;
-        if(Vector2.DistanceSquared(p.Center,Target)>320*320){replantTicks=0;return false;}
+        if(Vector2.DistanceSquared(CompanionStation.Origin(p),Target)>320*320){replantTicks=0;return false;}
         var seed=TreeSpecies.FindSeed(p,s,replantTrunk);
         if(seed!=null&&Vector2.DistanceSquared(cat.Center,Target)<=56*56&&Reachability.Clear(cat.Center,Target)){
             if(++replantWork<CompanionWorkTiming.ExtraDelay(CompanionActionVisual.Duration))return true;

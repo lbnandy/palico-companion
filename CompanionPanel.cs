@@ -257,10 +257,14 @@ public sealed class CompanionPanel : ModSystem
             using var navigation=CompanionGamepad.Slot(s,items,i,new Rectangle(bx,by,SlotSize,SlotSize));
             byte group=CompanionInventoryOperations.Group(s,items);
             bool canFavorite=CompanionInventoryOperations.CanFavorite(group,i);
+            bool visibility=ReferenceEquals(items,s.Gear)&&i>=CompanionEquipment.AccessoryStart&&i<CompanionEquipment.AccessoryStart+CompanionEquipment.AccessoryCount&&CompanionEquipmentSlots.Unlocked(s,i);
+            var eye=s.Loadouts.Hidden(i)?TextureAssets.InventoryTickOff.Value:TextureAssets.InventoryTickOn.Value;
+            var eyeBounds=visibility?new Rectangle(bx+SlotSize-eye.Width+2,by-2,eye.Width,eye.Height):Rectangle.Empty;
+            bool eyeHover=visibility&&eyeBounds.Contains(mouse);
             float oldScale=Main.inventoryScale;
             try {
                 Main.inventoryScale=SlotScale;
-                if(new Rectangle(bx,by,SlotSize,SlotSize).Contains(mouse)) {
+                if(!eyeHover&&new Rectangle(bx,by,SlotSize,SlotSize).Contains(mouse)) {
                     Main.LocalPlayer.mouseInterface=true;
                     // Vanilla returns mouseItem to the player each tick when inventory is closed.
                     // Open it before moving a slot item so the cursor can carry it between panels.
@@ -307,6 +311,15 @@ public sealed class CompanionPanel : ModSystem
                 else if(equipment&&!armor&&!dye&&!training&&(i==0||i==CompanionWeapons.SummonSlot)&&items[i].IsAir)
                     DrawEmptyIcon(sb,i==0?0:1,new Vector2(bx,by));
             } finally {Main.inventoryScale=oldScale;}
+            if(visibility){
+                CompanionGamepad.Add("accessory-visibility-"+i,eyeBounds);
+                sb.Draw(eye,eyeBounds,Color.White*.7f);
+                if(eyeHover){
+                    Main.LocalPlayer.mouseInterface=true;Main.HoverItem=new Item();
+                    Main.instance.MouseText(Lang.inter[s.Loadouts.Hidden(i)?60:59].Value);
+                    if(clicked)CompanionControl.Request(s,CompanionControlOp.AccessoryVisibility,i,new Point(s.Loadouts.Current,s.Loadouts.Hidden(i)?0:1));
+                }
+            }
         }
         if(tab==0) {
             int top=y+140+BackpackHeaderSpacing;
@@ -399,10 +412,11 @@ public sealed class CompanionPanel : ModSystem
                 if(new Rectangle(x+16,footer,width-32,43).Contains(mouse))Main.instance.MouseText(status);
                 footer+=52;
             }
-            int footerWidth=(width-52)/3;
+            int footerWidth=(width-62)/4;
             Button("Pet",L("Pet"),x+16,footer,footerWidth,s.Pet,false,s.PetCooldown==0&&!s.Stowed&&!s.Vitals.Downed);
             Button("RecallAction",L("RecallAction"),x+26+footerWidth,footer,footerWidth,s.Recall,false,!s.Vitals.Downed&&!s.Stowed);
-            Button("Stow",L(s.Stowed?"CallOut":"Stow"),x+36+footerWidth*2,footer,footerWidth,()=>CompanionLife.Toggle(s));
+            Button("Station",Language.GetTextValue("Mods.PalicoCompanion.Station."+(s.Stationed?"Follow":"Stay")),x+36+footerWidth*2,footer,footerWidth,()=>CompanionControl.Request(s,CompanionControlOp.Station,s.Stationed?0:1),s.Stationed,!s.Stowed&&!s.Vitals.Downed);
+            Button("Stow",L(s.Stowed?"CallOut":"Stow"),x+46+footerWidth*3,footer,footerWidth,()=>CompanionLife.Toggle(s));
         } else {
             Button("MineTarget",L("MineTarget"),x+12,y+183,154,()=>{targeting=1;s.PanelOpen=false;});
             Button("Left",L("Left"),x+12,y+223,100,()=>direction=-1,direction==-1);

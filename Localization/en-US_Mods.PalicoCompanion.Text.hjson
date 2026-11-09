@@ -474,12 +474,15 @@ Guide: {
 
 		[Recovery and fainting]
 		Inheritance mode uses the configured share of your bonus regeneration, 50% by default. Independent equipment uses the Palico's own equipment and buff regeneration. Recovery timing follows its own injuries in both modes.
-		Your Palico retreats when defeated and returns after recovering.
+		Your Palico retreats when defeated and returns after recovering. With no boss or nearby threats, Calamity or Quality of Terraria fast-respawn rules can shorten the wait.
 		'''
 	DirectAndRecover:
 		'''
 		point at ore, a tree, dropped items or water and left-click.
-		Tasks pause during combat. Recall cancels them; moving away resumes following.
+		Tasks pause during combat. Recall cancels them; while following, moving away ends the current task.
+
+		[Stay and follow]
+		Click Stay here at the bottom of the panel to keep your Palico nearby for combat, pickup or fishing. Follow me or Recall brings it back; stowing it or entering a world also restores following.
 
 		[Feeding]
 		Hold vanilla food, such as cooked fish or fruit, and right-click your Palico nearby. One serving increases out-of-combat health regeneration by 25% for the food's usual duration. Neither the effect nor its duration stacks.

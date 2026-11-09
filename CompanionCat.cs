@@ -167,7 +167,7 @@ public sealed class CompanionCat : ModProjectile
             Light.Update(owner,state,Projectile,true);return;
         }
         if(retreated){
-            retreated=false;Projectile.Center=owner.Center;Projectile.velocity=Vector2.Zero;
+            retreated=false;Projectile.Center=state.WorkAnchor;Projectile.velocity=Vector2.Zero;
             Navigation.HoldReturn(Projectile);CompanionRestVisual.DustPuff(Projectile,true);
         }
         if(Kite.Tick(state,this)){attackVisualTicks=workFacingTicks=0;return;}
@@ -220,7 +220,7 @@ public sealed class CompanionCat : ModProjectile
         var airborneTarget=!state.Paused&&!state.Vitals.Downed&&Navigation.Riding?FindThreat(owner):null;
         var airWeapon=CompanionWeapons.Active(state.Gear);
         bool airWorkDanger=airborneTarget!=null&&(state.CooperativeCombat||HoldingThreat||CompanionThreat.InterruptsWork(airborneTarget,owner,Projectile.Center)||CompanionTargeting.Marked(owner,Projectile.Center)==airborneTarget);
-        if(!state.Paused&&!state.Vitals.Downed&&Navigation.Riding&&!airWorkDanger&&Vector2.DistanceSquared(owner.Center,Projectile.Center)<480*480) {
+        if(!state.Paused&&!state.Vitals.Downed&&Navigation.Riding&&!airWorkDanger&&Vector2.DistanceSquared(state.WorkAnchor,Projectile.Center)<480*480) {
             if(state.Construction.Active&&state.Construction.Tick(owner,state,Projectile,false)&&Navigation.UpdateWorkFlight(Projectile,owner,state.Construction.MoveTarget,true)){
                 Weapons.Tick(owner,state,Projectile,null,false);Light.Update(owner,state,Projectile,true);return;
             }
@@ -272,14 +272,14 @@ public sealed class CompanionCat : ModProjectile
             }
         }
         // Selector retries between strokes are still the same work intent.
-        if(!state.Paused&&!state.Vitals.Downed&&Navigation.Riding&&!airWorkDanger&&state.Digging.Active&&!state.Mining.Active&&Vector2.DistanceSquared(owner.Center,Projectile.Center)<480*480){
+        if(!state.Paused&&!state.Vitals.Downed&&Navigation.Riding&&!airWorkDanger&&state.Digging.Active&&!state.Mining.Active&&Vector2.DistanceSquared(state.WorkAnchor,Projectile.Center)<480*480){
             Projectile.velocity*=.5f;Weapons.Tick(owner,state,Projectile,null,false);Light.Update(owner,state,Projectile,true);return;
         }
         if(!state.Paused&&!state.Vitals.Downed&&Navigation.UpdateReturn(Projectile,owner,state.AttacksEnabled?airborneTarget:null,airWeapon,tactics.Cautious,HoldingThreat)) {
             // Nearby hovering/landing is still a working state. Only genuine
             // long-distance catch-up clears the owner's current digging intention;
             // nearby combat suspends a still-valid mining job.
-            if(Vector2.DistanceSquared(owner.Center,Projectile.Center)>=480*480)CancelTransitWork(state);
+            if(Vector2.DistanceSquared(state.WorkAnchor,Projectile.Center)>=480*480)CancelTransitWork(state);
             else if(airborneTarget!=null){SuspendTransientWork(state);state.Mining.Tick(owner,Projectile.Center,false,true);}
             targetItem=-1;
             var airTarget=airborneTarget??FindThreat(owner);
@@ -357,7 +357,7 @@ public sealed class CompanionCat : ModProjectile
             state.Travel.Tick(owner,state,Projectile);
             if(state.Travel.Active)goal=state.Travel.MoveTarget;
             if(state.Travel.Status.Length>0)state.Status=state.Travel.Status;
-            else if(tick%15==0)state.Status=state.Trees.Status.Length>0?state.Trees.Status:"Following";
+            else if(tick%15==0)state.Status=state.Trees.Status.Length>0?state.Trees.Status:state.Stationed?CompanionText.MessageFull("Mods.PalicoCompanion.Station.Guarding"):"Following";
         }
         if((Light.Holding||Light.Status.Length>0)&&!building&&!mining&&!ordered&&!logistics&&!gardening&&!forestry&&!threat)state.Status=Light.Status.Length>0?Light.Status:CompanionText.Message("CompanionCat.HoldingTorch");
         Move(goal,owner,state,threat&&state.AttacksEnabled);

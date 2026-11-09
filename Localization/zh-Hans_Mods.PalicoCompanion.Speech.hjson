@@ -555,3 +555,33 @@ WorkingGearThoriumRest: {
 	Line1: "容我找找调子喵……"
 	Line2: "等我喘口气，再接着奏喵。"
 }
+
+OwnerHurtTrap: {
+	Line1: "老大，脚下也得看着点喵！"
+	Line2: "刚才是谁踩了机关喵……"
+	Line3: "老大，打我们的东西好像不会动喵。"
+}
+
+OwnerHurtTrapSeed: {
+	Line1: "老大，这地方连路都想打我们喵！"
+	Line2: "这里的机关比怪还勤快喵……"
+	Line3: "老大，下次咱们先看看脚下喵。"
+}
+
+WelcomeRepeatedDeath: {
+	Line1: "老大，又见面了喵……要不先缓缓？"
+	Line2: "老大，这条回家的路我都记住了喵。"
+	Line3: "这次我跟紧点，老大也小心点喵。"
+}
+
+WorkingLava: {
+	Line1: "老大，矿我来挖，别把路挖进岩浆里喵。"
+	Line2: "老大，这里的矿烫爪子喵！"
+	Line3: "再挖一会儿，我就熟了喵……"
+}
+
+BossRetry: {
+	Line1: "老大，又是它喵！这次咱们小心点。"
+	Line2: "刚才那招我记住了喵……老大你呢？"
+	Line3: "老大，再来一次喵，我还在呢。"
+}

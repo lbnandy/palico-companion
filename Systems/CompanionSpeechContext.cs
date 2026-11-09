@@ -19,6 +19,8 @@ internal static class CompanionSpeechContext {
         foreach(string name in CompanionWorldEvents.Names)map["BossEvent"+name]="Boss";
         map["RestEventQuiet"]="Rest";
         map["OwnerHurtDeath"]="OwnerHurt";map["WelcomeRevived"]="Welcome";map["WorkingBagFull"]="Working";
+        map["OwnerHurtTrap"]=map["OwnerHurtTrapSeed"]="OwnerHurt";
+        map["WelcomeRepeatedDeath"]="Welcome";map["WorkingLava"]="Working";map["BossRetry"]="Boss";
         foreach(string place in new[]{"Rain","Snow","Desert","Jungle","Evil","Underworld","Ocean","Mushroom"})map["Rest"+place]="Rest";
         map["DeliveredLife"]=map["DeliveredMana"]=map["DeliveredUpgrade"]="Delivered";
         map["LootPlunder"]="Loot";
@@ -65,10 +67,16 @@ internal static class CompanionSpeechContext {
 internal sealed class CompanionBossEncounter {
     readonly Dictionary<string,int> seen=new();
     readonly HashSet<string> announced=new();
+    readonly Dictionary<string,int> failedUntil=new();
+    internal void OwnerDied(int tick){
+        foreach(var pair in seen)if(tick-pair.Value<120){failedUntil[pair.Key]=tick+36000;announced.Remove(pair.Key);}
+    }
     // One encounter survives a short excursion off screen. Failed text delivery
     // is retried while the boss remains nearby, not marked as already spoken.
     int marathonAt;
     internal bool Tick(CompanionExpression expression,CompanionPlayer state,Projectile cat,int tick){
+        if(state.Player.dead)return false;
+        foreach(string id in new List<string>(failedUntil.Keys))if(tick>failedUntil[id])failedUntil.Remove(id);
         var present=new Dictionary<string,NPC>();
         foreach(var n in Main.npc)if(CompanionSpeechContext.EncounterBoss(n)&&Vector2.DistanceSquared(n.Center,cat.Center)<900*900){
             string id=CompanionSpeechContext.BossFamily(n)??"NPC:"+n.type;
@@ -80,8 +88,8 @@ internal sealed class CompanionBossEncounter {
             if(CompanionSpeechContent.BossMarathon?.Invoke()==true&&tick<marathonAt)break;
             var n=pair.Value;
             string family=CompanionSpeechContext.BossFamily(n);
-            string variant=state.Dialogue.Memories.Won(family)?"Rematch"+family:family;
-            if(expression.TrySay(state,cat,"Boss",EmoteID.EmoteFear,context:CompanionText.MessageFull(Lang.GetNPCName(n.type).Key),variant:variant)){announced.Add(pair.Key);marathonAt=tick+1800;}
+            string variant=failedUntil.ContainsKey(pair.Key)?"Retry":state.Dialogue.Memories.Won(family)?"Rematch"+family:family;
+            if(expression.TrySay(state,cat,"Boss",EmoteID.EmoteFear,context:CompanionText.MessageFull(Lang.GetNPCName(n.type).Key),variant:variant)){announced.Add(pair.Key);failedUntil.Remove(pair.Key);marathonAt=tick+1800;}
             break;
         }
         return present.Count>0;

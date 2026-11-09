@@ -4,13 +4,23 @@ using Terraria;
 
 namespace PalicoCompanion.Systems;
 
-internal enum CompanionControlOp:byte { Direct, Skill, SwitchLoadout, Environment, CombatMode }
+internal enum CompanionControlOp:byte { Direct, Skill, SwitchLoadout, Environment, CombatMode, AccessoryVisibility, Station }
 
 internal static class CompanionControl {
     internal static bool Execute(CompanionPlayer s,CompanionControlOp op,int index,Point cell,string name,out string message) {
         message=CompanionText.Message("CompanionControl.Unavailable");
         if(CompanionNetwork.Client||s.Player.dead||s.NetLeaving)return false;
         switch(op) {
+            case CompanionControlOp.Station:
+                if(index is not (0 or 1)||!CompanionStation.Set(s,index==1))return false;
+                message=s.Status;return true;
+            case CompanionControlOp.AccessoryVisibility:
+                if(!CompanionEquipment.Independent(s)||cell.X!=s.Loadouts.Current||cell.Y is not (0 or 1)||
+                    index<CompanionEquipment.AccessoryStart||index>=CompanionEquipment.AccessoryStart+CompanionEquipment.AccessoryCount||
+                    !CompanionEquipmentSlots.Unlocked(s,index))return false;
+                s.Loadouts.SetHidden(index,cell.Y==1);
+                message=CompanionText.MessageFull(Lang.inter[s.Loadouts.Hidden(index)?60:59].Key);
+                return true;
             case CompanionControlOp.CombatMode:
                 if(index is <0 or >2)return false;
                 var mode=(CompanionCombatMode)index;

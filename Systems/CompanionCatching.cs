@@ -33,7 +33,7 @@ public sealed class CompanionCatching {
         clock++;
         if(s.Paused||s.Vitals.Downed||!(CompanionNetwork.Server?s.NetCatch:ModContent.GetInstance<CompanionConfig>().CatchCritters)){Cancel();return false;}
         Tool=Best(owner);
-        bool Good(NPC n)=>n!=null&&Candidate(n,Tool)&&Vector2.DistanceSquared(n.Center,owner.Center)<240*240&&
+        bool Good(NPC n)=>n!=null&&Candidate(n,Tool)&&Vector2.DistanceSquared(n.Center,s.WorkAnchor)<240*240&&
             Vector2.DistanceSquared(n.Center,cat.Center)<240*240&&Reachability.Clear(cat.Center,n.Center)&&
             InventoryTransfer.HasRoom(new Item(n.catchItem),s.Bag);
         if(!Good(target)||age>CompanionWorkTiming.Timeout(180))Cancel();

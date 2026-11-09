@@ -53,7 +53,7 @@ internal sealed class CompanionBarrelCharge {
         foreach(var n in Main.npc){
             if(!requested&&!CompanionCombatBehavior.Allows(s,n))continue;
             if(needsLanding&&!requested&&!CompanionTargeting.Valid(s.Player,cat.Projectile.Center,n))continue;
-            if(!Enemy(n)||Vector2.DistanceSquared(n.Hitbox.ClosestPointInRect(cat.Projectile.Center),cat.Projectile.Center)>Reach*Reach)continue;
+            if(!CompanionStation.Contains(s,n.Center)||!Enemy(n)||Vector2.DistanceSquared(n.Hitbox.ClosestPointInRect(cat.Projectile.Center),cat.Projectile.Center)>Reach*Reach)continue;
             int group=Group(n);if(!requested&&!n.boss&&group<2)continue;
             float rank=group*1000+(n.boss?200:0)-Vector2.Distance(cat.Projectile.Center,n.Center);
             if(requested&&n.whoAmI==s.Player.MinionAttackTargetNPC)rank+=100000;
@@ -97,7 +97,7 @@ internal sealed class CompanionBarrelCharge {
         if(!Active)return false;
         var p=cat.Projectile;
         if(!s.Training.Active(s)||s.Training.Find(s,TrainingCatalog.Barrel)<0||Working(s)||s.PetCooldown>510||
-            Vector2.DistanceSquared(s.Player.Center,p.Center)>480*480){Cancel(cat);return false;}
+            !CompanionStation.Contains(s,p.Center)||Vector2.DistanceSquared(s.WorkAnchor,p.Center)>480*480){Cancel(cat);return false;}
         if(s.CombatMode==CompanionCombatMode.Passive&&(Preparing||Carrying)){Cancel(cat);return false;}
         cat.Weapons.Tick(s.Player,s,p,null,false);
         p.tileCollide=true;
@@ -130,10 +130,10 @@ internal sealed class CompanionBarrelCharge {
         }
         if(Vector2.DistanceSquared(origin,p.Center)>Reach*Reach||++travelTicks>LiftTicks+RushTicks){Cancel(cat);return false;}
         NPC chosen=target>=0&&target<Main.maxNPCs?Main.npc[target]:null;
-        if(chosen==null||chosen.type!=targetType||!Enemy(chosen)||!OnGround(chosen,p)){
+        if(chosen==null||!CompanionStation.Contains(s,chosen.Center)||chosen.type!=targetType||!Enemy(chosen)||!OnGround(chosen,p)){
             // Retarget only along the already chosen charge direction.
             chosen=null;
-            foreach(var n in Main.npc)if(Enemy(n)&&(n.Center.X-p.Center.X)*p.direction>=-16&&Route(p,n)){chosen=n;break;}
+            foreach(var n in Main.npc)if(CompanionStation.Contains(s,n.Center)&&Enemy(n)&&(n.Center.X-p.Center.X)*p.direction>=-16&&Route(p,n)){chosen=n;break;}
             if(chosen==null){Cancel(cat);return false;}
             target=chosen.whoAmI;targetType=chosen.type;
         }

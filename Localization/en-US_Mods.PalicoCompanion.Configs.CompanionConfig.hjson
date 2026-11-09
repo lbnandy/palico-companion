@@ -2,5 +2,17 @@
     "AttributeMode": {
         "Label": "Attribute mode",
         "Tooltip": "Player inheritance: share player attributes using the companion ability settings.\nIndependent equipment: 3 armor and 5 base accessory slots (with extra slots following your vanilla unlocks) provide the cat’s own bonuses, without inherited combat bonuses. Base life and mana still follow your permanent upgrades.\nSwitching modes keeps all items; stored armor and accessories are inactive in inheritance mode."
+    },
+    "PickupFilter": {
+        "Label": "Pickup filter",
+        "Tooltip": "Exclude listed items: use the blacklist. Only listed items: use the whitelist. Coins only: collect copper, silver, gold and platinum coins.\nSwitching keeps both lists. Applies to ground items, including carried health and mana drops; does not affect fishing catches, chest restocking or player pickups. Only affects your companion."
+    },
+    "PickupWhitelist": {
+        "Label": "Items to collect",
+        "Tooltip": "Only collect or carry listed items. An empty list allows no ground pickups. Supports searching vanilla and modded items."
+    },
+    "Lighting": {
+        "Label": "Lighting",
+        "Tooltip": "Hold a torch or glowstick when it is dark. Held light only does not automatically place or consume torches. Automatic placement still respects the environment toggle. Only affects your companion."
     }
 }

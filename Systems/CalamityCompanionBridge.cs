@@ -22,8 +22,10 @@ namespace PalicoCompanion.Systems;
 public sealed class CalamityCompanionBridge:ModSystem {
     Func<ModProjectile,int> viperChargeFrames;
     int sealedSingularityHoldout=-1,supernovaHoldout=-1;
-    public override void Load(){CompanionCrossMod.InheritStats+=Stats;CompanionCrossMod.PrepareActor+=Aim;CompanionCrossMod.SafeThrow+=Throw;CompanionCrossMod.UsesPerMaterial=Material;CompanionCrossMod.ChargeComplete.Add(Charge);CompanionCrossMod.WeaponReach+=Range;CompanionCrossMod.ProjectileFlight+=Flight;}
-    public override void Unload(){CompanionCrossMod.InheritStats-=Stats;CompanionCrossMod.PrepareActor-=Aim;CompanionCrossMod.SafeThrow-=Throw;CompanionCrossMod.UsesPerMaterial=null;CompanionCrossMod.ChargeComplete.Remove(Charge);CompanionCrossMod.WeaponReach-=Range;CompanionCrossMod.ProjectileFlight-=Flight;viperChargeFrames=null;sealedSingularityHoldout=supernovaHoldout=-1;}
+    public override void Load(){CompanionCrossMod.PeacefulRespawnLimit+=PeacefulRespawn; CompanionCrossMod.InheritStats+=Stats;CompanionCrossMod.PrepareActor+=Aim;CompanionCrossMod.SafeThrow+=Throw;CompanionCrossMod.UsesPerMaterial=Material;CompanionCrossMod.ChargeComplete.Add(Charge);CompanionCrossMod.WeaponReach+=Range;CompanionCrossMod.ProjectileFlight+=Flight;}
+    public override void Unload(){CompanionCrossMod.PeacefulRespawnLimit-=PeacefulRespawn; CompanionCrossMod.InheritStats-=Stats;CompanionCrossMod.PrepareActor-=Aim;CompanionCrossMod.SafeThrow-=Throw;CompanionCrossMod.UsesPerMaterial=null;CompanionCrossMod.ChargeComplete.Remove(Charge);CompanionCrossMod.WeaponReach-=Range;CompanionCrossMod.ProjectileFlight-=Flight;viperChargeFrames=null;sealedSingularityHoldout=supernovaHoldout=-1;}
+    // CalamityPlayer.UpdateDead caps non-boss respawns at 180 ticks.
+    static int PeacefulRespawn(int normal)=>Math.Min(normal,180);
     static void Stats(Player actor,Player owner,float ratio){
         var target=actor.GetModPlayer<CalamityPlayer>();var source=owner.GetModPlayer<CalamityPlayer>();
         target.critDamage=source.critDamage*ratio;

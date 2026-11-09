@@ -15,6 +15,7 @@ public sealed class CompanionVitals {
     internal int FeedCooldown;
     int foodRegenRemainder,ownerRegenRemainder,ownerLifeRegen;
     bool independentRegen;
+    int peacefulRecoveryTicks;
     public int ManaSickness, ManaDelay, LifeCounter, ManaCounter;
     public float LifeSteal=80;
     public float MagicMultiplier=>1f-Player.manaSickLessDmg*Math.Clamp(ManaSickness/(float)Player.manaSickTime,0,Player.manaSickTimeMax/(float)Player.manaSickTime);
@@ -49,13 +50,13 @@ public sealed class CompanionVitals {
     internal bool HurtFinal(int damage,bool boss,bool valid=true,int immunityTicks=60) {
         if(!valid||damage<=0 || Downed || Immunity>0)return false;
         Health=Math.Max(0,Health-damage);Immunity=immunityTicks;QuietTicks=0;LifeCounter=0;ownerRegenRemainder=0;
-        if(Health==0)Recovery=RecoveryTotal=RespawnTicks(Main.expertMode,boss);
+        if(Health==0){Recovery=RecoveryTotal=RespawnTicks(Main.expertMode,boss);peacefulRecoveryTicks=0;}
         return true;
     }
     // Health keeps its existing baseline; mana uses the installed tML runtime.
     // The selected attribute mode supplies a positive regen bonus; recovery
     // timers remain independent from the owner in either mode.
-    public void Tick(float velocityX=0,float velocityY=0,bool magicUse=false,bool resting=false,bool expert=false,Player manaActor=null,bool foodRecovery=false) {
+    public void Tick(float velocityX=0,float velocityY=0,bool magicUse=false,bool resting=false,bool expert=false,Player manaActor=null,bool foodRecovery=false,Player recoveryOwner=null) {
         if(FoodTime>0)FoodTime--;
         if(FeedCooldown>0)FeedCooldown--;
         LifeSteal=Math.Min(expert?70:80,LifeSteal+(expert?.5f:.6f));
@@ -64,13 +65,26 @@ public sealed class CompanionVitals {
         if(Immunity>0)Immunity--;
         // Match the vanilla player's non-PvP respawn protection (180 ticks).
         RecoveryPerSecond=0;
-        if(Recovery>0){if(--Recovery==0){Health=MaxHealth;Mana=MaxMana;Immunity=180;QuietTicks=LifeCounter=ManaCounter=ManaDelay=0;}return;}
+        if(Recovery>0){
+            if(recoveryOwner!=null&&!CompanionNetwork.Client&&CompanionCrossMod.PeacefulRespawnLimit!=null){
+                peacefulRecoveryTicks=CompanionRespawn.Safe(recoveryOwner)?peacefulRecoveryTicks+1:0;
+                // A full safe second prevents one-frame target gaps from shortening recovery.
+                if(peacefulRecoveryTicks>=60){
+                    int limit=CompanionCrossMod.PeacefulRespawnTicks(RespawnTicks(expert));
+                    if(limit<RespawnTicks(expert))Recovery=Math.Min(Recovery,Math.Max(1,limit-peacefulRecoveryTicks));
+                }
+            }else peacefulRecoveryTicks=0;
+            if(--Recovery==0){Health=MaxHealth;Mana=MaxMana;Immunity=180;QuietTicks=LifeCounter=ManaCounter=ManaDelay=0;}return;}
+        peacefulRecoveryTicks=0;
         QuietTicks=Math.Min(QuietTicks+1,3600);
         int steps=Math.Min(QuietTicks/300,6)+(QuietTicks>=2400?1:0)+(QuietTicks>=3000?1:0)+(QuietTicks>=3600?1:0);
         float lifeRate=steps*(velocityX!=0?0.5f:1.25f)*(MaxHealth/400f*0.85f+0.15f);
         if(resting){QuietTicks=Math.Min(QuietTicks+3,3600);lifeRate*=1.3f;}
         if(expert)lifeRate*=0.5f; // Companion has no Well Fed buff of its own.
         if(independentRegen&&manaActor!=null){RecoveryPerSecond=manaActor.lifeRegen/2f*(FoodTime>0&&foodRecovery&&manaActor.lifeRegen>0?1.25f:1);LifeCounter=0;foodRegenRemainder=ownerRegenRemainder=0;}
+        else if(manaActor!=null&&(manaActor.lifeRegen<0||manaActor.bleed)){
+            RecoveryPerSecond=Math.Min(0,manaActor.lifeRegen)/2f;QuietTicks=LifeCounter=0;foodRegenRemainder=ownerRegenRemainder=0;
+        }
         else if(Health<MaxHealth){
             int gain=(int)Math.Round(lifeRate);
             // Apply the server's share after our own recovery delay. Carry

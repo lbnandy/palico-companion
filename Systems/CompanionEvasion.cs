@@ -47,7 +47,7 @@ public sealed class CompanionEvasion {
         if(style==CompanionEvasionMode.Off){remaining=cooldown=0;return;}
         bool agile=style==CompanionEvasionMode.Agile;
         if(cooldown>0)cooldown--;
-        if(state.Paused||state.Vitals.Downed||!state.Enabled||Vector2.DistanceSquared(owner.Center,cat.Center)>480*480){remaining=0;return;}
+        if(state.Paused||state.Vitals.Downed||!state.Enabled||Vector2.DistanceSquared(state.WorkAnchor,cat.Center)>480*480){remaining=0;return;}
         bool flying=nav.Riding;
         if(!flying&&!nav.Grounded(cat)){remaining=0;return;}
         bool contact=false;
@@ -56,13 +56,21 @@ public sealed class CompanionEvasion {
             if(Safe(cat,chosen,flying)){cat.velocity.X=chosen.X;if(flying)cat.velocity.Y=chosen.Y;remaining--;return;}
             remaining=0;
         }
-        if(cooldown>0&&(!contact||!agile))return;
         // Ground movement includes gravity before Terraria resolves the floor.
         // Compare the displacement that can actually occur, not that downward
         // velocity against sidesteps whose vertical component is already zero.
         Vector2 motion=flying?cat.velocity:Collision.TileCollision(cat.position,cat.velocity,cat.width,cat.height,nav.DropThrough);
         int horizon=agile?12:6;
         float baseline=Risk(cat,motion,horizon);if(baseline==0)return;
+        if(cooldown>0&&(!contact||!agile)){
+            // Do not immediately follow back through a threat after a sidestep.
+            // Only wait when staying put is clear; moving hazards still require
+            // the normal dodge cooldown, and no immunity is granted.
+            if(Safe(cat,Vector2.Zero,flying)&&Risk(cat,Vector2.Zero,horizon)==0){
+                cat.velocity.X=0;if(flying)cat.velocity.Y=0;
+            }
+            return;
+        }
         Vector2 best=motion;float score=baseline;
         float speed=3.8f*settings.MovementScale(true);
         Vector2[] options=flying?new[]{new Vector2(-speed,0),new Vector2(speed,0),new Vector2(0,-speed),new Vector2(0,speed),Vector2.Zero}:new[]{new Vector2(-speed,0),new Vector2(speed,0),Vector2.Zero};
