@@ -13,8 +13,8 @@ namespace PalicoCompanion.Systems;
 
 public sealed class KoishiCompanionBridge:ModSystem {
     ModPlayer charge,magazine;
-    Type bow,oreBow;
-    Func<ModPlayer,float> value;
+    readonly Dictionary<Type,int> releaseBows=new();
+    Func<ModPlayer,int,float> value;
     readonly List<ILHook> reloadInputs=new();
     public override void PostSetupContent(){
         if(!ModLoader.TryGetMod("OriginalWeaponResetBH",out var mod))return;
@@ -27,14 +27,24 @@ public sealed class KoishiCompanionBridge:ModSystem {
         charge=mod.GetContent<ModPlayer>().FirstOrDefault(p=>p.GetType().FullName=="OriginalWeaponResetBH.Players.ChargePlayer");
         magazine=mod.GetContent<ModPlayer>().FirstOrDefault(p=>p.GetType().FullName=="OriginalWeaponResetBH.Players.GunMagazinePlayer");
         if(charge!=null||magazine!=null)CompanionCrossMod.BeforeReset+=Advance;
-        bow=mod.Code.GetType("OriginalWeaponResetBH.Content.Projectiles.Ranged.Bows.WoodBowLeftHoldout");
-        oreBow=mod.Code.GetType("OriginalWeaponResetBH.Content.Projectiles.Ranged.Bows.OreBowLeftHoldout");
         var method=charge?.GetType().GetMethod("GetChargeValue");
         var key=method?.GetParameters().SingleOrDefault()?.ParameterType;
-        if(bow==null||method?.ReturnType!=typeof(float)||key?.IsEnum!=true||!Enum.IsDefined(key,"BowCharge"))return;
+        if(method?.ReturnType!=typeof(float)||key?.IsEnum!=true)return;
         var player=Expression.Parameter(typeof(ModPlayer));
-        value=Expression.Lambda<Func<ModPlayer,float>>(Expression.Call(Expression.Convert(player,charge.GetType()),method,Expression.Constant(Enum.Parse(key,"BowCharge"),key)),player).Compile();
+        var chargeKey=Expression.Parameter(typeof(int));
+        value=Expression.Lambda<Func<ModPlayer,int,float>>(Expression.Call(Expression.Convert(player,charge.GetType()),method,Expression.Convert(chargeKey,key)),player,chargeKey).Compile();
+        // Only release-to-fire bows use this input policy. Their own ChargePlayer
+        // supplies the duration and attack-speed scaling; continuous bows stay held.
+        foreach(string name in new[]{"WoodBow","OreBow","BloodRainBow","BeesKnees","DD2PhoenixBow","DemonBow","HellwingBow","IceBow","Marrow","MoltenFury","TendonBow","ShadowFlameBow","SkeletonBow","WoodlandStalker"})Register(name,"BowCharge");
+        foreach(string name in new[]{"Phantasm","Tsunami","DaedalusStormbow","DD2BetsyBow","FairyQueenRangedItem","PulseBow"})Register(name,name);
         CompanionCrossMod.ChargeComplete.Add(Complete);
+        void Register(string name,string chargeName){
+            var type=mod.Code.GetType("OriginalWeaponResetBH.Content.Projectiles.Ranged.Bows."+name+"LeftHoldout");
+            if(type==null||!Enum.IsDefined(key,chargeName))return;
+            int id=Convert.ToInt32(Enum.Parse(key,chargeName));
+            foreach(var projectile in mod.GetContent<ModProjectile>())
+                if(type.IsInstanceOfType(projectile))releaseBows[projectile.GetType()]=id;
+        }
     }
     void Advance(CompanionNativeUse use){
         // The mod accumulates last tick's enabled charge before ResetEffects.
@@ -46,7 +56,7 @@ public sealed class KoishiCompanionBridge:ModSystem {
             if(magazine!=null)use.Actor.GetModPlayer(magazine).PreUpdate();
         }
     }
-    bool? Complete(Item item,Projectile shot,CompanionNativeUse use)=>shot.ModProjectile!=null&&(bow.IsInstanceOfType(shot.ModProjectile)||oreBow?.IsInstanceOfType(shot.ModProjectile)==true)?value(use.Actor.GetModPlayer(charge))>=1:null;
+    bool? Complete(Item item,Projectile shot,CompanionNativeUse use)=>shot.ModProjectile!=null&&releaseBows.TryGetValue(shot.ModProjectile.GetType(),out int key)?value(use.Actor.GetModPlayer(charge),key)>=1:null;
     static bool IsolateReloadInput(ILContext il){
         var cursor=new ILCursor(il);bool changed=false;
         // Native HoldItem also queries a client-only manual reload key. An AI
@@ -61,5 +71,5 @@ public sealed class KoishiCompanionBridge:ModSystem {
         }
         return changed;
     }
-    public override void Unload(){foreach(var hook in reloadInputs)hook.Dispose();reloadInputs.Clear();CompanionCrossMod.BeforeReset-=Advance;CompanionCrossMod.ChargeComplete.Remove(Complete);charge=magazine=null;bow=oreBow=null;value=null;}
+    public override void Unload(){foreach(var hook in reloadInputs)hook.Dispose();reloadInputs.Clear();CompanionCrossMod.BeforeReset-=Advance;CompanionCrossMod.ChargeComplete.Remove(Complete);charge=magazine=null;releaseBows.Clear();value=null;}
 }

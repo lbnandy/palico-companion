@@ -21,8 +21,9 @@ namespace PalicoCompanion.Systems;
 [JITWhenModsEnabled("CalamityMod")]
 public sealed class CalamityCompanionBridge:ModSystem {
     Func<ModProjectile,int> viperChargeFrames;
+    int sealedSingularityHoldout=-1,supernovaHoldout=-1;
     public override void Load(){CompanionCrossMod.InheritStats+=Stats;CompanionCrossMod.PrepareActor+=Aim;CompanionCrossMod.SafeThrow+=Throw;CompanionCrossMod.UsesPerMaterial=Material;CompanionCrossMod.ChargeComplete.Add(Charge);CompanionCrossMod.WeaponReach+=Range;CompanionCrossMod.ProjectileFlight+=Flight;}
-    public override void Unload(){CompanionCrossMod.InheritStats-=Stats;CompanionCrossMod.PrepareActor-=Aim;CompanionCrossMod.SafeThrow-=Throw;CompanionCrossMod.UsesPerMaterial=null;CompanionCrossMod.ChargeComplete.Remove(Charge);CompanionCrossMod.WeaponReach-=Range;CompanionCrossMod.ProjectileFlight-=Flight;viperChargeFrames=null;}
+    public override void Unload(){CompanionCrossMod.InheritStats-=Stats;CompanionCrossMod.PrepareActor-=Aim;CompanionCrossMod.SafeThrow-=Throw;CompanionCrossMod.UsesPerMaterial=null;CompanionCrossMod.ChargeComplete.Remove(Charge);CompanionCrossMod.WeaponReach-=Range;CompanionCrossMod.ProjectileFlight-=Flight;viperChargeFrames=null;sealedSingularityHoldout=supernovaHoldout=-1;}
     static void Stats(Player actor,Player owner,float ratio){
         var target=actor.GetModPlayer<CalamityPlayer>();var source=owner.GetModPlayer<CalamityPlayer>();
         target.critDamage=source.critDamage*ratio;
@@ -42,6 +43,10 @@ public sealed class CalamityCompanionBridge:ModSystem {
         return null;
     }
     public override void PostSetupContent(){
+        // Older Calamity builds use a thrown projectile instead of this newer
+        // holdout. Resolve the optional content without a hard CLR type reference.
+        sealedSingularityHoldout=ModContent.TryFind<ModProjectile>("CalamityMod/SealedSingularityHoldout",out var singularity)?singularity.Type:-1;
+        supernovaHoldout=ModContent.TryFind<ModProjectile>("CalamityMod/SupernovaHoldout",out var supernova)?supernova.Type:-1;
         // The holdout type is internal, but exposes its charge cap as a public
         // instance field. Bind once; do not duplicate its timing or reflect per tick.
         if(!ModContent.TryFind<ModProjectile>("CalamityMod/VitriolicViperHoldout",out var viper))return;
@@ -94,8 +99,8 @@ public sealed class CalamityCompanionBridge:ModSystem {
         // Helium's holdout class is internal; its item declares the projectile
         // type and public charge cap. Read its native counter without reflection.
         if(weapon.ModItem is HeliumFlash&&shot.type==weapon.shoot)return shot.ai[0]>=HeliumFlash.FullChargeFrames;
-        if(weapon.ModItem is Supernova&&shot.ModProjectile is SupernovaHoldout||
-            weapon.ModItem is SealedSingularity&&shot.ModProjectile is SealedSingularityHoldout){
+        if(weapon.ModItem is Supernova&&shot.type==supernovaHoldout||
+            weapon.ModItem is SealedSingularity&&shot.type==sealedSingularityHoldout){
             var player=use.Actor.GetModPlayer<CalamityPlayer>();
             return player.temporaryStealthMax>0&&player.rogueStealth>=System.Math.Max(player.temporaryStealthMax,player.rogueStealthMax);
         }

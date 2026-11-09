@@ -28,14 +28,16 @@ public sealed class QualityCompanionBridge:ModSystem {
     void PreparePlacement(Player actor,Vector2 aim){var cache=actor.GetModPlayer(placement);tileSpeed.SetValue(cache,actor.tileSpeed);wallSpeed.SetValue(cache,actor.wallSpeed);}
     public override void Unload(){CompanionCrossMod.InfiniteStack=null;CompanionCrossMod.MinedOre=null;CompanionCrossMod.PrepareActor-=PreparePlacement;placement=null;tileSpeed=wallSpeed=null;}
     static void Chain(Player owner,Point cell,int type){
-        if(CompanionNetwork.Client||!ImproveConfigs.Instance.SimpleVeinMining||ModLoader.HasMod("BAM")||ModLoader.HasMod("OreExcavator")||
+        if(CompanionNetwork.Client||!ModContent.GetInstance<ImproveConfigs>().SimpleVeinMining||ModLoader.HasMod("BAM")||ModLoader.HasMod("OreExcavator")||
             !FieldAssist.AllowedOre(type)||!CompanionExclusions.CanChain(owner,type))return;
         int previous=VeinMinerSystem.MinerIndex;
         try{VeinMinerSystem.MinerIndex=owner.whoAmI;VeinMinerSystem.DoVeinMiningAt(cell,type);}
         finally{VeinMinerSystem.MinerIndex=previous;}
     }
     static int Threshold(Item item){
-        var c=ImproveConfigs.Instance;if(c==null||item.IsAir||!item.consumable)return 0;
+        // Use tML's config registry; QoT's convenience Instance property is not
+        // present in all supported builds of the same config class.
+        var c=ModContent.GetInstance<ImproveConfigs>();if(c==null||item.IsAir||!item.consumable)return 0;
         int count=item.ammo>0?(c.NoConsume_Ammo?(item.type==ItemID.FallenStar?999:3996):0):
             c.NoConsume_Projectile&&item.shoot>ProjectileID.None?3996:0;
         return count<=item.maxStack?count:0;

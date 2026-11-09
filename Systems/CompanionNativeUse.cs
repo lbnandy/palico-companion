@@ -548,10 +548,14 @@ public sealed class CompanionOwnedShot : GlobalProjectile {
             // matching input so native AI cannot mistake visual buffering for
             // a release. The latest server tick wins across both packet paths.
             w.Write((ulong)Main.GameUpdateCount);w.Write((byte)((Context.Actor.channel?1:0)|(Context.Actor.controlUseItem?2:0)));w.Write(p.timeLeft);
+            // Native weapons may change a child projectile's class after spawn.
+            // Peers must not keep its SetDefaults class when running native AI
+            // or subsequent GlobalProjectile serializers.
+            w.Write(p.DamageType.Type);
         }
     }
     public override void ReceiveExtraAI(Projectile p,Terraria.ModLoader.IO.BitReader bits,System.IO.BinaryReader r){
-        if(bits.ReadBit()){int bondOwner=r.ReadInt32(),identity=r.ReadInt32();ulong instance=r.ReadUInt64();bool thrown=r.ReadBoolean(),summoned=r.ReadBoolean();ulong time=r.ReadUInt64();byte controls=r.ReadByte();int lifetime=r.ReadInt32();if(CompanionNetwork.Client){p.timeLeft=Math.Max(1,lifetime);BondOwner=bondOwner;CatIdentity=identity;CatInstance=instance;Thrown=thrown;Summoned=summoned;inputTime=time;input=controls;PendingNativeLinkRepair=true;Resolve(p);Context?.ReceiveInput(inputTime,(input&1)!=0,(input&2)!=0);
+        if(bits.ReadBit()){int bondOwner=r.ReadInt32(),identity=r.ReadInt32();ulong instance=r.ReadUInt64();bool thrown=r.ReadBoolean(),summoned=r.ReadBoolean();ulong time=r.ReadUInt64();byte controls=r.ReadByte();int lifetime=r.ReadInt32(),damageClass=r.ReadInt32();if(CompanionNetwork.Client){if(damageClass>=0&&damageClass<DamageClassLoader.DamageClassCount)p.DamageType=DamageClassLoader.GetDamageClass(damageClass);p.timeLeft=Math.Max(1,lifetime);BondOwner=bondOwner;CatIdentity=identity;CatInstance=instance;Thrown=thrown;Summoned=summoned;inputTime=time;input=controls;PendingNativeLinkRepair=true;Resolve(p);Context?.ReceiveInput(inputTime,(input&1)!=0,(input&2)!=0);
 }}
         else if(CompanionNetwork.Client){Context=null;CatIdentity=-1;CatInstance=0;Thrown=false;Summoned=false;PendingNativeLinkRepair=false;}
     }

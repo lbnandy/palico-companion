@@ -1,5 +1,21 @@
 # Changelog
 
+## 1.2.3 — 2026-11-09
+
+### 简体中文
+
+- 修复与部分版本的更好的体验、灾厄同开时，因接口差异导致的模组加载失败。
+- 修复部分灾厄弹幕特效在特殊绘制路径下可能导致的战斗崩溃。
+- 补齐 Koishi 原版武器重做中幻影弓等蓄力弓的松手发射处理，沿用武器自身的蓄力规则。
+- 修复部分子弹幕改变伤害类型后，联机额外数据读取异常的问题。
+
+### English
+
+- Fixed mod loading failures caused by API differences in some versions of Quality of Terraria and Calamity.
+- Fixed combat crashes caused by certain Calamity projectile effects using alternate rendering paths.
+- Added release-to-fire handling for charge bows such as Phantasm in Koishi's vanilla weapon rework, preserving each weapon's native charge rules.
+- Fixed multiplayer extra-data read errors when some child projectiles change their damage class after spawning.
+
 ## 1.2.2 — 2026-11-09
 
 ### 简体中文
