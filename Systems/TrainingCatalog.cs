@@ -15,7 +15,6 @@ namespace PalicoCompanion.Systems;
 
 internal record TrainingDefinition(string Key,int Icon,params int[] Materials) {
     internal string Name=>Language.GetTextValue("Mods.PalicoCompanion.TrainingNames."+Key);
-    internal string Detail=>CompanionText.Get("Catalog."+Key);
 }
 internal static class TrainingCatalog {
     internal const int Barrel=20, TimerCount=21;
@@ -43,20 +42,22 @@ internal static class TrainingCatalog {
         null, // Retired catalog position; not registered as content.
         null, // Retired catalog position; not registered as content.
         new("CatWorkbench",ItemID.WorkBench,ItemID.Wood,20,-1,3),
-        new("GigaBarrelBomb",ItemID.Barrel,ItemID.Dynamite,3,ItemID.Wood,30,-1,8)
+        new("GigaBarrelBomb",ItemID.Barrel,ItemID.Dynamite,3,ItemID.Wood,30,-1,8),
+        new("ReinforcedTools",ItemID.CobaltBar,-4,6,ItemID.SoulofLight,2,ItemID.SoulofNight,2),
+        new("CelestialTools",ItemID.LunarBar,ItemID.LunarBar,4,ItemID.FragmentSolar,2,ItemID.FragmentVortex,2,ItemID.FragmentNebula,2,ItemID.FragmentStardust,2)
     ];
     internal static bool Current(int id)=>id>=0&&id<Entries.Length&&Entries[id]!=null;
     internal static int Type(int id)=>ModContent.GetInstance<PalicoCompanion>().Find<ModItem>(Entries[id].Key).Type;
-    internal static string TierName(int tier)=>new[]{CompanionText.Get("Catalog.Basic"),CompanionText.Get("Catalog.Improved"),CompanionText.Get("Catalog.Masterwork")}[Math.Clamp(tier,0,2)];
+    internal static string TierName(int tier)=>CompanionText.Get("Catalog."+TrainingTiers.At(tier).Key);
     internal static int Id(Item item)=>item?.ModItem is TrainingItem t?t.Kind:-1;
-    internal static string Group(int n)=>n switch {-1=>"IronBar",-2=>"PalicoCompanion:Silver",-3=>"PalicoCompanion:Gold",_=>""};
-    internal static bool Matches(int key,Item i)=>key switch {-1=>i.type is ItemID.IronBar or ItemID.LeadBar,-2=>i.type is ItemID.SilverBar or ItemID.TungstenBar,-3=>i.type is ItemID.GoldBar or ItemID.PlatinumBar,_=>i.type==key};
-    internal static string MaterialName(int key)=>key switch {-1=>CompanionText.Get("Catalog.IronBars"),-2=>CompanionText.Get("Catalog.SilverBars"),-3=>CompanionText.Get("Catalog.GoldBars"),_=>Lang.GetItemNameValue(key)};
+    internal static string Group(int n)=>n switch {-1=>"IronBar",-2=>"PalicoCompanion:Silver",-3=>"PalicoCompanion:Gold",-4=>"PalicoCompanion:Cobalt",_=>""};
+    internal static bool Matches(int key,Item i)=>key switch {-1=>i.type is ItemID.IronBar or ItemID.LeadBar,-2=>i.type is ItemID.SilverBar or ItemID.TungstenBar,-3=>i.type is ItemID.GoldBar or ItemID.PlatinumBar,-4=>i.type is ItemID.CobaltBar or ItemID.PalladiumBar,_=>i.type==key};
+    internal static string MaterialName(int key)=>key switch {-1=>CompanionText.Get("Catalog.IronBars"),-2=>CompanionText.Get("Catalog.SilverBars"),-3=>CompanionText.Get("Catalog.GoldBars"),-4=>CompanionText.Get("Catalog.CobaltBars"),_=>Lang.GetItemNameValue(key)};
 }
 
 public sealed class TrainingContent:ModSystem {
     public override void Load(){for(int i=0;i<TrainingCatalog.Entries.Length;i++)if(TrainingCatalog.Current(i))Mod.AddContent(new TrainingItem(i));}
-    public override void AddRecipeGroups(){RecipeGroup.RegisterGroup("PalicoCompanion:Silver",new RecipeGroup(()=>CompanionText.Get("Catalog.SilverBars"),ItemID.SilverBar,ItemID.TungstenBar));RecipeGroup.RegisterGroup("PalicoCompanion:Gold",new RecipeGroup(()=>CompanionText.Get("Catalog.GoldBars"),ItemID.GoldBar,ItemID.PlatinumBar));}
+    public override void AddRecipeGroups(){RecipeGroup.RegisterGroup("PalicoCompanion:Cobalt",new RecipeGroup(()=>CompanionText.Get("Catalog.CobaltBars"),ItemID.CobaltBar,ItemID.PalladiumBar));RecipeGroup.RegisterGroup("PalicoCompanion:Silver",new RecipeGroup(()=>CompanionText.Get("Catalog.SilverBars"),ItemID.SilverBar,ItemID.TungstenBar));RecipeGroup.RegisterGroup("PalicoCompanion:Gold",new RecipeGroup(()=>CompanionText.Get("Catalog.GoldBars"),ItemID.GoldBar,ItemID.PlatinumBar));}
 }
 
 [Autoload(false)]
@@ -67,7 +68,7 @@ public sealed class TrainingItem:ModItem {
     public bool Installed,Alternate;
     public TrainingItem(int kind){Kind=kind;}
     public override string Name=>TrainingCatalog.Entries[Kind].Key;
-    public override string Texture=>Kind < 11 || Kind is >=13 and <=15 or 19 ? "PalicoCompanion/Assets/Training/"+Name : "Terraria/Images/Item_"+TrainingCatalog.Entries[Kind].Icon;
+    public override string Texture=>Kind < 11 || Kind is >=13 and <=15 or 19 or 21 or 22 ? "PalicoCompanion/Assets/Training/"+Name : "Terraria/Images/Item_"+TrainingCatalog.Entries[Kind].Icon;
     public override LocalizedText DisplayName=>Language.GetOrRegister("Mods.PalicoCompanion.TrainingNames."+Name);
     public override bool PreDrawInInventory(SpriteBatch spriteBatch,Vector2 position,Rectangle frame,Color drawColor,Color itemColor,Vector2 origin,float scale){
         if(Kind!=TrainingCatalog.Barrel||CompanionBarrelVisual.Icon is not {} icon)return true;
@@ -77,7 +78,7 @@ public sealed class TrainingItem:ModItem {
         if(Kind!=TrainingCatalog.Barrel||CompanionBarrelVisual.Icon is not {} icon)return true;
         spriteBatch.Draw(icon,Item.Bottom-Main.screenPosition,null,Item.GetAlpha(lightColor),rotation,new Vector2(icon.Width/2f,icon.Height),scale,SpriteEffects.None,0);return false;
     }
-    public override void SetDefaults(){Item.width=24;Item.height=24;Item.maxStack=TrainingCatalog.Equipment(Kind)?1:9999;Item.rare=ItemRarityID.Blue;Item.value=Item.buyPrice(silver:10);if(Kind is >=13 and <=15){Item.useStyle=ItemUseStyleID.HoldUp;Item.useTime=Item.useAnimation=30;Item.UseSound=SoundID.Item4;Item.consumable=true;}if(Kind==19){Item.DefaultToPlaceableTile(ModContent.TileType<CatWorkbenchTile>());Item.maxStack=9999;}}
+    public override void SetDefaults(){Item.width=24;Item.height=24;Item.maxStack=TrainingCatalog.Equipment(Kind)?1:9999;Item.rare=ItemRarityID.Blue;Item.value=Item.buyPrice(silver:10);if(TrainingTiers.Upgrade(Kind)){Item.useStyle=ItemUseStyleID.HoldUp;Item.useTime=Item.useAnimation=30;Item.UseSound=SoundID.Item4;Item.consumable=true;}if(Kind==19){Item.DefaultToPlaceableTile(ModContent.TileType<CatWorkbenchTile>());Item.maxStack=9999;}}
     public override void ModifyTooltips(List<TooltipLine> lines){
         int tier=Main.gameMenu?0:Main.LocalPlayer.GetModPlayer<CompanionPlayer>().Training.Tier;
         if(TrainingCatalog.Equipment(Kind))lines.Add(new(Mod,"Kind",CompanionText.Get(TrainingCatalog.Support(Kind)?"Catalog.SupportGear":"Catalog.WorkGear")+(Main.gameMenu?"":" · "+TrainingCatalog.TierName(tier))));
@@ -91,10 +92,10 @@ public sealed class TrainingItem:ModItem {
         }
     }
     static int IdAt(CompanionPlayer s,int slot)=>TrainingCatalog.Id(s.Training.Slots[slot]);
-    public override bool CanUseItem(Player player)=>Kind is <13 or >15 || player.GetModPlayer<CompanionPlayer>().Training.CanUpgrade(Kind)&&!CompanionNetwork.Pending&&(!CompanionNetwork.Client||player.GetModPlayer<CompanionPlayer>().NetReady);
-    public override bool ConsumeItem(Player player)=>Kind is <13 or >15;
+    public override bool CanUseItem(Player player)=>!TrainingTiers.Upgrade(Kind) || player.GetModPlayer<CompanionPlayer>().Training.CanUpgrade(Kind)&&!CompanionNetwork.Pending&&(!CompanionNetwork.Client||player.GetModPlayer<CompanionPlayer>().NetReady);
+    public override bool ConsumeItem(Player player)=>!TrainingTiers.Upgrade(Kind);
     public override bool? UseItem(Player player){
-        if(Kind is <13 or >15)return null;
+        if(!TrainingTiers.Upgrade(Kind))return null;
         if(player.whoAmI!=Main.myPlayer)return false;
         var s=player.GetModPlayer<CompanionPlayer>();if(!CanUseItem(player))return false;
         if(CompanionNetwork.Client)CompanionNetwork.UseTrainingItem(s,Item);
@@ -102,7 +103,7 @@ public sealed class TrainingItem:ModItem {
         return true;
     }
     internal static void UpgradeFeedback(CompanionPlayer s,int kind){
-        string text=kind==13?CompanionText.Get("Catalog.SupportSlotAdded"):kind==14?CompanionText.Get("Catalog.ImprovedUpgrade"):CompanionText.Get("Catalog.MasterworkUpgrade");
+        string text=kind==13?CompanionText.Get("Catalog.SupportSlotAdded"):CompanionText.Get("Catalog.ToolsUpgraded",TrainingCatalog.TierName(s.Training.Tier));
         CombatText.NewText(s.Player.Hitbox,Color.LightGreen,text,true);
         s.Report(text);
     }

@@ -54,20 +54,35 @@ public sealed class CompanionDebuffs:ModSystem {
         });
     }
     internal sealed class Modifiers {
+        readonly struct InheritedVitals(Player actor) {
+            readonly Player.DefenseStat defense=actor.statDefense;
+            readonly float endurance=actor.endurance;
+            readonly int life=actor.statLifeMax2,mana=actor.statManaMax2,minions=actor.maxMinions,sentries=actor.maxTurrets;
+            internal void Restore(Player actor){
+                actor.statDefense=defense;actor.endurance=endurance;
+                actor.statLifeMax2=life;actor.statManaMax2=mana;actor.maxMinions=minions;actor.maxTurrets=sentries;
+            }
+        }
         struct Values {
             internal StatModifier Damage,Knockback;
             internal float Crit,Speed,Penetration;
             internal static Values Read(Player p,DamageClass type)=>new(){Damage=p.GetDamage(type),Knockback=p.GetKnockback(type),Crit=p.GetCritChance(type),Speed=p.GetAttackSpeed(type),Penetration=p.GetArmorPenetration(type)};
         }
         readonly Values[] before=new Values[DamageClassLoader.DamageClassCount],delta=new Values[DamageClassLoader.DamageClassCount];
-        bool recording;
+        bool recording,inheritedBonus;
+        InheritedVitals inheritedVitals;
         float manaBefore,mana;
         internal Modifiers()=>Clear();
         internal void Clear(){
-            recording=false;mana=0;
+            recording=inheritedBonus=false;mana=0;
             for(int i=0;i<delta.Length;i++)delta[i]=new(){Damage=StatModifier.Default,Knockback=StatModifier.Default};
         }
         internal void Begin(Player actor,int buff){
+            // Inheritance already includes the owner's positive buff bonuses
+            // in these values. Still run native buff mechanics and flags, but
+            // do not add those numbers again. Debuffs keep their own changes.
+            inheritedBonus=buff>0&&!Main.debuff[buff];
+            if(inheritedBonus)inheritedVitals=new(actor);
             // Mana sickness is already applied by Vitals.MagicMultiplier.
             recording=buff>0&&Main.debuff[buff]&&buff!=BuffID.ManaSickness;
             if(!recording)return;
@@ -77,6 +92,7 @@ public sealed class CompanionDebuffs:ModSystem {
         static StatModifier Difference(StatModifier a,StatModifier b)=>new(1+b.Additive-a.Additive,
             a.Multiplicative==0?1:b.Multiplicative/a.Multiplicative,b.Flat-a.Flat,b.Base-a.Base);
         internal void End(Player actor){
+            if(inheritedBonus){inheritedVitals.Restore(actor);inheritedBonus=false;}
             if(!recording)return;recording=false;
             for(int i=0;i<delta.Length;i++){
                 var a=before[i];var b=Values.Read(actor,DamageClassLoader.GetDamageClass(i));ref var d=ref delta[i];

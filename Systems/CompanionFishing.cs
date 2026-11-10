@@ -192,7 +192,7 @@ public sealed class CompanionFishing {
         Actor.accFishingLine=attributes.accFishingLine;Actor.accTackleBox=attributes.accTackleBox;
         Actor.sonarPotion=attributes.sonarPotion;
         Actor.dead=false;Actor.selectedItem=0;Actor.itemRotation=0;Actor.heldProj=-1;
-        Actor.fishingSkill=attributes.fishingSkill+(State.Training.Work(10)?5*(State.Training.Tier+1):0);
+        Actor.fishingSkill=attributes.fishingSkill+(State.Training.Work(10)?State.Training.Values.Fishing:0);
         var p=State.Player;Actor.name=p.name;
         // Native reward rolls read these separately from GetFishingConditions.
         // Biome/luck retain the existing environment source; equipment bonuses

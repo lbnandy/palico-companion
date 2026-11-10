@@ -32,7 +32,7 @@ public sealed class CompanionEvasion {
     static bool Safe(Projectile cat,Vector2 velocity,bool flying){
         for(int t=2;t<=12;t+=2){
             Vector2 pos=cat.Center+velocity*t;
-            if(!CompanionNavigation.Fits(pos))return false;
+            if(!CompanionNavigation.Fits(pos)||CompanionIncomingDamage.HazardAt(cat,pos))return false;
             int x=(int)(pos.X/16),y=(int)((pos.Y+cat.height/2f)/16);
             if(!WorldGen.InWorld(x,y,10))return false;
             if(Main.tile[x,y].LiquidAmount>0&&Main.tile[x,y].LiquidType==Terraria.ID.LiquidID.Lava)return false;
@@ -47,7 +47,7 @@ public sealed class CompanionEvasion {
         if(style==CompanionEvasionMode.Off){remaining=cooldown=0;return;}
         bool agile=style==CompanionEvasionMode.Agile;
         if(cooldown>0)cooldown--;
-        if(state.Paused||state.Vitals.Downed||!state.Enabled||Vector2.DistanceSquared(state.WorkAnchor,cat.Center)>480*480){remaining=0;return;}
+        if(state.Paused||state.Vitals.Downed||!state.Enabled||!CompanionCombatReach.PursuitLocal(CompanionWeapons.Active(state.Gear),cat,cat.Center,state.WorkAnchor)){remaining=0;return;}
         bool flying=nav.Riding;
         if(!flying&&!nav.Grounded(cat)){remaining=0;return;}
         bool contact=false;

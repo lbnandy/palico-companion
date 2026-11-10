@@ -392,7 +392,7 @@ public sealed partial class CompanionNativeUse {
         actor.GetDamage(DamageClass.Summon)*=summon?1:1/state.Training.Damage(state);
         actor.GetDamage(DamageClass.Magic)*=state.Vitals.MagicMultiplier;
         if(state.Training.Find(state,3)>=0&&state.Training.ManaDance>0&&state.Training.ManaTarget==1)
-            actor.manaCost*=.9f-.05f*state.Training.Tier;
+            actor.manaCost*=1-state.Training.Values.ManaSaving/100f;
     }
     readonly List<DrawData> drawCache=new();
     // Projectile.Update enforces maxMinions, including reconnecting segmented

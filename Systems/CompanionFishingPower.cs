@@ -25,7 +25,7 @@ public sealed class CompanionFishingPower:ModSystem {
         try {
             evaluating=actor;pole=rod??CompanionFishing.BestRod(s.Player);
             bait=actualBait??s.Bag.Where(CompanionFishing.SafeBait).OrderByDescending(i=>i.bait).FirstOrDefault();
-            actor.fishingSkill+=s.Training.Work(10)?5*(s.Training.Tier+1):0;
+            actor.fishingSkill+=s.Training.Work(10)?s.Training.Values.Fishing:0;
             return actor.GetFishingConditions();
         } finally {actor.fishingSkill=previousSkill;evaluating=previous;pole=previousPole;bait=previousBait;}
     }

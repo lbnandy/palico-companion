@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using Microsoft.Xna.Framework;
@@ -22,6 +23,7 @@ public sealed class ThoriumCompanionBridge:ModSystem {
     static Action<BardItem,Player,Player> empower;
     static Action<Player,SoundStyle,float> playSound;
     static Action<ThoriumPlayer> findAlly;
+    internal static readonly HashSet<int> NativeSelfHealing=new();
     Hook instrumentUse,instrumentSound,instrumentEmpower,playerLookup,mouseLookup,healing;
     delegate int HealOriginal(Player player,int amount,Player healer,bool overMax,bool statistics);
     delegate void UseOriginal(BardItem item,Player player);
@@ -31,6 +33,7 @@ public sealed class ThoriumCompanionBridge:ModSystem {
     delegate void EmpowerOriginal(BardItem item,Player player,BitsByte info);
     const BindingFlags PrivateInstance=BindingFlags.Instance|BindingFlags.NonPublic;
     public override void Load(){
+        CompanionCrossMod.SupportProgression+=SupportProgression;
         empower=typeof(BardItem).GetMethod("ApplyEmpowerments",PrivateInstance,null,new[]{typeof(Player),typeof(Player)},null)!.CreateDelegate<Action<BardItem,Player,Player>>();
         playSound=typeof(BardItem).GetMethod("PlaySound",BindingFlags.Static|BindingFlags.NonPublic)!.CreateDelegate<Action<Player,SoundStyle,float>>();
         findAlly=typeof(ThoriumPlayer).GetMethod("HandleLowestLifeAlly",PrivateInstance)!.CreateDelegate<Action<ThoriumPlayer>>();
@@ -49,6 +52,7 @@ public sealed class ThoriumCompanionBridge:ModSystem {
         CompanionCrossMod.PlanUse=Plan;CompanionCrossMod.WeaponReach+=Range;
     }
     public override void Unload(){
+        CompanionCrossMod.SupportProgression-=SupportProgression;
         instrumentUse?.Dispose();instrumentSound?.Dispose();instrumentUse=instrumentSound=null;
         instrumentEmpower?.Dispose();instrumentEmpower=null;
         playerLookup?.Dispose();mouseLookup?.Dispose();playerLookup=mouseLookup=null;
@@ -59,8 +63,9 @@ public sealed class ThoriumCompanionBridge:ModSystem {
         CompanionCrossMod.UpdateResources-=Update;CompanionCrossMod.SupportTool=null;CompanionCrossMod.SafeThrow-=Throw;
         CompanionCrossMod.SupportTarget=null;CompanionCrossMod.ResourceReady-=Ready;CompanionCrossMod.WeaponEffect=null;
         CompanionCrossMod.PlanUse=null;CompanionCrossMod.WeaponReach-=Range;
-        resources=new();empower=null;playSound=null;findAlly=null;
+        resources=new();empower=null;playSound=null;findAlly=null;NativeSelfHealing.Clear();
     }
+    static float SupportProgression()=>ThoriumWorld.downedThePrimordials?1.5f:1;
     static bool UsesInspiration(Item item)=>item.ModItem is BardItem;
     static void CaptureResources(CompanionNativeUse use,CompanionStats stats){
         var player=use.Actor.GetModPlayer<ThoriumPlayer>();
@@ -88,8 +93,8 @@ public sealed class ThoriumCompanionBridge:ModSystem {
         target.throwerExhaustionMax=CompanionCombatInheritance.Blend(1200,source.throwerExhaustionMax,ratio);
         target.throwerExhaustionRegenBonus=source.throwerExhaustionRegenBonus*ratio;
     }
-    static bool Support(Item item)=>item.ModItem is ThoriumItem {isHealer:true}&&item.damage<=0&&
-        item.CountsAsClass(ThoriumDamageBase<HealerTool>.Instance)&&
+    static bool Support(Item item)=>item.ModItem is ThoriumItem {isHealer:true} healer&&item.damage<=0&&
+        (item.CountsAsClass(ThoriumDamageBase<HealerTool>.Instance)||healer.healDisplay)&&
         (item.shoot>0||item.ModItem is ThoriumMod.Items.HealerItems.Renew)&&!item.consumable;
     static bool Throw(Item item)=>item.ModItem is ThoriumItem {isThrower:true}&&item.damage>0&&item.shoot>0&&
         item.createTile<0&&item.createWall<0&&item.ammo==0;
@@ -153,7 +158,7 @@ public sealed class ThoriumCompanionBridge:ModSystem {
         // companion only for native self-healing tools; projectile eligibility,
         // healing amount, pickup range and resource cost remain native.
         var healingType=(use.Actor.HeldItem.ModItem as ThoriumItem)?.healType??HealType.None;
-        bool self=healingType is HealType.Player or HealType.AllyAndPlayer;
+        bool self=healingType is HealType.Player or HealType.AllyAndPlayer||NativeSelfHealing.Contains(use.Actor.HeldItem.type);
         Player best=self&&use.State.Vitals.Health<use.State.Vitals.MaxHealth?use.Actor:null;
         float score=best!=null?(float)use.State.Vitals.Health/use.State.Vitals.MaxHealth*1000:float.MaxValue;
         foreach(var player in Main.ActivePlayers){

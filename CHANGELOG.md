@@ -1,5 +1,29 @@
 # Changelog
 
+## 1.2.6 — 2026-11-10
+
+### 简体中文
+
+- 工作与支援装备扩展为五档成长，新增加固与天界升级，补充月后成长并保留旧存档进度。
+- 加快普通召唤武器补齐召唤物的速度，减少复活后的重新召唤等待。
+- 调整近战、鞭子的接敌距离及远程跟随站位，改善大范围危险区域的躲避。
+- 补齐灾厄潜行的消耗、恢复与联机同步，避免连续触发潜行攻击。
+- 适配聚魂圣物，完善相关治疗与自疗判定。
+- 狱火环跟随“更好的体验”的透明度设置，并新增只隐藏光环的开关。
+- 修复继承模式下部分增益重复增加防御、生命／魔力上限和召唤容量的问题。
+- 修复与 Aiko 的世界同开时部分武器无法造成伤害的兼容问题。
+
+### English
+
+- Expanded work and support equipment to five progression tiers, adding Reinforced and Celestial upgrades, post-Moon Lord growth, and migration of existing upgrades.
+- Sped up replenishing minions with standard summon weapons, including after recovery.
+- Adjusted melee and whip approach distances and ranged combat positioning, and improved avoidance of large hazardous areas.
+- Completed Calamity stealth consumption, recovery and multiplayer synchronization to prevent repeated stealth strikes.
+- Added support for Ragnarok's healing relic and refined healing and self-healing checks.
+- Inferno rings now respect Quality of Terraria's opacity setting, with a separate option to hide only the ring.
+- Fixed some buffs applying defense, maximum health/mana and summon capacity bonuses twice in inherited-stat mode.
+- Fixed a compatibility issue with Aiko's world that prevented some weapons from dealing damage.
+
 ## 1.2.5 — 2026-11-10
 
 ### 简体中文

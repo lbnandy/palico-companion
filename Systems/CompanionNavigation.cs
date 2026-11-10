@@ -120,15 +120,21 @@ public sealed class CompanionNavigation
         // A valid ranged position belongs to combat, even when the owner's
         // shoulder is also in range. Stand reuses the existing spacing band.
         bool engage=weapon!=null&&combatTarget!=null&&Vector2.DistanceSquared(combatTarget.Center,CompanionStation.Origin(owner))<CompanionCombatReach.TrackingRange*CompanionCombatReach.TrackingRange&&
-            separation.LengthSquared()<CompanionCombatReach.TrackingRange*CompanionCombatReach.TrackingRange&&
+            CompanionCombatReach.PursuitLocal(weapon,cat,cat.Center,CompanionStation.Origin(owner))&&
             (obscured||CompanionAttackPath.Clear(weapon,(cat.ModProjectile as CompanionCat)?.Weapons,cat.Center,combatTarget.Center));
         if(engage) {
-            destination=obscured?cat.Center:CompanionCombatReach.Stand(weapon,cat,combatTarget,cautious);
+            var combatPoint=obscured?cat.Center:CompanionCombatReach.Stand(weapon,cat,combatTarget,cautious);
+            // A wall-piercing shot does not grant wall-piercing movement.
+            // Reuse the work-flight body clearance test; an obstructed attack
+            // may fire from here, otherwise return through the normal path.
+            if(combatPoint==CompanionStation.Origin(owner))engage=false;
+            else if(ClearFlight(cat.Center,combatPoint)&&!CompanionIncomingDamage.HazardAt(cat,combatPoint))destination=combatPoint;
+            else if(Fits(cat.Center)&&!CompanionIncomingDamage.HazardAt(cat,cat.Center)&&CompanionCombatReach.CanUse(weapon,cat,combatTarget))destination=cat.Center;
+            else engage=false;
         }
         if(!engage&&separation.LengthSquared()>2000*2000) {
             // Vanilla pets retain an emergency relocation for multi-screen gaps.
-            // A valid combat approach may exceed this gap with a wider targeting
-            // setting; keep flying until combat ends or its tracking leash breaks.
+            // Acquiring a distant target must not disable normal owner recovery.
             CompanionTransitEffects.Move(cat,destination);
         }
         bool landed=state.Stationed?TryStand(state.StationPoint,out _):Math.Abs(owner.velocity.Y)<0.6f&&Supported(owner.position,owner.width,owner.height);
@@ -159,6 +165,7 @@ public sealed class CompanionNavigation
         Vector2 desired=delta*0.2f+(engage?(obscured?Vector2.Zero:combatTarget.velocity):CompanionStation.Velocity(owner));
         if(desired.LengthSquared()>speed*speed)desired=desired.SafeNormalize(Vector2.Zero)*speed;
         cat.velocity=Vector2.Lerp(cat.velocity,desired,engage?0.3f:0.15f);
+        if(engage)cat.velocity=Collision.TileCollision(cat.position,cat.velocity,cat.width,cat.height,true);
         if(cat.velocity.LengthSquared()>speed*speed)cat.velocity=cat.velocity.SafeNormalize(Vector2.Zero)*speed;
         if(Math.Abs(cat.velocity.X)>0.5f)cat.direction=Math.Sign(cat.velocity.X);
         else if(delta.LengthSquared()<48*48)cat.direction=owner.direction;

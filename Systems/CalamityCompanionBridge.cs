@@ -22,10 +22,36 @@ namespace PalicoCompanion.Systems;
 public sealed class CalamityCompanionBridge:ModSystem {
     Func<ModProjectile,int> viperChargeFrames;
     int sealedSingularityHoldout=-1,supernovaHoldout=-1;
-    public override void Load(){CompanionCrossMod.PeacefulRespawnLimit+=PeacefulRespawn; CompanionCrossMod.InheritStats+=Stats;CompanionCrossMod.PrepareActor+=Aim;CompanionCrossMod.SafeThrow+=Throw;CompanionCrossMod.UsesPerMaterial=Material;CompanionCrossMod.ChargeComplete.Add(Charge);CompanionCrossMod.WeaponReach+=Range;CompanionCrossMod.ProjectileFlight+=Flight;}
-    public override void Unload(){CompanionCrossMod.PeacefulRespawnLimit-=PeacefulRespawn; CompanionCrossMod.InheritStats-=Stats;CompanionCrossMod.PrepareActor-=Aim;CompanionCrossMod.SafeThrow-=Throw;CompanionCrossMod.UsesPerMaterial=null;CompanionCrossMod.ChargeComplete.Remove(Charge);CompanionCrossMod.WeaponReach-=Range;CompanionCrossMod.ProjectileFlight-=Flight;viperChargeFrames=null;sealedSingularityHoldout=supernovaHoldout=-1;}
+    public override void Load(){CompanionCrossMod.SupportProgression+=SupportProgression;CompanionCrossMod.PeacefulRespawnLimit+=PeacefulRespawn; CompanionCrossMod.InheritStats+=Stats;CompanionCrossMod.UpdateResources+=Resources;CompanionCrossMod.PrepareActor+=Aim;CompanionCrossMod.SafeThrow+=Throw;CompanionCrossMod.UsesPerMaterial=Material;CompanionCrossMod.ChargeComplete.Add(Charge);CompanionCrossMod.WeaponReach+=Range;CompanionCrossMod.ProjectileFlight+=Flight;}
+    public override void Unload(){CompanionCrossMod.SupportProgression-=SupportProgression;CompanionCrossMod.PeacefulRespawnLimit-=PeacefulRespawn; CompanionCrossMod.InheritStats-=Stats;CompanionCrossMod.UpdateResources-=Resources;CompanionCrossMod.PrepareActor-=Aim;CompanionCrossMod.SafeThrow-=Throw;CompanionCrossMod.UsesPerMaterial=null;CompanionCrossMod.ChargeComplete.Remove(Charge);CompanionCrossMod.WeaponReach-=Range;CompanionCrossMod.ProjectileFlight-=Flight;viperChargeFrames=null;sealedSingularityHoldout=supernovaHoldout=-1;}
     // CalamityPlayer.UpdateDead caps non-boss respawns at 180 ticks.
     static int PeacefulRespawn(int normal)=>Math.Min(normal,180);
+    static float SupportProgression()=>CalamityMod.DownedBossSystem.downedExoMechs||CalamityMod.DownedBossSystem.downedCalamitas?6:
+        CalamityMod.DownedBossSystem.downedYharon?4:CalamityMod.DownedBossSystem.downedDoG?3:
+        CalamityMod.DownedBossSystem.downedPolterghast?2:CalamityMod.DownedBossSystem.downedProvidence?1.5f:1;
+    static void Resources(CompanionNativeUse use){
+        if(CompanionNetwork.Client)return;
+        // Native order: rebuild equipment, update stealth, then ItemCheck.
+        // This authority-only stage owns recovery and normal attack costs;
+        // held weapons retain their native, projectile-driven consumption.
+        using(new CompanionNativeUse.Scope(use)){
+            // Calamity previews stealth damage using the hovered weapon. The
+            // human's tooltip must not change the companion's combat stats.
+            var hover=Main.HoverItem;
+            try{
+                Main.HoverItem=use.Actor.HeldItem;
+                var player=use.Actor.GetModPlayer<CalamityPlayer>();
+                player.UpdateRogueStealth();
+                // PostUpdateMiscEffects applies the native computed bonus after
+                // its passive stages, except for Elephant Killer's own resource.
+                bool elephant=use.Actor.HeldItem.ModItem is ElephantKiller;
+                if(elephant&&!player.heldElephantKillerLastFrame)player.rogueStealth=0f;
+                player.heldElephantKillerLastFrame=elephant;
+                if(!elephant)use.Actor.GetDamage<CalamityMod.RogueDamageClass>()+=player.stealthDamage;
+            }
+            finally{Main.HoverItem=hover;}
+        }
+    }
     static void Stats(Player actor,Player owner,float ratio){
         var target=actor.GetModPlayer<CalamityPlayer>();var source=owner.GetModPlayer<CalamityPlayer>();
         target.critDamage=source.critDamage*ratio;

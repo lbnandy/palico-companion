@@ -1,4 +1,8 @@
-- Fixed a compatibility issue with Ultimate Pet Force that could make the Palico disappear in multiplayer.
-- In independent equipment mode, mining, woodcutting, building, and fishing bonuses now use the Palico's own equipment effects.
-- Fixed some armor set effects remaining active after removing armor.
-- Added native visuals and animations for ice, beetle, and solar shields.
+- Expanded work and support equipment to five progression tiers, adding Reinforced and Celestial upgrades, post-Moon Lord growth, and migration of existing upgrades.
+- Sped up replenishing minions with standard summon weapons, including after recovery.
+- Adjusted melee and whip approach distances and ranged combat positioning, and improved avoidance of large hazardous areas.
+- Completed Calamity stealth consumption, recovery and multiplayer synchronization to prevent repeated stealth strikes.
+- Added support for Ragnarok's healing relic and refined healing and self-healing checks.
+- Inferno rings now respect Quality of Terraria's opacity setting, with a separate option to hide only the ring.
+- Fixed some buffs applying defense, maximum health/mana and summon capacity bonuses twice in inherited-stat mode.
+- Fixed a compatibility issue with Aiko's world that prevented some weapons from dealing damage.

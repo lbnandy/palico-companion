@@ -13,7 +13,10 @@ namespace PalicoCompanion.Systems;
 [ExtendsFromMod("ImproveGame")]
 [JITWhenModsEnabled("ImproveGame")]
 public sealed class QualityCompanionBridge:ModSystem {
-    public override void Load(){CompanionCrossMod.PeacefulRespawnLimit+=PeacefulRespawn; CompanionCrossMod.InfiniteStack=Threshold;CompanionCrossMod.MinedOre=Chain;}
+    public override void Load(){CompanionCrossMod.PeacefulRespawnLimit+=PeacefulRespawn; CompanionCrossMod.InfiniteStack=Threshold;CompanionCrossMod.MinedOre=Chain;CompanionCrossMod.InfernoOpacity=InfernoOpacity;}
+    // Read the registered client config live, just as QoT's native ring patch
+    // does. Avoid its version-dependent Instance convenience property.
+    static float InfernoOpacity()=>ModContent.GetInstance<UIConfigs>().InfernoTransparency;
     ModPlayer placement;
     FieldInfo tileSpeed,wallSpeed;
     public override void PostSetupContent(){
@@ -26,7 +29,7 @@ public sealed class QualityCompanionBridge:ModSystem {
         if(tileSpeed!=null&&wallSpeed!=null)CompanionCrossMod.PrepareActor+=PreparePlacement;
     }
     void PreparePlacement(Player actor,Vector2 aim){var cache=actor.GetModPlayer(placement);tileSpeed.SetValue(cache,actor.tileSpeed);wallSpeed.SetValue(cache,actor.wallSpeed);}
-    public override void Unload(){CompanionCrossMod.PeacefulRespawnLimit-=PeacefulRespawn; CompanionCrossMod.InfiniteStack=null;CompanionCrossMod.MinedOre=null;CompanionCrossMod.PrepareActor-=PreparePlacement;placement=null;tileSpeed=wallSpeed=null;}
+    public override void Unload(){CompanionCrossMod.PeacefulRespawnLimit-=PeacefulRespawn; CompanionCrossMod.InfiniteStack=null;CompanionCrossMod.MinedOre=null;CompanionCrossMod.InfernoOpacity=null;CompanionCrossMod.PrepareActor-=PreparePlacement;placement=null;tileSpeed=wallSpeed=null;}
     static int PeacefulRespawn(int normal){
         var config=ModContent.GetInstance<ImproveConfigs>();
         int reduction=System.Math.Clamp(config.ResurrectionTimeShortened,0,100);

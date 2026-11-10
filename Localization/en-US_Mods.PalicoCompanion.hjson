@@ -371,6 +371,11 @@ Configs: {
 			Tooltip: Play sounds when a Palico teleports, is recalled or stowed, or reappears. Turning this off keeps the particles and does not affect meows or player teleport sounds. In multiplayer, this only changes what you hear.
 		}
 
+		InfernoRing: {
+			Label: Show Inferno ring
+			Tooltip: Show Palicos' Inferno rings. Uses Quality of Terraria's Inferno ring opacity when installed. Turning this off only hides the rings; the buff and damage remain active. In multiplayer, this only changes your view.
+		}
+
 		CatSounds: {
 			Label: Palico sounds
 			Tooltip: Quiet Terraria cat sounds when chatting, hurt or petted, with limits on repeated playback.
@@ -1343,6 +1348,8 @@ TrainingSpeech: {
 	PlaceBench: Got the workbench! Put it down and right-click for my gear recipes.
 	Equip: Pop that gear in the slots beside my bag. Let me try it!
 	Belt: An Expanded Toolbelt means room for another support item! Recipe's in the guide.
+	Reinforced: Cobalt or Palladium Bars! A Reinforced Toolkit will give my gear a boost!
+	Celestial: Luminite and four kinds of fragments! We can make a Celestial Toolkit, meow!
 	Improved: Hallowed Bars! We can make an Improved Toolkit and give my gear an upgrade!
 	Master: Ectoplasm for a Masterwork Toolkit! I'll hold it... Just don't let it wriggle.
 }
@@ -1363,6 +1370,8 @@ Discovery: {
 CatWorkbenchName: Palico Workbench
 
 TrainingNames: {
+	ReinforcedTools: Reinforced Toolkit
+	CelestialTools: Celestial Toolkit
 	GigaBarrelBomb: Giga Barrel Bomb
 	HoneyCage: Vigorwasp Cage
 	GuardShield: Guardian Shield

@@ -1,35 +1,22 @@
 using System;
 using System.Linq;
-using System.Text.RegularExpressions;
 using Terraria.ModLoader;
 
 namespace PalicoCompanion.Systems;
 
 internal static class TrainingGuideCopy {
-    // Resolve the catalog's three-value expressions, rather than maintaining
-    // another set of balance numbers for the guide, tooltips and HUD.
-    static readonly Regex TierValues=new(@"(?<v>\d+(?:\.\d+)?%?)\s*/\s*(?<v>\d+(?:\.\d+)?%?)\s*/\s*(?<v>\d+(?:\.\d+)?%?)",RegexOptions.Compiled);
-    // Explosive damage also follows the world's Hardmode state, so current
-    // values use the same resolver as the server-authoritative projectile.
-    static string TierValue(Match match,int kind,int tier)=>kind switch {
-        7=>CompanionTraining.BombDamage(tier).ToString(),
-        TrainingCatalog.Barrel=>CompanionBarrelCharge.Damage(tier).ToString(),
-        _=>match.Groups["v"].Captures[Math.Clamp(tier,0,2)].Value
-    };
-    internal static string Detail(int kind,int tier,bool compare=false){
-        string text=TrainingCatalog.Entries[kind].Detail;
-        return CooldownText(compare?text:TierValues.Replace(text,m=>TierValue(m,kind,tier)),kind,tier,compare);
-    }
-    internal static string Tooltip(int kind,int tier,bool compare=false){
-        // Short copy reuses the guide's tier values; balance numbers have one
-        // localized source, rather than drifting between two descriptions.
-        var entry=TrainingCatalog.Entries[kind];
-        object[] values=TierValues.Matches(entry.Detail).Select(m=>(object)(compare?m.Value:TierValue(m,kind,tier))).ToArray();
-        return CooldownText(CompanionText.Get("ItemTooltips."+entry.Key,values),kind,tier,compare);
+    internal static string Detail(int kind,int tier,bool compare=false)=>WithNotes(
+        CooldownText(CompanionText.Get("Catalog."+TrainingCatalog.Entries[kind].Key,compare?TrainingTiers.CompareValues(kind):TrainingTiers.Values(kind,tier)),kind,tier,compare),kind,tier,compare);
+    internal static string Tooltip(int kind,int tier,bool compare=false)=>WithNotes(
+        CooldownText(CompanionText.Get("ItemTooltips."+TrainingCatalog.Entries[kind].Key,compare?TrainingTiers.CompareValues(kind):TrainingTiers.Values(kind,tier)),kind,tier,compare),kind,tier,compare);
+    static string WithNotes(string text,int kind,int tier,bool compare){
+        if(tier!=TrainingTiers.Last&&!compare)return text;
+        string key=kind switch {0=>"CelestialHealing",1=>"CelestialShield",3=>"CelestialMana",7 or TrainingCatalog.Barrel=>"CelestialDamage",_=>null};
+        return key==null?text:text+"\n"+CompanionText.Get("Catalog."+key);
     }
     static string CooldownText(string text,int kind,int tier,bool compare){
-        int first=CompanionTraining.CooldownSeconds(kind,0),last=CompanionTraining.CooldownSeconds(kind,2);
-        string value=compare&&first!=last?$"{first} / {CompanionTraining.CooldownSeconds(kind,1)} / {last}":CompanionTraining.CooldownSeconds(kind,tier).ToString();
+        var values=Enumerable.Range(0,TrainingTiers.Last+1).Select(t=>CompanionTraining.CooldownSeconds(kind,t)).ToArray();
+        string value=compare&&values.Distinct().Count()>1?string.Join(" / ",values):CompanionTraining.CooldownSeconds(kind,tier).ToString();
         return text.Replace("<cooldown>",value);
     }
     internal static string DirectInstruction(){

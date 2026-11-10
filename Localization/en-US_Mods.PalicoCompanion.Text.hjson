@@ -230,7 +230,7 @@ TrainingPanel: {
 	AllReady: All set! Browse the categories for gear and recipes.
 	CurrentTier: Current tier
 	CompareTiers: Compare tiers
-	TierLegend: Basic / Improved / Masterwork
+	TierLegend: Basic / Reinforced / Improved / Masterwork / Celestial
 	CurrentEffect: Current effects · {0}
 	Ingredients: Materials · Carried / Needed
 	SwitchRecipe: Switch recipe ({0}/{1})
@@ -240,14 +240,13 @@ TrainingPanel: {
 
 TrainingProgress: {
 	Used: Already used
-	NeedsImproved: Use an Improved Toolkit first
+	NeedsTier: Requires the {0} tier first
 	ReadyToUse: In inventory · Ready to use
 	Craftable: Ready to craft
 	NeedsStation: Materials ready · Check crafting requirements
 	MissingMaterials: Missing materials
-	NextImproved: Next: Improved Toolkit (Hallowed Bars, Souls of Light and Night).
-	NextMasterwork: Next: Masterwork Toolkit (Chlorophyte Bars, Ectoplasm and Cogs).
-	MaxTier: Masterwork tier reached. Choose gear to suit your weapon and plans.
+	NextTier: Next: {0}. See Upgrades & crafting for the recipe.
+	MaxTier: Celestial tier reached. Choose gear to suit your weapon and plans.
 }
 
 TrainingStatus: {
@@ -292,20 +291,20 @@ TreeAssist: {
 }
 
 Catalog: {
-	GigaBarrelBomb: Hoists a large barrel and charges nearby ground enemies, dealing 240 / 960 / 2400 damage in an 18×18-tile area; <cooldown>-second cooldown. Before upgrading, base damage rises to 480 in Hardmode. Automatically targets groups or grounded bosses; manual use also targets single enemies. Requires a safe ground route. Airborne use first finds a safe place to land; this can also happen automatically during combat. Cancelled charges do not spend the full cooldown. Does not damage tiles, players or your Palico.
-	HoneyCage: Restores 15 / 30 / 50 life to you immediately, then another 5 / 10 / 15 life over 5 seconds. Triggers at 70% life or below when you are missing at least 20 / 40 / 65 life. <cooldown>-second cooldown. Works during Potion Sickness.
-	GuardShield: Blocks one heavy hit against you, preventing up to 15 / 30 / 40 damage. <cooldown>-second cooldown. When you are above 70% life, it can instead protect your Palico at 35% life or below, or from a lethal hit. Both uses share a cooldown.
-	CleansingPot: Removes one common debuff from you, such as Poisoned, On Fire! or Slow, prioritizing more harmful effects. Grants immunity to that debuff for 2 / 3 / 4 seconds afterward. <cooldown>-second cooldown. Minor debuffs about to expire do not trigger it. Does not remove Potion Sickness or Mana Sickness.
-	CheerBell: Restores 20 / 40 / 60 mana to you or your Palico and reduces the recipient's mana cost by 10% / 15% / 20% for 6 seconds. <cooldown>-second cooldown. Prioritizes you when casting below half mana; otherwise helps your Palico while casting or waiting for mana. The recipient must be missing at least the restoration amount or half their maximum mana, whichever is lower.
-	BattleDrum: Triggers when your Palico starts attacking: +20% / 25% / 30% damage and +10% / 15% / 20% attack speed for 10 seconds. <cooldown>-second cooldown. During the effect, your Palico's summons deal +25% / 35% / 45% damage.
-	PiercingBoomerang: On hit, you and your Palico gain 4 / 8 / 12 armor penetration against the target for 15 / 18 / 20 seconds. <cooldown>-second cooldown. Prioritizes stronger enemies and avoids targets with plenty of time left on this effect. Multiple applications do not stack.
-	UpdraftBag: While you are airborne, unmounted and holding Jump with little flight time left, restores 0.6 / 0.9 / 1.2 seconds of flight. Without wings, gives you a small upward boost instead. <cooldown>-second cooldown.
-	BombPot: Your Palico throws a bomb dealing 120 / 480 / 1200 area damage in a 10×10-tile area. Before upgrading, base damage rises to 240 in Hardmode. <cooldown>-second cooldown. Does not destroy blocks. Aims ahead of moving targets and prioritizes nearby groups of visible enemies.
-	PlunderKnife: Enemies damaged by you or your Palico can drop extra loot on defeat, regardless of the distance between you. Normal enemies have a 10% / 12% / 15% chance to drop 1 extra stackable loot item. Vanilla boss materials yield an average of 5% / 7.5% / 10% extra. Excludes Treasure Bags, unstackable items, coins, Hearts, Stars, biome keys, and normal enemies' Cyan-rarity or higher items. Does not trigger on friendly creatures or statue-spawned enemies. With multiple players, normal enemies use only the highest tier; boss bag materials are checked separately for each player.
-	MiningKit: Your Palico mines 20% / 25% / 30% faster. Ore detection, digging assistance and pickaxe reach each extend by 1 / 2 / 3 tiles. Does not increase pickaxe power or change your own mining stats.
-	GardenKit: Chopping trees or harvesting mature herbs with either you or your Palico yields extra resources, regardless of the distance between you. Average extra yield: 8% / 12% / 16% wood and 20% / 30% / 40% herbs, awarded at random. Does not increase seeds, gems or furniture drops, or apply to placed wood blocks. Your Palico gains 5 / 10 / 15 fishing power.
+	GigaBarrelBomb: Hoists a large barrel and charges nearby ground enemies, dealing {0} damage in an 18×18-tile area; <cooldown>-second cooldown. Before upgrading, base damage rises to 480 in Hardmode. Automatically targets groups or grounded bosses; manual use also targets single enemies. Requires a safe ground route. Airborne use first finds a safe place to land; this can also happen automatically during combat. Cancelled charges do not spend the full cooldown. Does not damage tiles, players or your Palico.
+	HoneyCage: Restores {0} life to you immediately, then another {1} life over 5 seconds. Triggers at 70% life or below when you are missing at least {2} life. <cooldown>-second cooldown. Works during Potion Sickness.
+	GuardShield: Blocks one heavy hit against you, preventing up to {0} damage. <cooldown>-second cooldown. When you are above 70% life, it can instead protect your Palico at 35% life or below, or from a lethal hit. Both uses share a cooldown.
+	CleansingPot: Removes one common debuff from you, such as Poisoned, On Fire! or Slow, prioritizing more harmful effects. Grants immunity to that debuff for {0} seconds afterward. <cooldown>-second cooldown. Minor debuffs about to expire do not trigger it. Does not remove Potion Sickness or Mana Sickness.
+	CheerBell: Restores {0} mana to you or your Palico and reduces the recipient's mana cost by {1} for 6 seconds. <cooldown>-second cooldown. Prioritizes you when casting below half mana; otherwise helps your Palico while casting or waiting for mana. The recipient must be missing at least the restoration amount or half their maximum mana, whichever is lower.
+	BattleDrum: Triggers when your Palico starts attacking: +{0} damage and +{1} attack speed for 10 seconds. <cooldown>-second cooldown. During the effect, your Palico's summons deal +{2} damage.
+	PiercingBoomerang: On hit, you and your Palico gain {0} armor penetration against the target for {1} seconds. <cooldown>-second cooldown. Prioritizes stronger enemies and avoids targets with plenty of time left on this effect. Multiple applications do not stack.
+	UpdraftBag: While you are airborne, unmounted and holding Jump with little flight time left, restores {0} seconds of flight. Without wings, gives you a small upward boost instead. <cooldown>-second cooldown.
+	BombPot: Your Palico throws a bomb dealing {0} area damage in a 10×10-tile area. Before upgrading, base damage rises to 240 in Hardmode. <cooldown>-second cooldown. Does not destroy blocks. Aims ahead of moving targets and prioritizes nearby groups of visible enemies.
+	PlunderKnife: Enemies damaged by you or your Palico can drop extra loot on defeat, regardless of the distance between you. Normal enemies have a {0} chance to drop 1 extra stackable loot item. Vanilla boss materials yield an average of {1} extra. Excludes Treasure Bags, unstackable items, coins, Hearts, Stars, biome keys, and normal enemies' Cyan-rarity or higher items. Does not trigger on friendly creatures or statue-spawned enemies. With multiple players, normal enemies use only the highest tier; boss bag materials are checked separately for each player.
+	MiningKit: Your Palico mines {0} faster. Ore detection, digging assistance and pickaxe reach each extend by {1} tiles. Does not increase pickaxe power or change your own mining stats.
+	GardenKit: Chopping trees or harvesting mature herbs with either you or your Palico yields extra resources, regardless of the distance between you. Average extra yield: {0} wood and {1} herbs, awarded at random. Does not increase seeds, gems or furniture drops, or apply to placed wood blocks. Your Palico gains {2} fishing power.
 	ExpandedBelt: Permanently adds one Palico support slot. Can only be used once.
-	ImprovedTools: Permanently upgrades Palico support and work gear to the Improved tier. Can only be used once.
+	ImprovedTools: Permanently upgrades Palico work and support gear to the Improved tier. Requires the Reinforced Toolkit first.
 	MasterTools: Permanently upgrades Palico support and work gear to the Masterwork tier. Requires the Improved Toolkit first.
 	CatWorkbench: Craft Palico gear, the Expanded Toolbelt and toolkit upgrades here. Right-click to open the Palico Guide.
 	Basic: Basic
@@ -322,8 +321,16 @@ Catalog: {
 	CurrentTier: "Current tier: "
 	Legacy: Legacy modifications are now built in. Modification materials are refunded when this enters your inventory; the gear is kept.
 	SupportSlotAdded: Support slots +1
-	ImprovedUpgrade: Palico tools · Improved
-	MasterworkUpgrade: Palico tools · Masterwork
+	ReinforcedTools: Permanently upgrades Palico work and support gear to the Reinforced tier.
+	CelestialTools: Permanently upgrades Palico work and support gear to the Celestial tier. Requires the Masterwork Toolkit first.
+	Reinforced: Reinforced
+	Celestial: Celestial
+	CobaltBars: Cobalt / Palladium Bars
+	ToolsUpgraded: Palico tools · {0}
+	CelestialHealing: Celestial: restores 1 extra life immediately per 10 maximum life above 500. The missing-life threshold increases accordingly.
+	CelestialShield: Celestial: blocks additional damage equal to 8% of the protected character's maximum life above 500, rounded down.
+	CelestialMana: Celestial: restores 1 extra mana per 5 maximum mana above 200.
+	CelestialDamage: Celestial: damage scales with the current world's post-Moon Lord progress. Thorium's Primordials grant ×1.5. Calamity's Providence, Polterghast, Devourer of Gods, Yharon, and Exo Mechs or Supreme Calamitas grant ×1.5, ×2, ×3, ×4, and ×6 respectively. Only the highest milestone applies.
 }
 
 Guide: {
@@ -369,7 +376,7 @@ Guide: {
 
 		[Support slots and upgrades]
 		The Expanded Toolbelt adds 1 support slot. Using a Demon Heart adds another in Expert or Master worlds. In Classic worlds, gear from the extra Expert slot returns to the backpack, or is held safely if full.
-		Use Improved then Masterwork Toolkits to strengthen work and support gear. Some skill cooldowns also decrease. See Upgrades & crafting for recipes.
+		Use Reinforced, Improved, Masterwork, then Celestial Toolkits to strengthen work and support gear. Some skill cooldowns also decrease. See Upgrades & crafting for recipes.
 		'''
 	Reserves:
 		'''
@@ -519,6 +526,8 @@ Storage: {
 }
 
 ItemTooltips: {
+	CelestialTools: Permanently upgrades Palico work and support gear to the Celestial tier. Requires the Masterwork Toolkit first.
+	ReinforcedTools: Permanently upgrades Palico work and support gear to the Reinforced tier.
 	GigaBarrelBomb:
 		'''
 		Charges ground enemies with a barrel, dealing {0} damage in an 18×18-tile area
@@ -599,7 +608,7 @@ ItemTooltips: {
 	ImprovedTools:
 		'''
 		Permanently upgrades Palico support and work gear to the Improved tier
-		Can only be used once
+		Requires the Reinforced Toolkit first
 		'''
 	MasterTools:
 		'''

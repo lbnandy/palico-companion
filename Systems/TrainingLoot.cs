@@ -33,15 +33,15 @@ public sealed class TrainingLoot:GlobalItem {
             if(snapshot.BagHandled)return;snapshot.BagHandled=true;
             var rates=new List<DropRateInfo>();foreach(var rule in Main.ItemDropsDB.GetRulesForItemID(item.type))rule.ReportDroprates(rates,new DropRateInfoChainFeed(1));
             foreach(var e in eligible){var p=CompanionNativeUse.Current?.State.Player.whoAmI==e.Owner?CompanionNativeUse.Current.State.Player:Main.player[e.Owner];var info=new DropAttemptInfo{player=p,item=item.type,npc=npc,IsExpertMode=Main.expertMode,IsMasterMode=Main.masterMode,rng=Main.rand};
-                foreach(var rate in rates.Where(r=>BossMaterials.Contains(r.itemId))){if(rate.conditions!=null&&rate.conditions.Any(c=>!c.CanDrop(info)))continue;if(Main.rand.NextFloat()>=rate.dropRate)continue;int amount=Bonus(Main.rand.Next(rate.stackMin,rate.stackMax+1),new[]{.05f,.075f,.10f}[e.Tier]);if(amount>0)Spawn(npc,rate.itemId,amount,e.Owner);}
+                foreach(var rate in rates.Where(r=>BossMaterials.Contains(r.itemId))){if(rate.conditions!=null&&rate.conditions.Any(c=>!c.CanDrop(info)))continue;if(Main.rand.NextFloat()>=rate.dropRate)continue;int amount=Bonus(Main.rand.Next(rate.stackMin,rate.stackMax+1),TrainingTiers.At(e.Tier).BossLoot/100f);if(amount>0)Spawn(npc,rate.itemId,amount,e.Owner);}
             }return;
         }
         if(item.type is ItemID.JungleKey or ItemID.CorruptionKey or ItemID.CrimsonKey or ItemID.HallowedKey or ItemID.FrozenKey or ItemID.DungeonDesertKey)return;
         if(item.type is ItemID.CopperCoin or ItemID.SilverCoin or ItemID.GoldCoin or ItemID.PlatinumCoin or ItemID.Heart or ItemID.Star||item.maxStack<=1||!npc.boss&&item.rare>=ItemRarityID.Cyan)return;
         int tier=eligible.Max(e=>e.Tier);int bonus;
         bool boss=npc.boss||npc.type is NPCID.EaterofWorldsHead or NPCID.EaterofWorldsBody or NPCID.EaterofWorldsTail||npc.realLife>=0&&Main.npc[npc.realLife].boss;
-        if(boss){if(!BossMaterials.Contains(item.type))return;bonus=Bonus(item.stack,new[]{.05f,.075f,.10f}[tier]);}
-        else bonus=Main.rand.NextFloat()<new[]{.10f,.12f,.15f}[tier]?1:0;
+        if(boss){if(!BossMaterials.Contains(item.type))return;bonus=Bonus(item.stack,TrainingTiers.At(tier).BossLoot/100f);}
+        else bonus=Main.rand.NextFloat()<TrainingTiers.At(tier).Loot/100f?1:0;
         if(bonus>0&&Spawn(npc,item.type,bonus,-1))Notice(eligible.First(e=>e.Tier==tier).Owner,item.type,bonus);
     }
     static void Notice(int owner,int type,int count){var s=Main.player[owner].GetModPlayer<CompanionPlayer>();TrainingWorkFeedback.Trigger(s,8);if(s.Cat is {} cat)s.Expression.TrySay(s,cat,"Loot",Terraria.GameContent.UI.EmoteID.EmoteHappiness,context:CompanionText.MessageFull(Lang.GetItemName(type).Key)+" ×"+count,variant:"Plunder");}

@@ -78,6 +78,18 @@ public sealed partial class CompanionNativeUse {
     void SummonAttempt(Item item,bool started){
         // Failed CanUse/placement must not monopolize the main weapon. Sentries
         // also need time to settle before considering another deployment.
-        summonRetryAt=Main.GameUpdateCount+(ulong)(started?CompanionWeaponPolicy.Sentry(item)?120:Math.Max(6,item.useAnimation):60);
+        // Successful minion casts already obey ItemCheck's adjusted animation,
+        // item time and reuse delay. A second base-animation timer ignores use
+        // speed bonuses and can switch away between otherwise continuous casts.
+        summonRetryAt=started&&!CompanionWeaponPolicy.Sentry(item)?0:Main.GameUpdateCount+(ulong)(started?120:60);
     }
+}
+
+// Speed up the existing sequence, not projectile creation. ItemCheck still
+// pays each cast and runs the staff's slot/group rules. Sentry deployment and
+// channeled summons keep their native cadence and projectile-driven timing.
+public sealed class CompanionSummonCasting:ModPlayer {
+    public override float UseSpeedMultiplier(Item item)=>CompanionNativeUse.Current is {} use&&use.Actor==Player&&
+        use.HeldGearSlot==CompanionWeapons.SummonSlot&&!item.channel&&!CompanionWeaponPolicy.Sentry(item)&&
+        CompanionNativeUse.Summoning(item)?2.5f:1f;
 }

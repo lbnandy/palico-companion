@@ -374,6 +374,11 @@ Configs: {
 			Tooltip: 播放呆猫传送、召回、收起和重新出现时的音效。关闭后仍显示粒子，不影响猫叫或玩家的传送音效；联机时仅影响自己听到的声音。
 		}
 
+		InfernoRing: {
+			Label: 显示狱火光环
+			Tooltip: 显示呆猫身上的狱火光环；安装「更好的体验」时，沿用其狱火圈不透明度设置。关闭只隐藏光环，药水增益和伤害照常生效；联机时仅影响自己看到的画面。
+		}
+
 		CatSounds: {
 			Label: 播放猫叫声
 			Tooltip: 在说话、受伤、抚摸等情境播放猫叫，避免连续重复。
@@ -1346,6 +1351,8 @@ TrainingSpeech: {
 	PlaceBench: 老大，把工作台摆下来喵！右键就能看我能用的装备。
 	Equip: 老大，这件是给我的喵？放到我背包旁边的装备格就能用啦！
 	Belt: 老大，我想多带一件支援装备喵！指南里有扩容工具带的做法。
+	Reinforced: 老大，用钴锭或钯金锭能做加固工具组喵！我的装备还能更好用。
+	Celestial: 老大，用夜明锭和四种碎片能做天界工具组喵！指南里有做法。
 	Improved: 老大，有神圣锭了喵！做个改良工具组给我用，装备就能升级啦。
 	Master: 老大，用灵气能做精工工具组喵！做一个给我用，我的装备还能再升级！
 }
@@ -1366,6 +1373,8 @@ Discovery: {
 CatWorkbenchName: 呆猫工作台
 
 TrainingNames: {
+	ReinforcedTools: 加固工具组
+	CelestialTools: 天界工具组
 	GigaBarrelBomb: 特大桶爆弹
 	HoneyCage: 蜜虫笼
 	GuardShield: 守护盾

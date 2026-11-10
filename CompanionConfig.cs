@@ -106,6 +106,7 @@ public sealed class CompanionConfig : ModConfig {
     [DefaultValue(true)] public bool Discoveries = true;
     [DefaultValue(true)] public bool Chatter = true;
     [DefaultValue(true)] public bool Emotes = true;
+    [DefaultValue(true)] public bool InfernoRing = true;
     [DefaultValue(true)] public bool CatSounds = true;
     [DefaultValue(true)] public bool TeleportSounds = true;
     [DefaultValue(CatCartMode.EveryTime),Dropdown] public CatCartMode CatCart = CatCartMode.EveryTime;

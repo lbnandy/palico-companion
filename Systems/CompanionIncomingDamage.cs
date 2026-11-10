@@ -14,10 +14,22 @@ namespace PalicoCompanion.Systems;
 // Hurt or equipment hooks against the owner's Player to injure their companion.
 public sealed class CompanionIncomingDamage : ModSystem {
     static readonly List<CompanionCat> cats=new();
+    // Observe hazards only after the native damage gate. In particular, arena
+    // borders have custom collision and telegraphs need not deal damage yet.
+    static readonly Dictionary<int,(Projectile Shot,ModProjectile Instance,int Identity,Rectangle Box,ulong Tick)> hazards=new();
+    internal static bool HazardAt(Projectile cat,Vector2 center){
+        var body=new Rectangle((int)(center.X-cat.width/2f),(int)(center.Y-cat.height/2f),cat.width,cat.height);
+        foreach(var entry in hazards.Values){
+            var shot=entry.Shot;
+            if(shot.active&&shot.hostile&&shot.damage>0&&shot.identity==entry.Identity&&ReferenceEquals(shot.ModProjectile,entry.Instance)&&
+                Main.GameUpdateCount-entry.Tick<=1&&shot.Colliding(entry.Box,body))return true;
+        }
+        return false;
+    }
     internal static void Register(CompanionCat cat){if(!CompanionNetwork.Client&&!cats.Contains(cat))cats.Add(cat);}
     internal static void Remove(CompanionCat cat)=>cats.Remove(cat);
-    public override void OnWorldLoad()=>cats.Clear();
-    public override void OnWorldUnload()=>cats.Clear();
+    public override void OnWorldLoad(){cats.Clear();hazards.Clear();}
+    public override void OnWorldUnload(){cats.Clear();hazards.Clear();}
     public override void Load()=>IL_Projectile.Damage+=Patch;
     public override void Unload()=>IL_Projectile.Damage-=Patch;
     static void Patch(ILContext il){
@@ -51,6 +63,9 @@ public sealed class CompanionIncomingDamage : ModSystem {
     }
     static void Hit(Projectile shot,Rectangle box){
         if(CompanionNetwork.Client||!shot.hostile||shot.damage<=0)return;
+        if(shot.velocity.LengthSquared()<.25f||box.Width>128||box.Height>128)
+            hazards[shot.whoAmI]=(shot,shot.ModProjectile,shot.identity,box,Main.GameUpdateCount);
+        else hazards.Remove(shot.whoAmI);
         // Scan actual companions, not all projectiles for every hostile shot.
         for(int i=cats.Count-1;i>=0;i--){
             var cat=cats[i];var p=cat.Projectile;

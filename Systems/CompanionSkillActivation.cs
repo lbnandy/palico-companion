@@ -11,7 +11,7 @@ public sealed partial class CompanionTraining {
     internal void ReconcileEffects(CompanionPlayer s) {
         if(Find(s,4)<0)Drum=0;
         if(Find(s,3)<0)ManaDance=0;
-        if(Find(s,0)<0)SlowHealing=0;
+        if(Find(s,0)<0)SlowHealing=SlowHealingRemaining=0;
         if(Find(s,2)<0)CleanseTime=0;
     }
     internal bool Activate(CompanionPlayer s,int kind,bool manual,out string message) {
@@ -32,7 +32,7 @@ public sealed partial class CompanionTraining {
         switch(kind) {
             case 0:
                 message=CompanionText.Message("CompanionSkillActivation.NoHealingNeeded");
-                if(p.statLife>=p.statLifeMax2||!manual&&(p.statLifeMax2-p.statLife<new[]{20,40,65}[Tier]||p.statLife>p.statLifeMax2*.7f))return false;
+                if(p.statLife>=p.statLifeMax2||!manual&&(p.statLifeMax2-p.statLife<TrainingTiers.Honey(Tier,p.statLifeMax2)+Values.HoneyOverTime||p.statLife>p.statLifeMax2*.7f))return false;
                 break;
             case 2:
                 debuff=MostUrgentDebuff(p,manual);
@@ -63,12 +63,12 @@ public sealed partial class CompanionTraining {
         if(CompanionNetwork.Client){message=CompanionText.Message("CompanionSkillActivation.ServerPending");return false;}
         if(!Use(s,kind,kind is 0 or 2||kind==3&&manaTarget==0?p.Center:null))return false;
         switch(kind) {
-            case 0:OwnerEffect(s,0,new[]{15,30,50}[Tier]);SlowHealing=EffectDuration(0);break;
+            case 0:OwnerEffect(s,0,TrainingTiers.Honey(Tier,p.statLifeMax2));SlowHealing=EffectDuration(0);SlowHealingRemaining=Values.HoneyOverTime;break;
             case 2:CleanseType=debuff;CleanseTime=EffectDuration(2);OwnerEffect(s,2,debuff);break;
             case 3:
                 ManaDance=EffectDuration(3);ManaTarget=manaTarget;
-                if(manaTarget==0)OwnerEffect(s,1,new[]{20,40,60}[Tier]);
-                else {int restored=Math.Min(new[]{20,40,60}[Tier],s.Vitals.MaxMana-s.Vitals.Mana);s.Vitals.Mana+=restored;CompanionFeedback.Show(2,cat.Center,restored,"skill");}
+                if(manaTarget==0)OwnerEffect(s,1,TrainingTiers.Mana(Tier,p.statManaMax2));
+                else {int restored=Math.Min(TrainingTiers.Mana(Tier,s.Vitals.MaxMana),s.Vitals.MaxMana-s.Vitals.Mana);s.Vitals.Mana+=restored;CompanionFeedback.Show(2,cat.Center,restored,"skill");}
                 break;
             case 4:Drum=EffectDuration(4);break;
             case 5:case 7:

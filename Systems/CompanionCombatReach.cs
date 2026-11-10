@@ -32,7 +32,11 @@ internal static class CompanionCombatReach {
             ProjectileID.GolemFist=>500,ProjectileID.ChainGuillotine=>525,_=>700});
         if(shot.aiStyle==ProjAIStyleID.Flail)return cat?.ModProjectile is CompanionCat c?c.Weapons.FlailRange:100;
         if(shot.aiStyle==ProjAIStyleID.Yoyo)return Math.Clamp(ProjectileID.Sets.YoyosMaximumRange[shot.type]*0.85f,80,700);
-        if(ProjectileID.Sets.IsAWhip[shot.type])return 220;
+        // FillWhipControlPoints uses base animation, launch speed and the
+        // projectile's native range multiplier. Reserve the last part of the
+        // extension for moving targets rather than standing at the tip.
+        if(ProjectileID.Sets.IsAWhip[shot.type])return item.shootSpeed*ContentSamples.ItemsByType[item.type].useAnimation*
+            shot.WhipSettings.RangeMultiplier*(cat?.ModProjectile is CompanionCat whipCat?whipCat.Weapons.Actor.whipRangeMultiplier:1);
         // These are the sword's swing arc, not traveling sword beams.
         if(shot.aiStyle==ProjAIStyleID.LightsBane)return CompanionWeapons.Range(item)+24;
         if(shot.aiStyle==ProjAIStyleID.NightsEdge&&shot.type!=ProjectileID.TerraBlade2)return 100;
@@ -83,21 +87,45 @@ internal static class CompanionCombatReach {
     // TerraGuardians' close-range behavior likewise accounts for both bodies
     // and keeps an approach/retreat band rather than chasing Target.Center.
     internal static Vector2 Stand(Item item,Projectile cat,NPC target,bool cautious=false) {
+        var owner=Main.player[CompanionCat.OwnerOf(cat)];
+        var anchor=CompanionStation.Origin(owner);
+        // Keep ranged hovering local; finite-reach attacks retain the existing
+        // targeting leash so the companion can reach what it has selected.
+        if(!PursuitLocal(item,cat,cat.Center,anchor)||CompanionIncomingDamage.HazardAt(cat,cat.Center))return anchor;
         float edge=Vector2.Distance(cat.Center,target.Hitbox.ClosestPointInRect(cat.Center));
         float range=EffectiveRange(item,cat,target);
-        float gap=Distance(item)?Math.Clamp(range*.5f,24,100):Math.Clamp(CompanionWeapons.Range(item)*.3f,8,18);
+        bool distance=Distance(item);
+        // Beam swords can shoot at range without giving up their contact swing.
+        float spacing=SpacingRange(item,cat,target);
+        float gap=distance?Math.Clamp(spacing*.5f,24,240):Math.Clamp(CompanionWeapons.Range(item)*.3f,8,18);
         // A held lance damages with its extended tip; walking inside that tip
         // cannot be repaired by waiting for another hit cooldown.
         if(item.channel&&Sample(item)?.aiStyle==ProjAIStyleID.Spear)gap=range*.7f;
-        if(cautious){gap=Math.Max(gap,80);if(edge>=gap+cat.width/2f)return cat.Center;}
-        if(Distance(item)&&edge>=gap+cat.width/2f&&CanUse(item,cat,target))return cat.Center;
+        // Caution changes spacing inside usable reach, never beyond it.
+        if(cautious)gap=Math.Max(gap,Math.Min(80,Math.Max(8,spacing*.5f-cat.width/2f)));
+        float upper=Math.Max(gap+24,Math.Min(spacing*.72f,360));
+        if((distance||cautious)&&edge>=gap+cat.width/2f&&edge<=upper&&CanUse(item,cat,target)&&CompanionNavigation.Fits(cat.Center))return cat.Center;
         float side=cat.Center.X<target.Center.X?-1:1;
         // Horizontal approach lets even a shortsword reach from its hand anchor;
         // the nearest vertical point avoids chasing the middle of a tall boss.
         float y=Math.Clamp(cat.Center.Y,target.Top.Y+Math.Min(8,target.height/2f),target.Bottom.Y-Math.Min(8,target.height/2f));
-        if(Distance(item)&&edge>range*.8f)gap=range*.65f;
-        return new Vector2((side<0?target.Left.X:target.Right.X)+side*(cat.width/2f+gap),y);
+        var point=new Vector2((side<0?target.Left.X:target.Right.X)+side*(cat.width/2f+gap),y);
+        // Use the same leash for selecting and maintaining this approach.
+        if(!PursuitLocal(item,cat,point,anchor))return anchor;
+        return CompanionIncomingDamage.HazardAt(cat,point)?anchor:point;
     }
+    static float SpacingRange(Item item,Projectile cat,NPC target=null){
+        float range=EffectiveRange(item,cat,target);
+        if(!item.noMelee&&item.CountsAsClass(DamageClass.Melee))range=Math.Min(range,CompanionWeapons.Range(item)+24);
+        if(Sample(item)?.aiStyle is ProjAIStyleID.NightsEdge or ProjAIStyleID.TrueNightsEdge)range=Math.Min(range,100);
+        return range;
+    }
+    // Finite-reach weapons must approach targets inside the existing targeting
+    // leash. The tighter ranged hover area must not cancel that approach.
+    internal static bool PursuitLocal(Item item,Projectile cat,Vector2 point,Vector2 anchor)=>
+        SpacingRange(item,cat)<RangedRange
+            ?Vector2.DistanceSquared(point,anchor)<TrackingRange*TrackingRange:Local(point,anchor);
+    internal static bool Local(Vector2 point,Vector2 anchor)=>Math.Abs(point.Y-anchor.Y)<=240&&Vector2.DistanceSquared(point,anchor)<=560*560;
     internal static Vector2 AimPoint(Item item,Vector2 hand,NPC target) {
         if(Distance(item))return target.Center;
         var surface=target.Hitbox.ClosestPointInRect(hand);

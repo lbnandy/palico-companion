@@ -7,6 +7,8 @@ using Terraria.Localization;
 namespace PalicoCompanion.Systems;
 
 public sealed class CompanionCrossMod:ModSystem {
+    internal static Func<float> InfernoOpacity;
+    internal static Func<float> SupportProgression;
     internal static Action<Player,Vector2> PrepareActor;
     // Optional non-combat respawn limits, queried without running death hooks.
     internal static Func<int,int> PeacefulRespawnLimit;
@@ -70,5 +72,5 @@ public sealed class CompanionCrossMod:ModSystem {
         var result=recipes.Call("AddItemCategory",Language.ActiveCulture.Name=="zh-Hans"?"呆猫装备":"Palico equipment","",icon,(Predicate<Item>)(item=>item.ModItem is TrainingItem));
         RecipeCategoryRegistered=result is string status&&status=="Success";
     }
-    public override void Unload(){PeacefulRespawnLimit=null;PrepareActor=null;CaptureResources=null;UsesInspiration=null;SupportTool=null;SafeThrow=null;UpdateResources=null;UpdateEquipment=null;UpdateInheritedStatus=null;InheritStats=null;BeforeReset=null;SupportTarget=null;ResourceReady=null;PlanUse=null;MaintainHeldWeapon=null;WeaponReach=null;ProjectileFlight=null;WeaponEffect=null;Storage=null;UsesPerMaterial=null;ChargeComplete.Clear();InfiniteStack=null;MinedOre=null;RecipeCategoryRegistered=false;CompanionRecovery.Unload();}
+    public override void Unload(){SupportProgression=null;PeacefulRespawnLimit=null;PrepareActor=null;CaptureResources=null;UsesInspiration=null;SupportTool=null;SafeThrow=null;UpdateResources=null;UpdateEquipment=null;UpdateInheritedStatus=null;InheritStats=null;BeforeReset=null;SupportTarget=null;ResourceReady=null;PlanUse=null;MaintainHeldWeapon=null;WeaponReach=null;ProjectileFlight=null;WeaponEffect=null;Storage=null;UsesPerMaterial=null;ChargeComplete.Clear();InfiniteStack=null;MinedOre=null;RecipeCategoryRegistered=false;CompanionRecovery.Unload();}
 }

@@ -20,6 +20,8 @@ public sealed class TrainingPanel:ModSystem {
     internal bool CompareTiers=>compareTiers;
     readonly GuideBackdrop backdrop=new();
     internal void DrawBackdrop(SpriteBatch batch,Rectangle bounds)=>backdrop.Draw(batch,bounds);
+    static readonly int[] UpgradeEntries=[13,21,14,15,22,19];
+    internal static int UpgradeEntry(int kind)=>13+Array.IndexOf(UpgradeEntries,kind);
     static readonly string[] CategoryKeys=["TrainingPanel.Basics", "TrainingPanel.Support", "TrainingPanel.Work", "TrainingPanel.Upgrades"];
     static string CategoryLabel(int index)=>CompanionText.Get(CategoryKeys[index]);
     readonly UITextPanel<string>[] categoryTabs=new UITextPanel<string>[4];
@@ -91,8 +93,8 @@ public sealed class TrainingPanel:ModSystem {
             tab.Recalculate();tab.Draw(sb);
             if(click&&hover&&Category!=i){Category=i;Entry=new[]{0,0,8,13}[i];recipeVariant=0;scrollDragging=false;Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuTick);}
         }
-        int start=new[]{0,0,8,13}[Category],end=new[]{9,9,11,17}[Category];Entry=Math.Clamp(Entry,start,end-1);
-        int Actual(int index)=>Category==1&&index==8?TrainingCatalog.Barrel:Category==3&&index==16?19:index;
+        int start=new[]{0,0,8,13}[Category],end=new[]{9,9,11,19}[Category];Entry=Math.Clamp(Entry,start,end-1);
+        int Actual(int index)=>Category==1&&index==8?TrainingCatalog.Barrel:Category==3?UpgradeEntries[index-13]:index;
         for(int i=start;i<end;i++) {
             var r=new Rectangle(x+28,y+103+(i-start)*40,156,32);bool selected=Entry==i,hover=r.Contains(mouse);CompanionGamepad.Add("topic-"+i,r);
             if(selected||hover)Box(r,selected?new Color(70,90,150):new Color(49,65,111));
@@ -133,7 +135,7 @@ public sealed class TrainingPanel:ModSystem {
                 Terraria.UI.ItemSlot.DrawItemIcon(item,Terraria.UI.ItemSlot.Context.InventoryItem,sb,new Vector2(x+220,row+19),1f,28f,Color.White);
                 Text(item.Name,x+246,row+1,Color.White,.8f);
                 Text(TrainingProgress.Status(s,id),x+246,row+25,Color.LightGray,.65f);
-                int selected=id,detailsWidth=CompanionButtonLayout.ContentWidth(CompanionText.Get("TrainingPanel.Details"));Button("details-"+id,CompanionText.Get("TrainingPanel.Details"),x+694-detailsWidth,row+7,detailsWidth,()=>{Category=TrainingCatalog.Support(selected)?1:TrainingCatalog.WorkGear(selected)?2:3;Entry=selected==TrainingCatalog.Barrel?8:selected==19?16:selected;recipeVariant=0;});
+                int selected=id,detailsWidth=CompanionButtonLayout.ContentWidth(CompanionText.Get("TrainingPanel.Details"));Button("details-"+id,CompanionText.Get("TrainingPanel.Details"),x+694-detailsWidth,row+7,detailsWidth,()=>{Category=TrainingCatalog.Support(selected)?1:TrainingCatalog.WorkGear(selected)?2:3;Entry=Category==3?UpgradeEntry(selected):selected==TrainingCatalog.Barrel?8:selected;recipeVariant=0;});
                 row+=56;
             }
             if(suggestions.Length==0)Text(CompanionText.Get("TrainingPanel.AllReady"),x+204,row,Color.LightGray,.75f);
@@ -189,15 +191,17 @@ public sealed class TrainingGuide:ModPlayer {
     internal void UsedBench()=>seen|=3;
     public override void SaveData(TagCompound tag)=>tag["seen"]=seen;
     public override void LoadData(TagCompound tag)=>seen=tag.GetInt("seen");
-    public override void PostUpdate(){if(Player.whoAmI!=Main.myPlayer||Main.dedServ||Main.gameMenu||ReferenceEquals(Player,CompanionNativeUse.Current?.Actor))return;if(++timer%300!=0||!ModContent.GetInstance<CompanionConfig>().TrainingHints)return;var s=Player.GetModPlayer<CompanionPlayer>();if(timer<quietUntil)return;if(s.Training.Expanded)seen|=8;if(s.Training.Tier>=1)seen|=16;if(s.Training.Tier>=2)seen|=32;if(s.Training.Slots.Any(i=>!i.IsAir))seen|=5;if(!s.Bonded||!s.Enabled||s.Stowed||Player.dead||s.Vitals.Downed||CompanionThreat.WorkDanger(Player,Player.Center))return;
+    public override void PostUpdate(){if(Player.whoAmI!=Main.myPlayer||Main.dedServ||Main.gameMenu||ReferenceEquals(Player,CompanionNativeUse.Current?.Actor))return;if(++timer%300!=0||!ModContent.GetInstance<CompanionConfig>().TrainingHints)return;var s=Player.GetModPlayer<CompanionPlayer>();if(timer<quietUntil)return;if(s.Training.Tier>=1)seen|=128;if(s.Training.Tier>=4)seen|=256;if(s.Training.Expanded)seen|=8;if(s.Training.Tier>=2)seen|=16;if(s.Training.Tier>=3)seen|=32;if(s.Training.Slots.Any(i=>!i.IsAir))seen|=5;if(!s.Bonded||!s.Enabled||s.Stowed||Player.dead||s.Vitals.Downed||CompanionThreat.WorkDanger(Player,Player.Center))return;
         bool Has(int type)=>Player.inventory.Any(i=>!i.IsAir&&i.type==type);
         string line=null,context="";int bit=0;
         if((seen&1)==0){bit=1;line="Workbench";}
         else if((seen&2)==0&&Has(TrainingCatalog.Type(19))){bit=2;line="PlaceBench";}
         else if((seen&4)==0&&Player.inventory.Any(i=>TrainingCatalog.Equipment(TrainingCatalog.Id(i)))&&s.Training.Slots.All(i=>i.IsAir)){bit=4;line="Equip";}
         else if((seen&8)==0&&!s.Training.Expanded&&(Has(ItemID.Bone)||Has(ItemID.ShadowScale)||Has(ItemID.TissueSample))){bit=8;line="Belt";}
-        else if((seen&16)==0&&s.Training.Tier==0&&Has(ItemID.HallowedBar)){bit=16;line="Improved";}
-        else if((seen&32)==0&&s.Training.Tier==1&&Has(ItemID.Ectoplasm)){bit=32;line="Master";}
+        else if((seen&128)==0&&s.Training.Tier==0&&(Has(ItemID.CobaltBar)||Has(ItemID.PalladiumBar))){bit=128;line="Reinforced";}
+        else if((seen&256)==0&&s.Training.Tier==3&&Has(ItemID.LunarBar)){bit=256;line="Celestial";}
+        else if((seen&16)==0&&s.Training.Tier==1&&Has(ItemID.HallowedBar)){bit=16;line="Improved";}
+        else if((seen&32)==0&&s.Training.Tier==2&&Has(ItemID.Ectoplasm)){bit=32;line="Master";}
         if(line==null&&(seen&64)==0){int ready=Enumerable.Range(0,11).FirstOrDefault(id=>TrainingCatalog.Current(id)&&TrainingProgress.Recipes(id).Any(r=>TrainingProgress.Materials(Player,r)),-1);if(ready>=0){bit=64;line="Ready";context=TrainingCatalog.Entries[ready].Name;}}
         if(line!=null&&s.Expression.TryHint(s,line,context)){seen|=bit;quietUntil=timer+1800;}
     }

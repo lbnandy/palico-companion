@@ -16,7 +16,7 @@ internal sealed class HarvestBasket : IDisposable {
     internal static void NotifyBenefit(){if(current!=null)TrainingWorkFeedback.Trigger(current,10);}
     internal static int Extra(int type,int count) {
         if(current==null||!current.Training.Work(10))return 0;
-        float rate=IsWood(type)?new[]{.08f,.12f,.16f}[current.Training.Tier]:IsHerb(type)?new[]{.20f,.30f,.40f}[current.Training.Tier]:0;
+        float rate=IsWood(type)?current.Training.Values.Wood/100f:IsHerb(type)?current.Training.Values.Herbs/100f:0;
         return rate>0?TrainingLoot.Bonus(count,rate):0;
     }
     internal static bool IsWood(int type)=>type is ItemID.Wood or ItemID.BorealWood or ItemID.PalmWood or ItemID.RichMahogany or ItemID.Ebonwood or ItemID.Shadewood or ItemID.Pearlwood or ItemID.AshWood;

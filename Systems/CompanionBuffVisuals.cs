@@ -35,15 +35,20 @@ public sealed class CompanionBuffVisuals:ModSystem {
     static void DrawInfernoRings(On_Main.orig_DrawInfernoRings orig,Main self){
         orig(self);
         if(Main.gameMenu)return;
+        float opacity=InfernoOpacity;
+        if(opacity<=0)return;
         foreach(var projectile in Main.ActiveProjectiles){
             if(projectile.ModProjectile is not CompanionCat cat||!InfernoVisible(cat))continue;
-            DrawInferno(self,cat.Weapons.Actor);
+            DrawInferno(self,cat.Weapons.Actor,opacity);
         }
     }
     internal static bool InfernoVisible(CompanionCat cat)=>cat.Weapons.Present&&
         !cat.Weapons.State.Stowed&&cat.Weapons.State.Cat==cat.Projectile&&cat.Weapons.Actor.inferno;
 
-    static void DrawInferno(Main main,Player actor){
+    internal static float InfernoOpacity=>ModContent.GetInstance<CompanionConfig>().InfernoRing
+        ?Math.Clamp(CompanionCrossMod.InfernoOpacity?.Invoke()??1f,0f,1f):0f;
+
+    static void DrawInferno(Main main,Player actor,float ringOpacity){
         // Main.DrawInfernoRings has no single-entity entry point. Reuse its
         // texture, three layers and animation math in the same world pass,
         // without registering a fake player or rerunning buff/damage hooks.
@@ -54,7 +59,7 @@ public sealed class CompanionBuffVisuals:ModSystem {
         for(int layer=0;layer<3;layer++){
             float scale=actor.flameRingScale+.1f*layer;
             if(scale>1f)scale-=.2f;
-            float opacity=MathHelper.Lerp(.8f,0,Math.Abs(scale-.9f)*10);
+            float opacity=MathHelper.Lerp(.8f,0,Math.Abs(scale-.9f)*10)*ringOpacity;
             Main.spriteBatch.Draw(TextureAssets.FlameRing.Value,actor.Center-Main.screenPosition,
                 new Rectangle(0,400*layer,400,400),new Color(opacity,opacity,opacity,opacity/2),
                 actor.flameRingRot+MathHelper.Pi/3*layer,new Vector2(200),scale,SpriteEffects.None,0);

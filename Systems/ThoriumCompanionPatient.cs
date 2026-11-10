@@ -22,13 +22,20 @@ public sealed class ThoriumCompanionPatient:ModSystem {
         const BindingFlags flags=BindingFlags.Static|BindingFlags.Public|BindingFlags.NonPublic;
         eligible=helper.GetMethod("CanBeHealed",flags).CreateDelegate<Func<Projectile,Player,Player,float,Func<Player,bool>,int,bool,bool>>();
         var target=helper.GetMethod("ThoriumHealTarget",flags);
-        var args=target.GetParameters();var parameters=new ParameterExpression[args.Length];var call=new Expression[args.Length];
-        for(int i=0;i<args.Length;i++){
-            parameters[i]=Expression.Parameter(i==7?typeof(object):args[i].ParameterType);
-            call[i]=i==7?Expression.Convert(parameters[i],args[i].ParameterType):parameters[i];
-        }
-        heal=Expression.Lambda<Func<Projectile,Player,int,bool,bool,bool,bool,object,bool>>(Expression.Call(target,call),parameters).Compile();
+        heal=Bind<Func<Projectile,Player,int,bool,bool,bool,bool,object,bool>>(target);
         healing=new ILHook(helper.GetMethod("ThoriumHeal",flags),AppendPatients);
+    }
+    // Addons can retain the native healer pipeline while declaring their own
+    // CustomHealing delegate. Resolve that boundary once, never per cast.
+    internal static T Bind<T>(MethodInfo method) where T:Delegate {
+        var args=method.GetParameters();var signature=typeof(T).GetMethod("Invoke").GetParameters();
+        if(args.Length!=signature.Length)throw new ArgumentException("Healing method signature does not match the adapter.",nameof(method));
+        var parameters=new ParameterExpression[args.Length];var call=new Expression[args.Length];
+        for(int i=0;i<args.Length;i++){
+            parameters[i]=Expression.Parameter(signature[i].ParameterType);
+            call[i]=signature[i].ParameterType==args[i].ParameterType?parameters[i]:Expression.Convert(parameters[i],args[i].ParameterType);
+        }
+        return Expression.Lambda<T>(Expression.Call(method,call),parameters).Compile();
     }
     static void AppendPatients(ILContext il){
         var cursor=new ILCursor(il);
