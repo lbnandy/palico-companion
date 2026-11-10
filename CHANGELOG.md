@@ -1,5 +1,23 @@
 # Changelog
 
+## 1.2.7 — 2026-11-11
+
+### 简体中文
+
+- 修复驻守钓鱼仍按主人所在环境决定渔获的问题，改为使用呆猫所在地的群系与深度。
+- 修正驻守时部分状态文字仍显示“跟随主人”的问题。
+- 修复与灾劫同开时，专用服务器上的增益处理可能导致呆猫异常的问题。
+- 修复与 Lan’s Unlimited Pets 同开时重复出现宠物栏的问题。
+- 补充天界档支援装备的月后成长：蜜虫的持续治疗随生命上限提高，贯通回旋镖的护甲穿透随世界进度提高。
+
+### English
+
+- Fixed stationed fishing using the owner's environment for catches instead of the companion's local biome and depth.
+- Corrected status text that could still show “Following you” while stationed.
+- Fixed a Catalyst compatibility issue where buff processing could disrupt the companion on dedicated servers.
+- Fixed duplicate pet slots when used with Lan’s Unlimited Pets.
+- Extended Celestial support equipment progression: Vigorwasp healing over time scales with maximum health, and Piercing Boomerang armor penetration scales with post-Moon Lord world progression.
+
 ## 1.2.6 — 2026-11-10
 
 ### 简体中文

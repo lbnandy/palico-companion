@@ -133,7 +133,7 @@ public sealed class TrainingMark:GlobalNPC {
     public override void SendExtraAI(NPC npc,BitWriter bits,BinaryWriter w){w.Write((byte)until.Count(v=>v>0));for(int i=0;i<256;i++)if(until[i]>0){w.Write((byte)i);w.Write((ushort)until[i]);w.Write((byte)power[i]);}}
     public override void ReceiveExtraAI(NPC npc,BitReader bits,BinaryReader r){Array.Clear(until);Array.Clear(power);int count=r.ReadByte();for(int i=0;i<count;i++){int owner=r.ReadByte();until[owner]=r.ReadUInt16();power[owner]=r.ReadByte();}}
     internal int Remaining(int owner)=>owner>=0&&owner<256?until[owner]:0;
-    internal void Mark(int owner,int tier){if(owner<0||owner>=256)return;until[owner]=TrainingTiers.At(tier).MarkSeconds*60;power[owner]=TrainingTiers.At(tier).Pierce;}
+    internal void Mark(int owner,int tier){if(owner<0||owner>=256)return;until[owner]=TrainingTiers.At(tier).MarkSeconds*60;power[owner]=TrainingTiers.Pierce(tier);}
     public override void PostAI(NPC npc){for(int i=0;i<256;i++)if(until[i]>0)until[i]--;}
     void Modify(int owner,ref NPC.HitModifiers m){if(owner>=0&&owner<256&&until[owner]>0)m.ArmorPenetration+=power[owner];}
     public override void ModifyHitByItem(NPC npc,Player player,Item item,ref NPC.HitModifiers m)=>Modify(CompanionNativeUse.Current?.State.Player.whoAmI??player.whoAmI,ref m);

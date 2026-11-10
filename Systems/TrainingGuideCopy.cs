@@ -11,7 +11,7 @@ internal static class TrainingGuideCopy {
         CooldownText(CompanionText.Get("ItemTooltips."+TrainingCatalog.Entries[kind].Key,compare?TrainingTiers.CompareValues(kind):TrainingTiers.Values(kind,tier)),kind,tier,compare),kind,tier,compare);
     static string WithNotes(string text,int kind,int tier,bool compare){
         if(tier!=TrainingTiers.Last&&!compare)return text;
-        string key=kind switch {0=>"CelestialHealing",1=>"CelestialShield",3=>"CelestialMana",7 or TrainingCatalog.Barrel=>"CelestialDamage",_=>null};
+        string key=kind switch {0=>"CelestialHealing",1=>"CelestialShield",3=>"CelestialMana",5=>"CelestialPierce",7 or TrainingCatalog.Barrel=>"CelestialDamage",_=>null};
         return key==null?text:text+"\n"+CompanionText.Get("Catalog."+key);
     }
     static string CooldownText(string text,int kind,int tier,bool compare){

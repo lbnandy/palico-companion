@@ -26,6 +26,12 @@ internal static class TrainingTiers {
     internal static bool Upgrade(int kind)=>kind==13||UpgradeTier(kind)>0;
     internal static int LoadTier(int value,int format)=>format<SaveFormat?Math.Clamp(value,0,2) switch {1=>2,2=>3,_=>0}:Math.Clamp(value,0,Last);
     internal static int Honey(int tier,int maximum)=>At(tier).Honey+(tier==Last?Math.Max(0,maximum-500)/10:0);
+    internal static int HoneyOverTime(int tier,int maximum)=>At(tier).HoneyOverTime+(tier==Last?Math.Max(0,maximum-500)/50:0);
+    internal static int Pierce(int tier){
+        if(tier!=Last)return At(tier).Pierce;
+        float progress=WorldPower;
+        return progress>=6?32:progress>=4?28:progress>=3?24:progress>=2?20:progress>=1.5f?18:At(tier).Pierce;
+    }
     internal static int Shield(int tier,int maximum)=>At(tier).Shield+(tier==Last?(int)(Math.Max(0,maximum-500)*.08):0);
     internal static int Mana(int tier,int maximum)=>At(tier).Mana+(tier==Last?Math.Max(0,maximum-200)/5:0);
     internal static float WorldPower {
@@ -47,7 +53,7 @@ internal static class TrainingTiers {
         return kind switch {
             0=>[t.Honey,t.HoneyOverTime,t.Honey+t.HoneyOverTime],
             1=>[t.Shield],2=>[N(t.CleanseTicks/60f)],3=>[t.Mana,P(t.ManaSaving)],
-            4=>[P(t.DrumDamage),P(t.DrumSpeed),P(t.DrumSummon)],5=>[t.Pierce,t.MarkSeconds],
+            4=>[P(t.DrumDamage),P(t.DrumSpeed),P(t.DrumSummon)],5=>[Pierce(tier),t.MarkSeconds],
             6=>[N(t.FlightTicks/60f)],7=>[BombDamage(tier)],TrainingCatalog.Barrel=>[BombDamage(tier)*2],
             8=>[P(t.Loot),P(t.BossLoot)],9=>[P(t.Mining),t.Reach],10=>[P(t.Wood),P(t.Herbs),t.Fishing],_=>[]
         };

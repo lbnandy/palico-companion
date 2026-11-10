@@ -32,7 +32,7 @@ public sealed partial class CompanionTraining {
         switch(kind) {
             case 0:
                 message=CompanionText.Message("CompanionSkillActivation.NoHealingNeeded");
-                if(p.statLife>=p.statLifeMax2||!manual&&(p.statLifeMax2-p.statLife<TrainingTiers.Honey(Tier,p.statLifeMax2)+Values.HoneyOverTime||p.statLife>p.statLifeMax2*.7f))return false;
+                if(p.statLife>=p.statLifeMax2||!manual&&(p.statLifeMax2-p.statLife<TrainingTiers.Honey(Tier,p.statLifeMax2)+TrainingTiers.HoneyOverTime(Tier,p.statLifeMax2)||p.statLife>p.statLifeMax2*.7f))return false;
                 break;
             case 2:
                 debuff=MostUrgentDebuff(p,manual);
@@ -63,7 +63,7 @@ public sealed partial class CompanionTraining {
         if(CompanionNetwork.Client){message=CompanionText.Message("CompanionSkillActivation.ServerPending");return false;}
         if(!Use(s,kind,kind is 0 or 2||kind==3&&manaTarget==0?p.Center:null))return false;
         switch(kind) {
-            case 0:OwnerEffect(s,0,TrainingTiers.Honey(Tier,p.statLifeMax2));SlowHealing=EffectDuration(0);SlowHealingRemaining=Values.HoneyOverTime;break;
+            case 0:OwnerEffect(s,0,TrainingTiers.Honey(Tier,p.statLifeMax2));SlowHealing=EffectDuration(0);SlowHealingRemaining=TrainingTiers.HoneyOverTime(Tier,p.statLifeMax2);break;
             case 2:CleanseType=debuff;CleanseTime=EffectDuration(2);OwnerEffect(s,2,debuff);break;
             case 3:
                 ManaDance=EffectDuration(3);ManaTarget=manaTarget;

@@ -1,8 +1,5 @@
-- Expanded work and support equipment to five progression tiers, adding Reinforced and Celestial upgrades, post-Moon Lord growth, and migration of existing upgrades.
-- Sped up replenishing minions with standard summon weapons, including after recovery.
-- Adjusted melee and whip approach distances and ranged combat positioning, and improved avoidance of large hazardous areas.
-- Completed Calamity stealth consumption, recovery and multiplayer synchronization to prevent repeated stealth strikes.
-- Added support for Ragnarok's healing relic and refined healing and self-healing checks.
-- Inferno rings now respect Quality of Terraria's opacity setting, with a separate option to hide only the ring.
-- Fixed some buffs applying defense, maximum health/mana and summon capacity bonuses twice in inherited-stat mode.
-- Fixed a compatibility issue with Aiko's world that prevented some weapons from dealing damage.
+- Fixed stationed fishing using the owner's environment for catches instead of the companion's local biome and depth.
+- Corrected status text that could still show “Following you” while stationed.
+- Fixed a Catalyst compatibility issue where buff processing could disrupt the companion on dedicated servers.
+- Fixed duplicate pet slots when used with Lan’s Unlimited Pets.
+- Extended Celestial support equipment progression: Vigorwasp healing over time scales with maximum health, and Piercing Boomerang armor penetration scales with post-Moon Lord world progression.

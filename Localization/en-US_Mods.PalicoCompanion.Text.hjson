@@ -327,7 +327,8 @@ Catalog: {
 	Celestial: Celestial
 	CobaltBars: Cobalt / Palladium Bars
 	ToolsUpgraded: Palico tools · {0}
-	CelestialHealing: Celestial: restores 1 extra life immediately per 10 maximum life above 500. The missing-life threshold increases accordingly.
+	CelestialHealing: Celestial: for maximum life above 500, restores 1 extra life immediately per 10 points and 1 extra life over time per 50 points. All healing over time still finishes within 5 seconds. The missing-life threshold increases accordingly.
+	CelestialPierce: Celestial: armor penetration scales with the current world's post-Moon Lord progress. Thorium's Primordials grant 18; Calamity's Providence, Polterghast, Devourer of Gods, Yharon, and Exo Mechs or Supreme Calamitas grant 18, 20, 24, 28, and 32 respectively. Only the highest milestone applies. Duration and cooldown are unchanged.
 	CelestialShield: Celestial: blocks additional damage equal to 8% of the protected character's maximum life above 500, rounded down.
 	CelestialMana: Celestial: restores 1 extra mana per 5 maximum mana above 200.
 	CelestialDamage: Celestial: damage scales with the current world's post-Moon Lord progress. Thorium's Primordials grant ×1.5. Calamity's Providence, Polterghast, Devourer of Gods, Yharon, and Exo Mechs or Supreme Calamitas grant ×1.5, ×2, ×3, ×4, and ×6 respectively. Only the highest milestone applies.

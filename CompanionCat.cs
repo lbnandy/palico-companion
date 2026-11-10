@@ -290,7 +290,7 @@ public sealed class CompanionCat : ModProjectile
             if(CompanionWeapons.Support(airWeapon)&&Weapons.Busy)attackFacing=Weapons.Aim;
             else if(airTarget!=null)attackFacing=airTarget.Center;
             // Holding light is fine; placement is forbidden while carried.
-            Light.Update(owner,state,Projectile,true);state.Status=HoldingThreat?CompanionText.Message("CompanionCat.WatchingEnemies"):airTarget!=null?(tactics.Cautious?CompanionText.Message("CompanionCat.KeepingDistance"):"Guarding"):CompanionText.Message("CompanionCat.CatchingUp");return;
+            Light.Update(owner,state,Projectile,true);state.Status=HoldingThreat?CompanionText.Message("CompanionCat.WatchingEnemies"):airTarget!=null?(tactics.Cautious?CompanionText.Message("CompanionCat.KeepingDistance"):"Guarding"):state.Stationed?Terraria.Localization.Language.GetTextValue("Mods.PalicoCompanion.Station.Guarding"):CompanionText.Message("CompanionCat.CatchingUp");return;
         }
         if(state.Vitals.Downed) {
             Light.Update(owner,state,Projectile,false);

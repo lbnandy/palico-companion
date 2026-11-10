@@ -20,6 +20,7 @@ public sealed class CompanionFishing {
     delegate void PondQuery(int x,int y,out bool lava,out bool honey,out int water,out int chum);
     static readonly PondQuery Pond=typeof(Projectile).GetMethod("GetFishingPondState",BindingFlags.Static|BindingFlags.NonPublic)!.CreateDelegate<PondQuery>();
     public readonly Player Actor=new();
+    readonly CompanionFishingEnvironment environment=new();
     public static CompanionFishing Current {get;private set;}
     public Projectile Cat {get;private set;}
     public CompanionPlayer State {get;private set;}
@@ -195,9 +196,8 @@ public sealed class CompanionFishing {
         Actor.fishingSkill=attributes.fishingSkill+(State.Training.Work(10)?State.Training.Values.Fishing:0);
         var p=State.Player;Actor.name=p.name;
         // Native reward rolls read these separately from GetFishingConditions.
-        // Biome/luck retain the existing environment source; equipment bonuses
-        // above and crate chance below follow the chosen attribute mode.
-        Actor.zone1=p.zone1;Actor.zone2=p.zone2;Actor.zone3=p.zone3;Actor.zone4=p.zone4;Actor.zone5=p.zone5;
+        // The angler's location decides the catch, even when its owner leaves.
+        environment.Apply(Actor);
         Actor.cratePotion=attributes.cratePotion;Actor.luck=p.luck;
         // HasItem suppresses duplicate quest fish. Expose the cat's actual bag,
         // not the owner's inventory; native bait selection still uses slot 54.

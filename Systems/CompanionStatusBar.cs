@@ -48,7 +48,7 @@ public static class CompanionStatusBar {
             if(c.Supplies.Active)return CompanionLife.L("HudDelivering");
             if(c.Animation.Motion==CatMotion.Rest)return CompanionLife.L("RestState");
         }
-        return CompanionLife.L("Following");
+        return s.Stationed?Terraria.Localization.Language.GetTextValue("Mods.PalicoCompanion.Station.Guarding"):CompanionLife.L("Following");
     }
     public static void Draw(CompanionPlayer s){
         bool clicked=Main.mouseLeft&&!previousLeft&&!CompanionHudLayout.Capturing;previousLeft=Main.mouseLeft;
