@@ -18,7 +18,7 @@ public sealed class CompanionBossHealth : GlobalNPC {
     Encounter encounter;
     NPC parent;
     CompanionBossHealth parentIdentity;
-    bool initialized,applied,finishedFirstAI;
+    bool initialized,applied;
     int unscaledMaximum;
     internal float Bonus=>encounter?.Bonus??0;
     public override bool InstancePerEntity=>true;
@@ -34,24 +34,18 @@ public sealed class CompanionBossHealth : GlobalNPC {
         if(IsBossPart(npc))encounter??=FindEncounter(npc)??Capture(npc.Center);
     }
 
-    public override bool PreAI(NPC npc) {
-        if(Main.netMode!=NetmodeID.MultiplayerClient&&!initialized)Initialize(npc);
-        return true;
-    }
-
     public override void PostAI(NPC npc) {
-        if(finishedFirstAI)return;
-        finishedFirstAI=true;
-        // Modded segments may establish realLife inside their first AI rather
-        // than in the head's spawn code. Wait for that link before classifying.
-        if(Main.netMode!=NetmodeID.MultiplayerClient&&!applied&&SharedRoot(npc)!=null)Initialize(npc);
+        // Let native AI create/link its segments before scaling. Some heads
+        // clamp their life to a newly created body's still-unscaled life.
+        // Passive bosses may only become hostile much later in the encounter.
+        if(Main.netMode!=NetmodeID.MultiplayerClient&&!initialized)Initialize(npc);
     }
 
     void Initialize(NPC npc) {
-        initialized=true;
         if(npc.friendly||npc.lifeMax<=1)return;
         NPC root=SharedRoot(npc);
         if(!IsBossPart(npc)&&root==null)return;
+        initialized=true;
         if(root!=null)encounter??=root.GetGlobalNPC<CompanionBossHealth>().encounter;
         encounter??=FindEncounter(npc)??Capture(npc.Center);
         if(Bonus<=0)return;

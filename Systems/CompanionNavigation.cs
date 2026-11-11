@@ -241,6 +241,7 @@ public sealed class CompanionNavigation
         if(combat)desired=Math.Clamp(dx*.25f,-FollowSpeed(CompanionStation.Velocity(owner).X),FollowSpeed(CompanionStation.Velocity(owner).X));
         desired*=CompanionBalanceConfig.Current.MovementScale(combat);
         bool ground=Grounded(cat);
+        if(ground&&needsTravel&&desired!=0)CompanionDoors.TryOpen(cat,owner,desired);
         cat.velocity.X=MathHelper.Lerp(cat.velocity.X,desired,combat?0.3f:0.18f);
         if(Math.Abs(dx)>8)cat.direction=Math.Sign(dx);
         if(ground&&!DropThrough&&desired!=0) {

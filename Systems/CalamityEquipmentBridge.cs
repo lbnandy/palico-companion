@@ -65,6 +65,10 @@ public sealed class CalamityEquipmentBridge : ModSystem {
     }
     void UpdateEquipment(CompanionNativeUse use){
         var player=use.Actor.GetModPlayer<CalamityPlayer>();
+        // Calamity's MiscEffects owns this capacity calculation, mixed with
+        // human movement and world effects. Equipment hooks above already set
+        // the native flags; preserve its upgrade precedence, not item IDs.
+        use.Actor.maxMinions+=SummonCapacity(player);
         // OtherBuffEffects temporarily changes the global persistence table
         // for Amalgam and jump height for Bounding. Those must not leak to a
         // real player or another companion, even if an addon hook throws.
@@ -82,6 +86,12 @@ public sealed class CalamityEquipmentBridge : ModSystem {
             ArrayPool<bool>.Shared.Return(saved);
             Player.jumpHeight=jumpHeight;
         }
+    }
+    static int SummonCapacity(CalamityPlayer player){
+        if(player.nucleogenesis)return 4;
+        int slots=(player.shadowMinions?1:0)+(player.statisMinions?2:0);
+        return slots+(player.starTaintedGenerator?2:
+            (player.starbusterCore?1:0)+(player.voltaicJelly?1:0)+(player.nuclearFuelRod?1:0));
     }
     static bool IsActor(CalamityPlayer player)=>CompanionNativeUse.Current?.Actor==player.Player;
     static bool InvalidGemOwner(Func<GemTechArmorState,bool> orig,GemTechArmorState state){

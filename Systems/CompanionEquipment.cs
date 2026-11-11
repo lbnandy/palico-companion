@@ -1,4 +1,5 @@
 using System;
+using System.Reflection;
 using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.ID;
@@ -25,6 +26,12 @@ internal sealed class CompanionEquipment {
     static readonly Item Empty=new();
     internal Player Preview;
     Player validation;
+    readonly Item[] validationArmor=new Item[20];
+    // ItemSlot's player-specific check is internal in tML. Bind it once so
+    // companion clicks and quick-equip use the same placement rules as players.
+    static readonly Func<Player,Item[],Item,int,bool> AccessoryBlocked=
+        typeof(Terraria.UI.ItemSlot).GetMethod("AccCheck_ForPlayer",BindingFlags.Static|BindingFlags.NonPublic)
+        .CreateDelegate<Func<Player,Item[],Item,int,bool>>();
     internal float Endurance;
     internal int Defense,HealthBonus,ManaBonus,Regen,Minions=1,Sentries=1;
     int foodRemainder;
@@ -66,14 +73,18 @@ internal sealed class CompanionEquipment {
         if(slot<4)return slot switch {1=>item.headSlot>=0,2=>item.bodySlot>=0,_=>item.legSlot>=0};
         if(!CompanionEquipmentSlots.Unlocked(state,slot)||!item.accessory||item.expertOnly&&!Main.expertMode)return false;
         var actor=(state.Cat?.ModProjectile as CompanionCat)?.Weapons.Actor??(state.Equipment.validation??=new Player());
-        if(actor==null||!ItemLoader.CanEquipAccessory(actor,item,ArmorIndex(slot),false))return false;
-        for(int i=AccessoryStart;i<AccessoryStart+AccessoryCount;i++){
-            var other=state.Gear[i];
-            if(i==slot||other.IsAir||!CompanionEquipmentSlots.Unlocked(state,i))continue;
-            if(item.type==other.type||item.wingSlot>0&&other.wingSlot>0||
-                !ItemLoader.CanAccessoryBeEquippedWith(other,item))return false;
-        }
-        return true;
+        var armor=state.Equipment.validationArmor;
+        Array.Fill(armor,Empty);
+        for(int i=1;i<state.Gear.Length;i++)
+            if(IsSlot(i)&&CompanionEquipmentSlots.Unlocked(state,i))armor[ArmorIndex(i)]=state.Gear[i];
+        var previous=actor.armor;
+        try{
+            // Hooks must see this loadout, even before the next equipment tick
+            // and on remote clients, without consulting Main.LocalPlayer.
+            actor.armor=armor;
+            return ItemLoader.CanEquipAccessory(actor,item,ArmorIndex(slot),false)&&
+                !AccessoryBlocked(actor,armor,item,ArmorIndex(slot));
+        }finally{actor.armor=previous;}
     }
 
     internal static bool TryEquip(CompanionPlayer state,Item item){

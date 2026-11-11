@@ -13,8 +13,8 @@ public sealed class CallOfVoidCompanionBridge:ModSystem {
     Type holdoutItem;
     Func<ModItem,int> holdoutType;
     public override void PostSetupContent(){
-        if(!ModLoader.TryGetMod("CalamityEntropy",out var mod))return;
-        holdoutItem=mod.Code.GetType("CalamityEntropy.Content.Items.Weapons.IHoldoutItem");
+        if(!ModLoader.TryGetMod("CalamityEntropy",out var mod)&&!ModLoader.TryGetMod("CalamityEntropyLegacy",out mod))return;
+        holdoutItem=mod.Code.GetType(mod.Name+".Content.Items.Weapons.IHoldoutItem");
         var projectile=holdoutItem?.GetProperty("ProjectileType");
         if(projectile?.PropertyType==typeof(int)&&projectile.GetGetMethod()!=null){
             var item=Expression.Parameter(typeof(ModItem));
@@ -22,7 +22,7 @@ public sealed class CallOfVoidCompanionBridge:ModSystem {
                 Expression.Call(Expression.Convert(item,holdoutItem),projectile.GetGetMethod()),item).Compile();
             CompanionCrossMod.MaintainHeldWeapon+=Maintain;
         }
-        input=mod.GetContent<ModPlayer>().FirstOrDefault(p=>p.GetType().FullName=="CalamityEntropy.Common.EModPlayer");
+        input=mod.GetContent<ModPlayer>().FirstOrDefault(p=>p.GetType().FullName==mod.Name+".Common.EModPlayer");
         var type=input?.GetType();var mouse=type?.GetProperty("MouseWorld");
         if(mouse?.PropertyType!=typeof(Vector2)||mouse.GetSetMethod()==null)return;
         var state=Expression.Parameter(typeof(ModPlayer));var aim=Expression.Parameter(typeof(Vector2));

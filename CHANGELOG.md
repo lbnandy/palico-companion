@@ -1,5 +1,29 @@
 # Changelog
 
+## 1.2.8 — 2026-11-11
+
+### 简体中文
+
+- 呆猫现在可以自动开门，通过后会在周围无人挡门时关门；关闭环境改动后不会开关门。
+- 修复关闭自动暂停、打开背包时，部分模组可能导致呆猫反复传送、无法攻击或召唤的问题。
+- 修复与 Use Duplicated Accessories 同开时，呆猫只有第一个饰品栏能装备的问题。
+- 修复与灾熵遗产同开时呆猫无法正常攻击的兼容问题。
+- 修复与幻想时间同开时，呆猫弹幕可能引发更新异常、伤害飘字停顿的问题。
+- 修复 Low Health Effects 将呆猫受伤误显示为玩家受伤红屏的问题。
+- 修复荒漠灾虫等蠕虫 Boss 的额外血量加成，以及部分 Boss 进入战斗后漏加血的问题。
+- 补齐福达凝胶等灾厄召唤饰品提供的仆从栏位，正确处理升级饰品的效果。
+
+### English
+
+- The companion can now open doors and close them after passing when the doorway is clear. Disabling environmental changes also disables this behavior.
+- Fixed compatibility issues that could cause repeated teleporting or prevent attacks and summoning while the inventory was open with autopause disabled.
+- Fixed only the first companion accessory slot accepting items when Use Duplicated Accessories was enabled.
+- Fixed companion attacks not working correctly with Calamity Entropy Legacy.
+- Fixed companion projectiles causing update errors and stalled damage numbers with Fantasy Time.
+- Fixed Low Health Effects showing a player damage flash when the companion was hurt.
+- Fixed extra boss health scaling for worms such as the Desert Scourge and for bosses that become hostile after spawning.
+- Added missing minion capacity from Calamity summoning accessories such as Voltaic Jelly, with proper handling of upgraded accessories.
+
 ## 1.2.7 — 2026-11-11
 
 ### 简体中文

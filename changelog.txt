@@ -1,5 +1,8 @@
-- Fixed stationed fishing using the owner's environment for catches instead of the companion's local biome and depth.
-- Corrected status text that could still show “Following you” while stationed.
-- Fixed a Catalyst compatibility issue where buff processing could disrupt the companion on dedicated servers.
-- Fixed duplicate pet slots when used with Lan’s Unlimited Pets.
-- Extended Celestial support equipment progression: Vigorwasp healing over time scales with maximum health, and Piercing Boomerang armor penetration scales with post-Moon Lord world progression.
+- The companion can now open doors and close them after passing when the doorway is clear. Disabling environmental changes also disables this behavior.
+- Fixed compatibility issues that could cause repeated teleporting or prevent attacks and summoning while the inventory was open with autopause disabled.
+- Fixed only the first companion accessory slot accepting items when Use Duplicated Accessories was enabled.
+- Fixed companion attacks not working correctly with Calamity Entropy Legacy.
+- Fixed companion projectiles causing update errors and stalled damage numbers with Fantasy Time.
+- Fixed Low Health Effects showing a player damage flash when the companion was hurt.
+- Fixed extra boss health scaling for worms such as the Desert Scourge and for bosses that become hostile after spawning.
+- Added missing minion capacity from Calamity summoning accessories such as Voltaic Jelly, with proper handling of upgraded accessories.

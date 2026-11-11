@@ -12,10 +12,10 @@ public sealed class EntropyEquipmentBridge:ModSystem {
     FieldInfo last,reset;
     PropertyInfo config,enabled;
     public override void PostSetupContent(){
-        if(!ModLoader.TryGetMod("CalamityEntropy",out var mod))return;
-        prototype=mod.GetContent<ModPlayer>().FirstOrDefault(p=>p.GetType().FullName=="CalamityEntropy.Common.EModPlayer");
+        if(!ModLoader.TryGetMod("CalamityEntropy",out var mod)&&!ModLoader.TryGetMod("CalamityEntropyLegacy",out mod))return;
+        prototype=mod.GetContent<ModPlayer>().FirstOrDefault(p=>p.GetType().FullName==mod.Name+".Common.EModPlayer");
         last=prototype?.GetType().GetField("StealthMaxLast");reset=prototype?.GetType().GetField("RstStealth");
-        var settings=mod.Code.GetType("CalamityEntropy.Common.ServerConfig");
+        var settings=mod.Code.GetType(mod.Name+".Common.ServerConfig");
         config=settings?.GetProperty("Instance");enabled=settings?.GetProperty("ClearStealthWhenChangeEquipSet");
         if(last?.FieldType==typeof(float)&&reset?.FieldType==typeof(bool)&&config!=null&&enabled?.PropertyType==typeof(bool))
             CompanionCrossMod.UpdateResources+=Update;

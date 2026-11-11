@@ -8,6 +8,13 @@ public sealed class CompanionLocalPresentationBridge : ModSystem {
     public override void Load(){
         Hook("CatalystMod","CatalystMod.CatalystPlayer",CatalystBuffs);
         Hook("LansUnlimitedPets","LansUnlimitedPets.PetPlayer",PetBuffs);
+        if(ModLoader.TryGetMod("LowHealthEffects",out var effects)){
+            var type=effects.Code.GetType("LowHealthEffects.PlayerHealthWatcher");
+            var method=type?.GetMethod(nameof(ModPlayer.OnHurt),new[]{typeof(Player.HurtInfo)});
+            if(method?.DeclaringType==type&&method?.ReturnType==typeof(void)&&
+                type!=null&&typeof(ModPlayer).IsAssignableFrom(type))
+                MonoModHooks.Add(method,(Action<Action<ModPlayer,Player.HurtInfo>,ModPlayer,Player.HurtInfo>)LocalHurt);
+        }
     }
 
     static void Hook(string modName,string typeName,Action<Action<ModPlayer>,ModPlayer> hook){
@@ -34,5 +41,12 @@ public sealed class CompanionLocalPresentationBridge : ModSystem {
         // a local-player check. Companions have no inventory in that UI.
         if(CompanionNativeUse.Current?.Actor==self.Player)return;
         orig(self);
+    }
+
+    static void LocalHurt(Action<ModPlayer,Player.HurtInfo> orig,ModPlayer self,Player.HurtInfo info){
+        // Native damage temporarily uses the companion as LocalPlayer. Screen
+        // and audio feedback still belong to the human, not that native actor.
+        if(CompanionNativeUse.Current?.Actor==self.Player)return;
+        orig(self,info);
     }
 }

@@ -461,7 +461,7 @@ public sealed partial class CompanionNativeUse {
         readonly CompanionNativeUse context,previous;
         readonly Player backup;
         readonly int myPlayer,mouseX,mouseY;
-        readonly bool blockMouse;
+        readonly bool blockMouse,playerInventory;
         readonly bool mouseLeft,mouseLeftRelease,mouseRight,mouseRightRelease;
         readonly TriggersSet triggers;
         readonly bool triggerLeft,triggerRight;
@@ -487,7 +487,7 @@ public sealed partial class CompanionNativeUse {
                 if(healthScope)healthBefore=CompanionWeaponRecovery.Begin(use);
             }
             context=use;previous=Current;backup=Main.player[use.slot];myPlayer=Main.myPlayer;mouseX=Main.mouseX;mouseY=Main.mouseY;
-            blockMouse=Main.blockMouse;
+            blockMouse=Main.blockMouse;playerInventory=Main.playerInventory;
             mouseLeft=Main.mouseLeft;mouseLeftRelease=Main.mouseLeftRelease;mouseRight=Main.mouseRight;mouseRightRelease=Main.mouseRightRelease;
             triggers=PlayerInput.Triggers.Current;triggerLeft=triggers.MouseLeft;triggerRight=triggers.MouseRight;
             if(use.Cat is {active:true})use.LocateActor(use.Cat);
@@ -497,6 +497,9 @@ public sealed partial class CompanionNativeUse {
             // OnSpawn still rejects replica gameplay spawns, and projectile AI
             // retains its normal remote-owner checks.
             Main.player[use.slot]=use.Actor;use.Actor.active=true;Main.myPlayer=CompanionNetwork.Client&&!equipmentOwner?myPlayer:use.slot;Current=use;
+            // The actor has no inventory UI. Native item hooks must not read
+            // the human's open backpack as the actor's inventory state.
+            Main.playerInventory=false;
             Main.mouseX=(int)(use.Aim.X-Main.screenPosition.X);Main.mouseY=(int)(use.Aim.Y-Main.screenPosition.Y);
             Main.mouseLeft=use.Actor.controlUseItem;Main.mouseLeftRelease=!use.Actor.controlUseItem||use.PressedThisTick;
             Main.mouseRight=use.Actor.controlUseTile;Main.mouseRightRelease=false;
@@ -510,7 +513,7 @@ public sealed partial class CompanionNativeUse {
             try {if(healthScope)CompanionWeaponRecovery.End(context,healthBefore);}
             finally {try {hitCooldowns?.Dispose();}finally {
             combatTargets?.Dispose();projectiles.Dispose();Main.player[actorSlot]=backup;Main.myPlayer=myPlayer;Main.mouseX=mouseX;Main.mouseY=mouseY;Current=previous;
-            Main.blockMouse=blockMouse;
+            Main.blockMouse=blockMouse;Main.playerInventory=playerInventory;
             Main.mouseLeft=mouseLeft;Main.mouseLeftRelease=mouseLeftRelease;Main.mouseRight=mouseRight;Main.mouseRightRelease=mouseRightRelease;
             triggers.MouseLeft=triggerLeft;triggers.MouseRight=triggerRight;
             context.Actor.active=actorActive;
