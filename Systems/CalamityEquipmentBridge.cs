@@ -65,6 +65,11 @@ public sealed class CalamityEquipmentBridge : ModSystem {
     }
     void UpdateEquipment(CompanionNativeUse use){
         var player=use.Actor.GetModPlayer<CalamityPlayer>();
+        // Battery's flag controls only minion lighting/dust; its summon damage
+        // is applied separately by UpdateAccessory. Calamity 2.2.4 queries
+        // Lighting.UpdateEveryFrame without a server guard, which throws and
+        // removes the minion on a headless server. Keep native visuals on peers.
+        if(Main.dedServ)use.Actor.GetModPlayer<CalamityMod.Items.Accessories.WulfrumBatteryPlayer>().battery=false;
         // Calamity's MiscEffects owns this capacity calculation, mixed with
         // human movement and world effects. Equipment hooks above already set
         // the native flags; preserve its upgrade precedence, not item IDs.

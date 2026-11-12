@@ -25,7 +25,7 @@ public sealed class CompanionConfigLayout : ModSystem {
         ["AutoLogistics"]="Chest",["StockTorches"]="Torch",["StockGlowsticks"]="Glowstick",["StockPlatforms"]="WoodPlatform",["StockRopes"]="Rope",
         ["StockHealing"]="HealingPotion",["StockMana"]="ManaPotion",["StockAmmo"]="WoodenArrow",["StockAcorns"]="Acorn",["StockBait"]="Worm",
         ["CompanionHud"]="head",["ShowActivityStatus"]="Stopwatch",["CompanionMarker"]="Compass",["Discoveries"]="MetalDetector",
-        ["Chatter"]="Sign",["Emotes"]="WhoopieCushion",["CatSounds"]="Bell",["TeleportSounds"]="MagicMirror",["CatCart"]="Minecart",["TrainingHints"]="Book",
+        ["Chatter"]="Sign",["SpeechDisplay"]="Sign",["Emotes"]="WhoopieCushion",["CatSounds"]="Bell",["TeleportSounds"]="MagicMirror",["CatCart"]="Minecart",["TrainingHints"]="Book",
         ["DyeClothesOnly"]="BlueDye",["DyeKite"]="KiteBlue",
         ["RunInBackground"]="Stopwatch",["AdvancedOrders"]="Ruler",
         ["SharePotionBuffs"]="WrathPotion",["AttributeMode"]="IronChainmail",["Preset"]="head",["CombatInheritancePercent"]="AvengerEmblem",["DamagePercent"]="GoldBroadsword",["HealthPercent"]="LifeCrystal",["DefensePercent"]="IronChainmail",["DamageReductionInheritancePercent"]="EndurancePotion",["RegenInheritancePercent"]="BandofRegeneration",["TargetingRangePercent"]="Binoculars",

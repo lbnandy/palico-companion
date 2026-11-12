@@ -7,7 +7,7 @@
 
 - **Combat and support.** Give your Palico a weapon and fight side by side. Support gear can heal, shield, clear debuffs, throw pot bombs or send your Palico charging into a group with a Giga Barrel Bomb. When you're hurt, it can bring you nearby Hearts, too.
 - **Gathering and exploring.** Your Palico can mine ore, chop and replant trees, tend herbs, fish, catch critters and collect items. It can also light up dark areas and point out nearby chests and Life Crystals.
-- **Your own Palico.** Choose a name, outfit color and dye. Your Palico chats with you and reacts with emotes. You can pet it, feed it or fly it as a kite, too.
+- **Your own Palico.** Choose a name, outfit color and dye. Your Palico chats with you and reacts with emotes. Dialogue appears overhead by default, with chat fallback when off-screen; you can also choose overhead only, chat only, or both. You can pet it, feed it or fly it as a kite, too.
 
 ## Equipment and inventory
 

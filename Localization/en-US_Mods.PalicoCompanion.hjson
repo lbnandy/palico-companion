@@ -413,7 +413,19 @@ Configs: {
 
 		Chatter: {
 			Label: Palico chatter
-			Tooltip: Occasional comments, work reports and discovery callouts. Urgent messages take priority; repeated work reports are grouped.
+			Tooltip: Shows your Palico's comments, work reports and discovery callouts. Urgent messages take priority; repeated work reports are grouped. Only you see your Palico's dialogue in multiplayer.
+		}
+
+		SpeechDisplay: {
+			Label: Palico dialogue display
+			Tooltip:
+				'''
+				Automatic: shows dialogue overhead; copies it to chat once if your Palico leaves the screen or the full text no longer fits.
+				Overhead only: never copies to chat.
+				Chat only: hides overhead text.
+				Both: shows dialogue overhead and in chat.
+				Requires Palico chatter. Does not change speech frequency or emotes.
+				'''
 		}
 
 		Discoveries: {

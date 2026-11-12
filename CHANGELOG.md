@@ -1,5 +1,19 @@
 # Changelog
 
+## 1.2.10 — 2026-11-13
+
+### 简体中文
+
+- 呆猫台词新增自动、仅头顶、仅聊天栏、两处显示四种模式，默认自动；离屏或文字显示不全时补到聊天栏，同一句只补一次。
+- 头顶台词会为表情气泡留出空间，联机时仍仅主人可见。
+- 修复联机时呆猫佩戴灾厄钨钢电池导致召唤物消失、反复补召并消耗魔力的问题，保留召唤伤害加成及客户端特效。
+
+### English
+
+- Added Automatic, Overhead only, Chat only, and Both dialogue display modes. Automatic is the default and adds a line to chat once if the companion is off-screen or the full text cannot fit.
+- Overhead dialogue leaves room for emotes and remains private to the owner in multiplayer.
+- Fixed companion minions disappearing and being repeatedly resummoned at a mana cost when wearing Calamity's Wulfrum Battery in multiplayer. Summon damage bonuses and client visuals are preserved.
+
 ## 1.2.9 — 2026-11-12
 
 ### 简体中文

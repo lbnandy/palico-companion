@@ -199,7 +199,7 @@ public sealed partial class CompanionExpression {
         }
         if(canChat) {
             string lineKey=s.Dialogue.Next(key,variant);string line=Language.GetTextValue(lineKey,CompanionMemories.Context(lineKey,context));
-            if(CompanionNetwork.Server)CompanionNetwork.Say(s,lineKey,context);else Main.NewText(s.CatName+"："+line,Color.SandyBrown);Chats++;saidLine=true;
+            if(CompanionNetwork.Server)CompanionNetwork.Say(s,lineKey,context);else CompanionSpeechDisplay.Show(s,line);Chats++;saidLine=true;
             nextEvent[repeatKey]=tick+repeatDelay;
             pacing.Spoken(tick,priority);
             flavorAt=tick+1800;

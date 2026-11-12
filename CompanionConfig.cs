@@ -38,6 +38,13 @@ public enum CompanionLightingMode {
     [LabelKey("$Mods.PalicoCompanion.LightingChoices.Held")] Held,
     [LabelKey("$Mods.PalicoCompanion.LightingChoices.Automatic")] Automatic
 }
+[JsonConverter(typeof(StringEnumConverter))]
+public enum CompanionSpeechMode {
+    [LabelKey("$Mods.PalicoCompanion.SpeechDisplayChoices.Automatic")] Automatic,
+    [LabelKey("$Mods.PalicoCompanion.SpeechDisplayChoices.Overhead")] Overhead,
+    [LabelKey("$Mods.PalicoCompanion.SpeechDisplayChoices.Chat")] Chat,
+    [LabelKey("$Mods.PalicoCompanion.SpeechDisplayChoices.Both")] Both
+}
 public sealed class CompanionConfig : ModConfig {
     public override ConfigScope Mode => ConfigScope.ClientSide;
     [Header("Companion")]
@@ -105,6 +112,7 @@ public sealed class CompanionConfig : ModConfig {
     [DefaultValue(true)] public bool CompanionMarker = true;
     [DefaultValue(true)] public bool Discoveries = true;
     [DefaultValue(true)] public bool Chatter = true;
+    [DefaultValue(CompanionSpeechMode.Automatic),Dropdown] public CompanionSpeechMode SpeechDisplay=CompanionSpeechMode.Automatic;
     [DefaultValue(true)] public bool Emotes = true;
     [DefaultValue(true)] public bool InfernoRing = true;
     [DefaultValue(true)] public bool CatSounds = true;

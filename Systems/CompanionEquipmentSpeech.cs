@@ -74,7 +74,7 @@ public sealed partial class CompanionExpression {
 
     internal bool TryHint(CompanionPlayer s,string key,string context) {
         if(!IsLocalListener(s)||!ChatEnabled(s)||!s.Introduced||tick<flavorAt||!pacing.Ready(tick,CompanionSpeechPacing.Priority.Routine))return false;
-        Main.NewText(s.CatName+"："+Language.GetTextValue("Mods.PalicoCompanion.TrainingSpeech."+key,context),Color.SandyBrown);
+        CompanionSpeechDisplay.Show(s,Language.GetTextValue("Mods.PalicoCompanion.TrainingSpeech."+key,context));
         pacing.Spoken(tick,CompanionSpeechPacing.Priority.Routine);flavorAt=tick+1800;return true;
     }
 
@@ -92,6 +92,6 @@ public sealed partial class CompanionExpression {
         if(priority is CompanionSpeechPacing.Priority.Routine or CompanionSpeechPacing.Priority.Equipment && !pacing.Ready(tick,priority))return;
         s.Dialogue.Observe(lineKey);pacing.Spoken(tick,priority);flavorAt=tick+1800;
         string text=Language.GetTextValue(lineKey,CompanionMemories.Context(lineKey,context));
-        s.NetSpeechCount++;s.NetLastSpeech=text;Main.NewText(s.CatName+"："+text,Color.SandyBrown);
+        s.NetSpeechCount++;s.NetLastSpeech=text;CompanionSpeechDisplay.Show(s,text);
     }
 }
