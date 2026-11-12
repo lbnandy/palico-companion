@@ -1,8 +1,3 @@
-- The companion can now open doors and close them after passing when the doorway is clear. Disabling environmental changes also disables this behavior.
-- Fixed compatibility issues that could cause repeated teleporting or prevent attacks and summoning while the inventory was open with autopause disabled.
-- Fixed only the first companion accessory slot accepting items when Use Duplicated Accessories was enabled.
-- Fixed companion attacks not working correctly with Calamity Entropy Legacy.
-- Fixed companion projectiles causing update errors and stalled damage numbers with Fantasy Time.
-- Fixed Low Health Effects showing a player damage flash when the companion was hurt.
-- Fixed extra boss health scaling for worms such as the Desert Scourge and for bosses that become hostile after spawning.
-- Added missing minion capacity from Calamity summoning accessories such as Voltaic Jelly, with proper handling of upgraded accessories.
+- Fixed parts of the companion panel disappearing and accessories becoming impossible to equip when hovering a held accessory over slots with extra accessory-slot mods enabled.
+- Fixed Accessories+ dedicated-slot restrictions preventing the companion from equipping wings, boots, shields, and accessories such as the Soul of Eternity.
+- Fixed the work and combat buttons flickering when changing equipment in multiplayer.

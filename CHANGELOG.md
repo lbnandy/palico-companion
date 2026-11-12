@@ -1,5 +1,19 @@
 # Changelog
 
+## 1.2.9 — 2026-11-12
+
+### 简体中文
+
+- 修复与额外饰品栏模组同用时，拿着饰品移到呆猫栏位会导致部分界面消失、无法装备的问题。
+- 修复 Accessories+ 的专用栏限制导致呆猫无法装备翅膀、靴子、盾牌及永恒之魂等饰品的问题。
+- 修复联机更换装备时，面板上的工作／攻击按钮闪烁的问题。
+
+### English
+
+- Fixed parts of the companion panel disappearing and accessories becoming impossible to equip when hovering a held accessory over slots with extra accessory-slot mods enabled.
+- Fixed Accessories+ dedicated-slot restrictions preventing the companion from equipping wings, boots, shields, and accessories such as the Soul of Eternity.
+- Fixed the work and combat buttons flickering when changing equipment in multiplayer.
+
 ## 1.2.8 — 2026-11-11
 
 ### 简体中文

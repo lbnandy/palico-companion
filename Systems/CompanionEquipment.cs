@@ -25,8 +25,10 @@ internal sealed class CompanionEquipment {
     internal const int AccessoryStart=5, AccessoryCount=7;
     static readonly Item Empty=new();
     internal Player Preview;
+    [ThreadStatic] internal static Player ValidatingActor;
     Player validation;
     readonly Item[] validationArmor=new Item[20];
+    Item[] validationAccessories=Array.Empty<Item>();
     // ItemSlot's player-specific check is internal in tML. Bind it once so
     // companion clicks and quick-equip use the same placement rules as players.
     static readonly Func<Player,Item[],Item,int,bool> AccessoryBlocked=
@@ -77,14 +79,24 @@ internal sealed class CompanionEquipment {
         Array.Fill(armor,Empty);
         for(int i=1;i<state.Gear.Length;i++)
             if(IsSlot(i)&&CompanionEquipmentSlots.Unlocked(state,i))armor[ArmorIndex(i)]=state.Gear[i];
+        // Native ItemSlot checks a combined armor + mod accessory/vanity
+        // collection. Keep its full layout even though the companion only
+        // equips Gear; extra player slots must be empty, not copied from owner.
+        int length=armor.Length+2*actor.GetModPlayer<Terraria.ModLoader.Default.ModAccessorySlotPlayer>().SlotCount;
+        if(state.Equipment.validationAccessories.Length!=length)state.Equipment.validationAccessories=new Item[length];
+        var accessories=state.Equipment.validationAccessories;
+        Array.Fill(accessories,Empty);
+        Array.Copy(armor,accessories,armor.Length);
         var previous=actor.armor;
+        var previousValidator=ValidatingActor;
         try{
             // Hooks must see this loadout, even before the next equipment tick
             // and on remote clients, without consulting Main.LocalPlayer.
             actor.armor=armor;
+            ValidatingActor=actor;
             return ItemLoader.CanEquipAccessory(actor,item,ArmorIndex(slot),false)&&
-                !AccessoryBlocked(actor,armor,item,ArmorIndex(slot));
-        }finally{actor.armor=previous;}
+                !AccessoryBlocked(actor,accessories,item,ArmorIndex(slot));
+        }finally{ValidatingActor=previousValidator;actor.armor=previous;}
     }
 
     internal static bool TryEquip(CompanionPlayer state,Item item){

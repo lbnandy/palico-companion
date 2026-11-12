@@ -61,14 +61,17 @@ internal sealed class CompanionIconToggle
         PrepareFrames(icon);
         float scale=System.Math.Min(1f,24f/System.Math.Max(icon.Width,icon.Height));
         var center=bounds.Center.ToVector2();
-        bool enabled=!state.Player.dead&&!CompanionNetwork.Pending&&(!CompanionNetwork.Client||state.NetReady);
+        bool available=!state.Player.dead&&(!CompanionNetwork.Client||state.NetReady);
+        bool enabled=available&&!CompanionNetwork.Pending;
         CompanionGamepad.Add("toggle-"+itemType,bounds);
         bool hover=bounds.Contains(mouse);
         // Like vanilla's equipment/housing tabs: separate inactive, active and hover frames.
         if(hover&&enabled)
             spriteBatch.Draw(highlight,center,null,Main.OurFavoriteColor,0f,highlight.Size()/2f,scale,SpriteEffects.None,0f);
         var texture=active?(useAlternate?alternate??icon:icon):inactive;
-        spriteBatch.Draw(texture,center,null,enabled?Color.White:Color.Gray,0f,texture.Size()/2f,scale,SpriteEffects.None,0f);
+        // An inventory acknowledgement briefly locks input, not the selected
+        // work/combat mode. Keep its icon steady while that transaction settles.
+        spriteBatch.Draw(texture,center,null,available?Color.White:Color.Gray,0f,texture.Size()/2f,scale,SpriteEffects.None,0f);
         if(!hover)return;
         state.Player.mouseInterface=true;
         Main.instance.MouseText(string.Join("\n",CompanionCopy.Wrap(hint,System.Math.Min(520,Main.screenWidth-32))));
