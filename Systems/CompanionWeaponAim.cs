@@ -33,18 +33,37 @@ internal static class CompanionWeaponAim {
         }
         return cat.Center;
     }
+    static CompanionBallisticProfile? Flight(Projectile sample,Player actor)=>sample.type switch {
+        ProjectileID.WoodenArrowFriendly or ProjectileID.FireArrow or ProjectileID.UnholyArrow or ProjectileID.HellfireArrow=>new(.1f,14),
+        ProjectileID.ThrowingKnife or ProjectileID.PoisonedKnife or ProjectileID.Shuriken=>new(.4f,19,.97f),
+        ProjectileID.Meowmere=>new(.2f,19),
+        _=>CompanionCrossMod.Flight(sample,actor)
+    };
+    internal static bool TryFlight(Item item,CompanionNativeUse use,out Projectile sample,out float speed,out CompanionBallisticProfile profile){
+        sample=null;speed=0;profile=default;
+        if(item.channel||use?.AttributesReady!=true||use.Cat==null||!use.PreviewShot(item,out int type,out speed)||speed<=0||
+            !ContentSamples.ProjectilesByType.TryGetValue(type,out sample)||Flight(sample,use.Actor) is not {} flight)return false;
+        profile=flight;return true;
+    }
+    static Vector2 Launch(CompanionNativeUse use,Vector2 center,NPC target,Projectile sample){
+        var hand=CompanionSprite.Hand(use.Cat)+center-use.Cat.Center;
+        if((target.Center.X<center.X?-1:1)!=(use.Cat.direction<0?-1:1))hand.X=2*center.X-hand.X;
+        if(sample.tileCollide)ClearLaunchFloor(ref hand,sample);
+        return hand;
+    }
+    internal static bool CanReach(Item item,CompanionNativeUse use,Vector2 center,NPC target)=>
+        !TryFlight(item,use,out var sample,out var speed,out var flight)||
+        CompanionBallistics.TryAim(Launch(use,center,target,sample),target,speed,sample,flight,out _);
     internal static Vector2 Point(Item item,CompanionNativeUse use,NPC target) {
         Vector2 hand=CompanionSprite.Hand(use.Cat);
         Vector2 point=CompanionCombatReach.AimPoint(item,hand,target);
         if(item.channel)return point;
         if(!use.PreviewShot(item,out int type,out float speed))return point;
-        bool arrow=type is ProjectileID.WoodenArrowFriendly or ProjectileID.FireArrow or ProjectileID.UnholyArrow or ProjectileID.HellfireArrow;
         bool straight=type is ProjectileID.Bullet or ProjectileID.MeteorShot or ProjectileID.BulletHighVelocity;
         if(speed<=0||!ContentSamples.ProjectilesByType.TryGetValue(type,out var sample))return point;
-        CompanionBallisticProfile? flight=arrow?new(.1f,14):
-            type is ProjectileID.ThrowingKnife or ProjectileID.PoisonedKnife or ProjectileID.Shuriken?new(.4f,19,.97f):CompanionCrossMod.Flight(sample,use.Actor);
+        CompanionBallisticProfile? flight=Flight(sample,use.Actor);
         if(flight is {} profile){
-            ClearLaunchFloor(ref hand,sample);
+            hand=Launch(use,use.Cat.Center,target,sample);
             return CompanionBallistics.TryAim(hand,target,speed,sample,profile,out var aim)?aim:point;
         }
         if(!straight)return point;

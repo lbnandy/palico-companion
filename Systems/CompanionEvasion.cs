@@ -17,16 +17,19 @@ public sealed class CompanionEvasion {
         }
         return risk;
     }
-    static float Risk(Projectile cat,Vector2 motion,int horizon){
+    internal static bool ThreatAt(Projectile cat,Vector2 position)=>Risk(cat,Vector2.Zero,
+        CompanionBalanceConfig.Current.EvasionStyle==CompanionEvasionMode.Agile?12:6,position)>0;
+    static float Risk(Projectile cat,Vector2 motion,int horizon,Vector2? origin=null){
+        var center=origin??cat.Center;
         float risk=0;
         foreach(var shot in Main.projectile)if(shot.active&&shot.hostile&&shot.damage>0&&shot.velocity.LengthSquared()>.25f&&
-            Vector2.DistanceSquared(shot.Center,cat.Center)<240*240)
-            risk+=Exposure(shot.Center,shot.velocity*(shot.extraUpdates+1),shot.width,shot.height,cat.Center,motion,cat.width,cat.height,horizon);
+            Vector2.DistanceSquared(shot.Center,center)<240*240)
+            risk+=Exposure(shot.Center,shot.velocity*(shot.extraUpdates+1),shot.width,shot.height,center,motion,cat.width,cat.height,horizon);
         // Stationary enemies still deal contact damage. Use their nearest edge
         // for broad phase so large bosses are not discarded by center distance.
         foreach(var npc in Main.npc)if(npc.active&&!npc.friendly&&!npc.dontTakeDamage&&npc.damage>0&&
-            Vector2.DistanceSquared(npc.Hitbox.ClosestPointInRect(cat.Center),cat.Center)<240*240)
-            risk+=Exposure(npc.Center,npc.velocity,npc.width,npc.height,cat.Center,motion,cat.width,cat.height,horizon);
+            Vector2.DistanceSquared(npc.Hitbox.ClosestPointInRect(center),center)<240*240)
+            risk+=Exposure(npc.Center,npc.velocity,npc.width,npc.height,center,motion,cat.width,cat.height,horizon);
         return risk;
     }
     static bool Safe(Projectile cat,Vector2 velocity,bool flying){
@@ -61,7 +64,16 @@ public sealed class CompanionEvasion {
         // velocity against sidesteps whose vertical component is already zero.
         Vector2 motion=flying?cat.velocity:Collision.TileCollision(cat.position,cat.velocity,cat.width,cat.height,nav.DropThrough);
         int horizon=agile?12:6;
-        float baseline=Risk(cat,motion,horizon);if(baseline==0)return;
+        float baseline=Risk(cat,motion,horizon);
+        // Long-range following must not abandon a safe firing position merely
+        // to recover its offset. Reuse the same physical prediction as dodging,
+        // before choosing a sidestep; resume following as soon as it is clear.
+        if(!contact&&(cat.ModProjectile as CompanionCat)?.tactics.FollowingOwner==true&&
+            (baseline>0||!Safe(cat,motion,flying))&&Safe(cat,Vector2.Zero,flying)&&Risk(cat,Vector2.Zero,horizon)==0){
+            cat.velocity.X=0;if(flying)cat.velocity.Y=0;
+            return;
+        }
+        if(baseline==0)return;
         if(cooldown>0&&(!contact||!agile)){
             // Do not immediately follow back through a threat after a sidestep.
             // Only wait when staying put is clear; moving hazards still require

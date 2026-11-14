@@ -404,7 +404,7 @@ Guide: {
 	Fishing:
 		'''
 		[Fishing]
-		Give your Palico bait, then linger by water, cast your own line or direct them to a pool.
+		Give your Palico bait. Automatic mode fishes while you stay near water; cooperative mode waits for your cast. You can also select a fishing spot directly.
 		Uses the best rod you carry and inherits your fishing bonuses, but consumes their own bait. Never uses Truffle Worms. Lava fishing still requires suitable gear or bait.
 		Prefers stronger bait from its own inventory. Catches use native rolls with your biome, luck and Crate Potion effects. Quest fish already in the Palico inventory are not caught again.
 		If the inventory is full, catches land on the ground. Clear them or make room to continue.
@@ -446,7 +446,7 @@ Guide: {
 		[Digging and mining]
 		Your Palico helps nearby while you swing a pickaxe, and gathers exposed ore and gems while idle.
 		Uses the strongest pickaxe you carry, or a basic tool if you have none. If mining stalls, check pickaxe power and access. Exclude unwanted blocks in settings.
-		The pickaxe button at the top of the panel pauses or resumes automatic digging, logging, planting and placement.
+		Click the pickaxe or fishing rod at the top of the panel to cycle automatic, cooperative or off. Cooperative work follows your actions without seeking new jobs. Individual work settings still apply.
 		'''
 	Summons:
 		'''

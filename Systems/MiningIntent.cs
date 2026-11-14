@@ -20,6 +20,22 @@ public sealed class MiningIntent
         var tile=Main.tile[cell];
         if(tile.HasTile&&FieldAssist.AllowedOre(tile.TileType)){preferred=cell;preferenceTicks=120;}
     }
+    internal void AssistStroke(Player p,Point cell,int type) {
+        var s=p.GetModPlayer<CompanionPlayer>();
+        if(s.WorkMode!=CompanionWorkMode.Assist||!FieldAssist.AllowedOre(type)||s.Directive.Active||
+            !s.Enabled||s.Paused||s.Vitals.Downed||p.dead||s.Mining.Active||s.Order.Active||s.Order.HasPreview||
+            s.Storage.Active||s.Trees.Active||s.Garden.Active||s.Cat==null||
+            !(CompanionNetwork.Server?s.NetMining:ModContent.GetInstance<CompanionConfig>().MiningAssist)||
+            !CompanionStation.Contains(s,cell.ToWorldCoordinates()))return;
+        // The native hit may already have removed this tile. Only continue its
+        // connected vein, never scan unrelated ore merely because a pick is held.
+        foreach(var offset in new[]{Point.Zero,new Point(-1,0),new Point(1,0),new Point(0,-1),new Point(0,1)}) {
+            var at=cell+offset;
+            if(!WorldGen.InWorld(at.X,at.Y,10)||!Main.tile[at].HasTile||Main.tile[at].TileType!=type)continue;
+            s.Mining.Request(p,at.ToWorldCoordinates(),true);
+            if(s.Mining.Active)return;
+        }
+    }
     public void Tick(Player p,CompanionPlayer s)
     {
         if(s.Directive.Active)return;
@@ -30,6 +46,7 @@ public sealed class MiningIntent
             if(s.Mining.Active&&!s.Mining.Terrain&&!s.Mining.OwnerRequested)s.Mining.Cancel();
             wasActive=false;return;
         }
+        if(s.WorkMode==CompanionWorkMode.Assist)return;
         if(s.Digging.Active||s.Mining.Active&&s.Mining.Terrain){wasActive=false;return;}
         if(s.Mining.Active){wasActive=true;lastTarget=s.Mining.Tile;return;}
         if(wasActive){wasActive=false;deferred[lastTarget]=clock+600;scanDelay=60;}

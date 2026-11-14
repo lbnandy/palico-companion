@@ -140,6 +140,7 @@ public sealed class MiningObservation : ModSystem
         if(CompanionNetwork.Client){CompanionNetwork.DigAt(new Point(x,y),type,aim);return;}
         var s=p.GetModPlayer<CompanionPlayer>();
         if(s.Directive.Active)return;
+        s.MiningHelper.AssistStroke(p,new Point(x,y),type);
         if(s.Enabled&&!s.Paused&&!s.Vitals.Downed&&(CompanionNetwork.Server?s.NetDigging:ModContent.GetInstance<CompanionConfig>().DiggingAssist))
             s.Digging.Observe(p,new Point(x,y),type,aim);
     }

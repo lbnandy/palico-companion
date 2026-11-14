@@ -20,7 +20,7 @@ public sealed class CompanionBuffVisuals:ModSystem {
         var info=new PlayerDrawSet{drawPlayer=actor,Position=center-actor.Size/2,
             DrawDataCache=cache,colorArmorBody=light,
             playerEffect=cat.Projectile.direction<0?SpriteEffects.FlipHorizontally:SpriteEffects.None};
-        PlayerDrawLayers.DrawPlayer_26_SolarShield(ref info);
+        SolarShield(ref info,cat.Projectile.direction,cat.Weapons.State.Equipment.SolarShieldDirection);
         PlayerDrawLayers.DrawPlayer_37_BeetleBuff(ref info);
         // IceBarrier is anchored to the humanoid body frame rather than its
         // center. Translate that anchor only; retain native texture/animation.
@@ -28,6 +28,20 @@ public sealed class CompanionBuffVisuals:ModSystem {
         info.Position.X-=actor.bodyPosition.X;
         PlayerDrawLayers.DrawPlayer_35_IceBarrier(ref info);
         foreach(var data in cache)data.Draw(Main.spriteBatch);
+    }
+    static void SolarShield(ref PlayerDrawSet info,int direction,int animationDirection){
+        var actor=info.drawPlayer;
+        int previousDirection=actor.direction;
+        Vector2 previousPosition=actor.solarShieldPos[0];
+        try {
+            // Reuse the native layer's position, tilt and animation. Its cached
+            // offset belongs to equipment-time facing, not necessarily the
+            // final combat pose (or the pose received by a remote client).
+            actor.direction=direction;
+            actor.solarShieldPos[0].X*=direction*animationDirection;
+            PlayerDrawLayers.DrawPlayer_26_SolarShield(ref info);
+        }
+        finally {actor.direction=previousDirection;actor.solarShieldPos[0]=previousPosition;}
     }
     public override void Load(){if(!Main.dedServ)On_Main.DrawInfernoRings+=DrawInfernoRings;}
     public override void Unload()=>On_Main.DrawInfernoRings-=DrawInfernoRings;

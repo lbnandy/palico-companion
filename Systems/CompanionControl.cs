@@ -4,7 +4,7 @@ using Terraria;
 
 namespace PalicoCompanion.Systems;
 
-internal enum CompanionControlOp:byte { Direct, Skill, SwitchLoadout, Environment, CombatMode, AccessoryVisibility, Station }
+internal enum CompanionControlOp:byte { Direct, Skill, SwitchLoadout, Environment, CombatMode, AccessoryVisibility, Station, WorkMode, FishingMode }
 
 internal static class CompanionControl {
     internal static bool Execute(CompanionPlayer s,CompanionControlOp op,int index,Point cell,string name,out string message) {
@@ -36,6 +36,16 @@ internal static class CompanionControl {
                 }
                 message=CompanionText.MessageFull("Mods.PalicoCompanion.UI."+CompanionCombatModes.Key(mode));
                 return true;
+            case CompanionControlOp.WorkMode:
+                if(index is <0 or >2)return false;
+                CompanionEnvironment.SetMode(s,(CompanionWorkMode)index);
+                message=CompanionWorkModes.Label("Work",s.WorkMode);return true;
+            case CompanionControlOp.FishingMode:
+                if(index is <0 or >2)return false;
+                s.FishingMode=(CompanionWorkMode)index;
+                if(s.Cat?.ModProjectile is CompanionCat fishingCat&&!fishingCat.Fishing.RequestedWater.HasValue)
+                    fishingCat.Fishing.Cancel();
+                message=CompanionWorkModes.Label("Fishing",s.FishingMode);return true;
             case CompanionControlOp.Environment:
                 if(index is not (0 or 1))return false;
                 CompanionEnvironment.SetPaused(s,index==1);

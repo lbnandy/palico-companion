@@ -93,6 +93,7 @@ public sealed class TreeAssist
         if(ReplantPending){bool result=TryReplant(p,s,cat);if(!ReplantPending)requestedManual=false;return result;}
         if(cooldown>0){cooldown--;return false;}
         if(!Active) {
+            if(s.WorkMode!=CompanionWorkMode.Automatic)return false;
             if(!CompanionWorkOpportunity.KeepingUp(p,cat)){Status="";return false;}
             cooldown=60;Status="";axe=BestAxe(p);
             Point center=CompanionStation.Origin(p).ToTileCoordinates();float best=320*320;

@@ -19,7 +19,7 @@ public sealed class CompanionCursorCast : ModSystem {
             throw new InvalidOperationException("Native cursor cast obstruction test changed");
         c.Remove();
         c.EmitDelegate<Func<Vector2,int,int,Vector2,int,int,bool>>((from,width,height,to,targetWidth,targetHeight)=>
-            CompanionNativeUse.Current!=null?Reachability.Clear(from,to,CompanionCombatReach.RangedRange+64):
+            CompanionNativeUse.Current!=null?Reachability.Clear(from,to,CompanionCombatReach.RangedRange+64,includeSlopes:true):
                 Collision.CanHitLine(from,width,height,to,targetWidth,targetHeight));
     }
 }

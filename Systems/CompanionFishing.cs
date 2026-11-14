@@ -47,7 +47,7 @@ public sealed class CompanionFishing {
         try {RequestedWater=cell;State=s;Cat=s.Cat;Rod=BestRod(s.Player);bait=s.Bag.Where(SafeBait).OrderByDescending(i=>i.bait).FirstOrDefault();return bait!=null&&(FindPond(CompanionSprite.Hand(Cat),s.Player,out _)||FindShore(Cat,s.Player));}
         finally {RequestedWater=old;State=oldState;Cat=oldCat;Rod=oldRod;bait=oldBait;MoveTarget=oldGoal;Approaching=approaching;}
     }
-    int idle,age,recast,biteDelay,gesture,gestureMax;Vector2 visitAnchor;
+    int idle,age,recast,biteDelay,gesture,gestureMax;ulong ownerFishingAt;bool sawOwnerFishing;Vector2 visitAnchor;
     public bool Approaching {get;private set;}
     public Vector2 MoveTarget {get;private set;}
     internal static bool OwnerFishing(Player p)=>Main.projectile.Any(q=>q.active&&q.owner==p.whoAmI&&q.bobber&&CompanionFishingBobber.Of(q)==null);
@@ -60,7 +60,7 @@ public sealed class CompanionFishing {
     readonly Queue<int> catchAnnouncements=new();
     internal void Caught(Item item)=>catchAnnouncements.Enqueue(item.type);
     public bool Active=>Bobber is {active:true}&&CompanionFishingBobber.Of(Bobber)==this;
-    public bool Available=>Cat is {active:true}&&State is {Enabled:true,Paused:false}&&!State.Vitals.Downed&&!State.Player.dead&&(RequestedWater.HasValue||CompanionNetwork.Client||CompanionNetwork.Server&&State.NetFishing||!CompanionNetwork.Server&&ModContent.GetInstance<CompanionConfig>().Fishing);
+    public bool Available=>Cat is {active:true}&&State is {Enabled:true,Paused:false}&&!State.Vitals.Downed&&!State.Player.dead&&(RequestedWater.HasValue||State.FishingMode!=CompanionWorkMode.Off);
     public static Item BestRod(Player p) {
         Item best=new(ItemID.WoodFishingPole);
         foreach(var i in p.inventory.Take(50))if(!i.IsAir&&i.fishingPole>best.fishingPole&&StandardRod(i))best=i;
@@ -73,10 +73,13 @@ public sealed class CompanionFishing {
         return waitingOverflow.Any(i=>!CompanionPickup.HasRoom(i,s));
     }
     public static int WaterCount(Point cell){Pond(cell.X,cell.Y,out bool lava,out bool honey,out int water,out _);return lava||honey?0:water;}
-    public void Cancel(){if(Active){Bobber.ai[1]=0;if(CompanionNetwork.Server)NetMessage.SendData(MessageID.KillProjectile,-1,-1,null,Bobber.identity,Bobber.owner);Bobber.active=false;}Bobber=null;Approaching=false;idle=age=biteDelay=gesture=0;recast=30;}
+    public void Cancel(){sawOwnerFishing=false;if(Active){Bobber.ai[1]=0;if(CompanionNetwork.Server)NetMessage.SendData(MessageID.KillProjectile,-1,-1,null,Bobber.identity,Bobber.owner);Bobber.active=false;}Bobber=null;Approaching=false;idle=age=biteDelay=gesture=0;recast=30;}
     internal bool BindReplica(Projectile cat,Projectile bobber,int rod){Cat=cat;State=Main.player[CompanionCat.OwnerOf(cat)].GetModPlayer<CompanionPlayer>();Bobber=bobber;if(Rod?.type!=rod)Rod=new Item(rod);Actor.inventory[0]=Rod;Prepare();return CompanionActorSlots.Initialize(Actor);}
     public void Maintain(Player p,CompanionPlayer s,Projectile cat){
         Cat=cat;State=s;
+        if(OwnerFishing(p)){sawOwnerFishing=true;ownerFishingAt=Main.GameUpdateCount;}
+        bool assistExpired=s.FishingMode==CompanionWorkMode.Assist&&!RequestedWater.HasValue&&
+            (!sawOwnerFishing||Main.GameUpdateCount-ownerFishingAt>120);
         // Native bobber callbacks temporarily replace Main.myPlayer with the
         // fishing actor. Announce completed catches on the normal owner tick.
         while(catchAnnouncements.TryDequeue(out int type)){
@@ -85,7 +88,7 @@ public sealed class CompanionFishing {
                 context:CompanionText.MessageFull(Lang.GetItemName(type).Key),
                 variant:item.questItem?"Quest":ItemID.Sets.IsFishingCrate[type]?"Crate":null);
         }
-        if(!Available||s.Digging.Active||s.Mining.Active||s.Order.Active||s.Construction.Active||s.Storage.Active||s.Trees.Active||s.Garden.Active||
+        if(!Available||assistExpired||s.Digging.Active||s.Mining.Active||s.Order.Active||s.Construction.Active||s.Storage.Active||s.Trees.Active||s.Garden.Active||
             Vector2.DistanceSquared(CompanionStation.Origin(p),Active?Aim:cat.Center)>640*640||CompanionThreat.WorkDanger(p,cat.Center))Cancel();
     }
     public bool Tick(Player p,CompanionPlayer s,Projectile cat){
@@ -97,6 +100,9 @@ public sealed class CompanionFishing {
             if(!CompanionActorSlots.Initialize(Actor)){Cancel();return false;}
         }
         if(!Active){
+            // The short owner recast grace only preserves an existing cast.
+            // Starting another cast always requires the owner's real bobber.
+            if(s.FishingMode==CompanionWorkMode.Assist&&!RequestedWater.HasValue&&!OwnerFishing(p)){Approaching=false;return false;}
             if(recast>0){recast--;return false;}
             if(idle==0||Vector2.DistanceSquared(visitAnchor,CompanionStation.Origin(p))>128*128){visitAnchor=CompanionStation.Origin(p);idle=0;}
             idle++;bool ownerFishing=OwnerFishing(p);
@@ -210,7 +216,7 @@ public sealed class CompanionFishing {
         if(!CompanionActorSlots.Initialized(Actor))return Vector2.Zero;
         var info=new PlayerDrawSet{drawPlayer=Actor,heldItem=Rod,DrawDataCache=cache,Position=Actor.position,ItemLocation=Actor.itemLocation,
             itemColor=light,itemEffect=Cat.direction<0?SpriteEffects.FlipHorizontally:SpriteEffects.None};
-        PlayerDrawLayers.DrawPlayer_27_HeldItem(ref info);
+        CompanionItemVisual.DrawHeldItem(ref info);
         return cache.Count==0?Vector2.Zero:CompanionSprite.Hand(Cat)-Main.screenPosition-CompanionGrip.DrawnGrip(cache[0]);
     }
     public void Draw(Color light){

@@ -19,7 +19,7 @@ public sealed class CompanionConfigLayout : ModSystem {
     static readonly Dictionary<string,string> OptionIcons=new(){
         ["Enabled"]="head",["Combat"]="GoldBroadsword",["AutoHeal"]="HealingPotion",
         ["DiggingAssist"]="GoldPickaxe",["MiningAssist"]="IronOre",["Forestry"]="GoldAxe",["Gardening"]="StaffofRegrowth",
-        ["Pickup"]="TreasureMagnet",["CatchCritters"]="BugNet",["Fishing"]="WoodFishingPole",["MiningBlacklist"]="StoneBlock",["PickupBlacklist"]="TrashCan",
+        ["Pickup"]="TreasureMagnet",["CatchCritters"]="BugNet",["MiningBlacklist"]="StoneBlock",["PickupBlacklist"]="TrashCan",
         ["Lighting"]="Torch",["Bridges"]="WoodPlatform",["Ropes"]="Rope",
         ["DeliverRecoveryDrops"]="Heart",["ShareNewPickups"]="TreasureMagnet",["CoinDestination"]="GoldCoin",
         ["AutoLogistics"]="Chest",["StockTorches"]="Torch",["StockGlowsticks"]="Glowstick",["StockPlatforms"]="WoodPlatform",["StockRopes"]="Rope",

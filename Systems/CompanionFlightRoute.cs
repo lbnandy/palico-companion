@@ -14,25 +14,26 @@ internal sealed class CompanionFlightRoute {
     ulong retryAt,expires;
     public int LastExpanded {get;private set;}
     public void Clear(){route.Clear();retryAt=expires=0;}
-    public bool Next(Vector2 from,Vector2 goal,out Vector2 next) {
+    public bool Next(Vector2 from,Vector2 goal,out Vector2 next) => NextAvoiding(from,goal,CompanionNavigation.ClearFlight,out next);
+    internal bool NextAvoiding(Vector2 from,Vector2 goal,Func<Vector2,Vector2,bool> clear,out Vector2 next) {
         next=goal;
         if(!CompanionNavigation.Fits(from)||!CompanionNavigation.Fits(goal)||Vector2.DistanceSquared(from,goal)>640*640)return false;
-        if(CompanionNavigation.ClearFlight(from,goal)){Clear();return true;}
+        if(clear(from,goal)){Clear();return true;}
         bool changed=Vector2.DistanceSquared(goal,target)>16*16;
         if(changed||Main.GameUpdateCount>=expires)route.Clear();
         if(route.Count>0) {
             // A newly placed block also invalidates the still-cached route.
-            for(int i=route.Count-1;i>=0;i--)if(Vector2.DistanceSquared(from,route[i])>4&&CompanionNavigation.ClearFlight(from,route[i])) {
+            for(int i=route.Count-1;i>=0;i--)if(Vector2.DistanceSquared(from,route[i])>4&&clear(from,route[i])) {
                 next=route[i];if(i>0)route.RemoveRange(0,i);return true;
             }
             route.Clear();retryAt=0;
         }
         if(!changed&&Vector2.DistanceSquared(from,failedFrom)<32*32&&Main.GameUpdateCount<retryAt)return false;
         target=goal;failedFrom=from;retryAt=Main.GameUpdateCount+30;expires=Main.GameUpdateCount+120;
-        if(!Search(from,goal))return false;
+        if(!Search(from,goal,clear))return false;
         next=route[0];return true;
     }
-    bool Search(Vector2 from,Vector2 goal) {
+    bool Search(Vector2 from,Vector2 goal,Func<Vector2,Vector2,bool> clear) {
         LastExpanded=0;
         var open=new PriorityQueue<Point,float>();
         var cost=new Dictionary<Point,float>{{Point.Zero,0}};
@@ -43,7 +44,7 @@ internal sealed class CompanionFlightRoute {
         while(open.Count>0&&LastExpanded<SearchBudget) {
             var cell=open.Dequeue();if(!closed.Add(cell))continue;LastExpanded++;
             var at=from+new Vector2(cell.X*16,cell.Y*16);
-            if(Vector2.DistanceSquared(at,goal)<=80*80&&CompanionNavigation.ClearFlight(at,goal)) {
+            if(Vector2.DistanceSquared(at,goal)<=80*80&&clear(at,goal)) {
                 route.Add(goal);
                 for(var p=cell;p!=Point.Zero;p=parent[p])route.Add(from+new Vector2(p.X*16,p.Y*16));
                 route.Reverse();return true;
@@ -55,7 +56,7 @@ internal sealed class CompanionFlightRoute {
                 if(pos.X<min.X||pos.Y<min.Y||pos.X>max.X||pos.Y>max.Y)continue;
                 float score=cost[cell]+(dx!=0&&dy!=0?22.627417f:16);
                 if(cost.TryGetValue(adj,out float old)&&old<=score)continue;
-                if(!CompanionNavigation.ClearFlight(at,pos))continue;
+                if(!clear(at,pos))continue;
                 cost[adj]=score;parent[adj]=cell;open.Enqueue(adj,score+Vector2.Distance(pos,goal));
             }
         }

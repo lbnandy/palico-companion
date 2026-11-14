@@ -26,6 +26,21 @@ public sealed class CompanionIncomingDamage : ModSystem {
         }
         return false;
     }
+    internal static bool ContactAt(Projectile cat,Vector2 center)=>ContactWithin(cat,center,0);
+    internal static bool ContactWithin(Projectile cat,Vector2 center,int padding){
+        var body=new Rectangle((int)(center.X-cat.width/2f)-padding,(int)(center.Y-cat.height/2f)-padding,cat.width+padding*2,cat.height+padding*2);
+        foreach(var enemy in Main.ActiveNPCs)if(ContactHitbox(enemy,body,out _,out _))return true;
+        return false;
+    }
+    static bool ContactHitbox(NPC enemy,Rectangle body,out int cooldown,out float multiplier){
+        cooldown=-1;multiplier=1;
+        if(enemy.friendly||enemy.damage<=0||enemy.dontTakeDamage)return false;
+        // Same non-contact phases as Player.Update_NPCCollision.
+        if(enemy.type==NPCID.HallowBoss&&enemy.ai[0] is 0f or 10f)return false;
+        var box=enemy.Hitbox;
+        NPC.GetMeleeCollisionData(body,enemy.whoAmI,ref cooldown,ref multiplier,ref box);
+        return float.IsFinite(multiplier)&&multiplier>0&&body.Intersects(box);
+    }
     internal static void Register(CompanionCat cat){if(!CompanionNetwork.Client&&!cats.Contains(cat))cats.Add(cat);}
     internal static void Remove(CompanionCat cat)=>cats.Remove(cat);
     public override void OnWorldLoad(){cats.Clear();hazards.Clear();}
@@ -48,12 +63,7 @@ public sealed class CompanionIncomingDamage : ModSystem {
         if(CompanionNetwork.Client||state.Vitals.Downed||state.Vitals.Immunity>0)return;
         var body=cat.Projectile;bool boss=BossNear(state.Player);
         foreach(var enemy in Main.ActiveNPCs){
-            if(enemy.friendly||enemy.damage<=0||enemy.dontTakeDamage)continue;
-            // Same non-contact phases as Player.Update_NPCCollision.
-            if(enemy.type==NPCID.HallowBoss&&enemy.ai[0] is 0f or 10f)continue;
-            int cooldown=-1;float multiplier=1;var hitbox=enemy.Hitbox;
-            NPC.GetMeleeCollisionData(body.Hitbox,enemy.whoAmI,ref cooldown,ref multiplier,ref hitbox);
-            if(!body.Hitbox.Intersects(hitbox)||!float.IsFinite(multiplier)||multiplier<=0||
+            if(!ContactHitbox(enemy,body.Hitbox,out int cooldown,out float multiplier)||
                 !cat.Weapons.CanReceiveHit(state,body,enemy,null,ref cooldown))continue;
             int damage=Main.DamageVar(enemy.damage*multiplier);
             bool hit=cat.Weapons.EquipmentHit(damage,boss,enemy,null,cooldown);

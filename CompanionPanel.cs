@@ -125,7 +125,7 @@ public sealed class CompanionPanel : ModSystem
         foreach(var placeholder in slotPlaceholders)if(placeholder!=null)Main.QueueMainThreadAction(placeholder.Dispose);
         Array.Clear(slotPlaceholders);
         Array.Clear(weaponPlaceholderItems);
-        CompanionEnvironmentButton.Unload();CompanionCombatButton.Unload();
+        CompanionEnvironmentButton.Unload();CompanionFishingButton.Unload();CompanionCombatButton.Unload();
     }
     void DrawVanillaInventory(On_Main.orig_DrawInventory orig,Main self) {
         int mx=Main.mouseX,my=Main.mouseY;
@@ -201,21 +201,23 @@ public sealed class CompanionPanel : ModSystem
         int statsWidth=CompanionButtonLayout.ContentWidth(Language.GetTextValue("Mods.PalicoCompanion.Attributes.Button"));
         int statsX=guideButton.X-statsWidth-8;
         int nameX=(int)MathF.Ceiling(portrait.Right/Main.UIScale)+8;
-        var title=new Rectangle(nameX,y+3,statsX-20-CompanionEnvironmentButton.Size-CompanionCombatButton.Size-nameX,38);
+        var title=new Rectangle(nameX,y+3,statsX-24-CompanionEnvironmentButton.Size-CompanionFishingButton.Size-CompanionCombatButton.Size-nameX,38);
         var namePosition=CompanionPanelHeader.TitlePosition(s.CatName,headerArea);
         Text(s.CatName,nameX,namePosition.Y,Accent,1f,title.Width);
         int nameRight=Math.Min(title.Right,nameX+(int)Math.Ceiling(FontAssets.MouseText.Value.MeasureString(s.CatName).X));
         int identityRight=nameRight+4;
         var environmentButton=new Rectangle(nameRight+8,y+8,CompanionEnvironmentButton.Size,CompanionEnvironmentButton.Size);
-        var combatButton=new Rectangle(environmentButton.Right+4,y+8,CompanionCombatButton.Size,CompanionCombatButton.Size);
+        var fishingButton=new Rectangle(environmentButton.Right+4,y+8,CompanionFishingButton.Size,CompanionFishingButton.Size);
+        var combatButton=new Rectangle(fishingButton.Right+4,y+8,CompanionCombatButton.Size,CompanionCombatButton.Size);
         var identity=new Rectangle(x+12,y,identityRight-x-12,48);
         CompanionGamepad.Add("identity",identity);
         if(identity.Contains(mouse)) {
             Main.instance.MouseText(CompanionAppearance.L("AppearanceEntry"));
             if(clicked&&Main.mouseItem.IsAir){dragging=false;CompanionAppearance.Open(s);return true;}
         }
-        else if(!environmentButton.Contains(mouse)&&!combatButton.Contains(mouse)&&title.Contains(mouse)&&Main.mouseLeft&&!dragging&&Main.mouseItem.IsAir){dragging=true;dragOffset=new Vector2(mouse.X,mouse.Y)-position;}
+        else if(!environmentButton.Contains(mouse)&&!fishingButton.Contains(mouse)&&!combatButton.Contains(mouse)&&title.Contains(mouse)&&Main.mouseLeft&&!dragging&&Main.mouseItem.IsAir){dragging=true;dragOffset=new Vector2(mouse.X,mouse.Y)-position;}
         CompanionEnvironmentButton.Draw(sb,s,environmentButton,mouse,clicked);
+        CompanionFishingButton.Draw(sb,s,fishingButton,mouse,clicked);
         CompanionCombatButton.Draw(sb,s,combatButton,mouse,clicked);
         Button("Attributes",Language.GetTextValue("Mods.PalicoCompanion.Attributes.Button"),statsX,guideButton.Y,statsWidth,()=>{showStats=!showStats;Terraria.Audio.SoundEngine.PlaySound(Terraria.ID.SoundID.MenuTick);},showStats);
         Button("Guide",CompanionText.Get("CompanionPanel.Guide"),guideButton.X,guideButton.Y,guideButton.Width,TrainingPanel.OpenGuide);

@@ -8,7 +8,7 @@ namespace PalicoCompanion.Systems;
 // Design references: AutoTorchPlus candidate/occlusion checks; TerraGuardians offhand light.
 public sealed class CompanionLighting {
     internal static CompanionLightingMode Valid(byte mode)=>Enum.IsDefined((CompanionLightingMode)mode)?(CompanionLightingMode)mode:CompanionLightingMode.Automatic;
-    internal static bool CanPlace(CompanionPlayer s)=>s.Lighting==CompanionLightingMode.Automatic&&!s.EnvironmentPaused;
+    internal static bool CanPlace(CompanionPlayer s)=>s.Lighting==CompanionLightingMode.Automatic&&s.WorkMode==CompanionWorkMode.Automatic;
     public bool Holding {get;private set;}
     public Item HeldItem {get;private set;}
     public bool HoldingGlowstick=>Holding&&IsGlowstick(HeldItem);

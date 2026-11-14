@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 using Terraria.Audio;
+using Terraria.DataStructures;
 using Terraria.GameContent;
 using Terraria.ID;
 
@@ -12,6 +13,16 @@ namespace PalicoCompanion.Systems;
 // Labor has its own timed tile action. Combat uses CompanionNativeUse's isolated
 // Player executor; neither path calls ItemCheck on the human player's object.
 public static class CompanionItemVisual {
+    // ModItem only registers an optional _Flame asset when one exists. A
+    // cloned vanilla item's flame flag alone does not guarantee that asset.
+    static bool HasFlameTexture(Item item)=>item.flame&&(uint)item.type<TextureAssets.ItemFlame.Length&&TextureAssets.ItemFlame[item.type]!=null;
+    internal static void DrawHeldItem(ref PlayerDrawSet info) {
+        var item=info.heldItem;
+        bool missing=item.flame&&!HasFlameTexture(item);
+        if(missing)item.flame=false;
+        try {PlayerDrawLayers.DrawPlayer_27_HeldItem(ref info);}
+        finally {if(missing)item.flame=true;}
+    }
     static Foreground pendingForeground;
     struct Foreground {
         public bool Active,Requested;
@@ -79,7 +90,7 @@ public static class CompanionItemVisual {
             if(mask.Width>=frame.Right&&mask.Height>=frame.Bottom)
                 batch.Draw(mask,hand,frame,new Color(250,250,250,item.alpha),rotation,origin,scale,flip,0);
         }
-        if(item.flame) {
+        if(HasFlameTexture(item)) {
             Main.instance.LoadItemFlames(item.type);
             if(TextureAssets.ItemFlame[item.type].IsLoaded) {
                 var flame=TextureAssets.ItemFlame[item.type].Value;

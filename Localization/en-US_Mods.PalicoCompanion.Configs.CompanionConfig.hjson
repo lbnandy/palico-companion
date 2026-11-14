@@ -13,6 +13,6 @@
     },
     "Lighting": {
         "Label": "Lighting",
-        "Tooltip": "Hold a torch or glowstick when it is dark. Held light only does not automatically place or consume torches. Automatic placement still respects the environment toggle. Only affects your companion."
+        "Tooltip": "Hold a torch or glowstick when it is dark. Held light only does not automatically place or consume torches. Automatic placement requires automatic terrain work mode. Only affects your companion."
     }
 }

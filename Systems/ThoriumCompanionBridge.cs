@@ -127,7 +127,7 @@ public sealed class ThoriumCompanionBridge:ModSystem {
         }
         return use.Actor.HeldItem.ModItem is not ThoriumItem {isThrowerNon:true}||!tp.throwerExhaustionPenalty;
     }
-    static float? Range(Item item){
+    static float? Range(Item item,Player actor){
         if(item.ModItem is ThoriumMod.Items.BardItems.DrumMallet)return 120;
         // Scythes rotate around their owner; their projectile speed is not reach.
         var shot=CompanionCombatReach.Sample(item);

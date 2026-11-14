@@ -15,6 +15,39 @@ using CalamityMod.Projectiles.BaseProjectiles;
 
 namespace PalicoCompanion.Systems;
 
+// Native hammer combinations store another projectile's local array index.
+// Send its identity and resolve the receiving array slot before native AI;
+// otherwise a replica can write the smash trigger into an unrelated body.
+[ExtendsFromMod("CalamityMod")]
+[JITWhenModsEnabled("CalamityMod")]
+public sealed class CalamityCompanionHammerLink:GlobalProjectile {
+    public override bool InstancePerEntity=>true;
+    bool linked;int identity=-1;
+    public override bool AppliesToEntity(Projectile entity,bool lateInstantiation)=>entity.ModProjectile is TriactisHammerProj or TriactisHammerFlare;
+    static bool UsesLink(Projectile shot)=>shot.ModProjectile is TriactisHammerProj?shot.ai[1]>0&&shot.ai[1]<4:shot.ai[1]==-2;
+    public override void SendExtraAI(Projectile shot,Terraria.ModLoader.IO.BitWriter bits,System.IO.BinaryWriter writer){
+        var use=CompanionOwnedShot.Of(shot);bool hasLink=use!=null&&UsesLink(shot);bits.WriteBit(hasLink);
+        if(!hasLink)return;
+        int index=(int)shot.ai[2];
+        var target=index>=0&&index<Main.maxProjectiles?Main.projectile[index]:null;
+        writer.Write(target is {active:true}&&target.ModProjectile is TriactisHammerProj&&CompanionOwnedShot.Of(target)==use?target.identity:-1);
+    }
+    public override void ReceiveExtraAI(Projectile shot,Terraria.ModLoader.IO.BitReader bits,System.IO.BinaryReader reader){
+        linked=bits.ReadBit();identity=linked?reader.ReadInt32():-1;
+    }
+    public override bool PreAI(Projectile shot){
+        if(!CompanionNetwork.Client||!linked||!UsesLink(shot))return true;
+        var use=CompanionOwnedShot.Of(shot);
+        if(use==null||identity<0)return false;
+        foreach(var target in Main.ActiveProjectiles)
+            if(target.identity==identity&&target.owner==shot.owner&&target.ModProjectile is TriactisHammerProj&&
+                target.ai[1]==4&&CompanionOwnedShot.Of(target)==use){shot.ai[2]=target.whoAmI;return true;}
+        // Packets can arrive before their referenced projectile; wait for the
+        // matching native entity instead of treating a server slot as local.
+        return false;
+    }
+}
+
 // Optional typed adapter: tML omits this class when Calamity is absent.
 // Only the isolated companion actor is modified; human controls stay intact.
 [ExtendsFromMod("CalamityMod")]
@@ -60,17 +93,23 @@ public sealed class CalamityCompanionBridge:ModSystem {
     }
     // Flight metadata only; aiming and release stay in the shared native path.
     static CompanionBallisticProfile? Flight(Projectile shot,Player actor){
-        if(shot.ModProjectile is IronFranciscaProj or LeadTomahawkProj)return new(.2f);
-        if(shot.ModProjectile is Brick)return new(.6f,Drag:.98f,GravityRamp:.025f);
+        if(shot.ModProjectile is TriactisHammerProj)return new(.2f,Drag:.99f,MaxFallSpeed:20);
+        float speed=actor.GetModPlayer<CalamityPlayer>().rogueVelocity;
+        if(shot.ModProjectile is IronFranciscaProj or LeadTomahawkProj)return new(.2f,SpeedScale:speed);
+        if(shot.ModProjectile is Brick)return new(.6f,Drag:.98f,GravityRamp:.025f,SpeedScale:speed);
         // These stealth attacks fly straight or become a different projectile.
         // Read the isolated actor's native state, never the human's equipment.
         if(shot.ModProjectile is AdamantiteThrowingAxeProjectile or CobaltKunaiProjectile){
             if(actor.GetModPlayer<CalamityPlayer>().StealthStrikeAvailable())return null;
-            return shot.ModProjectile is AdamantiteThrowingAxeProjectile?new(.35f,31,.96f):new(.25f,26,MaxFallSpeed:float.PositiveInfinity);
+            return shot.ModProjectile is AdamantiteThrowingAxeProjectile?new(.35f,31,.96f,SpeedScale:speed):new(.25f,26,MaxFallSpeed:float.PositiveInfinity,SpeedScale:speed);
         }
         return null;
     }
     public override void PostSetupContent(){
+        // Use Calamity's own sheathed sprite on the back, not its animated
+        // inventory blade. The common renderer still owns anchoring and size.
+        if(!Main.dedServ)CompanionBackWeapon.RegisterStowedTexture(ModContent.ItemType<Murasama>(),
+            ModContent.Request<Microsoft.Xna.Framework.Graphics.Texture2D>(ModContent.GetInstance<Murasama>().Texture+"Sheathed"));
         // Older Calamity builds use a thrown projectile instead of this newer
         // holdout. Resolve the optional content without a hard CLR type reference.
         sealedSingularityHoldout=ModContent.TryFind<ModProjectile>("CalamityMod/SealedSingularityHoldout",out var singularity)?singularity.Type:-1;
@@ -89,7 +128,13 @@ public sealed class CalamityCompanionBridge:ModSystem {
     static int Material(Item weapon,Item material)=>weapon.type==ModContent.ItemType<CalamityMod.Items.Weapons.Ranged.WulfrumBlunderbuss>()&&material.type==ModContent.ItemType<CalamityMod.Items.Materials.WulfrumMetalScrap>()?CalamityMod.Items.Weapons.Ranged.WulfrumBlunderbuss.ShotsPerScrap:0;
     // Primary use is a held slash, not the alternate thrown attack. Approach
     // within its native hitbox instead of treating its holdout as a long shot.
-    static float? Range(Item weapon){
+    static float? Range(Item weapon,Player actor){
+        // MurasamaSlash.Colliding uses velocity * 8.6 for the shorter cuts.
+        // Reuse its melee scale and leave the collision thickness as margin.
+        if(weapon.ModItem is Murasama){
+            float scale=actor==null?weapon.scale:CalamityMod.CalamityUtils.GetMeleeScale(actor,false)+weapon.scale-1;
+            return weapon.shootSpeed*8.6f*scale*(Main.zenithWorld?2:1);
+        }
         // Its custom AI is a hand-bound thrust, with a native 78px collision
         // line. Leave the extra thrust offset as margin, not ranged spacing.
         if(weapon.ModItem is WulfrumScrewdriver)return 78f*weapon.scale;

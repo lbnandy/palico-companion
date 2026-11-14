@@ -46,7 +46,7 @@ public sealed class CompanionGlowstickDrawing {
         proxy.itemLocation=hand;
         var info=new PlayerDrawSet{drawPlayer=proxy,heldItem=item,DrawDataCache=cache,Position=proxy.position,ItemLocation=hand,
             itemColor=light,itemEffect=cat.direction<0?SpriteEffects.FlipHorizontally:SpriteEffects.None};
-        PlayerDrawLayers.DrawPlayer_27_HeldItem(ref info);
+        CompanionItemVisual.DrawHeldItem(ref info);
         if(cache.Count==0)return;
         Vector2 shift=hand-Main.screenPosition-CompanionGrip.DrawnGrip(cache[0]);
         foreach(var entry in cache){var draw=entry;draw.position+=shift;draw.Draw(Main.spriteBatch);}

@@ -1,13 +1,27 @@
 Keybinds: {
 	Stow.DisplayName: 收回／召出呆猫
 	Hud.DisplayName: 显示／隐藏呆猫状态卡
-	Environment.DisplayName: 切换呆猫环境改动
+	Environment.DisplayName: 切换呆猫地形工作模式
 	Direct.DisplayName: 指挥呆猫（按住并左键选择）
 	Panel.DisplayName: 呆猫面板
 	Recall.DisplayName: 召回呆猫
 }
 
 UI: {
+	WorkAutomatic: 自动地形工作
+	WorkAssist: 协同地形工作
+	WorkOff: 关闭地形工作
+	WorkAutomaticHint: 按设置主动采矿、砍树、采药和放置
+	WorkAssistHint: 跟随你的挖掘、砍树和铺设动作，完成后不另找工作
+	WorkOffHint: 不自动或协同改变地形，仍可手动指定任务
+	FishingAutomatic: 自动钓鱼
+	FishingAssist: 协同钓鱼
+	FishingOff: 关闭钓鱼
+	FishingAutomaticHint: 在水边停留时自动钓鱼
+	FishingAssistHint: 你钓鱼时才跟着钓，不会路过水边就开钓
+	FishingOffHint: 不自动或协同钓鱼，仍可指定水面钓鱼
+	WorkModeNext: 点击切换：{0}
+
 	CombatProactive: 主动进攻
 	CombatAssist: 协同进攻
 	CombatPassive: 不攻击
@@ -37,11 +51,8 @@ UI: {
 	FeedInvalid: 这种物品不能投喂
 	FeedChanged: 物品已变化，这次没有投喂
 	FeedAccepted: 呆猫接过了食物
-	EnvironmentPause: 暂停环境改动
-	EnvironmentResume: 恢复环境改动
 	EnvironmentPaused: 已暂停自动改动环境
 	EnvironmentResumed: 已恢复自动改动环境
-	EnvironmentHint: 控制自动挖掘、砍树、种植和放置
 	NameEmpty: 请输入名字，再确认
 	DefaultName: 呆猫
 	DyeSlot: 染料
@@ -384,10 +395,6 @@ Configs: {
 			Tooltip: 在说话、受伤、抚摸等情境播放猫叫，避免连续重复。
 		}
 
-		Fishing: {
-			Label: 自动钓鱼
-			Tooltip: 在水边逗留或你开始钓鱼时，呆猫会寻找钓点。需要呆猫背包中的鱼饵（包括收藏的鱼饵），可参考你携带的更好鱼竿；不使用松露虫，不钓起敌人。
-		}
 
 		DeliverRecoveryDrops: {
 			Label: 递送红心和魔力星
@@ -477,8 +484,8 @@ Configs: {
 		}
 
 		Forestry: {
-			Label: 自动砍树
-			Tooltip: 采伐附近成熟树木，有合适的橡实和位置时补种。没有橡实也能砍树；保留幼苗及树干有住房墙或促动器的装饰树。你主动砍伐时也会协助。
+			Label: 砍树
+			Tooltip: 按镐子按钮选择的模式砍树：自动寻找附近成熟树木，或只协助你正在砍的树。有合适的种子和位置时补种；没有种子也能砍树。保留幼苗和受保护的装饰树。
 		}
 
 		DiggingAssist: {
@@ -497,8 +504,8 @@ Configs: {
 		}
 
 		MiningAssist: {
-			Label: 自动采矿
-			Tooltip: 空闲或慢速探索时寻找附近露出的矿石和宝石。参考你背包里最强的镐，未携带时用基础镐；镐力不足的矿物暂不挖掘。
+			Label: 采矿
+			Tooltip: 按镐子按钮选择的模式采矿：自动寻找附近露出的矿石和宝石，或只接着你挖过的矿脉处理。使用你携带的最强镐，未携带时用基础镐；镐力不足的矿物暂不挖掘。
 		}
 
 		DisplayName: 呆猫伙伴设置

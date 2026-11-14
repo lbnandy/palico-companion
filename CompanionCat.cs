@@ -416,7 +416,10 @@ public sealed class CompanionCat : ModProjectile
         if(previous!=targeting.VisibleTarget)PendingPresentation=true;
         tactics.Update(state,target!=null);return target;
     }
-    readonly CompanionCombatTactics tactics=new();
+    internal readonly CompanionCombatTactics tactics=new();
+    internal bool HasFollowRecoveryWork(CompanionPlayer s)=>s.Directive.Active||s.Construction.Active||s.Digging.Active||
+        s.Mining.Active||s.Trees.Active||s.Trees.ReplantPending||s.Garden.Active||s.Order.Active||s.Storage.Active||s.Travel.Active||
+        targetItem>=0||Fishing.Active||Catching.Active||Supplies.Active||Barrel.Active||Kite.Active||ActionVisual.Eating;
     internal bool HoldingThreat=>targeting.Holding;
     internal NPC EngagedTarget=>animationThreat?targeting.VisibleTarget:null;
     internal int CombatTargetIndex=>targeting.VisibleTarget?.whoAmI??-1;

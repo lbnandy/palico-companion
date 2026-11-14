@@ -9,20 +9,28 @@ namespace PalicoCompanion.Systems;
 public sealed class CompanionNavigation
 {
     public const int Width=24, Height=28;
+    const int RecoveryDelay=150,RecoveryCooldown=180;
     int jumpCooldown, recoveryCooldown, noProgress;
+    int followNoProgress;
+    float followBestDistance=float.MaxValue;
+    ulong followObservedAt;
     float bestDistance=float.MaxValue;
     Vector2 trackedGoal;
     bool trackedWork;
     internal readonly CompanionFlightRoute WorkRoute=new();
+    readonly CompanionFlightRoute followRoute=new();
     public static float FollowSpeed(float ownerHorizontalSpeed)=>Math.Clamp(Math.Abs(ownerHorizontalSpeed)+1.5f,3.8f,9f);
+    internal static Vector2 FlightFollowGoal(Player owner) => owner.GetModPlayer<CompanionPlayer>().Stationed
+        ? CompanionStation.Origin(owner) : owner.MountedCenter+new Vector2(-owner.direction*24,-30);
     public static Vector2 FollowGoal(Player owner,Vector2 catCenter) {
         if(owner.GetModPlayer<CompanionPlayer>().Stationed)return CompanionStation.Origin(owner);
         Vector2 behind=CompanionStation.Origin(owner)-new Vector2(owner.direction*52,0);
-        // Empty air over lava is not a place to stop walking. Prefer the other
-        // side of a shore rather than repeatedly stepping back into the pool.
-        if(LavaBelow(behind)){
+        // Reuse landing support when the owner is standing: an empty pocket
+        // over a cliff is no more a ground destination than one over lava.
+        bool grounded=Supported(owner.position,owner.width,owner.height);
+        if(LavaBelow(behind)||grounded&&Fits(behind)&&!TryStand(behind,out _)){
             var ahead=CompanionStation.Origin(owner)+new Vector2(owner.direction*52,0);
-            return Fits(ahead)&&!LavaBelow(ahead)&&Reachability.Clear(ahead,CompanionStation.Origin(owner))?ahead:CompanionStation.Origin(owner);
+            return Fits(ahead)&&!LavaBelow(ahead)&&(!grounded||TryStand(ahead,out _))&&Reachability.Clear(ahead,CompanionStation.Origin(owner))?ahead:CompanionStation.Origin(owner);
         }
         // A collision-free pocket behind the player may be on the far side of
         // a cave wall. Reaching it must not count as successfully following.
@@ -50,6 +58,17 @@ public sealed class CompanionNavigation
         float length=Vector2.Distance(from,to);if(length>640)return false;
         int steps=Math.Max(1,(int)Math.Ceiling(length/8));
         for(int i=0;i<=steps;i++)if(!Fits(Vector2.Lerp(from,to,i/(float)steps)))return false;
+        return true;
+    }
+    static bool ClearFollowFlight(Projectile cat,Vector2 from,Vector2 to){
+        float length=Vector2.Distance(from,to);if(length>640)return false;
+        int steps=Math.Max(1,(int)Math.Ceiling(length/8));
+        for(int i=0;i<=steps;i++){
+            var point=Vector2.Lerp(from,to,i/(float)steps);
+            // Leave one path sample of contact clearance so integer hitboxes
+            // and corner interpolation do not repeatedly trigger evasion.
+            if(!Fits(point)||CompanionIncomingDamage.ContactWithin(cat,point,8)||CompanionIncomingDamage.HazardAt(cat,point))return false;
+        }
         return true;
     }
     public bool UpdateWorkFlight(Projectile cat,Player owner,Vector2 goal,bool working) {
@@ -95,10 +114,11 @@ public sealed class CompanionNavigation
         if(!Riding&&(separation.LengthSquared()>500*500||Math.Abs(separation.Y)>300||noProgress>=120)) {
             Riding=true;rideTicks=ownerGroundTicks=0;Puff(cat.Center);
         }
-        if(!Riding){cat.tileCollide=true;return false;}
+        if(!Riding){ResetFollowRecovery();cat.tileCollide=true;return false;}
+        if(recoveryCooldown>0)recoveryCooldown--;
         cat.tileCollide=false;rideTicks++;
         var state=owner.GetModPlayer<CompanionPlayer>();
-        Vector2 destination=state.Stationed?state.StationPoint:owner.MountedCenter+new Vector2(-owner.direction*24,-30);
+        Vector2 destination=FlightFollowGoal(owner);
         // Vanilla's shoulder offset can sit inside a narrow shaft wall. Return
         // through terrain as usual, but settle in a whole-body empty pocket so
         // nearby work can resume instead of failing its Fits guard forever.
@@ -120,18 +140,28 @@ public sealed class CompanionNavigation
         // A valid ranged position belongs to combat, even when the owner's
         // shoulder is also in range. Stand reuses the existing spacing band.
         bool engage=weapon!=null&&combatTarget!=null&&Vector2.DistanceSquared(combatTarget.Center,CompanionStation.Origin(owner))<CompanionCombatReach.TrackingRange*CompanionCombatReach.TrackingRange&&
-            CompanionCombatReach.PursuitLocal(weapon,cat,cat.Center,CompanionStation.Origin(owner))&&
-            (obscured||CompanionAttackPath.Clear(weapon,(cat.ModProjectile as CompanionCat)?.Weapons,cat.Center,combatTarget.Center));
+            (obscured||CompanionAttackPath.Clear(weapon,(cat.ModProjectile as CompanionCat)?.Weapons,cat.Center,combatTarget));
+        bool detouring=false;
         if(engage) {
             var combatPoint=obscured?cat.Center:CompanionCombatReach.Stand(weapon,cat,combatTarget,cautious);
-            // A wall-piercing shot does not grant wall-piercing movement.
-            // Reuse the work-flight body clearance test; an obstructed attack
-            // may fire from here, otherwise return through the normal path.
-            if(combatPoint==CompanionStation.Origin(owner))engage=false;
-            else if(ClearFlight(cat.Center,combatPoint)&&!CompanionIncomingDamage.HazardAt(cat,combatPoint))destination=combatPoint;
-            else if(Fits(cat.Center)&&!CompanionIncomingDamage.HazardAt(cat,cat.Center)&&CompanionCombatReach.CanUse(weapon,cat,combatTarget))destination=cat.Center;
+            if((cat.ModProjectile as CompanionCat)?.tactics.Returning==true){destination=combatPoint;engage=false;}
+            else if(combatPoint==CompanionStation.Origin(owner)&&(cat.ModProjectile as CompanionCat)?.tactics.FollowingOwner!=true)engage=false;
+            else if((cat.ModProjectile as CompanionCat)?.tactics.FollowingOwner==true){
+                // A body across the owner's route is not a reason to wait
+                // forever. Reuse bounded flight routing with native contact
+                // geometry; work keeps its own unmodified route and cache.
+                if(followRoute.NextAvoiding(cat.Center,combatPoint,(from,to)=>ClearFollowFlight(cat,from,to),out var next)){
+                    destination=next;detouring=next!=combatPoint;
+                }else destination=cat.Center;
+            }
+            else if(!CompanionIncomingDamage.HazardAt(cat,combatPoint))destination=combatPoint;
+            else if(!CompanionIncomingDamage.HazardAt(cat,cat.Center)&&CompanionCombatReach.CanUse(weapon,cat,combatTarget))destination=cat.Center;
             else engage=false;
         }
+        if(!engage||(cat.ModProjectile as CompanionCat)?.tactics.FollowingOwner!=true)followRoute.Clear();
+        if(RecoverBlockedFollow(cat,owner,engage))return true;
+        if(!engage&&(CompanionIncomingDamage.HazardAt(cat,destination)||CompanionIncomingDamage.ContactAt(cat,destination)))
+            destination=CompanionCombatReach.SafeGoal(cat,owner,destination);
         if(!engage&&separation.LengthSquared()>2000*2000) {
             // Vanilla pets retain an emergency relocation for multi-screen gaps.
             // Acquiring a distant target must not disable normal owner recovery.
@@ -144,7 +174,8 @@ public sealed class CompanionNavigation
             foreach(int dx in new[]{-32,32,-48,48,0,-64,64})
             foreach(int dy in new[]{0,-16,16}) {
                 var candidate=CompanionStation.Bottom(owner)+new Vector2(dx,dy-cat.height/2f);
-                if(!TryStand(candidate,out var stand)||LavaBelow(stand,cat.width,cat.height)||!Reachability.Clear(stand,CompanionStation.Origin(owner)))continue;
+                if(!TryStand(candidate,out var stand)||LavaBelow(stand,cat.width,cat.height)||!Reachability.Clear(stand,CompanionStation.Origin(owner))||
+                    CompanionIncomingDamage.HazardAt(cat,stand)||CompanionIncomingDamage.ContactAt(cat,stand))continue;
                 destination=stand;landing=true;goto LandingFound;
             }
         }
@@ -161,11 +192,20 @@ public sealed class CompanionNavigation
         float speed=Math.Max(10,CompanionStation.Velocity(owner).Length()+4);
         // Combat approach is adjustable; returning to a distant owner must
         // still be able to catch up with mounts and wings.
-        if(engage)speed*=CompanionBalanceConfig.Current.MovementScale(true);
-        Vector2 desired=delta*0.2f+(engage?(obscured?Vector2.Zero:combatTarget.velocity):CompanionStation.Velocity(owner));
+        var combatTactics=(cat.ModProjectile as CompanionCat)?.tactics;
+        bool followingOwner=engage&&!obscured&&destination!=cat.Center&&combatTactics?.FollowingOwner==true;
+        if(engage&&!followingOwner)speed*=CompanionBalanceConfig.Current.MovementScale(true);
+        // Holding a valid position means braking, including against a moving
+        // target. Only an actual combat approach inherits target motion.
+        Vector2 motion=!engage||followingOwner?CompanionStation.Velocity(owner):
+            !obscured&&delta.LengthSquared()>=8*8&&combatTactics?.Approaching==true?combatTarget.velocity:Vector2.Zero;
+        if(detouring)motion=Vector2.Zero;
+        Vector2 desired=delta*0.2f+motion;
         if(desired.LengthSquared()>speed*speed)desired=desired.SafeNormalize(Vector2.Zero)*speed;
         cat.velocity=Vector2.Lerp(cat.velocity,desired,engage?0.3f:0.15f);
-        if(engage)cat.velocity=Collision.TileCollision(cat.position,cat.velocity,cat.width,cat.height,true);
+        // As in work flight, brake inertia that would cut a routed corner.
+        if(detouring&&!ClearFollowFlight(cat,cat.Center,cat.Center+cat.velocity*2))cat.velocity=desired*0.2f;
+        if(engage&&combatTactics?.FollowingOwner==true)cat.velocity=Collision.TileCollision(cat.position,cat.velocity,cat.width,cat.height,true);
         if(cat.velocity.LengthSquared()>speed*speed)cat.velocity=cat.velocity.SafeNormalize(Vector2.Zero)*speed;
         if(Math.Abs(cat.velocity.X)>0.5f)cat.direction=Math.Sign(cat.velocity.X);
         else if(delta.LengthSquared()<48*48)cat.direction=owner.direction;
@@ -173,16 +213,52 @@ public sealed class CompanionNavigation
         return true;
     }
     internal void ResumeFlight(Projectile cat) {
-        WorkRoute.Clear();WorkFlying=false;Riding=true;rideTicks=ownerGroundTicks=noProgress=0;DropThrough=false;cat.tileCollide=false;
+        ResetFollowRecovery();
+        WorkRoute.Clear();followRoute.Clear();WorkFlying=false;Riding=true;rideTicks=ownerGroundTicks=noProgress=0;DropThrough=false;cat.tileCollide=false;
     }
     public void HoldReturn(Projectile cat) {
+        ResetFollowRecovery();
         WorkRoute.Clear();
+        followRoute.Clear();
         WorkFlying=false;
         cat.velocity=Vector2.Zero;
         if(Fits(cat.Center)){Riding=false;cat.tileCollide=true;noProgress=0;DropThrough=false;}
         else cat.tileCollide=false;
     }
     public int NoProgress => noProgress;
+    void ResetFollowRecovery(){followNoProgress=0;followBestDistance=float.MaxValue;}
+    bool RecoverBlockedFollow(Projectile cat,Player owner,bool engage){
+        if(followObservedAt+1!=Main.GameUpdateCount)ResetFollowRecovery();
+        followObservedAt=Main.GameUpdateCount;
+        var state=owner.GetModPlayer<CompanionPlayer>();
+        if(CompanionNetwork.Client||!engage||cat.ModProjectile is not CompanionCat companion||
+            !companion.tactics.FollowingOwner||state.Stationed||state.Paused||state.Stowed||state.Vitals.Downed||
+            !state.Enabled||!owner.active||owner.dead||companion.HasFollowRecoveryWork(state)){
+            ResetFollowRecovery();return false;
+        }
+        var goal=FlightFollowGoal(owner);
+        float distance=Vector2.Distance(cat.Center,goal);
+        // Use ordinary following's tolerance and existing recovery timing.
+        // Real progress resets the wait; sidestepping in place does not.
+        if(distance<=48){ResetFollowRecovery();return false;}
+        if(distance<followBestDistance-12){followBestDistance=distance;followNoProgress=0;}
+        followNoProgress=Math.Min(RecoveryDelay,followNoProgress+1);
+        if(followNoProgress<RecoveryDelay||recoveryCooldown>0)return false;
+        // Retry occupied destinations at the flight router's normal cadence.
+        // A failed search never grants immunity or moves into a damaging tile.
+        recoveryCooldown=30;
+        foreach(int ox in new[]{0,-24,24,-48,48})
+        foreach(int oy in new[]{0,-16,16,-32,32}){
+            var point=goal+new Vector2(ox,oy);
+            var body=new Rectangle((int)(point.X-cat.width/2f),(int)(point.Y-cat.height/2f),cat.width,cat.height);
+            if(!Fits(point,cat.width,cat.height)||body.Intersects(owner.Hitbox)||!Reachability.Clear(point,owner.Center)||
+                CompanionIncomingDamage.ContactAt(cat,point)||CompanionIncomingDamage.HazardAt(cat,point)||CompanionEvasion.ThreatAt(cat,point))continue;
+            CompanionTransitEffects.Move(cat,point);
+            followRoute.Clear();ResetFollowRecovery();noProgress=0;bestDistance=float.MaxValue;recoveryCooldown=RecoveryCooldown;
+            return true;
+        }
+        return false;
+    }
     public bool DropThrough { get; private set; }
     public bool Grounded(Projectile cat) {
         if(cat.velocity.Y<0)return false;
@@ -239,7 +315,10 @@ public sealed class CompanionNavigation
         float dx=goal.X-cat.Center.X;
         float desired=Math.Abs(dx)> (working?6:20)?Math.Sign(dx)*(working?3.8f:FollowSpeed(CompanionStation.Velocity(owner).X)):0;
         if(combat)desired=Math.Clamp(dx*.25f,-FollowSpeed(CompanionStation.Velocity(owner).X),FollowSpeed(CompanionStation.Velocity(owner).X));
-        desired*=CompanionBalanceConfig.Current.MovementScale(combat);
+        // Keeping up with the owner uses ordinary travel speed even while a
+        // ranged weapon is firing; closing on an enemy retains combat pacing.
+        bool following=combat&&(cat.ModProjectile as CompanionCat)?.tactics.FollowingOwner==true;
+        desired*=CompanionBalanceConfig.Current.MovementScale(combat&&!following);
         bool ground=Grounded(cat);
         if(ground&&needsTravel&&desired!=0)CompanionDoors.TryOpen(cat,owner,desired);
         cat.velocity.X=MathHelper.Lerp(cat.velocity.X,desired,combat?0.3f:0.18f);
@@ -262,7 +341,7 @@ public sealed class CompanionNavigation
         cat.velocity.Y=Math.Min(10,cat.velocity.Y+0.35f);
         bool far=Vector2.DistanceSquared(CompanionStation.Origin(owner),cat.Center)>900*900;
         bool extreme=Vector2.DistanceSquared(CompanionStation.Origin(owner),cat.Center)>2000*2000;
-        if(extreme||(recoveryCooldown==0&&(far||noProgress>=150))) {
+        if(extreme||(recoveryCooldown==0&&(far||noProgress>=RecoveryDelay))) {
             // Work is cancelled by the caller before any later hit/placement.
             // Prefer grounded positions near the owner, with an empty body box.
             for(int pass=0;pass<2;pass++)
@@ -274,7 +353,7 @@ public sealed class CompanionNavigation
                 if(Vector2.DistanceSquared(safe,cat.Center)<24*24&&!blocked&&!far)continue;
                 CompanionTransitEffects.Move(cat,safe);
                 cat.velocity=Vector2.Zero;noProgress=0;bestDistance=float.MaxValue;
-                recoveryCooldown=180;return true;
+                recoveryCooldown=RecoveryCooldown;return true;
             }
         }
         return false;

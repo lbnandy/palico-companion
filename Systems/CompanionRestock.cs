@@ -67,7 +67,7 @@ public static class CompanionRestock {
         int uses=CompanionCrossMod.UsesPerMaterial?.Invoke(s.Gear[0],i)??0;
         if(uses>0)return Target((stock.Ammo+uses-1)/uses,x=>(CompanionCrossMod.UsesPerMaterial?.Invoke(s.Gear[0],x)??0)>0);
         if((CompanionNetwork.Server?s.NetForestry:ModContent.GetInstance<CompanionConfig>().Forestry)&&i.type==ItemID.Acorn)return Target(stock.Acorns,x=>x.type==ItemID.Acorn);
-        if((CompanionNetwork.Server?s.NetFishing:ModContent.GetInstance<CompanionConfig>().Fishing)&&CompanionFishing.SafeBait(i))return Target(stock.Bait,CompanionFishing.SafeBait);
+        if(s.FishingMode!=CompanionWorkMode.Off&&CompanionFishing.SafeBait(i))return Target(stock.Bait,CompanionFishing.SafeBait);
         return (0,0,_=>false);
     }
     public static int Wanted(CompanionPlayer s,Item i,bool onlyLow=false){

@@ -36,6 +36,7 @@ internal sealed class CompanionEquipment {
         .CreateDelegate<Func<Player,Item[],Item,int,bool>>();
     internal float Endurance;
     internal int Defense,HealthBonus,ManaBonus,Regen,Minions=1,Sentries=1;
+    internal int SolarShieldDirection{get;private set;}=1;
     int foodRemainder;
     bool wasIndependent;
     readonly CompanionPotionBuffs.Sharing potions=new();
@@ -167,6 +168,15 @@ internal sealed class CompanionEquipment {
             // These set flags are cleared by Player.Update, not ResetEffects.
             actor.beetleDefense=actor.beetleOffense=actor.setSolar=false;
             actor.UpdateEquips(actor.whoAmI);
+            // Armor runs before attack facing is finalized. Keep the native
+            // shield's position and velocity in the same facing space; drawing
+            // can then project that animation onto the cat's final direction.
+            if(SolarShieldDirection!=actor.direction)
+                for(int i=0;i<actor.solarShieldPos.Length;i++){
+                    actor.solarShieldPos[i].X=-actor.solarShieldPos[i].X;
+                    actor.solarShieldVel[i].X=-actor.solarShieldVel[i].X;
+                }
+            SolarShieldDirection=actor.direction;
             actor.UpdateArmorSets(actor.whoAmI);
             // Player.Update clears Holy Protection when its granting set is
             // removed. Keep the cooldown, but do not carry a free dodge into

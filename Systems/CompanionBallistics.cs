@@ -5,7 +5,7 @@ namespace PalicoCompanion.Systems;
 
 // Metadata for verified native flight rules, in projectile updates. Keep the
 // aiming calculation shared; optional adapters only supply their own physics.
-internal readonly record struct CompanionBallisticProfile(float Gravity,int Delay=0,float Drag=1,float GravityRamp=0,float MaxFallSpeed=16) {
+internal readonly record struct CompanionBallisticProfile(float Gravity,int Delay=0,float Drag=1,float GravityRamp=0,float MaxFallSpeed=16,float SpeedScale=1) {
     internal Vector2 Displacement(float time){
         int whole=(int)time;
         return Vector2.Lerp(Step(whole),Step(whole+1),time-whole);
@@ -30,6 +30,7 @@ internal static class CompanionBallistics {
     }
     internal static bool TryAim(Vector2 origin,NPC target,float speed,Projectile sample,CompanionBallisticProfile flight,out Vector2 point){
         point=target.Center;
+        speed*=flight.SpeedScale;
         if(!float.IsFinite(speed)||speed<=0)return false;
         Vector2 Velocity(float time){
             var delta=target.Center+Lead(target,time,sample.extraUpdates)-origin;

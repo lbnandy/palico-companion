@@ -40,16 +40,16 @@ public sealed class CompanionCrossMod:ModSystem {
     }
     internal static Action<CompanionNativeUse> PlanUse;
     internal static Action<CompanionNativeUse> MaintainHeldWeapon;
-    internal static Func<Item,float?> WeaponReach;
+    internal static Func<Item,Player,float?> WeaponReach;
     internal static Func<Projectile,Player,CompanionBallisticProfile?> ProjectileFlight;
     internal static CompanionBallisticProfile? Flight(Projectile projectile,Player actor){
         if(ProjectileFlight!=null)foreach(Func<Projectile,Player,CompanionBallisticProfile?> profile in ProjectileFlight.GetInvocationList())
             if(profile(projectile,actor) is {} flight)return flight;
         return null;
     }
-    internal static float? Reach(Item item){
-        if(WeaponReach!=null)foreach(Func<Item,float?> range in WeaponReach.GetInvocationList())
-            if(range(item) is float value)return value;
+    internal static float? Reach(Item item,Player actor=null){
+        if(WeaponReach!=null)foreach(Func<Item,Player,float?> range in WeaponReach.GetInvocationList())
+            if(range(item,actor) is float value)return value;
         return null;
     }
     internal static Action<CompanionNativeUse,int,byte,byte,float> WeaponEffect;

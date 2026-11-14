@@ -6,6 +6,7 @@ using Terraria;
 using Terraria.GameContent;
 using Terraria.ID;
 using Terraria.ModLoader;
+using ReLogic.Content;
 
 namespace PalicoCompanion.Systems;
 
@@ -14,7 +15,14 @@ namespace PalicoCompanion.Systems;
 public sealed class CompanionBackWeapon : ModSystem {
     static readonly Dictionary<(Texture2D,Rectangle),Rectangle> bounds=new();
     static readonly Dictionary<(Texture2D,Rectangle,float),Vector2> silhouettes=new();
-    public override void Unload(){bounds.Clear();silhouettes.Clear();}
+    static readonly Dictionary<int,Asset<Texture2D>> stowedTextures=new();
+    internal static void RegisterStowedTexture(int type,Asset<Texture2D> texture)=>stowedTextures[type]=texture;
+    public override void Unload(){bounds.Clear();silhouettes.Clear();stowedTextures.Clear();}
+    internal static (Texture2D Texture,Rectangle Frame) Image(Item item){
+        if(stowedTextures.TryGetValue(item.type,out var stowed))return (stowed.Value,stowed.Value.Bounds);
+        Main.instance.LoadItem(item.type);var texture=TextureAssets.Item[item.type].Value;
+        return (texture,Main.itemAnimations[item.type]?.GetFrame(texture)??texture.Bounds);
+    }
     internal static bool Visible(CompanionCat cat,CompanionPlayer state) {
         if(!CompanionProfile.Appearance(state).BackWeapon||state.Stowed||state.Vitals.Downed||
             cat.Barrel.Presenting||cat.Barrel.Active)return false;
@@ -113,9 +121,7 @@ public sealed class CompanionBackWeapon : ModSystem {
     }
     internal static void Draw(CompanionCat cat,CompanionPlayer state,Vector2 feet,int bodyPose,Color light) {
         if(!Visible(cat,state))return;
-        var item=state.Gear[0];Main.instance.LoadItem(item.type);
-        var texture=TextureAssets.Item[item.type].Value;
-        var frame=Main.itemAnimations[item.type]?.GetFrame(texture)??texture.Bounds;
+        var item=state.Gear[0];var (texture,frame)=Image(item);
         var opaque=OpaqueBounds(texture,frame);if(opaque.IsEmpty)return;
         var pose=Pose(item,opaque);
         int direction=cat.Projectile.direction;float rotation=pose.Rotation*direction;

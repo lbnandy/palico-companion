@@ -63,7 +63,10 @@ public sealed class CompanionConfig : ModConfig {
     [DefaultValue(true)] public bool Gardening = true;
     [DefaultValue(true)] public bool Pickup = true;
     [DefaultValue(true)] public bool CatchCritters = true;
-    [DefaultValue(true)] public bool Fishing = true;
+    // The former global switch only seeds characters without a saved mode.
+    // Fishing is now controlled directly beside the work and combat buttons.
+    [JsonProperty("Fishing"),DefaultValue(true)] bool legacyFishing=true;
+    [JsonIgnore] public bool Fishing {get=>legacyFishing;set=>legacyFishing=value;}
     public List<ItemDefinition> MiningBlacklist = new();
     [DefaultValue(PickupFilterMode.Blacklist),Dropdown] public PickupFilterMode PickupFilter=PickupFilterMode.Blacklist;
     public List<ItemDefinition> PickupBlacklist = new();

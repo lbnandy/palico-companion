@@ -31,7 +31,7 @@ internal sealed class CompanionTargeting {
     // the primary weapon's ability to attack through terrain.
     internal static bool Valid(Player owner,Vector2 cat,NPC npc,float range)=>InReach(owner,cat,npc,range)&&CompanionCombatReach.Clear(cat,npc.Center);
     internal static bool Attackable(Player owner,Vector2 cat,NPC npc,float range)=>InReach(owner,cat,npc,range)&&
-        (CompanionCombatReach.Clear(cat,npc.Center)||CompanionAttackPath.ThroughWalls(owner));
+        CompanionAttackPath.For(owner).Clear(cat,npc);
     internal static NPC Marked(Player owner,Vector2 cat){
         int id=owner.MinionAttackTargetNPC;
         return owner.GetModPlayer<CompanionPlayer>().AttacksEnabled&&id>=0&&id<Main.maxNPCs&&Attackable(owner,cat,Main.npc[id],CompanionCombatReach.TrackingRange)?Main.npc[id]:null;
@@ -40,11 +40,10 @@ internal sealed class CompanionTargeting {
         if(owner.GetModPlayer<CompanionPlayer>().CombatMode==CompanionCombatMode.Passive)return Remember(null);
         if(Marked(owner,cat) is {} marked)return Remember(marked);
         bool retained=SameTarget;
-        // Resolve ammunition only if a blocked candidate needs it, at most
-        // once per selection rather than once for every NPC.
-        bool? throughWalls=null;
+        // Acquisition and firing share both direct and conditional flight paths.
+        var path=CompanionAttackPath.For(owner);
         bool Reachable(NPC npc,float range)=>InReach(owner,cat,npc,range)&&
-            (CompanionCombatReach.Clear(cat,npc.Center)||(throughWalls??=CompanionAttackPath.ThroughWalls(owner)));
+            path.Clear(cat,npc);
         if(owner.GetModPlayer<CompanionPlayer>().CooperativeCombat){
             if(retained&&Reachable(current,CompanionCombatReach.TrackingRange))return Remember(current);
             if(retained&&InReach(owner,cat,current,CompanionCombatReach.TrackingRange)&&Main.GameUpdateCount-lastSeen<SightGrace){Obscured=true;return current;}

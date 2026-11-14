@@ -24,7 +24,7 @@ public sealed class CompanionPlayer : ModPlayer
     }
     internal CompanionProfile NetworkProfile;
     internal bool HasNetworkProfile;
-    internal bool NetGarden=true,NetCatch=true,NetFishing=true,NetSupplies=true,NetDark;
+    internal bool NetGarden=true,NetCatch=true,NetSupplies=true,NetDark;
     internal CompanionStock NetStock=CompanionStock.Default;
     internal bool NetIndependent;
     internal bool NetEnabled=true,NetMining=true,NetDigging=true,NetForestry=true,NetAutoHeal=true;
@@ -56,7 +56,9 @@ public sealed class CompanionPlayer : ModPlayer
     public bool Enabled, Paused, Pickup=true, Combat=true, Bridges, Ropes;
     public CompanionLightingMode Lighting=CompanionLightingMode.Automatic;
     public bool Torches { get=>Lighting!=CompanionLightingMode.Off; set=>Lighting=value?(Torches?Lighting:CompanionLightingMode.Automatic):CompanionLightingMode.Off; }
-    public bool EnvironmentPaused;
+    public CompanionWorkMode WorkMode,FishingMode;
+    // Keep the former pause API and save key compatible with existing callers.
+    public bool EnvironmentPaused {get=>WorkMode==CompanionWorkMode.Off;set=>WorkMode=value?CompanionWorkMode.Off:CompanionWorkMode.Automatic;}
     public CompanionCombatMode CombatMode;
     public bool CooperativeCombat {get=>CombatMode==CompanionCombatMode.Assist;set=>CombatMode=value?CompanionCombatMode.Assist:CompanionCombatMode.Proactive;}
     internal bool AttacksEnabled=>Combat&&CombatMode!=CompanionCombatMode.Passive;
@@ -96,7 +98,7 @@ public sealed class CompanionPlayer : ModPlayer
         tag["dialogue"]=Dialogue.Save();
         tag["discoveries"]=Discovery.Save();
         tag["foodTime"]=Vitals.FoodTime;tag["foodDuration"]=Vitals.FoodDuration;tag["potionDelay"]=Vitals.PotionDelay; tag["autoLogistics"]=AutoLogistics; tag["schema"]=5; tag["maxHealth"]=Vitals.MaxHealth;tag["maxMana"]=Vitals.MaxMana;tag["mana"]=Vitals.Mana; tag["gear"]=Gear.Select(ItemIO.Save).ToList(); tag["health"]=Vitals.Health;tag["recovery"]=Vitals.Recovery; tag["bag"]=Bag.Select(ItemIO.Save).ToList();
-        tag["environmentPaused"]=EnvironmentPaused;
+        tag["environmentPaused"]=EnvironmentPaused;tag["workMode"]=(int)WorkMode;tag["fishingMode"]=(int)FishingMode;
         tag["combatMode"]=(int)CombatMode;
         tag["enabled"]=Enabled; tag["paused"]=Paused; tag["name"]=CatName;
         tag["pickup"]=Pickup; tag["combat"]=Combat; tag["lighting"]=(byte)Lighting; tag["bridges"]=Bridges; tag["ropes"]=Ropes;
@@ -134,7 +136,8 @@ public sealed class CompanionPlayer : ModPlayer
         // Preserve every saved slot if capacity ever shrinks in a future version.
         Bag=InventoryTransfer.Empty(Math.Max(24,items.Count));
         for(int i=0;i<items.Count;i++) Bag[i]=ItemIO.Load(items[i]);
-        EnvironmentPaused=tag.GetBool("environmentPaused");
+        WorkMode=tag.ContainsKey("workMode")?CompanionWorkModes.Valid(tag.GetInt("workMode")):tag.GetBool("environmentPaused")?CompanionWorkMode.Off:CompanionWorkMode.Automatic;
+        FishingMode=tag.ContainsKey("fishingMode")?CompanionWorkModes.Valid(tag.GetInt("fishingMode")):ModContent.GetInstance<CompanionConfig>().Fishing?CompanionWorkMode.Automatic:CompanionWorkMode.Off;
         CombatMode=tag.ContainsKey("combatMode")?CompanionCombatModes.Valid(tag.GetInt("combatMode")):tag.GetBool("cooperativeCombat")?CompanionCombatMode.Assist:CompanionCombatMode.Proactive;
         Enabled=tag.GetBool("enabled"); Paused=tag.GetBool("paused");
         CatName=tag.ContainsKey("name")?tag.GetString("name"):CompanionLife.L("DefaultName");

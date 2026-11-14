@@ -1,13 +1,27 @@
 Keybinds: {
 	Stow.DisplayName: Stow / call out Palico
 	Hud.DisplayName: Toggle Palico status card
-	Environment.DisplayName: Toggle automatic environment changes
+	Environment.DisplayName: Cycle terrain work mode
 	Direct.DisplayName: Direct companion (hold and click)
 	Panel.DisplayName: Companion panel
 	Recall.DisplayName: Recall companion
 }
 
 UI: {
+	WorkAutomatic: Automatic terrain work
+	WorkAssist: Assist terrain work
+	WorkOff: Terrain work off
+	WorkAutomaticHint: Seek ore, trees and herbs, and build as enabled in settings
+	WorkAssistHint: Help with your digging, chopping and building; do not seek another job
+	WorkOffHint: No automatic or cooperative terrain changes; direct orders remain available
+	FishingAutomatic: Automatic fishing
+	FishingAssist: Fish with owner
+	FishingOff: Fishing off
+	FishingAutomaticHint: Fish automatically while staying near water
+	FishingAssistHint: Fish only when you fish, not merely when passing water
+	FishingOffHint: No automatic or cooperative fishing; you can still select a fishing spot
+	WorkModeNext: Click to switch: {0}
+
 	CombatProactive: Attack proactively
 	CombatAssist: Assist owner
 	CombatPassive: Do not attack
@@ -37,11 +51,8 @@ UI: {
 	FeedInvalid: This item cannot be fed to your Palico
 	FeedChanged: The item changed; nothing was fed
 	FeedAccepted: Your Palico accepted the food
-	EnvironmentPause: Pause environment changes
-	EnvironmentResume: Resume environment changes
 	EnvironmentPaused: Automatic environment changes paused
 	EnvironmentResumed: Automatic environment changes resumed
-	EnvironmentHint: Toggles automatic digging, tree cutting, planting and building
 	NameEmpty: Enter a name to continue
 	DefaultName: Kit
 	DyeSlot: Dye
@@ -381,10 +392,6 @@ Configs: {
 			Tooltip: Quiet Terraria cat sounds when chatting, hurt or petted, with limits on repeated playback.
 		}
 
-		Fishing: {
-			Label: Automatic fishing
-			Tooltip: Fishes when you linger by water or cast a line, using its own bait (including favorites) and the best rod you carry. Never uses Truffle Worms or fishes up enemies; lava fishing requires suitable gear or bait.
-		}
 
 		DeliverRecoveryDrops: {
 			Label: Bring Hearts and Stars
@@ -475,7 +482,7 @@ Configs: {
 
 		Forestry: {
 			Label: Chop and replant trees
-			Tooltip: Uses a basic axe or a stronger axe you carry. Chops mature trees, including palms, ash trees and gem trees. Replants with a matching seed from the Palico inventory (including favorites) or an unfavorited seed from yours; only successful planting consumes it. Leaves trees built into housing walls or actuators alone unless you start chopping them.
+			Tooltip: Follows the pickaxe button's mode: seek mature trees automatically, or only help with the tree you chop. Uses a basic axe or a stronger axe you carry. Replants with a matching seed when possible; only successful planting consumes it. Leaves protected decorative trees alone unless you start chopping them.
 		}
 
 		DiggingAssist: {
@@ -494,8 +501,8 @@ Configs: {
 		}
 
 		MiningAssist: {
-			Label: Mine exposed ore
-			Tooltip: Uses a basic pickaxe or the strongest one you carry. Mines exposed ore and gems when the pickaxe is strong enough, and can fly along a clear path to reach them.
+			Label: Mine ore
+			Tooltip: Follows the pickaxe button's mode: seek exposed ore and gems automatically, or only continue the vein you mine. Uses a basic pickaxe or the strongest one you carry; insufficient pickaxe power still prevents mining.
 		}
 
 		DisplayName: Palico Companion settings

@@ -1,3 +1,12 @@
-- Added Automatic, Overhead only, Chat only, and Both dialogue display modes. Automatic is the default and adds a line to chat once if the companion is off-screen or the full text cannot fit.
-- Overhead dialogue leaves room for emotes and remains private to the owner in multiplayer.
-- Fixed companion minions disappearing and being repeatedly resummoned at a mana cost when wearing Calamity's Wulfrum Battery in multiplayer. Summon damage bonuses and client visuals are preserved.
+1.2.11 Update
+
+- Added a fishing shortcut button with Automatic, Cooperative and Off modes; cooperative fishing follows the owner's fishing activity.
+- Expanded the existing terrain toggle into Automatic, Cooperative and Off modes; cooperative work responds to the owner's digging, tree cutting and building instead of starting tasks on its own.
+- Fixed repeated companion respawns caused by missing torch flame textures.
+- Fixed repeated falling and flying back when following an owner at a cliff edge.
+- Improved melee reach, short weapons against small ground enemies, and attacks blocked by terrain.
+- Improved ranged following and combat regrouping, reducing unnecessary retreating and cases where enemies prevented the companion from returning.
+- Fixed Murasama's interrupted attacks, reach estimation and animated stowed appearance.
+- Fixed the Solar Shield facing the owner's direction instead of the companion's.
+- Added ballistic compensation for Triactis' True Paladinian Mage-Hammer of Might and Meowmere; supported ballistic weapons such as the Adamantite Throwing Axe approach when their current position cannot reach the target.
+- Fixed multiplayer Triactis hammer combo links, and Call of Void Ystralyn effects and phantom summoning.

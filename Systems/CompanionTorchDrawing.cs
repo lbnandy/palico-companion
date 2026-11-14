@@ -17,7 +17,7 @@ public static class CompanionTorchDrawing {
     public static void Draw(SpriteBatch batch,Vector2 feet,int pose,int direction,Color bodyLight,Color torchLight,Player proxy,Item item) {
         Item held=item;
         if(!CompanionLighting.Torch(held)||!CompanionActorSlots.Initialized(proxy))return;
-        Main.instance.LoadItem(held.type);if(held.flame)Main.instance.LoadItemFlames(held.type);
+        Main.instance.LoadItem(held.type);
         var torch=TextureAssets.Item[held.type].Value;
         var off=CompanionSpriteLayout.OffHand[pose];
         int facing=direction<0?-1:1;
@@ -36,7 +36,7 @@ public static class CompanionTorchDrawing {
         cache.Clear();
         var info=new PlayerDrawSet{drawPlayer=proxy,heldItem=held,DrawDataCache=cache,
             Position=proxy.position,ItemLocation=proxy.itemLocation,itemColor=torchLight,itemEffect=flip};
-        PlayerDrawLayers.DrawPlayer_27_HeldItem(ref info);
+        CompanionItemVisual.DrawHeldItem(ref info);
         if(cache.Count>0) {
             var first=cache[0];
             // Preserve (1,14) shaft contact, not the player's long-arm position.

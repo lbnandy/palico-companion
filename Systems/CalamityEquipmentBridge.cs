@@ -112,6 +112,9 @@ public sealed class CalamityEquipmentBridge : ModSystem {
     static void Tick(CompanionNativeUse use){
         if(CompanionNetwork.Client)return;
         var player=use.Actor.GetModPlayer<CalamityPlayer>();
+        // Murasama's native release sets this clock; MiscEffects normally
+        // advances it. A stale cooldown blocks both slashes and their aiming.
+        if(player.murasamaHitCooldown>0)player.murasamaHitCooldown--;
         // This proc clock lives in MiscEffects, mixed with human movement and
         // world interactions. Its OnHitNPC hook still owns heart generation.
         if(CompanionEquipment.Independent(use.State)&&player.bloodflareSet&&player.bloodflareHeartTimer>0)

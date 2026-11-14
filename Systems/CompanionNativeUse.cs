@@ -287,7 +287,7 @@ public sealed partial class CompanionNativeUse {
         // alone may cost zero or only part of the creature's slots.
         float slots=summon?ItemID.Sets.StaffMinionSlotsRequired[weapon.type]:0;
         bool wants=(HeldGearSlot==CompanionWeapons.SummonSlot?allowSummons:allowAttack)&&(summon?Actor.slotsMinions+Math.Max(.01f,slots)<=Actor.maxMinions:target!=null);
-        bool attackPath=target==null||CompanionAttackPath.Clear(weapon,this,cat.Center,target.Center);
+        bool attackPath=target==null||CompanionAttackPath.Clear(weapon,this,cat.Center,target);
         ObserveReach(weapon,target,wants&&target!=null&&attackPath);
         Aim=summon?CompanionWeaponAim.SummonPoint(cat,target):target!=null?CompanionWeaponAim.Point(weapon,this,target):cat.Center+new Vector2(cat.direction*80,-24);
         Vector2 plannedAim=Aim;
@@ -360,7 +360,12 @@ public sealed partial class CompanionNativeUse {
     static readonly Item Empty=new();
     internal bool PreviewShot(Item weapon,out int projectile,out float speed){
         projectile=weapon.shoot;speed=weapon.shootSpeed;
-        if(weapon.useAmmo<=0)return true;
+        if(weapon.useAmmo<=0){
+            // Match ItemCheck_Shoot's native pre-launch velocity scaling.
+            if(weapon.CountsAsClass(DamageClass.Melee)&&!ProjectileID.Sets.NoMeleeSpeedVelocityScaling[projectile])speed*=Actor.GetTotalAttackSpeed(DamageClass.Melee);
+            if(weapon.CountsAsClass(DamageClass.Throwing)&&speed<16)speed=Math.Min(16,speed*Actor.ThrownVelocity);
+            return true;
+        }
         if(!initialized||State==null||!Present)return false;
         MapBag(State,weapon);
         using(new Scope(this,trackHealing:false))return Actor.PickAmmo(weapon,out projectile,out speed,out _,out _,out _,dontConsume:true);
@@ -448,7 +453,7 @@ public sealed partial class CompanionNativeUse {
         var info=new PlayerDrawSet {drawPlayer=Actor,heldItem=item,DrawDataCache=drawCache,
             Position=Actor.position,ItemLocation=location,itemColor=light,
             itemEffect=Actor.direction<0?SpriteEffects.FlipHorizontally:SpriteEffects.None};
-        using(new Scope(this))PlayerDrawLayers.DrawPlayer_27_HeldItem(ref info);
+        using(new Scope(this))CompanionItemVisual.DrawHeldItem(ref info);
         if(!nativeCasting&&drawCache.Count>0) {
             Vector2 correction=CompanionSprite.Hand(Cat)-Main.screenPosition-CompanionGrip.DrawnGrip(drawCache[0]);
             for(int i=0;i<drawCache.Count;i++){var data=drawCache[i];data.position+=correction;drawCache[i]=data;}
@@ -651,8 +656,8 @@ public sealed class CompanionCombatTerrain : GlobalTile {
     public override bool CanExplode(int i,int j,int type)=>CompanionNativeUse.Current==null;
 }
 public sealed class CompanionNativeHooks : ModSystem {
-    public override void Load(){IL_Player.ItemCheck_Shoot+=HeadlessShoot;IL_Player.ItemCheck_ApplyUseStyle_Inner+=HeadlessGeometry;IL_Player.ItemCheck_GetMeleeHitbox+=HeadlessGeometry;On_Item.GetDrawHitbox+=DrawHitbox;On_Player.GetItemDrawFrame+=ItemFrame;On_NetMessage.SendData+=SendNative;On_Player.ItemCheck_PlayInstruments+=Instruments;On_Projectile.Update+=UpdateShot;On_Projectile.Kill+=KillShot;On_Main.DrawProj_Inner+=DrawShot;On_Player.ItemCheck_CutTiles+=CutTiles;On_Main.GetPlayerArmPosition+=ArmPosition;IL_Main.SortBabyBirdProjectiles+=FinchDrawOwner;On_NPC.PlayerInteraction+=Interaction;On_Player.HealEffect+=Heal;On_Player.ManaEffect+=ManaFeedback;}
-    public override void Unload(){IL_Player.ItemCheck_Shoot-=HeadlessShoot;IL_Player.ItemCheck_ApplyUseStyle_Inner-=HeadlessGeometry;IL_Player.ItemCheck_GetMeleeHitbox-=HeadlessGeometry;On_Item.GetDrawHitbox-=DrawHitbox;On_Player.GetItemDrawFrame-=ItemFrame;On_NetMessage.SendData-=SendNative;On_Player.ItemCheck_PlayInstruments-=Instruments;On_Projectile.Update-=UpdateShot;On_Projectile.Kill-=KillShot;On_Main.DrawProj_Inner-=DrawShot;On_Player.ItemCheck_CutTiles-=CutTiles;On_Main.GetPlayerArmPosition-=ArmPosition;IL_Main.SortBabyBirdProjectiles-=FinchDrawOwner;On_NPC.PlayerInteraction-=Interaction;On_Player.HealEffect-=Heal;On_Player.ManaEffect-=ManaFeedback;}
+    public override void Load(){IL_Player.ItemCheck_Shoot+=HeadlessShoot;IL_Player.ItemCheck_ApplyUseStyle_Inner+=HeadlessGeometry;IL_Player.ItemCheck_GetMeleeHitbox+=HeadlessGeometry;On_Item.GetDrawHitbox+=DrawHitbox;On_Player.GetItemDrawFrame+=ItemFrame;On_NetMessage.SendData+=SendNative;On_Player.ItemCheck_PlayInstruments+=Instruments;On_Projectile.Update+=UpdateShot;On_Projectile.CanHitWithMeleeWeapon+=MeleeSight;On_Projectile.Kill+=KillShot;On_Main.DrawProj_Inner+=DrawShot;On_Player.ItemCheck_CutTiles+=CutTiles;On_Main.GetPlayerArmPosition+=ArmPosition;IL_Main.SortBabyBirdProjectiles+=FinchDrawOwner;On_NPC.PlayerInteraction+=Interaction;On_Player.HealEffect+=Heal;On_Player.ManaEffect+=ManaFeedback;}
+    public override void Unload(){IL_Player.ItemCheck_Shoot-=HeadlessShoot;IL_Player.ItemCheck_ApplyUseStyle_Inner-=HeadlessGeometry;IL_Player.ItemCheck_GetMeleeHitbox-=HeadlessGeometry;On_Item.GetDrawHitbox-=DrawHitbox;On_Player.GetItemDrawFrame-=ItemFrame;On_NetMessage.SendData-=SendNative;On_Player.ItemCheck_PlayInstruments-=Instruments;On_Projectile.Update-=UpdateShot;On_Projectile.CanHitWithMeleeWeapon-=MeleeSight;On_Projectile.Kill-=KillShot;On_Main.DrawProj_Inner-=DrawShot;On_Player.ItemCheck_CutTiles-=CutTiles;On_Main.GetPlayerArmPosition-=ArmPosition;IL_Main.SortBabyBirdProjectiles-=FinchDrawOwner;On_NPC.PlayerInteraction-=Interaction;On_Player.HealEffect-=Heal;On_Player.ManaEffect-=ManaFeedback;}
     // These two native methods contain server early-outs for human rendering.
     // Their geometry is also used by melee hits and replicated held weapons.
     // Override only the branch value during the companion actor scope; never
@@ -721,6 +726,19 @@ public sealed class CompanionNativeHooks : ModSystem {
     }
     static void CutTiles(On_Player.orig_ItemCheck_CutTiles orig,Player p,Item item,Rectangle box,bool[] ignore) {
         if(CompanionNativeUse.Current?.Actor==p)return;orig(p,item,box,ignore);
+    }
+    static bool MeleeSight(On_Projectile.orig_CanHitWithMeleeWeapon orig,Projectile p,Entity target) {
+        var use=CompanionNativeUse.Current;
+        if(use?.Cat is not {active:true} cat||CompanionOwnedShot.Of(p)!=use||
+            p.owner!=use.Actor.whoAmI||Main.player[p.owner]!=use.Actor)return orig(p,target);
+        // The actor is centered on the paw to preserve native weapon anchors.
+        // Owner visibility needs the cat's body instead: the taller actor box
+        // otherwise extends below a half-block floor and rejects a clear hit.
+        // Keep Terraria's complete obstruction test and restore the weapon
+        // anchor before native AI, collision or other projectile hooks resume.
+        var actor=use.Actor;var position=actor.position;int width=actor.width,height=actor.height;
+        try {actor.position=cat.position;actor.width=cat.width;actor.height=cat.height;return orig(p,target);}
+        finally {actor.position=position;actor.width=width;actor.height=height;}
     }
     static void UpdateShot(On_Projectile.orig_Update orig,Projectile p,int index) {
         if(CompanionProjectileData.TryGet<CompanionOwnedShot>(p,out var tag)){tag.Resolve(p);if(tag.Waiting(p))return;}
