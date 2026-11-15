@@ -96,7 +96,7 @@ internal sealed class CompanionBarrelCharge {
         if(retry>0)retry--;
         if(!Active)return false;
         var p=cat.Projectile;
-        if(!s.Training.Active(s)||s.Training.Find(s,TrainingCatalog.Barrel)<0||Working(s)||s.PetCooldown>510||
+        if(!s.Training.Active(s)||s.Training.Find(s,TrainingCatalog.Barrel)<0||Working(s)||s.Petting.Active||
             !CompanionStation.Contains(s,p.Center)||Vector2.DistanceSquared(s.WorkAnchor,p.Center)>480*480){Cancel(cat);return false;}
         if(s.CombatMode==CompanionCombatMode.Passive&&(Preparing||Carrying)){Cancel(cat);return false;}
         cat.Weapons.Tick(s.Player,s,p,null,false);

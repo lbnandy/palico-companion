@@ -62,6 +62,8 @@ UI: {
 	SortUnavailable: Sorting unavailable; items remain unchanged
 	PetCloser: Come closer to pet your companion
 	PetHappy: Mrr... That's the spot.
+	PetBusy: Stand still with your Palico nearby and free to be petted.
+	PetHoldHint: Click to pet, or hold to keep petting.
 	HudStowed: Resting away
 	HudRecovering: Recovering
 	HudWorking: Working
@@ -184,9 +186,9 @@ Configs: {
 			Label: Strength preset
 			Tooltip:
 				'''
-				Adjusts damage, health, both movement speeds and evasion, plus defense inheritance in Inherited mode; save to apply
+				Adjusts damage, attack speed, health, both movement speeds and evasion, plus defense inheritance in Inherited mode; save to apply
 				You can still adjust each value; unmatched settings appear as Custom
-				All presets keep following and work movement at 100%
+				All presets keep attack speed, following and work movement at 100%
 				In multiplayer, only the host can change these settings in-game; they apply to every Palico on the server
 				'''
 		}
@@ -206,6 +208,11 @@ Configs: {
 		DamagePercent: {
 			Label: Damage (%)
 			Tooltip: Scales hits from your Palico's weapons, minions, sentries and offensive support gear. Based on the damage your Palico would otherwise deal, not your damage; 100% leaves it unchanged. Does not scale damage over time, such as poison or fire.
+		}
+
+		AttackSpeedPercent: {
+			Label: Attack speed (%)
+			Tooltip: Scales weapon use and animation speed together; 100% keeps normal speed. Does not change projectile travel, minion attack rates or work speed. Weapons with their own charge or sustained-fire timing may not follow this setting. Set by the host in multiplayer.
 		}
 
 		HealthPercent: {
@@ -453,6 +460,11 @@ Configs: {
 		CompanionHud: {
 			Label: Show Palico status card
 			Tooltip: Shows health, status and equipment cooldowns. Click to open the Palico inventory; hold Alt and drag the status card to move. A show/hide key can be assigned in Controls. Hidden while your inventory or full-screen map is open.
+		}
+
+		HudScalePercent: {
+			Label: Status card size (%)
+			Tooltip: Scales only the Palico status card, including its portrait, skills and food icon. Does not resize the backpack or other game UI.
 		}
 
 		HudPosition: {
@@ -1403,6 +1415,8 @@ TrainingNames: {
 	PlunderKnife: Plunderblade
 	MiningKit: Mining Kit
 	GardenKit: Harvest Basket
+	ReinforcedBackpack: Reinforced Palico Backpack
+	ExpandedBackpack: Expanded Palico Backpack
 	ExpandedBelt: Expanded Toolbelt
 	ImprovedTools: Improved Toolkit
 	MasterTools: Masterwork Toolkit

@@ -29,7 +29,7 @@ internal sealed class CompanionKite {
         if(c.Kite.Active)return "Help";
         if(!Item(p.HeldItem)||p.selectedItem is <0 or >=10)return "NeedItem";
         if(!CompanionInteraction.TalkRange(p).Intersects(c.Projectile.Hitbox)||!Reachability.Clear(p.Center,c.Projectile.Center))return "Closer";
-        if(s.Paused||s.PetCooldown>510||c.ActionVisual.Eating||c.Barrel.Active||c.Weapons.Busy||p.itemAnimation>0||s.Directive.Active)return "Busy";
+        if(s.Paused||s.Petting.Active||c.ActionVisual.Eating||c.Barrel.Active||c.Weapons.Busy||p.itemAnimation>0||s.Directive.Active)return "Busy";
         foreach(var shot in Main.ActiveProjectiles)if(shot.owner==p.whoAmI&&shot.aiStyle==160)return "ReelFirst";
         return null;
     }

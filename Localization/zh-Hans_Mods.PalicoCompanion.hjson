@@ -62,6 +62,8 @@ UI: {
 	SortUnavailable: 暂时无法整理，请稍后重试
 	PetCloser: 靠近呆猫就能摸摸了
 	PetHappy: 嘿嘿，好舒服喵～
+	PetBusy: 等你和呆猫空下来，站稳了再摸摸吧
+	PetHoldHint: 点击摸摸，按住可以一直摸
 	HudStowed: 已收起
 	HudRecovering: 恢复中
 	HudWorking: 工作中
@@ -189,7 +191,7 @@ Configs: {
 			Label: 强度预设
 			Tooltip:
 				'''
-				调整伤害、生命、两项移速与闪避，以及继承模式的防御比例；保存后生效，也可逐项调整
+				调整伤害、攻速、生命、两项移速与闪避，以及继承模式的防御比例；保存后生效，也可逐项调整
 				手动调整后不匹配任何预设时，显示为自定义
 				联机时由房主修改，同一服务器内的所有呆猫共用这套设置
 				'''
@@ -210,6 +212,11 @@ Configs: {
 		DamagePercent: {
 			Label: 伤害倍率（%）
 			Tooltip: 调整呆猫武器、召唤物、哨兵和攻击型支援道具的命中伤害。以呆猫原本造成的伤害为基准，100% 不额外调整，不是继承玩家伤害的比例。该倍率不用于中毒、燃烧等持续伤害。
+		}
+
+		AttackSpeedPercent: {
+			Label: 攻击速度倍率（%）
+			Tooltip: 调整呆猫使用武器的速度，100% 保持原速。同步调整使用与动画时间，不改变弹幕飞行速度、召唤物自身的攻击频率或工作速度；部分武器自行控制的蓄力或持续攻击节奏不受此项控制。联机由房主设置。
 		}
 
 		HealthPercent: {
@@ -456,6 +463,11 @@ Configs: {
 		CompanionHud: {
 			Label: 显示呆猫状态卡
 			Tooltip: 显示生命、状态和装备冷却。点击打开呆猫背包；按住 Alt 拖动状态卡可调整位置。可在按键设置中绑定显示／隐藏快捷键。打开物品栏或全屏地图时隐藏。
+		}
+
+		HudScalePercent: {
+			Label: 状态栏大小（%）
+			Tooltip: 只调整呆猫状态栏，包括头像、技能和食物图标；不会改变背包或其他游戏界面的大小。
 		}
 
 		HudPosition: {
@@ -1406,6 +1418,8 @@ TrainingNames: {
 	PlunderKnife: 掠夺刀
 	MiningKit: 采矿工具
 	GardenKit: 丰收篮
+	ReinforcedBackpack: 呆猫加固背包
+	ExpandedBackpack: 呆猫扩容背包
 	ExpandedBelt: 扩容工具带
 	ImprovedTools: 改良工具组
 	MasterTools: 精工工具组

@@ -10,7 +10,6 @@ public sealed class CompanionAnimation {
     public int IdleTicks { get; private set; }
     public int StateTicks { get; private set; }
     public int SpriteFrame { get; private set; }
-    internal void SetNetworkFrame(int frame){SpriteFrame=Math.Clamp(frame,0,CompanionSpriteLayout.Frames-1);}
     double walkPhase;
     internal double WalkPhase=>walkPhase;
     internal void PlayReplica(CompanionPose pose,double elapsed){

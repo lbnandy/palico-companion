@@ -27,12 +27,16 @@ public static class CompanionStatusBar {
         int height=TrainingHud.HasEquipment(s)?126:76;
         return CompanionHudLayout.Place(new Rectangle(20,80+50*Math.Max(1,last/11+1),244,height));
     }
+    internal static Rectangle HitBounds(Player player){
+        var r=Bounds(player);float scale=CompanionHudLayout.Scale;
+        return new Rectangle((int)MathF.Round(r.X*scale),(int)MathF.Round(r.Y*scale),(int)MathF.Round(r.Width*scale),(int)MathF.Round(r.Height*scale));
+    }
     public static bool BlocksInput {
         get {
             if(CompanionHudLayout.Capturing)return true;
             if(!Visible)return false;
             var s=Main.LocalPlayer.GetModPlayer<CompanionPlayer>();var card=Bounds(s.Player);
-            var mouse=new Point((int)(PlayerInput.MouseInfo.X/Main.UIScale),(int)(PlayerInput.MouseInfo.Y/Main.UIScale));
+            var mouse=new Point((int)(PlayerInput.MouseInfo.X/(Main.UIScale*CompanionHudLayout.Scale)),(int)(PlayerInput.MouseInfo.Y/(Main.UIScale*CompanionHudLayout.Scale)));
             return card.Contains(mouse)||CompanionFoodDisplay.Active(s)&&CompanionFoodDisplay.HudBounds(card).Contains(mouse);
         }
     }
@@ -51,6 +55,14 @@ public static class CompanionStatusBar {
         return s.Stationed?Terraria.Localization.Language.GetTextValue("Mods.PalicoCompanion.Station.Guarding"):CompanionLife.L("Following");
     }
     public static void Draw(CompanionPlayer s){
+        float scale=CompanionHudLayout.Scale;
+        if(scale==1){DrawCard(s);return;}
+        var batch=Main.spriteBatch;int mouseX=Main.mouseX,mouseY=Main.mouseY;
+        batch.End();batch.Begin(SpriteSortMode.Deferred,BlendState.AlphaBlend,SamplerState.LinearClamp,null,null,null,Matrix.CreateScale(scale)*Main.UIScaleMatrix);
+        try{Main.mouseX=(int)(mouseX/scale);Main.mouseY=(int)(mouseY/scale);DrawCard(s);}
+        finally{Main.mouseX=mouseX;Main.mouseY=mouseY;batch.End();batch.Begin(SpriteSortMode.Deferred,BlendState.AlphaBlend,SamplerState.LinearClamp,null,null,null,Main.UIScaleMatrix);}
+    }
+    static void DrawCard(CompanionPlayer s){
         bool clicked=Main.mouseLeft&&!previousLeft&&!CompanionHudLayout.Capturing;previousLeft=Main.mouseLeft;
         if(!Visible||CompanionSprite.Atlas==null)return;
         Rectangle r=Bounds(s.Player);bool hover=r.Contains(Main.mouseX,Main.mouseY);
@@ -118,7 +130,7 @@ public static class CompanionStatusBar {
         try {
             pixelBatch??=new SpriteBatch(Main.graphics.GraphicsDevice);
             pixelBatch.Begin(SpriteSortMode.Immediate,BlendState.AlphaBlend,SamplerState.PointClamp,null,null,null,Matrix.Identity);
-            try {DrawPixels(pixelBatch,Main.LocalPlayer.GetModPlayer<CompanionPlayer>(),Main.UIScale,Vector2.Zero);}
+            try {DrawPixels(pixelBatch,Main.LocalPlayer.GetModPlayer<CompanionPlayer>(),Main.UIScale*CompanionHudLayout.Scale,Vector2.Zero);}
             finally {pixelBatch.End();}
             pixelLayerFailed=false;
         } catch(Exception error) {

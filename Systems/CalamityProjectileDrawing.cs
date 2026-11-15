@@ -1,13 +1,16 @@
 using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using CalamityMod.Enums;
+using CalamityMod.CalPlayer;
 using CalamityMod.Graphics.Primitives;
 using CalamityMod.Systems.Graphic.PixelationSystem;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoMod.Cil;
+using Mono.Cecil.Cil;
 using MonoMod.RuntimeDetour;
 using Terraria;
 using Terraria.ModLoader;
@@ -20,7 +23,7 @@ namespace PalicoCompanion.Systems;
 [ExtendsFromMod("CalamityMod")]
 [JITWhenModsEnabled("CalamityMod")]
 public sealed class CalamityProjectileDrawing:ModSystem {
-    ILHook primitives, queuedDispatch;
+    ILHook primitives, queuedDispatch, catalystRocks;
     Hook queuedDrawers;
     static readonly Dictionary<Type,FieldInfo[]> capturedProjectiles=new();
     delegate void Queue(Action<Matrix> draw,GeneralDrawLayer layer,BlendState blend);
@@ -29,8 +32,38 @@ public sealed class CalamityProjectileDrawing:ModSystem {
         primitives=new ILHook(typeof(PrimitivePixelationSystem).GetMethod("DrawPrimsToRenderTarget",BindingFlags.NonPublic|BindingFlags.Static)!,ScopePrimitives);
         queuedDispatch=new ILHook(typeof(PixelationManager).GetMethod("DrawCollectionsToTarget",BindingFlags.NonPublic|BindingFlags.Static)!,ScopeQueuedDraws);
         queuedDrawers=new Hook(typeof(PixelationManager).GetMethod(nameof(PixelationManager.AddPixelatedDrawer))!,Capture);
+        if(ModLoader.TryGetMod("CatalystMod",out var catalyst)){
+            var dispatch=catalyst.Code.GetType("CatalystMod.CatalystDetours")?.GetMethod("Main_DrawProjectiles",BindingFlags.NonPublic|BindingFlags.Static);
+            var draw=catalyst.Code.GetType("CatalystMod.Projectiles.Summon.IntergelacticMinionOrbitingRocks")?.GetMethod("DrawRocks",new[]{typeof(SpriteBatch),typeof(CalamityPlayer),typeof(bool)});
+            if(dispatch!=null&&draw!=null){
+                // Bind the optional native renderer once; do not copy its rock
+                // animation or require Catalyst when only Calamity is installed.
+                var renderer=Expression.Parameter(typeof(ModProjectile));var batch=Expression.Parameter(typeof(SpriteBatch));
+                var player=Expression.Parameter(typeof(CalamityPlayer));var top=Expression.Parameter(typeof(bool));
+                var native=Expression.Lambda<Action<ModProjectile,SpriteBatch,CalamityPlayer,bool>>(
+                    Expression.Call(Expression.Convert(renderer,draw.DeclaringType),draw,batch,player,top),renderer,batch,player,top).Compile();
+                catalystRocks=new ILHook(dispatch,il=>ScopeCatalystRocks(il,draw.DeclaringType.FullName,native));
+            }
+        }
     }
-    public override void Unload(){primitives?.Dispose();queuedDispatch?.Dispose();queuedDrawers?.Dispose();primitives=null;queuedDispatch=null;queuedDrawers=null;capturedProjectiles.Clear();}
+    public override void Unload(){primitives?.Dispose();queuedDispatch?.Dispose();queuedDrawers?.Dispose();catalystRocks?.Dispose();primitives=null;queuedDispatch=null;catalystRocks=null;queuedDrawers=null;capturedProjectiles.Clear();}
+    static void ScopeCatalystRocks(ILContext il,string renderer,Action<ModProjectile,SpriteBatch,CalamityPlayer,bool> native){
+        var cursor=new ILCursor(il);int count=0;
+        // Both rock layers read the owner BEFORE invoking DrawRocks. Scope that
+        // lookup too: DrawProj's existing scope cannot cover this separate pass.
+        while(cursor.TryGotoNext(i=>i.MatchLdsfld<Main>(nameof(Main.player)),i=>i.MatchLdloc(out _),
+            i=>i.MatchLdfld<Projectile>(nameof(Projectile.owner)),i=>i.OpCode==OpCodes.Ldelem_Ref,
+            i=>i.MatchCall("CalamityMod.CalamityUtils","Calamity"),i=>i.MatchLdcI4(out _),i=>i.MatchCallvirt(renderer,"DrawRocks"))){
+            cursor.RemoveRange(5);cursor.Index++;cursor.Remove();
+            cursor.EmitDelegate<Action<ModProjectile,SpriteBatch,bool>>((shot,batch,top)=>{
+                if(!CompanionNativeUse.DrawContext(shot.Projectile,out var use))return;
+                if(use==null){native(shot,batch,CalamityMod.CalamityUtils.Calamity(Main.player[shot.Projectile.owner]),top);return;}
+                using(new CompanionNativeUse.ReplicaDrawScope(use))
+                using(new CompanionNativeUse.Scope(use,trackHealing:false))native(shot,batch,CalamityMod.CalamityUtils.Calamity(use.Actor),top);
+            });count++;
+        }
+        if(count!=2)throw new InvalidOperationException("Catalyst rock draw dispatch was not found");
+    }
     static void ScopePrimitives(ILContext il){
         var cursor=new ILCursor(il);
         if(!cursor.TryGotoNext(i=>i.MatchCallvirt<IPixelatedPrimitiveRenderer>(nameof(IPixelatedPrimitiveRenderer.RenderPixelatedPrimitives))))

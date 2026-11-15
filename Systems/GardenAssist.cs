@@ -57,7 +57,6 @@ public sealed class GardenAssist {
         using var drops=new GardenHarvestDrops.Capture(tile);
         using(CompanionTileActions.Begin())using(new HarvestBasket(s))WorldGen.KillTile(tile.X,tile.Y);
         if(!Main.tile[tile].HasTile) {
-            s.Experience++;
             var seed=Seed(s,current)??drops.Items.FirstOrDefault(i=>i.active&&!i.IsAir&&!i.favorited&&i.type==Seeds[current]&&
                 (i.playerIndexTheItemIsReservedFor==255||i.playerIndexTheItemIsReservedFor==owner.whoAmI));
             if(seed!=null){

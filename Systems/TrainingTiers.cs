@@ -23,7 +23,7 @@ internal static class TrainingTiers {
     ];
     internal static TrainingTier At(int tier)=>tiers[Math.Clamp(tier,0,Last)];
     internal static int UpgradeTier(int kind)=>Array.FindIndex(tiers,t=>t.Upgrade==kind&&kind>=0);
-    internal static bool Upgrade(int kind)=>kind==13||UpgradeTier(kind)>0;
+    internal static bool Upgrade(int kind)=>kind==13||TrainingCatalog.BackpackSize(kind)>0||UpgradeTier(kind)>0;
     internal static int LoadTier(int value,int format)=>format<SaveFormat?Math.Clamp(value,0,2) switch {1=>2,2=>3,_=>0}:Math.Clamp(value,0,Last);
     internal static int Honey(int tier,int maximum)=>At(tier).Honey+(tier==Last?Math.Max(0,maximum-500)/10:0);
     internal static int HoneyOverTime(int tier,int maximum)=>At(tier).HoneyOverTime+(tier==Last?Math.Max(0,maximum-500)/50:0);

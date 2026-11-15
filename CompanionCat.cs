@@ -182,6 +182,12 @@ public sealed class CompanionCat : ModProjectile
                 state.Expression.Say(state,Projectile,"Heal",Terraria.GameContent.UI.EmoteID.ItemLifePotion);
             }
         }
+        if(state.Petting.Hold(this,out var petGoal)){
+            Weapons.Tick(owner,state,Projectile,null,false);Light.Update(owner,state,Projectile,false);
+            if(Math.Abs(Projectile.Center.X-petGoal.X)>3)Move(petGoal,owner,state);
+            else {Projectile.velocity.X=0;Projectile.velocity.Y=Math.Min(10,Projectile.velocity.Y+.35f);}
+            return;
+        }
         if(CompanionFeeding.Hold(state,this))return;
         if(Navigation.Riding&&(state.Paused||state.Vitals.Downed)) {
             CancelTransitWork(state);Navigation.HoldReturn(Projectile);
@@ -383,7 +389,7 @@ public sealed class CompanionCat : ModProjectile
         bool toolSwing=Fishing.Gesture||s.Mining.SwingTicks>0||s.Trees.SwingTicks>0||Catching.SwingTicks>0;
         float toolProgress=Fishing.Gesture?Fishing.GestureProgress:Catching.SwingTicks>0?1-Catching.SwingTicks/(float)Catching.Duration:s.Mining.SwingTicks>0?1-s.Mining.SwingTicks/(float)s.Mining.SwingDuration:1-s.Trees.SwingTicks/(float)s.Trees.SwingDuration;
         Animation.Update(Projectile.velocity.X,Projectile.velocity.Y,s.Vitals.Downed,s.Paused,
-            toolSwing,attackVisualTicks>0,s.PetCooldown>510,animationThreat,busy,
+            toolSwing,attackVisualTicks>0,s.Petting.Touching,animationThreat,busy,
             Vector2.DistanceSquared(s.WorkAnchor,Projectile.Center)<120*120&&Math.Abs(owner.velocity.X)<0.2f,grounded,
             toolSwing?toolProgress:1-attackVisualTicks/(float)attackVisualDuration,Navigation.Riding||Kite.Active,attackThrust,Diving.Submerged&&!grounded,
             Weapons.Actor.HeldItem.useStyle==ItemUseStyleID.Shoot&&Weapons.Actor.HeldItem.CountsAsClass(DamageClass.Ranged));

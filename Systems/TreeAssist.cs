@@ -130,7 +130,6 @@ public sealed class TreeAssist
         // on clients and paints unrelated tile data beside the felled tree.
         if(CompanionNetwork.Server)NetMessage.SendTileSquare(-1,root.X-4,treeTopY-2,9,root.Y-treeTopY+5);
         if(!Main.tile[root].HasTile) {
-            s.Experience++;
             bool manual=requestedManual;Cancel();requestedManual=manual;cooldown=CompanionWorkTiming.Ticks(300);replantTicks=180;
             bool result=TryReplant(p,s,cat);if(!ReplantPending)requestedManual=false;return result;
         }

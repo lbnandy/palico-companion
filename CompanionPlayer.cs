@@ -84,9 +84,7 @@ public sealed class CompanionPlayer : ModPlayer
     public GardenAssist Garden=new();
     public TreeAssist Trees=new();
     public string CatName=CompanionLife.L("DefaultName"), Status="Ready";
-    public int Experience, Fur, PetCooldown;
-    public Vector2 Home;
-    public string HomeWorld="";
+    public int PetChatterCooldown;
     public ChestPermissions Chests=new();
     public override void SaveData(TagCompound tag) {
         tag["deliveryRemainder"]=DeliveryRemainder.Select(ItemIO.Save).ToList();
@@ -102,7 +100,6 @@ public sealed class CompanionPlayer : ModPlayer
         tag["combatMode"]=(int)CombatMode;
         tag["enabled"]=Enabled; tag["paused"]=Paused; tag["name"]=CatName;
         tag["pickup"]=Pickup; tag["combat"]=Combat; tag["lighting"]=(byte)Lighting; tag["bridges"]=Bridges; tag["ropes"]=Ropes;
-        tag["xp"]=Experience; tag["fur"]=Fur; tag["home"]=Home; tag["homeWorld"]=HomeWorld;
         tag["chestPermissions"]=Chests.Save();
     }
     public override void LoadData(TagCompound tag) {
@@ -143,7 +140,6 @@ public sealed class CompanionPlayer : ModPlayer
         CatName=tag.ContainsKey("name")?tag.GetString("name"):CompanionLife.L("DefaultName");
         Pickup=!tag.ContainsKey("pickup")||tag.GetBool("pickup"); Combat=!tag.ContainsKey("combat")||tag.GetBool("combat");
         Lighting=tag.ContainsKey("lighting")?Systems.CompanionLighting.Valid(tag.GetByte("lighting")):(!tag.ContainsKey("torches")||tag.GetBool("torches")?CompanionLightingMode.Automatic:CompanionLightingMode.Off); Bridges=tag.GetBool("bridges"); Ropes=tag.GetBool("ropes");
-        Experience=tag.GetInt("xp"); Fur=tag.GetInt("fur"); Home=tag.Get<Vector2>("home"); HomeWorld=tag.GetString("homeWorld");
         Chests=new();Chests.Load(tag);
     }
     public override void OnEnterWorld() {
@@ -196,7 +192,7 @@ public sealed class CompanionPlayer : ModPlayer
                 companion?.Animation.Motion==CatMotion.Rest,Main.expertMode,companion?.Weapons.Actor,CompanionFeeding.CanRecover(this,companion),Player);
             if(++maintenanceTick%30==0)CompanionCoins.Maintain(this);
         }
-        if(PetCooldown>0) PetCooldown--;
+        if(PetChatterCooldown>0) PetChatterCooldown--;
         if(NoticeTicks>0) NoticeTicks--;
         if(Main.netMode==NetmodeID.SinglePlayer&&!Bonded&&!meetingShown&&Enabled&&!Player.dead&&++meetingTicks>=180&&!Terraria.GameInput.PlayerInput.WritingText&&!Main.inFancyUI&&!Main.gameMenu&&!CompanionThreat.WorkDanger(Player,Player.Center)){meetingShown=true;CompanionNaming.Open(this,true);}
         if(Main.netMode!=NetmodeID.SinglePlayer || !Enabled || Player.dead) {Digging.Clear(this);return;}
@@ -242,5 +238,6 @@ public sealed class CompanionPlayer : ModPlayer
         if(slot<0||slot>=Bag.Length)return;
         CompanionInventoryOperations.Take(this,Bag,slot).Present(this,true);
     }
-    public void Pet() {if(CompanionNetwork.Client){CompanionNetwork.Action(2);return;} if(PetCooldown>0||Stowed||Vitals.Downed) return; if(Cat is not {} cat || Vector2.Distance(cat.Center,Player.Center)>100) { Status=CompanionText.MessageFull("Mods.PalicoCompanion.UI.PetCloser");return; } if(cat.ModProjectile is CompanionCat flying)flying.Kite.Stop(flying); Experience++; PetCooldown=600; cat.ai[1]=90; Status=CompanionText.MessageFull("Mods.PalicoCompanion.UI.PetHappy");if(cat.ModProjectile is CompanionCat companion)companion.Feedback.PetSound(cat);Expression.Say(this,cat,"Pet",Terraria.GameContent.UI.EmoteID.EmotionLove); }
+    public CompanionPetting Petting=>Player.GetModPlayer<CompanionPetting>();
+    public void Pet()=>Petting.Begin();
 }

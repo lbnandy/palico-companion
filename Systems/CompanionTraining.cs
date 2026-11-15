@@ -31,12 +31,13 @@ public sealed partial class CompanionTraining {
     public int Find(CompanionPlayer s,int kind){for(int i=0;i<Math.Min(3,Count(s.Player));i++)if(TrainingCatalog.Id(Slots[i])==kind)return i;return -1;}
     public bool Work(int kind)=>TrainingCatalog.Id(Slots[3])==kind;
     // Old item flags remain readable for material refunds, but no longer select modes.
-    public bool CanUpgrade(int kind)=>kind==13&&!Expanded||TrainingTiers.UpgradeTier(kind)==Tier+1;
+    public bool CanUpgrade(int kind,CompanionPlayer state)=>TrainingCatalog.BackpackSize(kind) is >0 and var capacity?state.Bag.Length==capacity-12:kind==13&&!Expanded||TrainingTiers.UpgradeTier(kind)==Tier+1;
     public bool Ready(CompanionPlayer s,int kind)=>Active(s)&&Find(s,kind) is int i&&i>=0&&Cooldowns[kind]<=0&&SlotCooldowns[i]<=0;
     public bool Use(CompanionPlayer s,int kind,Vector2? at=null){if(!Ready(s,kind))return false;int i=Find(s,kind);Cooldowns[kind]=SlotCooldowns[i]=SlotCooldownTotals[i]=CooldownSeconds(kind,Tier)*60;if(!CompanionNetwork.Client)Cue(s,kind,at);return true;}
     public bool Accepts(CompanionPlayer s,Item item,int slot){if(slot<0||slot>3)return false;if(item.IsAir)return true;int k=TrainingCatalog.Id(item);if(slot==3)return TrainingCatalog.WorkGear(k);if(slot>=Count(s.Player)||!TrainingCatalog.Support(k))return false;for(int i=0;i<3;i++)if(i!=slot&&TrainingCatalog.Id(Slots[i])==k)return false;return true;}
     internal bool TryEquip(CompanionPlayer s,Item item){if(item.IsAir)return false;for(int i=0;i<4;i++)if(Slots[i].IsAir&&Accepts(s,item,i)){Slots[i]=item.Clone();Slots[i].stack=1;if(--item.stack<=0)item.TurnToAir();return true;}return false;}
-    public bool Apply(Item material,int slot){int k=TrainingCatalog.Id(material);bool ok=false;
+    public bool Apply(Item material,CompanionPlayer state){int k=TrainingCatalog.Id(material);bool ok=false;
+        if(TrainingCatalog.BackpackSize(k)>0&&CanUpgrade(k,state)){var expanded=InventoryTransfer.Empty(TrainingCatalog.BackpackSize(k));Array.Copy(state.Bag,expanded,state.Bag.Length);state.Bag=expanded;ok=true;}
         if(k==13&&!Expanded){Expanded=true;ok=true;}
         int next=TrainingTiers.UpgradeTier(k);
         if(next==Tier+1){Tier=next;ok=true;}

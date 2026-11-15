@@ -12,6 +12,7 @@ public sealed class CompanionHudLayout : ModSystem {
     static Vector2 offset,position,origin;
     internal static bool Capturing { get; private set; }
     internal static bool InputBlocked=>PlayerInput.WritingText||Main.drawingPlayerChat||Main.editSign||Main.editChest||Main.blockInput||Main.ingameOptionsWindow;
+    internal static float Scale=>Math.Clamp(Config.HudScalePercent,75,150)/100f;
     static CompanionConfig Config=>ModContent.GetInstance<CompanionConfig>();
 
     // Reserve the expanded card and the adjacent vanilla-sized food buff, even
@@ -19,8 +20,8 @@ public sealed class CompanionHudLayout : ModSystem {
     static Vector2 Travel {
         get {
             var viewport=Main.graphics.GraphicsDevice.PresentationParameters;
-            return new Vector2(Math.Max(0,viewport.BackBufferWidth/Main.UIScale-288-16),
-                Math.Max(0,viewport.BackBufferHeight/Main.UIScale-126-16));
+            return new Vector2(Math.Max(0,viewport.BackBufferWidth/Main.UIScale-288*Scale-16),
+                Math.Max(0,viewport.BackBufferHeight/Main.UIScale-126*Scale-16));
         }
     }
     static float Unit(float value)=>float.IsFinite(value)?Math.Clamp(value,0,1):0;
@@ -30,7 +31,7 @@ public sealed class CompanionHudLayout : ModSystem {
         if(dragging)point=position;
         else if(Config.HudPosition is Vector2 saved)point=new Vector2(8)+Travel*new Vector2(Unit(saved.X),Unit(saved.Y));
         point=Clamp(point);
-        return new Rectangle((int)MathF.Round(point.X),(int)MathF.Round(point.Y),automatic.Width,automatic.Height);
+        return new Rectangle((int)MathF.Round(point.X/Scale),(int)MathF.Round(point.Y/Scale),automatic.Width,automatic.Height);
     }
     internal static void Toggle() {
         Finish();
@@ -63,7 +64,7 @@ public sealed class CompanionHudLayout : ModSystem {
             return;
         }
         bool alt=Main.keyState.IsKeyDown(Keys.LeftAlt)||Main.keyState.IsKeyDown(Keys.RightAlt);
-        var card=CompanionStatusBar.Bounds(Main.LocalPlayer);
+        var card=CompanionStatusBar.HitBounds(Main.LocalPlayer);
         if(pressed&&alt&&Main.mouseItem.IsAir&&card.Contains(mouse.ToPoint())) {
             position=origin=card.TopLeft();offset=mouse-position;
             dragging=Capturing=true;moved=false;

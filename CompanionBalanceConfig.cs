@@ -37,10 +37,10 @@ public sealed class CompanionBalanceConfig : ModConfig {
     // must never reapply a preset over the player's individual adjustments.
     [Header("Presets"),JsonIgnore,ShowDespiteJsonIgnore,CustomModConfigItem(typeof(Systems.CompanionPresetElement))]
     public CompanionStrengthPreset Preset {
-        get => (DamagePercent,HealthPercent,DefensePercent,CombatMovementPercent,TravelMovementPercent,Evasion) switch {
-            (50,75,75,75,100,CompanionEvasionMode.Standard) => CompanionStrengthPreset.Assist,
-            (75,75,75,75,100,CompanionEvasionMode.Standard) => CompanionStrengthPreset.Standard,
-            (100,100,100,100,100,CompanionEvasionMode.Agile) => CompanionStrengthPreset.Strong,
+        get => (DamagePercent,HealthPercent,DefensePercent,CombatMovementPercent,TravelMovementPercent,Evasion,AttackSpeedPercent) switch {
+            (50,75,75,75,100,CompanionEvasionMode.Standard,100) => CompanionStrengthPreset.Assist,
+            (75,75,75,75,100,CompanionEvasionMode.Standard,100) => CompanionStrengthPreset.Standard,
+            (100,100,100,100,100,CompanionEvasionMode.Agile,100) => CompanionStrengthPreset.Strong,
             _ => CompanionStrengthPreset.Custom
         };
         set {
@@ -48,15 +48,16 @@ public sealed class CompanionBalanceConfig : ModConfig {
             bool strong=value==CompanionStrengthPreset.Strong;
             DamagePercent=value==CompanionStrengthPreset.Assist?50:strong?100:75;
             HealthPercent=DefensePercent=CombatMovementPercent=strong?100:75;
-            TravelMovementPercent=100;
+            TravelMovementPercent=AttackSpeedPercent=100;
             Evasion=strong?CompanionEvasionMode.Agile:CompanionEvasionMode.Standard;
         }
     }
 
     [Header("Strength")]
-    [DefaultValue(75),Range(10,200),Increment(5),Slider] public int DamagePercent { get; set; } = 75;
+    [DefaultValue(75),Range(1,200),Increment(1),Slider] public int DamagePercent { get; set; } = 75;
+    [DefaultValue(100),Range(25,150),Increment(5),Slider] public int AttackSpeedPercent { get; set; } = 100;
     [DefaultValue(75),Range(10,200),Increment(5),Slider] public int HealthPercent { get; set; } = 75;
-    [DefaultValue(100),Range(50,150),Increment(5),Slider] public int TargetingRangePercent { get; set; } = 100;
+    [DefaultValue(100),Range(25,150),Increment(5),Slider] public int TargetingRangePercent { get; set; } = 100;
 
     [Header("SharedBuffs")]
     [DefaultValue(true)] public bool SharePotionBuffs { get; set; } = true;
@@ -82,13 +83,14 @@ public sealed class CompanionBalanceConfig : ModConfig {
     [DefaultValue(false)] public bool BossHealthBoost { get; set; }
     [DefaultValue(35),Range(0,100),Increment(5),Slider] public int BossHealthPercent { get; set; } = 35;
 
+    internal float AttackSpeedScale => Math.Clamp(AttackSpeedPercent,25,150)/100f;
     internal float WorkScale => Math.Clamp(WorkSpeedPercent,25,200)/100f;
     internal float CombatInheritanceScale => Math.Clamp(CombatInheritancePercent,0,100)/100f;
     internal float FishingScale => Math.Clamp(FishingSpeedPercent,25,200)/100f;
-    internal float TargetingRangeScale => Math.Clamp(TargetingRangePercent,50,150)/100f;
+    internal float TargetingRangeScale => Math.Clamp(TargetingRangePercent,25,150)/100f;
 
     internal static CompanionBalanceConfig Current => ModContent.GetInstance<CompanionBalanceConfig>();
-    internal float DamageScale => Math.Clamp(DamagePercent,10,200)/100f;
+    internal float DamageScale => Math.Clamp(DamagePercent,1,200)/100f;
     internal int HealthRatio => Math.Clamp(HealthPercent,10,200);
     internal int DefenseRatio => Math.Clamp(DefensePercent,0,200);
     internal float DamageReductionInheritanceScale => Math.Clamp(DamageReductionInheritancePercent,0,100)/100f;

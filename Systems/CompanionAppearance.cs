@@ -187,8 +187,4 @@ public sealed class CompanionAppearance : UIState {
         try {CompanionDye.Portrait(batch,state,dest,CompanionStatusBar.PortraitSource,Color.White,previewColor);}
         finally {batch.End();batch.Begin(SpriteSortMode.Deferred,BlendState.AlphaBlend,SamplerState.LinearClamp,null,null,null,Main.UIScaleMatrix);}
     }
-    internal static void DrawPortrait(SpriteBatch batch,Texture2D texture,Rectangle dest,Rectangle source){
-        batch.End();batch.Begin(SpriteSortMode.Deferred,BlendState.AlphaBlend,SamplerState.PointClamp,null,null,null,Main.UIScaleMatrix);
-        batch.Draw(texture,dest,source,Color.White);batch.End();batch.Begin(SpriteSortMode.Deferred,BlendState.AlphaBlend,SamplerState.LinearClamp,null,null,null,Main.UIScaleMatrix);
-    }
 }

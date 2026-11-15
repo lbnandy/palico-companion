@@ -60,10 +60,6 @@ public static class CompanionItemVisual {
     public static float? ToolRotation(Item item,float progress,int direction)=>
         item.useStyle==ItemUseStyleID.Swing&&(item.pick>0||item.axe>0||item.hammer>0)
             ?((Math.Clamp(progress,0,1)-0.5f)*3.5f-0.3f)*(direction<0?-1:1):null;
-    public static float ThrustTravel(float progress,float range)=>
-        (Math.Clamp(progress,0,1)-0.5f)*range*0.6f;
-    public static float ThrustOpacity(float progress) =>
-        Math.Clamp(progress*16/7,0,1)*Math.Clamp((16-progress*16)/4,0,1);
     public static float ItemScale(Item item)=>Math.Clamp(item.scale,0.1f,4f);
     public static Vector2 SwingOrigin(int width,int height,int direction)=>new(direction<0?width:0,height);
     public static float SpriteRotation(float bladeAngle,int width,int height,int direction) {
@@ -101,15 +97,6 @@ public static class CompanionItemVisual {
                     }
             }
         }
-    }
-    public static void DrawThrust(SpriteBatch batch,Item item,Vector2 hand,float aim,float progress,Color light) {
-        // Vanilla shortswords hide the item icon and draw a dedicated rapier
-        // projectile. Borrow that texture, NOT its player-anchored AI/heldProj.
-        Main.instance.LoadProjectile(item.shoot);var texture=TextureAssets.Projectile[item.shoot].Value;
-        var frame=new Rectangle(0,0,texture.Width,texture.Height/Math.Max(1,Main.projFrames[item.shoot]));
-        float scale=ItemScale(item),half=frame.Height*scale/2;
-        Vector2 center=hand+aim.ToRotationVector2()*(half+ThrustTravel(progress,CompanionWeapons.Range(item)));
-        batch.Draw(texture,center,frame,light*ThrustOpacity(progress),aim+MathHelper.PiOver2,frame.Size()/2,scale,SpriteEffects.None,0);
     }
     public static void DrawGrip(SpriteBatch batch,Vector2 feet,int pose,int direction,Color light,bool offhand=false) {
         var atlas=CompanionSprite.Atlas;if(atlas is null)return;

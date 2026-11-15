@@ -17,6 +17,7 @@ namespace PalicoCompanion.Systems;
 public sealed class CompanionConfigLayout : ModSystem {
     const BindingFlags Private = BindingFlags.Instance | BindingFlags.NonPublic;
     static readonly Dictionary<string,string> OptionIcons=new(){
+        ["AttackSpeedPercent"]="FeralClaws",["HudScalePercent"]="Ruler",
         ["Enabled"]="head",["Combat"]="GoldBroadsword",["AutoHeal"]="HealingPotion",
         ["DiggingAssist"]="GoldPickaxe",["MiningAssist"]="IronOre",["Forestry"]="GoldAxe",["Gardening"]="StaffofRegrowth",
         ["Pickup"]="TreasureMagnet",["CatchCritters"]="BugNet",["MiningBlacklist"]="StoneBlock",["PickupBlacklist"]="TrashCan",

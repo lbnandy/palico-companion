@@ -39,11 +39,9 @@ public sealed class CompanionVitals {
         EffectiveEndurance=independent?state.Equipment.Endurance:Math.Clamp(owner.endurance,0,1)*balance.DamageReductionInheritanceScale;
         independentRegen=independent;
     }
-    public int AttackDamage(Item[] gear,int experience) => Attack(gear,experience);
     public bool Downed => Recovery>0;
     // Weapons use their native admission policy; armor is validated by CompanionEquipment.
     public static bool Accepts(Item item,int slot) => item.IsAir || (slot==CompanionWeapons.SummonSlot?CompanionWeapons.SummonWeapon(item):slot==0&&CompanionWeapons.Supports(item)&&!CompanionWeapons.SummonWeapon(item));
-    public static int Attack(Item[] gear,int experience) => Math.Max(1,CompanionWeapons.Active(gear).damage);
     internal static int AfterDefense(int damage,int defense,float penetration=0)=>Math.Max(1,
         (int)Math.Floor(damage-Math.Max(0,defense-penetration)*(Main.masterMode?1f:Main.expertMode?.75f:.5f)));
     public bool Hurt(int damage,int defense,bool boss=false) => HurtFinal(AfterDefense(damage,defense),boss,damage>0);

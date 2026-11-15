@@ -20,7 +20,7 @@ public sealed class TrainingPanel:ModSystem {
     internal bool CompareTiers=>compareTiers;
     readonly GuideBackdrop backdrop=new();
     internal void DrawBackdrop(SpriteBatch batch,Rectangle bounds)=>backdrop.Draw(batch,bounds);
-    static readonly int[] UpgradeEntries=[13,21,14,15,22,19];
+    static readonly int[] UpgradeEntries=[13,21,14,15,22,TrainingCatalog.Backpack,TrainingCatalog.ReinforcedBackpack,19];
     internal static int UpgradeEntry(int kind)=>13+Array.IndexOf(UpgradeEntries,kind);
     static readonly string[] CategoryKeys=["TrainingPanel.Basics", "TrainingPanel.Support", "TrainingPanel.Work", "TrainingPanel.Upgrades"];
     static string CategoryLabel(int index)=>CompanionText.Get(CategoryKeys[index]);
@@ -93,7 +93,7 @@ public sealed class TrainingPanel:ModSystem {
             tab.Recalculate();tab.Draw(sb);
             if(click&&hover&&Category!=i){Category=i;Entry=new[]{0,0,8,13}[i];recipeVariant=0;scrollDragging=false;Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuTick);}
         }
-        int start=new[]{0,0,8,13}[Category],end=new[]{9,9,11,19}[Category];Entry=Math.Clamp(Entry,start,end-1);
+        int start=new[]{0,0,8,13}[Category],end=new[]{9,9,11,13+UpgradeEntries.Length}[Category];Entry=Math.Clamp(Entry,start,end-1);
         int Actual(int index)=>Category==1&&index==8?TrainingCatalog.Barrel:Category==3?UpgradeEntries[index-13]:index;
         for(int i=start;i<end;i++) {
             var r=new Rectangle(x+28,y+103+(i-start)*40,156,32);bool selected=Entry==i,hover=r.Contains(mouse);CompanionGamepad.Add("topic-"+i,r);

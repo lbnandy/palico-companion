@@ -57,7 +57,7 @@ internal static partial class CompanionNetwork {
             return;
         }
         if(!Server||!s.NetReady||!s.Player.active||s.NetLeaving)return;
-        if(s.PetCooldown>0)s.PetCooldown--;if(s.NoticeTicks>0)s.NoticeTicks--;
+        if(s.PetChatterCooldown>0)s.PetChatterCooldown--;if(s.NoticeTicks>0)s.NoticeTicks--;
         var cat=s.Cat?.ModProjectile as CompanionCat;
         s.Vitals.Sync(s.Player,s.Gear);s.Vitals.Tick(s.Cat?.velocity.X??0,s.Cat?.velocity.Y??0,cat?.Weapons.Busy==true&&cat.Weapons.Actor.HeldItem.mana>0,cat?.Animation.Motion==CatMotion.Rest,Main.expertMode,cat?.Weapons.Actor,CompanionFeeding.CanRecover(s,cat),s.Player);
         if(s.Enabled&&!s.Player.dead&&s.Cat==null)
@@ -165,6 +165,7 @@ Send(state);return;}
 switch(action){
             case 0:CompanionLife.Toggle(state);break;case 1:state.Recall();break;case 2:state.Pet();break;
             case 3:state.Paused=!state.Paused;break;
+            case 4:state.Petting.Continue();return;case 5:state.Petting.End();return;
         }Send(state);return;}
         if(kind==FeedRequest){ReadFeed(state,r);return;}
         if(kind==Bulk){ReadBulk(state,r,sender);return;}

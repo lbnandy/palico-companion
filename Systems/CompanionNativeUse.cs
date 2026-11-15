@@ -105,6 +105,9 @@ public sealed partial class CompanionNativeUse {
     }
     public bool Busy=>Actor.itemAnimation>0;
     public static CompanionNativeUse Current {get;private set;}
+    // Keep the real local recipient available while native equipment temporarily
+    // makes the companion Main.LocalPlayer. Nested scopes preserve this identity.
+    internal static Player HumanPlayer {get;private set;}
     // Both native drawing and optional off-screen render passes must wait for
     // network ownership/AI and use the same live companion actor.
     internal static bool DrawContext(Projectile projectile,out CompanionNativeUse context){
@@ -187,7 +190,6 @@ public sealed partial class CompanionNativeUse {
     public static int MinionLimit(Player owner)=>owner.GetModPlayer<CompanionPlayer>().Cat!=null?owner.GetModPlayer<CompanionPlayer>().Equipment.Minions:Math.Max(0,owner.maxMinions);
     public static int SentryLimit(Player owner)=>owner.GetModPlayer<CompanionPlayer>().Cat!=null?owner.GetModPlayer<CompanionPlayer>().Equipment.Sentries:Math.Max(0,owner.maxTurrets);
     public static bool Summoning(Item item)=>item.shoot>ProjectileID.None&&ContentSamples.ProjectilesByType.TryGetValue(item.shoot,out var p)&&p.minion;
-    public static bool DistanceWeapon(Item item)=>CompanionCombatReach.Distance(item);
     // Range chooses tactics, not arm animation. Projectile-emitting swords
     // still use vanilla's overhead swing; guns, staffs, yoyos and rapiers do not.
     internal static bool SwingArm(Item item)=>item.useStyle==ItemUseStyleID.Swing;
@@ -422,6 +424,7 @@ public sealed partial class CompanionNativeUse {
                 if(Actor.buffType[i]>0&&!Main.debuff[Actor.buffType[i]])Actor.DelBuff(i);
             summonRetryAt=0;
         }
+        if(State?.Vitals.Downed==true)CompanionDebuffs.ClearOnDeath(Actor);
     }
     public void Draw(Color light) {
         if(!Available||!EnsureActorSlot())return;
@@ -464,7 +467,7 @@ public sealed partial class CompanionNativeUse {
     }
     public sealed class Scope : IDisposable {
         readonly CompanionNativeUse context,previous;
-        readonly Player backup;
+        readonly Player backup,previousHuman;
         readonly int myPlayer,mouseX,mouseY;
         readonly bool blockMouse,playerInventory;
         readonly bool mouseLeft,mouseLeftRelease,mouseRight,mouseRightRelease;
@@ -492,6 +495,8 @@ public sealed partial class CompanionNativeUse {
                 if(healthScope)healthBefore=CompanionWeaponRecovery.Begin(use);
             }
             context=use;previous=Current;backup=Main.player[use.slot];myPlayer=Main.myPlayer;mouseX=Main.mouseX;mouseY=Main.mouseY;
+            previousHuman=HumanPlayer;
+            if(previous==null)HumanPlayer=Main.dedServ?null:Main.LocalPlayer;
             blockMouse=Main.blockMouse;playerInventory=Main.playerInventory;
             mouseLeft=Main.mouseLeft;mouseLeftRelease=Main.mouseLeftRelease;mouseRight=Main.mouseRight;mouseRightRelease=Main.mouseRightRelease;
             triggers=PlayerInput.Triggers.Current;triggerLeft=triggers.MouseLeft;triggerRight=triggers.MouseRight;
@@ -517,7 +522,7 @@ public sealed partial class CompanionNativeUse {
         public void Dispose() {
             try {if(healthScope)CompanionWeaponRecovery.End(context,healthBefore);}
             finally {try {hitCooldowns?.Dispose();}finally {
-            combatTargets?.Dispose();projectiles.Dispose();Main.player[actorSlot]=backup;Main.myPlayer=myPlayer;Main.mouseX=mouseX;Main.mouseY=mouseY;Current=previous;
+            combatTargets?.Dispose();projectiles.Dispose();Main.player[actorSlot]=backup;Main.myPlayer=myPlayer;Main.mouseX=mouseX;Main.mouseY=mouseY;Current=previous;HumanPlayer=previousHuman;
             Main.blockMouse=blockMouse;Main.playerInventory=playerInventory;
             Main.mouseLeft=mouseLeft;Main.mouseLeftRelease=mouseLeftRelease;Main.mouseRight=mouseRight;Main.mouseRightRelease=mouseRightRelease;
             triggers.MouseLeft=triggerLeft;triggers.MouseRight=triggerRight;
@@ -656,8 +661,14 @@ public sealed class CompanionCombatTerrain : GlobalTile {
     public override bool CanExplode(int i,int j,int type)=>CompanionNativeUse.Current==null;
 }
 public sealed class CompanionNativeHooks : ModSystem {
-    public override void Load(){IL_Player.ItemCheck_Shoot+=HeadlessShoot;IL_Player.ItemCheck_ApplyUseStyle_Inner+=HeadlessGeometry;IL_Player.ItemCheck_GetMeleeHitbox+=HeadlessGeometry;On_Item.GetDrawHitbox+=DrawHitbox;On_Player.GetItemDrawFrame+=ItemFrame;On_NetMessage.SendData+=SendNative;On_Player.ItemCheck_PlayInstruments+=Instruments;On_Projectile.Update+=UpdateShot;On_Projectile.CanHitWithMeleeWeapon+=MeleeSight;On_Projectile.Kill+=KillShot;On_Main.DrawProj_Inner+=DrawShot;On_Player.ItemCheck_CutTiles+=CutTiles;On_Main.GetPlayerArmPosition+=ArmPosition;IL_Main.SortBabyBirdProjectiles+=FinchDrawOwner;On_NPC.PlayerInteraction+=Interaction;On_Player.HealEffect+=Heal;On_Player.ManaEffect+=ManaFeedback;}
-    public override void Unload(){IL_Player.ItemCheck_Shoot-=HeadlessShoot;IL_Player.ItemCheck_ApplyUseStyle_Inner-=HeadlessGeometry;IL_Player.ItemCheck_GetMeleeHitbox-=HeadlessGeometry;On_Item.GetDrawHitbox-=DrawHitbox;On_Player.GetItemDrawFrame-=ItemFrame;On_NetMessage.SendData-=SendNative;On_Player.ItemCheck_PlayInstruments-=Instruments;On_Projectile.Update-=UpdateShot;On_Projectile.CanHitWithMeleeWeapon-=MeleeSight;On_Projectile.Kill-=KillShot;On_Main.DrawProj_Inner-=DrawShot;On_Player.ItemCheck_CutTiles-=CutTiles;On_Main.GetPlayerArmPosition-=ArmPosition;IL_Main.SortBabyBirdProjectiles-=FinchDrawOwner;On_NPC.PlayerInteraction-=Interaction;On_Player.HealEffect-=Heal;On_Player.ManaEffect-=ManaFeedback;}
+    public override void Load(){On_Recipe.FindRecipes+=FindRecipes;IL_Player.ItemCheck_Shoot+=HeadlessShoot;IL_Player.ItemCheck_ApplyUseStyle_Inner+=HeadlessGeometry;IL_Player.ItemCheck_GetMeleeHitbox+=HeadlessGeometry;On_Item.GetDrawHitbox+=DrawHitbox;On_Player.GetItemDrawFrame+=ItemFrame;On_NetMessage.SendData+=SendNative;On_Player.ItemCheck_PlayInstruments+=Instruments;On_Projectile.Update+=UpdateShot;On_Projectile.CanHitWithMeleeWeapon+=MeleeSight;On_Projectile.Kill+=KillShot;On_Main.DrawProj_Inner+=DrawShot;On_Player.ItemCheck_CutTiles+=CutTiles;On_Main.GetPlayerArmPosition+=ArmPosition;IL_Main.SortBabyBirdProjectiles+=FinchDrawOwner;On_NPC.PlayerInteraction+=Interaction;On_Player.HealEffect+=Heal;On_Player.ManaEffect+=ManaFeedback;}
+    public override void Unload(){On_Recipe.FindRecipes-=FindRecipes;IL_Player.ItemCheck_Shoot-=HeadlessShoot;IL_Player.ItemCheck_ApplyUseStyle_Inner-=HeadlessGeometry;IL_Player.ItemCheck_GetMeleeHitbox-=HeadlessGeometry;On_Item.GetDrawHitbox-=DrawHitbox;On_Player.GetItemDrawFrame-=ItemFrame;On_NetMessage.SendData-=SendNative;On_Player.ItemCheck_PlayInstruments-=Instruments;On_Projectile.Update-=UpdateShot;On_Projectile.CanHitWithMeleeWeapon-=MeleeSight;On_Projectile.Kill-=KillShot;On_Main.DrawProj_Inner-=DrawShot;On_Player.ItemCheck_CutTiles-=CutTiles;On_Main.GetPlayerArmPosition-=ArmPosition;IL_Main.SortBabyBirdProjectiles-=FinchDrawOwner;On_NPC.PlayerInteraction-=Interaction;On_Player.HealEffect-=Heal;On_Player.ManaEffect-=ManaFeedback;}
+    static void FindRecipes(On_Recipe.orig_FindRecipes orig,bool canDelayCheck){
+        // The crafting list belongs to the human UI. Native actor item and
+        // projectile hooks can request a refresh inside nested scopes; let
+        // Terraria perform its existing delayed refresh after they unwind.
+        orig(canDelayCheck||CompanionNativeUse.Current is {} use&&ReferenceEquals(Main.LocalPlayer,use.Actor));
+    }
     // These two native methods contain server early-outs for human rendering.
     // Their geometry is also used by melee hits and replicated held weapons.
     // Override only the branch value during the companion actor scope; never

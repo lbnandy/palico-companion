@@ -108,6 +108,7 @@ public sealed class CompanionConfig : ModConfig {
 
     [Header("Display")]
     [DefaultValue(true)] public bool CompanionHud = true;
+    [DefaultValue(100),Range(75,150),Increment(5),Slider] public int HudScalePercent=100;
     // Fraction of the available UI area; null retains automatic buff avoidance.
     [CustomModConfigItem(typeof(Systems.CompanionHudPositionElement))]
     public Microsoft.Xna.Framework.Vector2? HudPosition;

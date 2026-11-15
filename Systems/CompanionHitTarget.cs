@@ -2,6 +2,9 @@ using System;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ModLoader;
+using Terraria.ID;
+using System.Reflection;
+using MonoMod.RuntimeDetour;
 
 namespace PalicoCompanion.Systems;
 
@@ -35,8 +38,25 @@ public sealed partial class CompanionNativeUse {
 }
 
 public sealed class CompanionHitLifecycle : ModSystem {
-    public override void Load()=>On_Player.KillMe+=Kill;
-    public override void Unload()=>On_Player.KillMe-=Kill;
+    Hook hurtHook;
+    delegate double HurtOriginal(Player player,PlayerDeathReason source,int damage,int direction,out Player.HurtInfo info,bool pvp,bool quiet,int cooldown,bool dodgeable,float penetration,float scalingPenetration,float knockback);
+    public override void Load(){
+        On_Player.KillMe+=Kill;
+        var method=typeof(Player).GetMethod(nameof(Player.Hurt),new[]{typeof(PlayerDeathReason),typeof(int),typeof(int),typeof(Player.HurtInfo).MakeByRefType(),typeof(bool),typeof(bool),typeof(int),typeof(bool),typeof(float),typeof(float),typeof(float)});
+        hurtHook=new Hook(method,Hurt);
+    }
+    public override void Unload(){On_Player.KillMe-=Kill;hurtHook?.Dispose();hurtHook=null;}
+    static double Hurt(HurtOriginal orig,Player player,PlayerDeathReason source,int damage,int direction,out Player.HurtInfo info,bool pvp,bool quiet,int cooldown,bool dodgeable,float penetration,float scalingPenetration,float knockback){
+        var use=CompanionNativeUse.Current;
+        // Native explosive classification and existing ownership cover rockets,
+        // grenades and modded explosives without changing human self-damage or
+        // a weapon's deliberate life cost. Enemy/trap damage still runs normally.
+        if(use!=null&&use.Actor==player&&source.TryGetCausingEntity(out var cause)&&cause is Projectile shot&&!shot.hostile&&
+            CompanionOwnedShot.Of(shot)==use&&(shot.aiStyle==16||ProjectileID.Sets.Explosive[shot.type])){
+            info=default;return 0;
+        }
+        return orig(player,source,damage,direction,out info,pvp,quiet,cooldown,dodgeable,penetration,scalingPenetration,knockback);
+    }
     static void Kill(On_Player.orig_KillMe orig,Player player,PlayerDeathReason reason,double damage,int direction,bool pvp){
         // A native hazard may request death directly. The isolated hit actor is
         // not a human player: its caller commits the loss to companion Vitals.

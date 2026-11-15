@@ -17,8 +17,22 @@ public sealed class CompanionDebuffs:ModSystem {
         var actor=use.Actor;
         PlayerLoader.PreUpdateBuffs(actor);
         Array.Clear(actor.buffImmune);
+        // Feeding rewards the companion without a second hunger obligation.
+        // Native immunity prevents new hunger; clear existing entries before
+        // they apply penalties, including actors already starving on reload.
+        actor.ClearBuff(BuffID.NeutralHunger);
+        actor.ClearBuff(BuffID.Hunger);
+        actor.ClearBuff(BuffID.Starving);
+        actor.buffImmune[BuffID.NeutralHunger]=actor.buffImmune[BuffID.Hunger]=actor.buffImmune[BuffID.Starving]=true;
         actor.UpdateBuffs(actor.whoAmI);
         PlayerLoader.PostUpdateBuffs(actor);
+    }
+    internal static void ClearOnDeath(Player actor){
+        // Player.UpdateDead clears non-persistent buffs. A downed companion
+        // does not run Player.Update, but must not carry ordinary poison into
+        // each revival. Keep native/modded effects explicitly marked persistent.
+        for(int i=actor.buffType.Length-1;i>=0;i--)
+            if(actor.buffType[i]>0&&!Main.persistentBuff[actor.buffType[i]])actor.DelBuff(i);
     }
     internal static void RemoveExpiredOrImmune(Player actor){
         // Player.Update performs this cleanup after equipment has established

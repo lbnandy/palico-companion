@@ -49,9 +49,6 @@ public sealed partial class CompanionNativeUse {
             return restored;
         }finally{
             Actor.inventory=inventory;Actor.selectedItem=selected;
-            // QuickHeal/QuickMana refresh native recipes while the temporary
-            // actor is current. Restore the human's visible recipe cache too.
-            if(Main.netMode==NetmodeID.SinglePlayer&&Current!=this)Recipe.FindRecipes();
         }
     }
 }

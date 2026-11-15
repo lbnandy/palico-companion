@@ -37,13 +37,7 @@ public sealed class CompanionLighting {
         var cell=center.ToTileCoordinates();
         if(!WorldGen.InWorld(cell.X,cell.Y,12))return false;
         float brightness=Lighting.Brightness(cell.X,cell.Y);
-        if(holding){
-            float ambient=0;int samples=0;
-            foreach(int dx in new[]{-6,6})if(!WorldGen.SolidTile(cell.X+dx,cell.Y)){
-                ambient+=Lighting.Brightness(cell.X+dx,cell.Y);samples++;
-            }
-            if(samples>0)brightness=Math.Min(brightness,ambient/samples);
-        }
+        if(holding)brightness=CompanionAmbientLight.Brightness(cell);
         // A dim torch, glowing ore or an inactive light tile is not sufficient
         // illumination. Retain the held light against its own emitted brightness.
         bool daylight=Main.dayTime&&!Main.eclipse&&cell.Y<Main.worldSurface&&Main.tile[cell].WallType==WallID.None;

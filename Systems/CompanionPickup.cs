@@ -149,7 +149,6 @@ public sealed class CompanionPickup {
                 if(moved>0) {
                     if(CompanionNetwork.Server)NetMessage.SendData(MessageID.SyncItem,-1,-1,null,slot);
                     took=true;coin|=isCoin;valuable|=isValuable;
-                    state.Experience++;
                 }
                 if(!item.active||!HasRoom(item,state))continue;
             }

@@ -240,6 +240,7 @@ TrainingPanel: {
 
 TrainingProgress: {
 	Used: Already used
+	NeedsBackpack: Use the Expanded Palico Backpack first
 	NeedsTier: Requires the {0} tier first
 	ReadyToUse: In inventory · Ready to use
 	Craftable: Ready to craft
@@ -303,6 +304,8 @@ Catalog: {
 	PlunderKnife: Enemies damaged by you or your Palico can drop extra loot on defeat, regardless of the distance between you. Normal enemies have a {0} chance to drop 1 extra stackable loot item. Vanilla boss materials yield an average of {1} extra. Excludes Treasure Bags, unstackable items, coins, Hearts, Stars, biome keys, and normal enemies' Cyan-rarity or higher items. Does not trigger on friendly creatures or statue-spawned enemies. With multiple players, normal enemies use only the highest tier; boss bag materials are checked separately for each player.
 	MiningKit: Your Palico mines {0} faster. Ore detection, digging assistance and pickaxe reach each extend by {1} tiles. Does not increase pickaxe power or change your own mining stats.
 	GardenKit: Chopping trees or harvesting mature herbs with either you or your Palico yields extra resources, regardless of the distance between you. Average extra yield: {0} wood and {1} herbs, awarded at random. Does not increase seeds, gems or furniture drops, or apply to placed wood blocks. Your Palico gains {2} fishing power.
+	ReinforcedBackpack: Permanently expands this character's Palico backpack from 36 to 48 slots. Requires the Expanded Palico Backpack first; occupies no equipment slot. Can only be used once.
+	ExpandedBackpack: Permanently expands this character's Palico backpack from 24 to 36 slots without occupying an equipment slot. Can only be used once.
 	ExpandedBelt: Permanently adds one Palico support slot. Can only be used once.
 	ImprovedTools: Permanently upgrades Palico work and support gear to the Improved tier. Requires the Reinforced Toolkit first.
 	MasterTools: Permanently upgrades Palico support and work gear to the Masterwork tier. Requires the Improved Toolkit first.
@@ -320,6 +323,7 @@ Catalog: {
 	ActiveCondition: Active while equipped and your Palico is out; inactive while stowed, paused or recovering
 	CurrentTier: "Current tier: "
 	Legacy: Legacy modifications are now built in. Modification materials are refunded when this enters your inventory; the gear is kept.
+	BackpackExpanded: Palico backpack expanded to {0} slots
 	SupportSlotAdded: Support slots +1
 	ReinforcedTools: Permanently upgrades Palico work and support gear to the Reinforced tier.
 	CelestialTools: Permanently upgrades Palico work and support gear to the Celestial tier. Requires the Masterwork Toolkit first.
@@ -395,6 +399,7 @@ Guide: {
 	Storage:
 		'''
 		[Transfers and favorites]
+		Craft an Expanded Palico Backpack at the Palico Workbench to expand from 24 to 36 slots. In Hardmode, use a Reinforced Palico Backpack to reach 48 slots.
 		With the panel open, Shift-click non-favorited items in your inventory or a chest to transfer them to your Palico.
 		Backpack favorites stay put during bulk withdrawal but remain usable and consumable. Equipment favorites are shared between loadouts; see Equipment & growth.
 
@@ -601,6 +606,8 @@ ItemTooltips: {
 		Your Palico gains {2} fishing power
 		Does not increase seeds, gems or furniture drops
 		'''
+	ReinforcedBackpack: Permanently expands this character's Palico backpack from 36 to 48 slots. Requires the Expanded Palico Backpack first; occupies no equipment slot. Can only be used once.
+	ExpandedBackpack: Permanently expands this character's Palico backpack from 24 to 36 slots without occupying an equipment slot. Can only be used once.
 	ExpandedBelt:
 		'''
 		Permanently adds one Palico support slot

@@ -72,7 +72,6 @@ public sealed class CompanionFishing {
         waitingOverflow.RemoveAll(i=>!i.active||i.IsAir||!Main.item.Contains(i));
         return waitingOverflow.Any(i=>!CompanionPickup.HasRoom(i,s));
     }
-    public static int WaterCount(Point cell){Pond(cell.X,cell.Y,out bool lava,out bool honey,out int water,out _);return lava||honey?0:water;}
     public void Cancel(){sawOwnerFishing=false;if(Active){Bobber.ai[1]=0;if(CompanionNetwork.Server)NetMessage.SendData(MessageID.KillProjectile,-1,-1,null,Bobber.identity,Bobber.owner);Bobber.active=false;}Bobber=null;Approaching=false;idle=age=biteDelay=gesture=0;recast=30;}
     internal bool BindReplica(Projectile cat,Projectile bobber,int rod){Cat=cat;State=Main.player[CompanionCat.OwnerOf(cat)].GetModPlayer<CompanionPlayer>();Bobber=bobber;if(Rod?.type!=rod)Rod=new Item(rod);Actor.inventory[0]=Rod;Prepare();return CompanionActorSlots.Initialize(Actor);}
     public void Maintain(Player p,CompanionPlayer s,Projectile cat){

@@ -46,7 +46,7 @@ internal static partial class CompanionNetwork {
     // animation starts this transaction without borrowing or replacing mouseItem.
     internal static void UseTrainingItem(CompanionPlayer s,Item material){
         int kind=TrainingCatalog.Id(material);
-        if(!Client||Pending||CompanionSession.Closing||!s.NetReady||!s.Training.CanUpgrade(kind))return;
+        if(!Client||Pending||CompanionSession.Closing||!s.NetReady||!s.Training.CanUpgrade(kind,s))return;
         trainingApplication=true;trainingReturnToBag=true;trainingUpgradeKind=kind;
         var p=Packet(Slot);pending=++sequence;p.Write(pending);p.Write((byte)4);p.Write((ushort)0);p.Write(false);p.Write(false);
         ItemIO.Send(s.Training.Slots[0],p,true,true);escrow=material.Clone();escrow.stack=1;
@@ -128,7 +128,7 @@ internal static partial class CompanionNetwork {
         // and the existing item transaction, not a second graphics registry.
         bool ok=items!=null&&index<items.Length&&Same(items[index],expected)&&(group is 2 or 4||CompanionInventoryOperations.Accepts(state,cursor,group,index));
         InventoryOutcome outcome=default;
-        if(ok&&group==4)ok=state.Training.Apply(cursor,index);
+        if(ok&&group==4)ok=state.Training.Apply(cursor,state);
         else if(ok)outcome=CompanionInventoryOperations.Click(items,index,ref cursor,right,favorite,group);
         CommitInventoryReply(state,SlotResult,id,outcome,ok,cursor);
     }

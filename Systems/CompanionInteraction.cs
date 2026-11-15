@@ -29,7 +29,7 @@ public sealed class CompanionInteraction:ModSystem {
         Hovered=false;
         if(Main.gameMenu||Main.netMode==NetmodeID.Server||Main.inFancyUI||Main.mapFullscreen||Terraria.GameInput.PlayerInput.WritingText)return;
         var p=Main.LocalPlayer;var s=p.GetModPlayer<CompanionPlayer>();
-        if(CompanionKiteInput.Capturing||s.PanelOpen||p.mouseInterface||CompanionStatusBar.BlocksInput||!Main.mouseItem.IsAir||!CanInteract(p,s.Cat,WorldCursor(new Vector2(Terraria.GameInput.PlayerInput.MouseInfo.X,Terraria.GameInput.PlayerInput.MouseInfo.Y),Main.screenPosition,Main.GameViewMatrix.TransformationMatrix)))return;
+        if(p.chest!=-1||CompanionKiteInput.Capturing||s.PanelOpen||p.mouseInterface||CompanionStatusBar.BlocksInput||!Main.mouseItem.IsAir||!CanInteract(p,s.Cat,WorldCursor(new Vector2(Terraria.GameInput.PlayerInput.MouseInfo.X,Terraria.GameInput.PlayerInput.MouseInfo.Y),Main.screenPosition,Main.GameViewMatrix.TransformationMatrix)))return;
         Hovered=true;
     }
     internal void HandleWorldInteraction(){
@@ -131,9 +131,6 @@ public sealed class CompanionMapLayer:ModMapLayer {
             head.SetData(canvas);headColor=rgb;
             return head;
         }
-    }
-    internal void PreparePreview(GraphicsDevice device,SpriteBatch batch){
-        _=Head;outlined.UseColor(Main.GetPlayerHeadBordersColor(Main.LocalPlayer));outlined.Request();outlined.PrepareRenderTarget(device,batch);
     }
     public override void Unload(){var texture=head;var content=outlined;head=null;outlined=null;Main.QueueMainThreadAction(()=>{if(content!=null){Main.ContentThatNeedsRenderTargets.Remove(content);content.GetTarget()?.Dispose();content.Reset();}texture?.Dispose();});}
     public override void Draw(ref MapOverlayDrawContext context,ref string text){

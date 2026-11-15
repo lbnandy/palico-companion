@@ -17,12 +17,13 @@ internal static class TrainingProgress {
     }
     internal static bool Materials(Player p,Recipe recipe)=>recipe.requiredItem.Where(i=>!i.IsAir).All(i=>Owned(p,recipe,i)>=i.stack);
     internal static bool Available(Recipe recipe)=>Enumerable.Range(0,Main.numAvailableRecipes).Any(i=>ReferenceEquals(Main.recipe[Main.availableRecipe[i]],recipe));
-    internal static bool Complete(CompanionPlayer s,int id)=>id==13&&s.Training.Expanded||TrainingTiers.UpgradeTier(id)>0&&s.Training.Tier>=TrainingTiers.UpgradeTier(id);
+    internal static bool Complete(CompanionPlayer s,int id)=>TrainingCatalog.BackpackSize(id)>0&&s.Bag.Length>=TrainingCatalog.BackpackSize(id)||id==13&&s.Training.Expanded||TrainingTiers.UpgradeTier(id)>0&&s.Training.Tier>=TrainingTiers.UpgradeTier(id);
     internal static bool Has(CompanionPlayer s,int id)=>s.Player.inventory.Concat(s.Bag).Concat(s.Training.Slots)
         .Concat(s.Loadouts.Sets.SelectMany(set=>set)).Concat(s.DeliveryRemainder).Any(item=>TrainingCatalog.Id(item)==id);
     internal static string Status(CompanionPlayer s,int id,Recipe selected=null){
         if(Complete(s,id))return CompanionText.Get("TrainingProgress.Used");
         if(TrainingTiers.UpgradeTier(id)>s.Training.Tier+1)return CompanionText.Get("TrainingProgress.NeedsTier",TrainingCatalog.TierName(TrainingTiers.UpgradeTier(id)-1));
+        if(TrainingCatalog.BackpackSize(id)>s.Bag.Length+12)return CompanionText.Get("TrainingProgress.NeedsBackpack");
         if(TrainingTiers.Upgrade(id)&&Has(s,id))return CompanionText.Get("TrainingProgress.ReadyToUse");
         var recipes=selected==null?Recipes(id):new[]{selected};
         if(recipes.Any(Available))return CompanionText.Get("TrainingProgress.Craftable");
@@ -34,7 +35,7 @@ internal static class TrainingProgress {
         if(!s.Player.GetModPlayer<TrainingGuide>().KnowsBench&&!Has(s,19)&&!s.Player.adjTile[ModContent.TileType<CatWorkbenchTile>()])yield return 19;
         var candidates=Enumerable.Range(0,TrainingCatalog.Entries.Length).Where(id=>id!=19).Where(TrainingCatalog.Current).Where(id=>!Complete(s,id)&&(!Has(s,id)||TrainingTiers.Upgrade(id))&&TrainingTiers.UpgradeTier(id)<=s.Training.Tier+1);
         double Prepared(int id)=>Recipes(id).Select(r=>r.requiredItem.Where(i=>!i.IsAir).Average(i=>Math.Min(1,Owned(s.Player,r,i)/(double)i.stack))).DefaultIfEmpty(0).Max();
-        int[] order=[1,9,10,0,7,20,3,2,6,4,5,8,13,21,14,15,22];
+        int[] order=[1,9,10,0,7,20,3,2,6,4,5,8,TrainingCatalog.Backpack,TrainingCatalog.ReinforcedBackpack,13,21,14,15,22];
         foreach(int id in candidates.OrderByDescending(id=>TrainingTiers.Upgrade(id)&&Has(s,id))
             .ThenByDescending(id=>Recipes(id).Any(Available)).ThenByDescending(id=>Recipes(id).Any(r=>Materials(s.Player,r)))
             .ThenByDescending(id=>TrainingTiers.Upgrade(id)&&Recipes(id).Any(r=>Available(r)||Materials(s.Player,r)))

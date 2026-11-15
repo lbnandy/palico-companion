@@ -12,11 +12,11 @@ internal static class CompanionFeeding {
     internal static string Text(string key,params object[] args)=>Language.GetTextValue("Mods.PalicoCompanion.UI.Feed"+key,args);
     internal static string Message(string key)=>CompanionText.MessageFull("Mods.PalicoCompanion.UI.Feed"+key);
     internal static string Status(CompanionPlayer s)=>s.Vitals.FoodTime>0?Text("Effect",CompanionFoodDisplay.Time(s)):"";
-    internal static string Unavailable(CompanionPlayer s){
+    internal static string Unavailable(CompanionPlayer s,bool allowPetting=false){
         if(!s.Enabled||s.Stowed||s.Player.dead||s.Vitals.Downed||s.Cat?.ModProjectile is not CompanionCat cat)return "Unavailable";
         if(s.Vitals.FeedCooldown>0||cat.ActionVisual.Eating)return "Eating";
         if(Vector2.DistanceSquared(s.Player.Center,cat.Projectile.Center)>100*100||!Reachability.Clear(s.Player.Center,cat.Projectile.Center))return "Closer";
-        if(s.Player.itemAnimation>0||s.Player.itemTime>0||s.Paused||s.PetCooldown>510||s.Directive.Active||s.Construction.Active||s.Digging.Active||s.Mining.Active||s.Trees.Active||s.Garden.Active||s.Order.Active||s.Storage.Active||
+        if(s.Player.itemAnimation>0||s.Player.itemTime>0||s.Paused||s.Petting.Active&&!allowPetting||s.Directive.Active||s.Construction.Active||s.Digging.Active||s.Mining.Active||s.Trees.Active||s.Garden.Active||s.Order.Active||s.Storage.Active||
             cat.Kite.Active||cat.Barrel.Active||cat.Weapons.Busy||cat.Fishing.Active||cat.Supplies.Active||cat.Catching.Active||cat.Navigation.Riding||!cat.Navigation.Grounded(cat.Projectile)||s.Vitals.Immunity>0||CompanionThreat.WorkDanger(s.Player,cat.Projectile.Center))return "Busy";
         return null;
     }
@@ -50,7 +50,7 @@ internal static class CompanionFeeding {
     }
     internal static bool Hold(CompanionPlayer s,CompanionCat cat){
         if(!cat.ActionVisual.Eating)return false;
-        if(s.Paused||s.PetCooldown>510||s.Vitals.Downed||s.Vitals.Immunity>0||s.Directive.Active||s.Construction.Active||s.Digging.Active||s.Mining.Active||s.Trees.Active||s.Garden.Active||s.Order.Active||s.Storage.Active||
+        if(s.Paused||s.Petting.Active||s.Vitals.Downed||s.Vitals.Immunity>0||s.Directive.Active||s.Construction.Active||s.Digging.Active||s.Mining.Active||s.Trees.Active||s.Garden.Active||s.Order.Active||s.Storage.Active||
             Vector2.DistanceSquared(s.Player.Center,cat.Projectile.Center)>160*160||CompanionThreat.WorkDanger(s.Player,cat.Projectile.Center)){
             cat.ActionVisual.Cancel(cat);return false;
         }

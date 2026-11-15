@@ -14,37 +14,41 @@ using Terraria.ObjectData;
 namespace PalicoCompanion.Systems;
 
 internal record TrainingDefinition(string Key,int Icon,params int[] Materials) {
+    internal int Rarity { get; init; } = ItemRarityID.Blue;
     internal string Name=>Language.GetTextValue("Mods.PalicoCompanion.TrainingNames."+Key);
 }
 internal static class TrainingCatalog {
-    internal const int Barrel=20, TimerCount=21;
+    internal const int Barrel=20, TimerCount=21, Backpack=23, ReinforcedBackpack=24;
+    internal static int BackpackSize(int kind)=>kind switch {Backpack=>36,ReinforcedBackpack=>48,_=>0};
     internal static bool Support(int kind)=>kind is >=0 and <8 or Barrel;
     internal static bool WorkGear(int kind)=>kind is >=8 and <=10;
     internal static bool Equipment(int kind)=>Support(kind)||WorkGear(kind);
     internal static readonly TrainingDefinition[] Entries = [
-        new("HoneyCage",ItemID.HoneyComb,ItemID.BottledHoney,3,ItemID.JungleSpores,6,ItemID.Silk,4),
+        new("HoneyCage",ItemID.HoneyComb,ItemID.BottledHoney,3,ItemID.JungleSpores,6,ItemID.Silk,4) { Rarity=ItemRarityID.Green },
         new("GuardShield",ItemID.PaladinsShield,-1,8,ItemID.Wood,20,ItemID.Chain,2),
         new("CleansingPot",ItemID.BottledWater,ItemID.ClayBlock,15,ItemID.Daybloom,3,ItemID.BottledWater,3,ItemID.PurificationPowder,10),
         new("CheerBell",ItemID.Bell,-2,4,ItemID.FallenStar,3,ItemID.Silk,4),
-        new("BattleDrum",ItemID.DrumSet,ItemID.DemoniteBar,4,ItemID.ShadowScale,3,ItemID.Wood,20),
-        new("PiercingBoomerang",ItemID.BoneGlove,ItemID.Bone,20,-2,6),
-        new("UpdraftBag",ItemID.CloudinaBottle,ItemID.Feather,5,ItemID.Cloud,20,ItemID.Silk,5),
+        new("BattleDrum",ItemID.DrumSet,ItemID.DemoniteBar,4,ItemID.ShadowScale,3,ItemID.Wood,20) { Rarity=ItemRarityID.Green },
+        new("PiercingBoomerang",ItemID.BoneGlove,ItemID.Bone,20,-2,6) { Rarity=ItemRarityID.Orange },
+        new("UpdraftBag",ItemID.CloudinaBottle,ItemID.Feather,5,ItemID.Cloud,20,ItemID.Silk,5) { Rarity=ItemRarityID.Green },
         new("BombPot",ItemID.Grenade,ItemID.Grenade,10,-1,6,ItemID.Gel,20),
-        new("PlunderKnife",ItemID.ThrowingKnife,ItemID.Bone,20,-3,4,ItemID.Silk,4),
+        new("PlunderKnife",ItemID.ThrowingKnife,ItemID.Bone,20,-3,4,ItemID.Silk,4) { Rarity=ItemRarityID.Orange },
         new("MiningKit",ItemID.MiningHelmet,-1,8,ItemID.Rope,50,ItemID.Torch,20),
         new("GardenKit",ItemID.StaffofRegrowth,ItemID.Wood,20,ItemID.Silk,6,ItemID.Daybloom,3),
         null, // Retired catalog position; not registered as content.
         null, // Retired catalog position; not registered as content.
-        new("ExpandedBelt",ItemID.Toolbelt,ItemID.Silk,8,-1,5,ItemID.ShadowScale,6),
-        new("ImprovedTools",ItemID.Toolbox,ItemID.HallowedBar,6,ItemID.SoulofLight,3,ItemID.SoulofNight,3),
-        new("MasterTools",ItemID.TinkerersWorkshop,ItemID.ChlorophyteBar,4,ItemID.Ectoplasm,3,ItemID.Cog,10),
+        new("ExpandedBelt",ItemID.Toolbelt,ItemID.Silk,8,-1,5,ItemID.ShadowScale,6) { Rarity=ItemRarityID.Green },
+        new("ImprovedTools",ItemID.Toolbox,ItemID.HallowedBar,6,ItemID.SoulofLight,3,ItemID.SoulofNight,3) { Rarity=ItemRarityID.Pink },
+        new("MasterTools",ItemID.TinkerersWorkshop,ItemID.ChlorophyteBar,4,ItemID.Ectoplasm,3,ItemID.Cog,10) { Rarity=ItemRarityID.Yellow },
         null, // Retired catalog position; not registered as content.
         null, // Retired catalog position; not registered as content.
         null, // Retired catalog position; not registered as content.
-        new("CatWorkbench",ItemID.WorkBench,ItemID.Wood,20,-1,3),
-        new("GigaBarrelBomb",ItemID.Barrel,ItemID.Dynamite,3,ItemID.Wood,30,-1,8),
-        new("ReinforcedTools",ItemID.CobaltBar,-4,6,ItemID.SoulofLight,2,ItemID.SoulofNight,2),
-        new("CelestialTools",ItemID.LunarBar,ItemID.LunarBar,4,ItemID.FragmentSolar,2,ItemID.FragmentVortex,2,ItemID.FragmentNebula,2,ItemID.FragmentStardust,2)
+        new("CatWorkbench",ItemID.WorkBench,ItemID.Wood,20,-1,3) { Rarity=ItemRarityID.White },
+        new("GigaBarrelBomb",ItemID.Barrel,ItemID.Dynamite,3,ItemID.Wood,30,-1,8) { Rarity=ItemRarityID.Green },
+        new("ReinforcedTools",ItemID.CobaltBar,-4,6,ItemID.SoulofLight,2,ItemID.SoulofNight,2) { Rarity=ItemRarityID.LightRed },
+        new("CelestialTools",ItemID.LunarBar,ItemID.LunarBar,4,ItemID.FragmentSolar,2,ItemID.FragmentVortex,2,ItemID.FragmentNebula,2,ItemID.FragmentStardust,2) { Rarity=ItemRarityID.Red },
+        new("ExpandedBackpack",ItemID.Toolbelt,ItemID.Silk,8,-1,5,ItemID.Wood,20),
+        new("ReinforcedBackpack",ItemID.Toolbox,ItemID.Silk,12,-4,6,ItemID.SoulofLight,2,ItemID.SoulofNight,2) { Rarity=ItemRarityID.LightRed }
     ];
     internal static bool Current(int id)=>id>=0&&id<Entries.Length&&Entries[id]!=null;
     internal static int Type(int id)=>ModContent.GetInstance<PalicoCompanion>().Find<ModItem>(Entries[id].Key).Type;
@@ -52,7 +56,6 @@ internal static class TrainingCatalog {
     internal static int Id(Item item)=>item?.ModItem is TrainingItem t?t.Kind:-1;
     internal static string Group(int n)=>n switch {-1=>"IronBar",-2=>"PalicoCompanion:Silver",-3=>"PalicoCompanion:Gold",-4=>"PalicoCompanion:Cobalt",_=>""};
     internal static bool Matches(int key,Item i)=>key switch {-1=>i.type is ItemID.IronBar or ItemID.LeadBar,-2=>i.type is ItemID.SilverBar or ItemID.TungstenBar,-3=>i.type is ItemID.GoldBar or ItemID.PlatinumBar,-4=>i.type is ItemID.CobaltBar or ItemID.PalladiumBar,_=>i.type==key};
-    internal static string MaterialName(int key)=>key switch {-1=>CompanionText.Get("Catalog.IronBars"),-2=>CompanionText.Get("Catalog.SilverBars"),-3=>CompanionText.Get("Catalog.GoldBars"),-4=>CompanionText.Get("Catalog.CobaltBars"),_=>Lang.GetItemNameValue(key)};
 }
 
 public sealed class TrainingContent:ModSystem {
@@ -68,7 +71,7 @@ public sealed class TrainingItem:ModItem {
     public bool Installed,Alternate;
     public TrainingItem(int kind){Kind=kind;}
     public override string Name=>TrainingCatalog.Entries[Kind].Key;
-    public override string Texture=>Kind < 11 || Kind is >=13 and <=15 or 19 or 21 or 22 ? "PalicoCompanion/Assets/Training/"+Name : "Terraria/Images/Item_"+TrainingCatalog.Entries[Kind].Icon;
+    public override string Texture=>Kind < 11 || Kind is >=13 and <=15 or 19 or 21 or 22 || TrainingCatalog.BackpackSize(Kind)>0 ? "PalicoCompanion/Assets/Training/"+Name : "Terraria/Images/Item_"+TrainingCatalog.Entries[Kind].Icon;
     public override LocalizedText DisplayName=>Language.GetOrRegister("Mods.PalicoCompanion.TrainingNames."+Name);
     public override bool PreDrawInInventory(SpriteBatch spriteBatch,Vector2 position,Rectangle frame,Color drawColor,Color itemColor,Vector2 origin,float scale){
         if(Kind!=TrainingCatalog.Barrel||CompanionBarrelVisual.Icon is not {} icon)return true;
@@ -78,7 +81,11 @@ public sealed class TrainingItem:ModItem {
         if(Kind!=TrainingCatalog.Barrel||CompanionBarrelVisual.Icon is not {} icon)return true;
         spriteBatch.Draw(icon,Item.Bottom-Main.screenPosition,null,Item.GetAlpha(lightColor),rotation,new Vector2(icon.Width/2f,icon.Height),scale,SpriteEffects.None,0);return false;
     }
-    public override void SetDefaults(){Item.width=24;Item.height=24;Item.maxStack=TrainingCatalog.Equipment(Kind)?1:9999;Item.rare=ItemRarityID.Blue;Item.value=Item.buyPrice(silver:10);if(TrainingTiers.Upgrade(Kind)){Item.useStyle=ItemUseStyleID.HoldUp;Item.useTime=Item.useAnimation=30;Item.UseSound=SoundID.Item4;Item.consumable=true;}if(Kind==19){Item.DefaultToPlaceableTile(ModContent.TileType<CatWorkbenchTile>());Item.maxStack=9999;}}
+    public override void SetStaticDefaults(){
+        // Keep the workbench lava-safe as it was before its name color became white.
+        if(Kind==19)ItemID.Sets.IsLavaImmuneRegardlessOfRarity[Type]=true;
+    }
+    public override void SetDefaults(){Item.width=24;Item.height=24;Item.maxStack=TrainingCatalog.Equipment(Kind)?1:9999;Item.rare=TrainingCatalog.Entries[Kind].Rarity;Item.value=Item.buyPrice(silver:10);if(TrainingTiers.Upgrade(Kind)){Item.useStyle=ItemUseStyleID.HoldUp;Item.useTime=Item.useAnimation=30;Item.UseSound=SoundID.Item4;Item.consumable=true;}if(Kind==19){Item.DefaultToPlaceableTile(ModContent.TileType<CatWorkbenchTile>());Item.maxStack=9999;}}
     public override void ModifyTooltips(List<TooltipLine> lines){
         int tier=Main.gameMenu?0:Main.LocalPlayer.GetModPlayer<CompanionPlayer>().Training.Tier;
         if(TrainingCatalog.Equipment(Kind))lines.Add(new(Mod,"Kind",CompanionText.Get(TrainingCatalog.Support(Kind)?"Catalog.SupportGear":"Catalog.WorkGear")+(Main.gameMenu?"":" · "+TrainingCatalog.TierName(tier))));
@@ -92,18 +99,18 @@ public sealed class TrainingItem:ModItem {
         }
     }
     static int IdAt(CompanionPlayer s,int slot)=>TrainingCatalog.Id(s.Training.Slots[slot]);
-    public override bool CanUseItem(Player player)=>!TrainingTiers.Upgrade(Kind) || player.GetModPlayer<CompanionPlayer>().Training.CanUpgrade(Kind)&&!CompanionNetwork.Pending&&(!CompanionNetwork.Client||player.GetModPlayer<CompanionPlayer>().NetReady);
+    public override bool CanUseItem(Player player)=>!TrainingTiers.Upgrade(Kind) || player.GetModPlayer<CompanionPlayer>().Training.CanUpgrade(Kind,player.GetModPlayer<CompanionPlayer>())&&!CompanionNetwork.Pending&&(!CompanionNetwork.Client||player.GetModPlayer<CompanionPlayer>().NetReady);
     public override bool ConsumeItem(Player player)=>!TrainingTiers.Upgrade(Kind);
     public override bool? UseItem(Player player){
         if(!TrainingTiers.Upgrade(Kind))return null;
         if(player.whoAmI!=Main.myPlayer)return false;
         var s=player.GetModPlayer<CompanionPlayer>();if(!CanUseItem(player))return false;
         if(CompanionNetwork.Client)CompanionNetwork.UseTrainingItem(s,Item);
-        else if(s.Training.Apply(Item,0))UpgradeFeedback(s,Kind);
+        else if(s.Training.Apply(Item,s))UpgradeFeedback(s,Kind);
         return true;
     }
     internal static void UpgradeFeedback(CompanionPlayer s,int kind){
-        string text=kind==13?CompanionText.Get("Catalog.SupportSlotAdded"):CompanionText.Get("Catalog.ToolsUpgraded",TrainingCatalog.TierName(s.Training.Tier));
+        string text=TrainingCatalog.BackpackSize(kind)>0?CompanionText.Get("Catalog.BackpackExpanded",s.Bag.Length):kind==13?CompanionText.Get("Catalog.SupportSlotAdded"):CompanionText.Get("Catalog.ToolsUpgraded",TrainingCatalog.TierName(s.Training.Tier));
         CombatText.NewText(s.Player.Hitbox,Color.LightGreen,text,true);
         s.Report(text);
     }
