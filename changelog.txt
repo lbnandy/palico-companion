@@ -1,15 +1,7 @@
-1.2.12 Update
+1.2.13 Update
 
-- Added two companion backpack upgrades, from 24 to 36 and then 48 slots, with a single-page layout, dedicated icons and guide entries.
-- Added attack-speed and status-bar scale settings. Damage can now be reduced to 1%, and targeting range to 25%.
-- Improved player and companion petting animations. Removed the petting action cooldown; repeated clicks and holding the button are supported.
-- Prioritized chest interactions while a chest is open, preventing accidental companion inventory opening from interrupting item management.
-- Fixed companion automatic mana recovery sometimes making player crafting recipes temporarily unavailable.
-- Removed hunger penalties from the companion in Don't Starve crossover worlds while preserving feeding benefits.
-- Fixed ordinary debuffs surviving companion defeat and causing repeated poison-related defeats after revival.
-- Prevented companion self-damage from its own rockets, grenades and similar explosives, fixing incorrect death messages and gravestone spam. Deliberate weapon life costs remain unchanged.
-- Fixed repeated torch drawing and stowing under certain lighting conditions.
-- Fixed a crash involving Catalyst's Intergelactic summoner armor effects.
-- Added support for Calamity's Affliction and Trinket of Chi team effects, including sharing their native benefits with the owner in singleplayer.
-- Fixed Calamity Overhaul's Erlanglaive failing to release after charging and Kikasa's canopy ghosts displaying the wrong companion minion capacity.
-- Adjusted companion item rarity to match progression and added icons for the new settings.
+- Players and companions can now share damage through the Paladin's Shield, its upgrades and modded accessories using the same effect, preserving their native effects and activation conditions.
+- Fixed some AlchemistNPC Lite combination-potion benefits not being shared with companions, including sources in the player's inventory and Quality of Terraria potion bag.
+- Fixed companion kills failing to count toward enemy banners. Melee, ranged and minion kills now contribute normally.
+- Fixed abnormal repeated hits during a melee attack with weapons such as the Keybrand, preserving existing damage, attack speed and projectile effects.
+- Fixed errors when Magic Storage refreshes crafting recipes while a companion is active, which could interrupt crafting.

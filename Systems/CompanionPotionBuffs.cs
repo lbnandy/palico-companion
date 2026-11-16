@@ -17,7 +17,9 @@ public sealed class CompanionPotionBuffs : ModSystem {
         potions.UnionWith(new[]{BuffID.Sharpened,BuffID.AmmoBox,BuffID.Clairvoyance,BuffID.Bewitched,BuffID.WarTable});
         foreach(var item in ContentSamples.ItemsByType.Values){
             int type=item.buffType;
-            if(!item.consumable||item.buffTime<=0||type<=0||item.useStyle!=ItemUseStyleID.DrinkLiquid||
+            // Consumption and buff metadata define the benefit. Modded potion
+            // bundles can use an eating/holding animation instead of drinking.
+            if(!item.consumable||item.buffTime<=0||type<=0||
                 ItemID.Sets.IsFood[item.type]||Main.debuff[type]||Main.vanityPet[type]||Main.lightPet[type]||
                 BuffID.Sets.IsFedState[type]||BuffID.Sets.TimeLeftDoesNotDecrease[type]||BuffID.Sets.BasicMountData[type]!=null)continue;
             potions.Add(type);

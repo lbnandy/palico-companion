@@ -90,6 +90,7 @@ internal static partial class CompanionNetwork {
             s.Stats=stats;s.Training=training;s.Loadouts=loadouts;s.Bag=bag;s.Gear=gear;s.Dyes=dyes;s.Chests=permissions;s.NetReady=true;
         }
     internal static void Receive(byte kind,BinaryReader r,int sender) {
+        if(kind==CompanionPaladinShield.TransferPacket){CompanionPaladinShield.Receive(r,sender);return;}
         if(kind==NativeWeaponEffect){if(Client)ReadWeaponEffect(r);return;}
         if(kind==ChestDiscoveryState){if(Client)DiscoveryChests.Apply(new Point(r.ReadInt16(),r.ReadInt16()),r.ReadBoolean());return;}
         if(kind==KiteResult&&Client){CompanionKiteInput.Result(r.ReadString());return;}

@@ -55,6 +55,7 @@ public sealed class CompanionHitLifecycle : ModSystem {
             CompanionOwnedShot.Of(shot)==use&&(shot.aiStyle==16||ProjectileID.Sets.Explosive[shot.type])){
             info=default;return 0;
         }
+        using var protection=CompanionPaladinShield.Protect(player);
         return orig(player,source,damage,direction,out info,pvp,quiet,cooldown,dodgeable,penetration,scalingPenetration,knockback);
     }
     static void Kill(On_Player.orig_KillMe orig,Player player,PlayerDeathReason reason,double damage,int direction,bool pvp){

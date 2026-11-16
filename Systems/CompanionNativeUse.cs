@@ -334,7 +334,9 @@ public sealed partial class CompanionNativeUse {
         if(!wants)Actor.channel=false;
         int stackBefore=Actor.HeldItem.stack;
         try {using(new Scope(this)){
-            Actor.UpdateMeleeHitCooldowns();if(Actor.attackCD>0)Actor.attackCD--;Actor.ItemCheck();
+            // ItemCheck owns per-target melee cooldowns. Only attackCD normally
+            // advances in Player.Update, which this isolated actor does not run.
+            if(Actor.attackCD>0)Actor.attackCD--;Actor.ItemCheck();
             // PlayerFrame normally dispatches this after ItemCheck. Some items
             // use it for aim or magazine accounting as well as body animation.
             // Run once on authority; drawing/replicas must never spend ammo.
@@ -661,8 +663,8 @@ public sealed class CompanionCombatTerrain : GlobalTile {
     public override bool CanExplode(int i,int j,int type)=>CompanionNativeUse.Current==null;
 }
 public sealed class CompanionNativeHooks : ModSystem {
-    public override void Load(){On_Recipe.FindRecipes+=FindRecipes;IL_Player.ItemCheck_Shoot+=HeadlessShoot;IL_Player.ItemCheck_ApplyUseStyle_Inner+=HeadlessGeometry;IL_Player.ItemCheck_GetMeleeHitbox+=HeadlessGeometry;On_Item.GetDrawHitbox+=DrawHitbox;On_Player.GetItemDrawFrame+=ItemFrame;On_NetMessage.SendData+=SendNative;On_Player.ItemCheck_PlayInstruments+=Instruments;On_Projectile.Update+=UpdateShot;On_Projectile.CanHitWithMeleeWeapon+=MeleeSight;On_Projectile.Kill+=KillShot;On_Main.DrawProj_Inner+=DrawShot;On_Player.ItemCheck_CutTiles+=CutTiles;On_Main.GetPlayerArmPosition+=ArmPosition;IL_Main.SortBabyBirdProjectiles+=FinchDrawOwner;On_NPC.PlayerInteraction+=Interaction;On_Player.HealEffect+=Heal;On_Player.ManaEffect+=ManaFeedback;}
-    public override void Unload(){On_Recipe.FindRecipes-=FindRecipes;IL_Player.ItemCheck_Shoot-=HeadlessShoot;IL_Player.ItemCheck_ApplyUseStyle_Inner-=HeadlessGeometry;IL_Player.ItemCheck_GetMeleeHitbox-=HeadlessGeometry;On_Item.GetDrawHitbox-=DrawHitbox;On_Player.GetItemDrawFrame-=ItemFrame;On_NetMessage.SendData-=SendNative;On_Player.ItemCheck_PlayInstruments-=Instruments;On_Projectile.Update-=UpdateShot;On_Projectile.CanHitWithMeleeWeapon-=MeleeSight;On_Projectile.Kill-=KillShot;On_Main.DrawProj_Inner-=DrawShot;On_Player.ItemCheck_CutTiles-=CutTiles;On_Main.GetPlayerArmPosition-=ArmPosition;IL_Main.SortBabyBirdProjectiles-=FinchDrawOwner;On_NPC.PlayerInteraction-=Interaction;On_Player.HealEffect-=Heal;On_Player.ManaEffect-=ManaFeedback;}
+    public override void Load(){MonoModHooks.Add(typeof(NPC).GetMethod(nameof(NPC.StrikeNPC),new[]{typeof(NPC.HitInfo),typeof(bool),typeof(bool)}),(StrikeHook)Strike);On_Recipe.FindRecipes+=FindRecipes;IL_Player.ItemCheck_Shoot+=HeadlessShoot;IL_Player.ItemCheck_ApplyUseStyle_Inner+=HeadlessGeometry;IL_Player.ItemCheck_GetMeleeHitbox+=HeadlessGeometry;On_Item.GetDrawHitbox+=DrawHitbox;On_Player.GetItemDrawFrame+=ItemFrame;On_NetMessage.SendData+=SendNative;On_Player.ItemCheck_PlayInstruments+=Instruments;On_Projectile.Update+=UpdateShot;On_Projectile.CanHitWithMeleeWeapon+=MeleeSight;On_Projectile.Kill+=KillShot;On_Main.DrawProj_Inner+=DrawShot;On_Player.ItemCheck_CutTiles+=CutTiles;On_Main.GetPlayerArmPosition+=ArmPosition;IL_Main.SortBabyBirdProjectiles+=FinchDrawOwner;On_NPC.PlayerInteraction+=Interaction;On_NPC.AnyInteractions+=AnyInteractions;On_Player.HealEffect+=Heal;On_Player.ManaEffect+=ManaFeedback;}
+    public override void Unload(){On_Recipe.FindRecipes-=FindRecipes;IL_Player.ItemCheck_Shoot-=HeadlessShoot;IL_Player.ItemCheck_ApplyUseStyle_Inner-=HeadlessGeometry;IL_Player.ItemCheck_GetMeleeHitbox-=HeadlessGeometry;On_Item.GetDrawHitbox-=DrawHitbox;On_Player.GetItemDrawFrame-=ItemFrame;On_NetMessage.SendData-=SendNative;On_Player.ItemCheck_PlayInstruments-=Instruments;On_Projectile.Update-=UpdateShot;On_Projectile.CanHitWithMeleeWeapon-=MeleeSight;On_Projectile.Kill-=KillShot;On_Main.DrawProj_Inner-=DrawShot;On_Player.ItemCheck_CutTiles-=CutTiles;On_Main.GetPlayerArmPosition-=ArmPosition;IL_Main.SortBabyBirdProjectiles-=FinchDrawOwner;On_NPC.PlayerInteraction-=Interaction;On_NPC.AnyInteractions-=AnyInteractions;On_Player.HealEffect-=Heal;On_Player.ManaEffect-=ManaFeedback;}
     static void FindRecipes(On_Recipe.orig_FindRecipes orig,bool canDelayCheck){
         // The crafting list belongs to the human UI. Native actor item and
         // projectile hooks can request a refresh inside nested scopes; let
@@ -715,6 +717,26 @@ public sealed class CompanionNativeHooks : ModSystem {
         // BEFORE lethal damage/loot processing, never the temporary actor slot.
         var use=CompanionNativeUse.Current;
         orig(npc,use!=null&&playerIndex==use.Actor.whoAmI?use.State.Player.whoAmI:playerIndex);
+    }
+    delegate int StrikeOriginal(NPC npc,NPC.HitInfo hit,bool fromNet,bool noPlayerInteraction);
+    delegate int StrikeHook(StrikeOriginal orig,NPC npc,NPC.HitInfo hit,bool fromNet,bool noPlayerInteraction);
+    static int Strike(StrikeOriginal orig,NPC npc,NPC.HitInfo hit,bool fromNet,bool noPlayerInteraction){
+        // Human multiplayer hits get participation from their incoming packet.
+        // Companion hits originate on the server, so credit them before lethal
+        // damage enters vanilla loot, banner and bestiary processing.
+        if(CompanionNetwork.Server&&!fromNet&&!noPlayerInteraction&&npc.active&&npc.life>0&&
+            (hit.Damage>0||hit.InstantKill)&&CompanionNativeUse.Current is {} use)
+            npc.PlayerInteraction(use.State.Player.whoAmI);
+        return orig(npc,hit,fromNet,noPlayerInteraction);
+    }
+    static bool AnyInteractions(On_NPC.orig_AnyInteractions orig,NPC npc){
+        var use=CompanionNativeUse.Current;
+        if(Main.netMode!=NetmodeID.SinglePlayer||use==null)return orig(npc);
+        // Single-player loot checks only Main.myPlayer's participation. The
+        // hit is already credited to the real owner, not the scoped actor.
+        int previous=Main.myPlayer;
+        try{Main.myPlayer=use.State.Player.whoAmI;return orig(npc);}
+        finally{Main.myPlayer=previous;}
     }
     static Vector2 ArmPosition(On_Main.orig_GetPlayerArmPosition orig,Projectile p) {
         var context=CompanionOwnedShot.Of(p);

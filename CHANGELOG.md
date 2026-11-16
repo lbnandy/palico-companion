@@ -1,5 +1,85 @@
 # Changelog
 
+## 1.2.13 — 2026-11-17
+
+### 简体中文
+
+- 呆猫与玩家现在可以通过圣骑士护盾、升级品及沿用同机制的模组饰品互相分摊伤害，沿用原有效果和生效条件。
+- 修复炼金 NPC Lite 组合药剂的部分增益未共享给呆猫的问题，支持玩家背包及“更好的体验”药水袋来源。
+- 修复呆猫击杀敌人未正常累计旗帜计数的问题，近战、远程和召唤物击杀均可正常累计。
+- 修复钥匙剑等近战武器一轮攻击异常重复命中的问题，保留原有伤害、攻速和弹幕效果。
+- 修复呆猫活动时，魔法存储刷新合成配方可能报错、无法正常制作的问题。
+
+### English
+
+- Players and companions can now share damage through the Paladin's Shield, its upgrades and modded accessories using the same effect, preserving their native effects and activation conditions.
+- Fixed some AlchemistNPC Lite combination-potion benefits not being shared with companions, including sources in the player's inventory and Quality of Terraria potion bag.
+- Fixed companion kills failing to count toward enemy banners. Melee, ranged and minion kills now contribute normally.
+- Fixed abnormal repeated hits during a melee attack with weapons such as the Keybrand, preserving existing damage, attack speed and projectile effects.
+- Fixed errors when Magic Storage refreshes crafting recipes while a companion is active, which could interrupt crafting.
+
+## 1.2.12 — 2026-11-16
+
+### 简体中文
+
+- 新增两档呆猫背包扩容：24→36→48 格，均在同一页显示，并加入专用图标与指南说明。
+- 新增攻击速度倍率和状态栏缩放设置；伤害倍率最低可调至 1%，索敌范围最低可调至 25%。
+- 完善摸摸时的人物与呆猫动作，取消摸摸动作冷却，可连续点击或按住摸摸。
+- 打开箱子时优先保留箱子交互，避免右键误打开呆猫背包而打断整理。
+- 修复呆猫使用魔法武器自动补蓝时，可能导致玩家部分配方暂时无法合成的问题。
+- 呆猫不再承受饥荒联动世界的饥饿效果；喂食原有效果保留。
+- 修复普通减益在呆猫倒地后残留，导致复活后连续中毒倒地的问题。
+- 呆猫免受自己投出的火箭、手雷等爆炸物误伤，修复异常死亡提示和刷墓碑问题；武器主动耗血机制保留。
+- 修复普通火把在部分照明环境下反复拿出、收起的问题。
+- 修复灾劫异宇星凝召唤套装特效可能导致崩溃的问题。
+- 适配灾厄的灾劫之尖啸、气功念珠团队增益，单人主人也能获得呆猫提供的原有效果。
+- 修复灾厄大修鬼槊蓄满后不投出、鬼伞的小鬼数量未正确反映呆猫召唤位的问题。
+- 按获取阶段调整伙伴道具稀有度，并补齐新增设置的图标。
+
+### English
+
+- Added two companion backpack upgrades, from 24 to 36 and then 48 slots, with a single-page layout, dedicated icons and guide entries.
+- Added attack-speed and status-bar scale settings. Damage can now be reduced to 1%, and targeting range to 25%.
+- Improved player and companion petting animations. Removed the petting action cooldown; repeated clicks and holding the button are supported.
+- Prioritized chest interactions while a chest is open, preventing accidental companion inventory opening from interrupting item management.
+- Fixed companion automatic mana recovery sometimes making player crafting recipes temporarily unavailable.
+- Removed hunger penalties from the companion in Don't Starve crossover worlds while preserving feeding benefits.
+- Fixed ordinary debuffs surviving companion defeat and causing repeated poison-related defeats after revival.
+- Prevented companion self-damage from its own rockets, grenades and similar explosives, fixing incorrect death messages and gravestone spam. Deliberate weapon life costs remain unchanged.
+- Fixed repeated torch drawing and stowing under certain lighting conditions.
+- Fixed a crash involving Catalyst's Intergelactic summoner armor effects.
+- Added support for Calamity's Affliction and Trinket of Chi team effects, including sharing their native benefits with the owner in singleplayer.
+- Fixed Calamity Overhaul's Erlanglaive failing to release after charging and Kikasa's canopy ghosts displaying the wrong companion minion capacity.
+- Adjusted companion item rarity to match progression and added icons for the new settings.
+
+## 1.2.11 — 2026-11-14
+
+### 简体中文
+
+- 新增钓鱼快捷按钮，可切换自动、协同、关闭；协同模式下跟着玩家钓鱼。
+- 原地形开关改为自动、协同、关闭三档；协同模式只响应玩家的挖掘、砍树和铺设，不主动找活干。
+- 修复部分火把绘制异常导致呆猫反复闪回的问题。
+- 修复玩家站在崖边时，呆猫反复掉下去、飞回来的问题。
+- 改善近战空挥、短武器打不到贴地小怪，以及隔着障碍物无效攻击的问题。
+- 优化远程跟随和战斗归队，减少不必要的后退及被敌人挡住后无法归队的情况。
+- 修复鬼妖村正中断后无法造成伤害、攻击距离判断不准和背负动画乱动的问题。
+- 修复日耀盾没有跟随呆猫自身朝向的问题。
+- 补上魔锤、彩虹喵刀的弹道补偿；精金投斧等已适配的抛物线武器够不到时，会靠近再攻击。
+- 修复魔锤联机连击引用错误，以及虚空召唤噬渊鞭挞的特效位置和幻影召唤问题。
+
+### English
+
+- Added a fishing shortcut button with Automatic, Cooperative and Off modes; cooperative fishing follows the owner's fishing activity.
+- Expanded the existing terrain toggle into Automatic, Cooperative and Off modes; cooperative work responds to the owner's digging, tree cutting and building instead of starting tasks on its own.
+- Fixed repeated companion respawns caused by missing torch flame textures.
+- Fixed repeated falling and flying back when following an owner at a cliff edge.
+- Improved melee reach, short weapons against small ground enemies, and attacks blocked by terrain.
+- Improved ranged following and combat regrouping, reducing unnecessary retreating and cases where enemies prevented the companion from returning.
+- Fixed Murasama's interrupted attacks, reach estimation and animated stowed appearance.
+- Fixed the Solar Shield facing the owner's direction instead of the companion's.
+- Added ballistic compensation for Triactis' True Paladinian Mage-Hammer of Might and Meowmere; supported ballistic weapons such as the Adamantite Throwing Axe approach when their current position cannot reach the target.
+- Fixed multiplayer Triactis hammer combo links, and Call of Void Ystralyn effects and phantom summoning.
+
 ## 1.2.10 — 2026-11-13
 
 ### 简体中文
