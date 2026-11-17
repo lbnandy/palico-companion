@@ -48,7 +48,7 @@ internal static partial class CompanionNetwork {
             if(s.Vitals.FoodTime>0)s.Vitals.FoodTime--;if(s.Vitals.FeedCooldown>0)s.Vitals.FeedCooldown--;
             if(s.Player.whoAmI==Main.myPlayer&&!s.NetReady&&s.NetTicks++==0){
                 var p=Packet(Init);p.Write(s.NetSession);p.Write(s.CatName);p.Write(s.HoodColor);p.Write(s.Bonded);p.Write(s.Stowed);p.Write(s.Enabled);p.Write(s.Introduced);p.Write(s.EnvironmentPaused);
-                Items(p,s.Bag);Items(p,s.Gear);Items(p,s.Dyes);s.Chests.Write(p);s.Dialogue.Write(p);Vitals(p,s.Vitals);WritePreferences(s,p);s.Training.Write(p);s.Loadouts.Write(p);p.Write((byte)s.CombatMode);p.Write((byte)s.WorkMode);p.Write((byte)s.FishingMode);p.Send();
+                Items(p,s.SupplySlots);Items(p,s.Bag);Items(p,s.Gear);Items(p,s.Dyes);s.Chests.Write(p);s.Dialogue.Write(p);Vitals(p,s.Vitals);WritePreferences(s,p);s.Training.Write(p);s.Loadouts.Write(p);s.ArmLayout.Write(p);p.Write((byte)s.CombatMode);p.Write((byte)s.WorkMode);p.Write((byte)s.FishingMode);p.Send();
             }
             if(s.Player.whoAmI==Main.myPlayer&&s.NetReady&&!CompanionSession.Closing&&++s.NetTicks%30==0&&s.Cat?.ModProjectile is CompanionCat visual){
                 bool dark=CompanionLighting.WantsLight(s.Cat.Center,visual.Light.Holding);
@@ -71,7 +71,7 @@ internal static partial class CompanionNetwork {
     }
     static void WriteState(CompanionPlayer s,BinaryWriter p){p.Write((byte)s.Player.whoAmI);p.Write(s.CatName);p.Write(s.HoodColor);p.Write(s.Bonded);p.Write(s.Stowed);p.Write(s.Enabled);p.Write(s.Paused);p.Write(s.EnvironmentPaused);p.Write(s.Stationed);p.Write(s.StationPoint.X);p.Write(s.StationPoint.Y);p.Write(s.Introduced);p.Write(s.Pickup);p.Write(s.Combat);p.Write((byte)s.Lighting);p.Write(s.Bridges);p.Write(s.Ropes);p.Write(s.AutoLogistics);p.Write(s.Vitals.EffectiveDefense);
         Vitals(p,s.Vitals);
-        p.Write(s.Status??"");s.Chests.Write(p);Items(p,s.Bag);Items(p,s.Gear);Items(p,s.Dyes);s.Training.Write(p);s.Loadouts.Write(p);
+        p.Write(s.Status??"");s.Chests.Write(p);Items(p,s.SupplySlots);Items(p,s.Bag);Items(p,s.Gear);Items(p,s.Dyes);s.Training.Write(p);s.Loadouts.Write(p);s.ArmLayout.Write(p);
         p.Write((ulong)Main.GameUpdateCount);p.Write(s.Enabled&&!s.Player.dead&&!s.NetLeaving&&s.Cat?.ModProjectile is CompanionCat cat?cat.NetworkInstance:0UL);s.Dialogue.Memories.Write(p);p.Write((byte)s.CombatMode);p.Write((byte)s.WorkMode);p.Write((byte)s.FishingMode);s.Stats.Write(p,s);
     }
     internal static void Action(byte action){if(!Client)return;var p=Packet(Command);p.Write(action);p.Send();}
@@ -79,7 +79,7 @@ internal static partial class CompanionNetwork {
             int owner=r.ReadByte();if(owner>=Main.maxPlayers)return;var s=destination??Main.player[owner].GetModPlayer<CompanionPlayer>();
             string name=r.ReadString();int hoodColor=CompanionPalette.Valid(r.ReadInt32());bool bonded=r.ReadBoolean(),stowed=r.ReadBoolean(),enabled=r.ReadBoolean(),paused=r.ReadBoolean(),environmentPaused=r.ReadBoolean();bool stationed=r.ReadBoolean();var stationPoint=new Microsoft.Xna.Framework.Vector2(r.ReadSingle(),r.ReadSingle());bool introduced=r.ReadBoolean();bool pickup=r.ReadBoolean(),combat=r.ReadBoolean();var lighting=CompanionLighting.Valid(r.ReadByte());bool bridges=r.ReadBoolean(),ropes=r.ReadBoolean(),logistics=r.ReadBoolean();int defense=r.ReadInt32();
             var vitals=new CompanionVitals();Vitals(r,vitals);string status=r.ReadString();var permissions=ChestPermissions.Read(r);
-            var bag=Items(r,256);var gear=Items(r,16);var dyes=Items(r,16);var training=CompanionTraining.Read(r);var loadouts=CompanionLoadouts.Read(r);
+            var supplies=Items(r,CompanionSupplySlots.Count);if(supplies.Length!=CompanionSupplySlots.Count)throw new InvalidDataException("Supply slots");var bag=Items(r,256);var gear=Items(r,16);var dyes=Items(r,16);var training=CompanionTraining.Read(r);var loadouts=CompanionLoadouts.Read(r);var armLayout=CompanionArmLayout.Read(r);
             ulong rosterTime=r.ReadUInt64(),rosterToken=r.ReadUInt64();var memories=new CompanionMemories();memories.Read(r);var combatMode=CompanionCombatModes.Valid(r.ReadByte());var workMode=CompanionWorkModes.Valid(r.ReadByte());var fishingMode=CompanionWorkModes.Valid(r.ReadByte());var stats=CompanionStats.Read(r);if(apply&&destination==null)CompanionRoster.Confirm(owner,rosterToken,rosterTime);
             // Independent from optimistic inventory state: a pending drag must
             // not discard a real victory. TCP preserves snapshot order.
@@ -87,9 +87,10 @@ internal static partial class CompanionNetwork {
             if(!apply||owner==Main.myPlayer&&Pending&&!transaction)return;
             s.CatName=name;s.HoodColor=hoodColor;s.Bonded=bonded;s.Stowed=stowed;s.Enabled=enabled;s.Paused=paused;s.EnvironmentPaused=environmentPaused;s.Stationed=stationed;s.StationPoint=stationPoint;s.Status=status;
             s.WorkMode=workMode;s.FishingMode=fishingMode;s.CombatMode=combatMode;s.Pickup=pickup;s.Combat=combat;s.Lighting=lighting;s.Bridges=bridges;s.Ropes=ropes;s.AutoLogistics=logistics;s.Vitals=vitals;s.Vitals.EffectiveDefense=defense;s.Introduced=introduced;
-            s.Stats=stats;s.Training=training;s.Loadouts=loadouts;s.Bag=bag;s.Gear=gear;s.Dyes=dyes;s.Chests=permissions;s.NetReady=true;
+            s.Stats=stats;s.Training=training;s.Loadouts=loadouts;s.ArmLayout=armLayout;s.SupplySlots=supplies;s.Bag=bag;s.Gear=gear;s.Dyes=dyes;s.Chests=permissions;s.NetReady=true;
         }
     internal static void Receive(byte kind,BinaryReader r,int sender) {
+        if(kind==CompanionCrossMod.CiveDefaultsPacket){CompanionCrossMod.CiveDefaults?.Invoke(r,sender);return;}
         if(kind==CompanionPaladinShield.TransferPacket){CompanionPaladinShield.Receive(r,sender);return;}
         if(kind==NativeWeaponEffect){if(Client)ReadWeaponEffect(r);return;}
         if(kind==ChestDiscoveryState){if(Client)DiscoveryChests.Apply(new Point(r.ReadInt16(),r.ReadInt16()),r.ReadBoolean());return;}
@@ -119,13 +120,13 @@ internal static partial class CompanionNetwork {
         if(kind==Init){
             string session=r.ReadString();if(!Guid.TryParseExact(session,"N",out _))throw new InvalidDataException("Invalid session");
             string name=r.ReadString();int hoodColor=CompanionPalette.Valid(r.ReadInt32());bool bonded=r.ReadBoolean(),stowed=r.ReadBoolean(),enabled=r.ReadBoolean();bool introduced=r.ReadBoolean(),environmentPaused=r.ReadBoolean();
-            var bag=Items(r,256);var gear=Items(r,16);var dyes=Items(r,16);
+            var supplies=Items(r,CompanionSupplySlots.Count);if(supplies.Length!=CompanionSupplySlots.Count)throw new InvalidDataException("Supply slots");var bag=Items(r,256);var gear=Items(r,16);var dyes=Items(r,16);
             var permissions=ChestPermissions.Read(r);
-            var history=new CompanionDialogue();history.Read(r);var savedVitals=new CompanionVitals();Vitals(r,savedVitals);ReadPreferences(state,r);var training=CompanionTraining.Read(r);var loadouts=CompanionLoadouts.Read(r);var combatMode=CompanionCombatModes.Valid(r.ReadByte());var workMode=CompanionWorkModes.Valid(r.ReadByte());var fishingMode=CompanionWorkModes.Valid(r.ReadByte());
+            var history=new CompanionDialogue();history.Read(r);var savedVitals=new CompanionVitals();Vitals(r,savedVitals);ReadPreferences(state,r);var training=CompanionTraining.Read(r);var loadouts=CompanionLoadouts.Read(r);var armLayout=CompanionArmLayout.Read(r);var combatMode=CompanionCombatModes.Valid(r.ReadByte());var workMode=CompanionWorkModes.Valid(r.ReadByte());var fishingMode=CompanionWorkModes.Valid(r.ReadByte());
             if(state.NetReady||bag.Length<24||gear.Length<CompanionWeapons.EquipmentCount||dyes.Length<1)return;
             state.NetSession=session;if(Restore(state)){CompanionEquipment.SetMode(state,state.NetIndependent);var resume=Packet(Resume);WriteState(state,resume);resume.Send(sender);Send(state);return;}
             CompanionNaming.Rename(state,name);state.HoodColor=hoodColor;state.Bonded=bonded;state.Introduced=introduced;state.Stowed=stowed;state.Enabled=enabled&&!stowed;state.Paused=false;state.EnvironmentPaused=environmentPaused;
-            state.WorkMode=workMode;state.FishingMode=fishingMode;state.CombatMode=combatMode;state.Dialogue=history;state.Training=training;state.Loadouts=loadouts;CompanionEquipment.SetMode(state,state.NetIndependent);state.NetLeaving=false;state.Chests=permissions;state.Bag=bag;state.Gear=gear;state.Dyes=dyes;state.NetReady=true;state.Vitals=savedVitals;state.Enabled=state.NetEnabled&&!stowed;state.Vitals.Sync(state.Player,gear);var ready=Packet(Resume);WriteState(state,ready);ready.Send(sender);Send(state);return;
+            state.WorkMode=workMode;state.FishingMode=fishingMode;state.CombatMode=combatMode;state.Dialogue=history;state.Training=training;state.Loadouts=loadouts;state.ArmLayout=armLayout;CompanionEquipment.SetMode(state,state.NetIndependent);state.NetLeaving=false;state.Chests=permissions;state.SupplySlots=supplies;state.Bag=bag;state.Gear=gear;state.Dyes=dyes;state.NetReady=true;state.Vitals=savedVitals;state.Enabled=state.NetEnabled&&!stowed;state.Vitals.Sync(state.Player,gear);var ready=Packet(Resume);WriteState(state,ready);ready.Send(sender);Send(state);return;
         }
         // A light report may already be queued when the final save handshake
         // freezes the cat. Consume its payload even when ignoring that report.

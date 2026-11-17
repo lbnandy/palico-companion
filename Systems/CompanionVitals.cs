@@ -41,7 +41,7 @@ public sealed class CompanionVitals {
     }
     public bool Downed => Recovery>0;
     // Weapons use their native admission policy; armor is validated by CompanionEquipment.
-    public static bool Accepts(Item item,int slot) => item.IsAir || (slot==CompanionWeapons.SummonSlot?CompanionWeapons.SummonWeapon(item):slot==0&&CompanionWeapons.Supports(item)&&!CompanionWeapons.SummonWeapon(item));
+    public static bool Accepts(Item item,int slot) => item.IsAir || (slot==CompanionWeapons.SummonSlot?CompanionWeapons.SummonWeapon(item)&&!CompanionWeaponPolicy.Sentry(item):slot==CompanionWeapons.SentrySlot?CompanionWeapons.SummonWeapon(item)&&CompanionWeaponPolicy.Sentry(item):slot==0&&CompanionWeapons.MainWeapon(item));
     internal static int AfterDefense(int damage,int defense,float penetration=0)=>Math.Max(1,
         (int)Math.Floor(damage-Math.Max(0,defense-penetration)*(Main.masterMode?1f:Main.expertMode?.75f:.5f)));
     public bool Hurt(int damage,int defense,bool boss=false) => HurtFinal(AfterDefense(damage,defense),boss,damage>0);

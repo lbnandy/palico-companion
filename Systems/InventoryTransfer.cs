@@ -1,10 +1,12 @@
+using System;
 using Terraria;
 using Terraria.ModLoader;
 namespace PalicoCompanion.Systems;
 public static class InventoryTransfer
 {
     // Mutates source in place. Never discard a remainder; empty slots preserve full Item data.
-    public static int Move(Item source, Item[] destination, int limit = int.MaxValue) {
+    public static int Move(Item source, Item[] destination, int limit = int.MaxValue)=>Move(source,destination.AsSpan(),limit);
+    internal static int Move(Item source, System.Span<Item> destination, int limit = int.MaxValue) {
         if (source == null || source.IsAir || limit <= 0) return 0;
         int before = source.stack;
         for (int i=0; i<destination.Length && source.stack>0 && before-source.stack<limit; i++) {

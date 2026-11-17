@@ -98,7 +98,7 @@ public sealed class MagicStorageCompanionBridge:ModSystem,ICompanionStorageProvi
             if(!Valid(state))return false;var stored=heart.GetStoredItems().ToArray();
             var types=stored.Select(i=>i.type).ToHashSet();var protectedTypes=stored.Where(i=>i.favorited).Select(i=>i.type).ToHashSet();
             return state.Bag.Any(i=>Storable(state,i)&&types.Contains(i.type)&&Room(i))||
-                stored.Any(i=>!protectedTypes.Contains(i.type)&&CompanionRestock.Wanted(state,i,true)>0&&InventoryTransfer.HasRoom(i,CompanionRestock.Destination(state,i)));
+                stored.Any(i=>!protectedTypes.Contains(i.type)&&CompanionRestock.Wanted(state,i,true)>0&&CompanionRestock.Capacity(state,i)>0);
         }
         public (int Stored,int Supplied) Transfer(CompanionPlayer state){
             if(CompanionNetwork.Client||!Valid(state)||state.Cat is not {} cat||!state.AutoLogistics||state.Paused||state.Vitals.Downed||
@@ -115,17 +115,16 @@ public sealed class MagicStorageCompanionBridge:ModSystem,ICompanionStorageProvi
             }
             var supplies=heart.GetStoredItems().ToArray();
             var protectedTypes=supplies.Where(i=>i.favorited).Select(i=>i.type).ToHashSet();
-            foreach(var sample in supplies.Where(i=>!protectedTypes.Contains(i.type)&&CompanionRestock.Wanted(state,i)>0).Select(i=>i.Clone()).OrderByDescending(i=>state.Bag.Any(b=>b.type==i.type&&!b.IsAir)).ToArray()){
+            foreach(var sample in CompanionRestock.Candidates(state,supplies.Where(i=>!protectedTypes.Contains(i.type)&&CompanionRestock.Wanted(state,i)>0)).Select(i=>i.Clone()).ToArray()){
                 // Native keepOneIfFavorite preserves one, not the whole stack.
                 // Never automatically withdraw a type the owner has favorited.
                 if(protectedTypes.Contains(sample.type))continue;int wanted=CompanionRestock.Wanted(state,sample);if(wanted<=0)continue;
-                var destination=CompanionRestock.Destination(state,sample);
-                int room=(int)Math.Min(int.MaxValue,destination.Sum(i=>i.IsAir?(long)sample.maxStack:i.type==sample.type&&ItemLoader.CanStack(i,sample)?Math.Max(0,i.maxStack-i.stack):0));
+                int room=CompanionRestock.Capacity(state,sample);
                 // Capacity queries must not execute OnStack hooks on dummy items.
                 int capacity=Math.Min(room,Math.Min(wanted,Math.Min(sample.stack,sample.maxStack)));if(capacity<=0)continue;
                 var request=sample.Clone();request.stack=capacity;
                 var taken=heart.TryWithdraw(request,true,state.Player);if(taken.IsAir)continue;
-                PickupCredit.Clear(taken);int type=taken.type;int moved=InventoryTransfer.Move(taken,destination);
+                PickupCredit.Clear(taken);int type=taken.type;int moved=CompanionRestock.Move(state,taken);
                 if(!taken.IsAir){heart.TryDeposit(taken,state.Player);if(!taken.IsAir)state.Player.QuickSpawnItem(state.Player.GetSource_Misc("PalicoStorageRemainder"),taken,taken.stack);}
                 supplied+=moved;changed.Add(type);
             }

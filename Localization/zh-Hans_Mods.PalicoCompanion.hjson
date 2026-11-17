@@ -21,7 +21,6 @@ UI: {
 	FishingAssistHint: 你钓鱼时才跟着钓，不会路过水边就开钓
 	FishingOffHint: 不自动或协同钓鱼，仍可指定水面钓鱼
 	WorkModeNext: 点击切换：{0}
-
 	CombatProactive: 主动进攻
 	CombatAssist: 协同进攻
 	CombatPassive: 不攻击
@@ -94,11 +93,15 @@ UI: {
 	GardenDone: 药草已采收并补种
 	GardenReplantBlocked: 药草已采收，当前位置暂时无法补种
 	GardenBlocked: 暂时无法采收，种子未消耗
+	AmmoSlots: 弹药
+	PotionSlots: 药水
+	HealingSlot: 生命药水
+	ManaSlot: 魔力药水
 	QuickStack: 快捷堆叠
 	NativeBagHint: Shift 点击玩家或箱子物品可转入呆猫背包，收藏物品除外。呆猫背包的收藏物品不会被全部取回，但仍可使用和消耗。
 	Transferred: 转移了 {0} 件物品
 	Recovering: 正在恢复，{0} 秒后回来帮忙
-	GearHint: 投掷武器可整叠装备；弹药放入呆猫背包
+	GearHint: 放入直接攻击武器（包括鞭子）；仆从和哨兵武器放入各自专属格。投掷武器可整叠装备。
 	DefaultWeaponHint: 空栏时自带铜短剑
 	RecoverArmor: 取回
 	LegacyArmorHint: 旧版防具仅供取回，防御现在随玩家成长
@@ -108,8 +111,11 @@ UI: {
 	DefenseHint: 呆猫的防御为玩家的 {0}%
 	HealthLabel: 生命
 	ManaLabel: 法力
-	SummonWeapon: 召唤武器
-	SummonWeaponHint: 放入仆从或哨兵召唤武器；补召或部署后使用主武器。更换此槽会收回原有召唤物。
+	SummonWeapon: 仆从武器
+	SummonWeaponHint: 放入仆从召唤武器；补召后切回主武器，更换此槽只收回仆从。
+	SentryWeapon: 哨兵武器
+	SentryWeaponHint: 放入哨兵召唤武器；部署后切回主武器，更换此槽只收回哨兵。
+	SummonCounts: 仆从 / 哨兵
 	MinionSlots: 仆从位
 	SentrySlots: 哨兵位
 	SentrySlotsHint: 已放置 / 自动布置上限。上限与玩家相同，至少为 1，不占用玩家的哨兵位。战斗转移时重新布置。撒旦军队武器沿用原版解锁条件，事件中消耗呆猫背包里的天国魔力。
@@ -233,10 +239,12 @@ Configs: {
 			Label: 共享药水与增益站效果
 			Tooltip: 两种模式均可共享主人的常规药水，以及利器站、弹药箱、水晶球、施法桌和战争桌增益；随主人的效果结束，同种效果不叠加。继承模式的属性仍按对应比例计算，关闭此项也不会移除已包含在主人属性中的加成。不共享食物、宠物、坐骑、装备触发效果及职业爆发。
 		}
+
 		DamageReductionInheritancePercent: {
 			Label: 减伤继承比例（%）
 			Tooltip: 继承主人常规伤害减免的比例。例如主人有 20% 减伤，设为 50% 时呆猫获得 10% 减伤。设为 0 不继承；不包含闪避、护盾和模组专用的条件减伤。
 		}
+
 		RegenInheritancePercent: {
 			Label: 回血继承比例（%）
 			Tooltip:
@@ -297,6 +305,11 @@ Configs: {
 				灵活：更早预判，间隔 0.75 秒；贴身时可跳过冷却尝试避让
 				闪避不会额外提供无敌时间；关闭后仍会正常调整攻击站位
 				'''
+		}
+
+		PersonalMode: {
+			Label: 个人属性模式
+			// Tooltip: ""
 		}
 	}
 
@@ -402,7 +415,6 @@ Configs: {
 			Tooltip: 在说话、受伤、抚摸等情境播放猫叫，避免连续重复。
 		}
 
-
 		DeliverRecoveryDrops: {
 			Label: 递送红心和魔力星
 			Tooltip: 你需要恢复生命或法力时，呆猫把附近掉落的红心或魔力星送给你。不消耗背包物品。
@@ -425,7 +437,7 @@ Configs: {
 
 		AutoHeal: {
 			Label: 自动喝药
-			Tooltip: 呆猫生命不高于一半时喝治疗药水，施法时法力不足则喝魔力药水。消耗呆猫背包中的药水（包括收藏的药水）；药水冷却与魔力病独立于玩家。
+			Tooltip: 根据携带治疗药水的恢复量决定喝药时机，最迟半血时喝；施法时法力不足则喝魔力药水。从专属格和背包中选择合适的药水（包括收藏的药水）；药水冷却与魔力病独立于玩家。
 		}
 
 		Chatter: {
@@ -574,6 +586,28 @@ Configs: {
 		// Occasional.Tooltip: ""
 		// EveryTime.Tooltip: ""
 		// Off.Tooltip: ""
+	}
+
+	PickupFilterMode: {
+		// Tooltip: ""
+		// Blacklist.Tooltip: ""
+		// Whitelist.Tooltip: ""
+		// Coins.Tooltip: ""
+	}
+
+	CompanionLightingMode: {
+		// Tooltip: ""
+		// Off.Tooltip: ""
+		// Held.Tooltip: ""
+		// Automatic.Tooltip: ""
+	}
+
+	CompanionSpeechMode: {
+		// Tooltip: ""
+		// Automatic.Tooltip: ""
+		// Overhead.Tooltip: ""
+		// Chat.Tooltip: ""
+		// Both.Tooltip: ""
 	}
 }
 
@@ -1443,6 +1477,10 @@ Items: {
 	// MasterTools.Tooltip: ""
 	// CatWorkbench.Tooltip: ""
 	// GigaBarrelBomb.Tooltip: ""
+	// ReinforcedTools.Tooltip: ""
+	// CelestialTools.Tooltip: ""
+	// ExpandedBackpack.Tooltip: ""
+	// ReinforcedBackpack.Tooltip: ""
 }
 
 EvasionChoices: {

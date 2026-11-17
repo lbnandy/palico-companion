@@ -290,7 +290,7 @@ public sealed class CompanionCat : ModProjectile
             else if(airborneTarget!=null){SuspendTransientWork(state);state.Mining.Tick(owner,Projectile.Center,false,true);}
             targetItem=-1;
             var airTarget=airborneTarget??FindThreat(owner);
-            Weapons.Tick(owner,state,Projectile,airTarget,state.AttacksEnabled&&(CompanionNativeUse.Summoning(airWeapon)||CompanionCombatReach.CanUse(airWeapon,Projectile,airTarget)),allowSupport:true,allowSummons:state.AttacksEnabled);
+            Weapons.Tick(owner,state,Projectile,airTarget,state.AttacksEnabled&&(CompanionWeapons.SummonWeapon(airWeapon)||CompanionCombatReach.CanUse(airWeapon,Projectile,airTarget)),allowSupport:true,allowSummons:state.AttacksEnabled);
             animationThreat=airTarget!=null;attackThrust=!CompanionNativeUse.SwingArm(Weapons.Actor.HeldItem);
             attackVisualTicks=Weapons.Actor.itemAnimation;attackVisualDuration=Math.Max(1,Weapons.Actor.itemAnimationMax);
             if(CompanionWeapons.Support(airWeapon)&&Weapons.Busy)attackFacing=Weapons.Aim;
@@ -319,7 +319,7 @@ public sealed class CompanionCat : ModProjectile
             attackFacing=npc.Center;
         }
         Item activeWeapon=CompanionWeapons.Active(state.Gear);
-        Weapons.Tick(owner,state,Projectile,target,state.AttacksEnabled&&(CompanionNativeUse.Summoning(activeWeapon)||CompanionCombatReach.CanUse(activeWeapon,Projectile,target)),allowSupport:true,allowSummons:state.AttacksEnabled);
+        Weapons.Tick(owner,state,Projectile,target,state.AttacksEnabled&&(CompanionWeapons.SummonWeapon(activeWeapon)||CompanionCombatReach.CanUse(activeWeapon,Projectile,target)),allowSupport:true,allowSummons:state.AttacksEnabled);
         if(CompanionWeapons.Support(activeWeapon)&&Weapons.Busy)attackFacing=Weapons.Aim;
         attackThrust=!CompanionNativeUse.SwingArm(Weapons.Actor.HeldItem);
         attackVisualTicks=Weapons.Actor.itemAnimation;attackVisualDuration=Math.Max(1,Weapons.Actor.itemAnimationMax);

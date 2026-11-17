@@ -24,6 +24,7 @@ public sealed partial class CompanionNativeUse {
     public CompanionPlayer State {get;private set;}
     public Vector2 Aim {get;private set;}
     internal void PlacementAim(Vector2 aim)=>Aim=aim;
+    internal bool CarrierPlacement {get;private set;}
     internal Vector2 ReplicaItemOffset;
     CompanionPose replicaPose;
     double inputTime=-1;
@@ -213,7 +214,7 @@ public sealed partial class CompanionNativeUse {
         LocateActor(cat);
         Actor.MinionAttackTargetNPC=cat.ModProjectile is CompanionCat companion?companion.CombatTargetIndex:-1;
         if(!initialized){Actor.inventory=InventoryTransfer.Empty(59);initialized=true;}
-        HeldGearSlot=replicaPose.HeldGearSlot;var item=HeldGearSlot==CompanionWeapons.SummonSlot?CompanionWeapons.Summon(state.Gear):CompanionWeapons.Active(state.Gear);if(Actor.inventory[0].type!=item.type||Actor.inventory[0].prefix!=item.prefix)Actor.inventory[0]=item.Clone();
+        HeldGearSlot=replicaPose.HeldGearSlot;var item=CompanionWeapons.InSlot(state.Gear,HeldGearSlot);if(Actor.inventory[0].type!=item.type||Actor.inventory[0].prefix!=item.prefix)Actor.inventory[0]=item.Clone();
         // ResetEffects clears the projectile caches too. Match Player.Update's
         // order: reset, rebuild caches, then update buffs which maintain minions.
         if(replicaEffectsTick!=Main.GameUpdateCount){
@@ -288,17 +289,17 @@ public sealed partial class CompanionNativeUse {
         // The item declares the cost of the complete summon. A head projectile
         // alone may cost zero or only part of the creature's slots.
         float slots=summon?ItemID.Sets.StaffMinionSlotsRequired[weapon.type]:0;
-        bool wants=(HeldGearSlot==CompanionWeapons.SummonSlot?allowSummons:allowAttack)&&(summon?Actor.slotsMinions+Math.Max(.01f,slots)<=Actor.maxMinions:target!=null);
+        bool wants=(CompanionWeapons.IsSummonSlot(HeldGearSlot)?allowSummons:allowAttack)&&(summon?Actor.slotsMinions+Math.Max(.01f,slots)<=Actor.maxMinions:target!=null||CompanionWeaponPolicy.Sentry(weapon));
         bool attackPath=target==null||CompanionAttackPath.Clear(weapon,this,cat.Center,target);
         ObserveReach(weapon,target,wants&&target!=null&&attackPath);
         Aim=summon?CompanionWeaponAim.SummonPoint(cat,target):target!=null?CompanionWeaponAim.Point(weapon,this,target):cat.Center+new Vector2(cat.direction*80,-24);
         Vector2 plannedAim=Aim;
-        bool planned=CompanionWeaponPolicy.Plan(weapon,this,target,ref plannedAim);
+        bool planned=CompanionWeaponPolicy.Plan(weapon,this,target,ref plannedAim,out bool carrierPlacement);
         Aim=plannedAim;
         // ItemCheck can finish one animation and start another in the same tick.
         // Release the input as soon as a persistent projectile is in flight.
         wants&=planned;
-        if(yieldToSummon||HeldGearSlot==CompanionWeapons.SummonSlot&&Busy)wants=false;
+        if(yieldToSummon||CompanionWeapons.IsSummonSlot(HeldGearSlot)&&Busy)wants=false;
         // A summon is placed beside the cat, not fired at this target. Its own
         // AI decides whether it can pursue enemies behind terrain.
         if(!summon&&!attackPath)wants=false;
@@ -313,7 +314,7 @@ public sealed partial class CompanionNativeUse {
         // Finish a natural refill after running dry. Native regeneration speeds
         // up as the bar fills; restarting early discards that faster portion and
         // pays the regeneration delay (and a held weapon's windup) again.
-        bool summonAttempt=HeldGearSlot==CompanionWeapons.SummonSlot&&wants&&Actor.itemAnimation==0;
+        bool summonAttempt=CompanionWeapons.IsSummonSlot(HeldGearSlot)&&wants&&Actor.itemAnimation==0;
         int cost=Actor.GetManaCost(weapon);
         if(WaitingForMana){
             if(Actor.statMana<cost)RestoreMana(cost);
@@ -328,11 +329,14 @@ public sealed partial class CompanionNativeUse {
             }
         }
         wants=channelInput.Hold(this,weapon,target,wants);
-        if(wants){cat.direction=Aim.X<cat.Center.X?-1:1;Actor.direction=cat.direction;}
+        // A carrier point is relative to the actor's current facing. Turning
+        // toward that point here can move the grip away from the planned cast.
+        if(wants&&!carrierPlacement){cat.direction=Aim.X<cat.Center.X?-1:1;Actor.direction=cat.direction;}
         PressedThisTick=wants&&(!Actor.controlUseItem||Actor.itemAnimation==0);
         Actor.controlUseItem=wants;Actor.releaseUseItem=!wants||Actor.itemAnimation==0;Actor.controlUseTile=false;
         if(!wants)Actor.channel=false;
         int stackBefore=Actor.HeldItem.stack;
+        bool previousPlacement=CarrierPlacement;CarrierPlacement=carrierPlacement;
         try {using(new Scope(this)){
             // ItemCheck owns per-target melee cooldowns. Only attackCD normally
             // advances in Player.Update, which this isolated actor does not run.
@@ -344,7 +348,9 @@ public sealed partial class CompanionNativeUse {
             CompanionCrossMod.MaintainHeldWeapon?.Invoke(this);
         }}
         finally {
+            CarrierPlacement=previousPlacement;
             if(materials)for(int i=0;i<Math.Min(state.Bag.Length,49);i++)state.Bag[i]=Actor.inventory[i+1];
+            for(int i=0;i<CompanionSupplySlots.AmmoCount;i++)state.SupplySlots[i]=Actor.inventory[54+i];
             state.Vitals.ManaDelay=Math.Max(0,(int)Math.Ceiling(Actor.manaRegenDelay));state.Vitals.Mana=Math.Clamp(Actor.statMana,0,state.Vitals.MaxMana);
             if(weapon.consumable) {
                 int consumed=Math.Clamp(stackBefore-Actor.HeldItem.stack,0,weapon.stack);
@@ -380,6 +386,7 @@ public sealed partial class CompanionNativeUse {
         for(int i=1;i<59;i++)Actor.inventory[i]=Empty;
         bool materials=CompanionEquipment.Independent(state)||weapon.ModItem!=null||CompanionWeaponPolicy.Sentry(weapon);
         for(int i=0;i<Math.Min(state.Bag.Length,49);i++)if(materials||state.Bag[i].ammo>0)Actor.inventory[i+1]=state.Bag[i];
+        for(int i=0;i<CompanionSupplySlots.AmmoCount;i++)Actor.inventory[54+i]=state.SupplySlots[i];
         return materials;
     }
 
@@ -424,7 +431,7 @@ public sealed partial class CompanionNativeUse {
             // refresh native dodge/revival cooldowns, which are debuffs.
             for(int i=Actor.buffType.Length-1;i>=0;i--)
                 if(Actor.buffType[i]>0&&!Main.debuff[Actor.buffType[i]])Actor.DelBuff(i);
-            summonRetryAt=0;
+            Array.Clear(summonRetryAt);
         }
         if(State?.Vitals.Downed==true)CompanionDebuffs.ClearOnDeath(Actor);
     }
@@ -556,6 +563,9 @@ public sealed class CompanionOwnedShot : GlobalProjectile {
     public CompanionNativeUse Context;
     public bool Thrown;
     internal bool Summoned;
+    // Authority-only lineage for dismissing one summon family without
+    // discarding the other slot's creatures or unmarked child projectiles.
+    internal byte SummonKind;
     internal int CatIdentity=-1;
     internal ulong CatInstance;
     internal int BondOwner;
@@ -641,8 +651,16 @@ public sealed class CompanionOwnedShot : GlobalProjectile {
             var origin=p.Center;CompanionWeaponAim.ClearLaunchFloor(ref origin,p);p.Center=origin;
         }
         Summoned=Context!=null&&(p.minion||p.sentry||
-            source is EntitySource_ItemUse itemUse&&ReferenceEquals(itemUse.Entity,Context.Actor)&&Context.HeldGearSlot==CompanionWeapons.SummonSlot||
+            source is EntitySource_ItemUse itemUse&&ReferenceEquals(itemUse.Entity,Context.Actor)&&CompanionWeapons.IsSummonSlot(Context.HeldGearSlot)||
             source is EntitySource_Parent summonedParent&&summonedParent.Entity is Projectile summonedFrom&&CompanionProjectileData.TryGet<CompanionOwnedShot>(summonedFrom,out var summonTag)&&summonTag.Summoned);
+        if(Context!=null){
+            SummonKind=p.sentry||ProjectileID.Sets.SentryShot[p.type]?(byte)2:p.minion||ProjectileID.Sets.MinionShot[p.type]?(byte)1:(byte)0;
+            if(SummonKind==0&&source is EntitySource_Parent lineage&&lineage.Entity is Projectile origin&&
+                CompanionProjectileData.TryGet<CompanionOwnedShot>(origin,out var parentTag))SummonKind=parentTag.SummonKind;
+            if(SummonKind==0&&source is EntitySource_ItemUse cast&&ReferenceEquals(cast.Entity,Context.Actor))
+                SummonKind=CompanionNativeUse.Summoning(cast.Item)?(byte)1:CompanionWeaponPolicy.Sentry(cast.Item)?(byte)2:(byte)0;
+            Summoned|=SummonKind!=0;
+        }
         Thrown=Context!=null&&(Context.Actor.HeldItem.consumable||source is EntitySource_Parent parentShot&&parentShot.Entity is Projectile from&&CompanionProjectileData.TryGet<CompanionOwnedShot>(from,out var thrownTag)&&thrownTag.Thrown);
     }
 }
@@ -663,8 +681,8 @@ public sealed class CompanionCombatTerrain : GlobalTile {
     public override bool CanExplode(int i,int j,int type)=>CompanionNativeUse.Current==null;
 }
 public sealed class CompanionNativeHooks : ModSystem {
-    public override void Load(){MonoModHooks.Add(typeof(NPC).GetMethod(nameof(NPC.StrikeNPC),new[]{typeof(NPC.HitInfo),typeof(bool),typeof(bool)}),(StrikeHook)Strike);On_Recipe.FindRecipes+=FindRecipes;IL_Player.ItemCheck_Shoot+=HeadlessShoot;IL_Player.ItemCheck_ApplyUseStyle_Inner+=HeadlessGeometry;IL_Player.ItemCheck_GetMeleeHitbox+=HeadlessGeometry;On_Item.GetDrawHitbox+=DrawHitbox;On_Player.GetItemDrawFrame+=ItemFrame;On_NetMessage.SendData+=SendNative;On_Player.ItemCheck_PlayInstruments+=Instruments;On_Projectile.Update+=UpdateShot;On_Projectile.CanHitWithMeleeWeapon+=MeleeSight;On_Projectile.Kill+=KillShot;On_Main.DrawProj_Inner+=DrawShot;On_Player.ItemCheck_CutTiles+=CutTiles;On_Main.GetPlayerArmPosition+=ArmPosition;IL_Main.SortBabyBirdProjectiles+=FinchDrawOwner;On_NPC.PlayerInteraction+=Interaction;On_NPC.AnyInteractions+=AnyInteractions;On_Player.HealEffect+=Heal;On_Player.ManaEffect+=ManaFeedback;}
-    public override void Unload(){On_Recipe.FindRecipes-=FindRecipes;IL_Player.ItemCheck_Shoot-=HeadlessShoot;IL_Player.ItemCheck_ApplyUseStyle_Inner-=HeadlessGeometry;IL_Player.ItemCheck_GetMeleeHitbox-=HeadlessGeometry;On_Item.GetDrawHitbox-=DrawHitbox;On_Player.GetItemDrawFrame-=ItemFrame;On_NetMessage.SendData-=SendNative;On_Player.ItemCheck_PlayInstruments-=Instruments;On_Projectile.Update-=UpdateShot;On_Projectile.CanHitWithMeleeWeapon-=MeleeSight;On_Projectile.Kill-=KillShot;On_Main.DrawProj_Inner-=DrawShot;On_Player.ItemCheck_CutTiles-=CutTiles;On_Main.GetPlayerArmPosition-=ArmPosition;IL_Main.SortBabyBirdProjectiles-=FinchDrawOwner;On_NPC.PlayerInteraction-=Interaction;On_NPC.AnyInteractions-=AnyInteractions;On_Player.HealEffect-=Heal;On_Player.ManaEffect-=ManaFeedback;}
+    public override void Load(){MonoModHooks.Add(typeof(NPC).GetMethod(nameof(NPC.StrikeNPC),new[]{typeof(NPC.HitInfo),typeof(bool),typeof(bool)}),(StrikeHook)Strike);On_Recipe.FindRecipes+=FindRecipes;IL_Player.ItemCheck_Shoot+=HeadlessShoot;IL_Player.ItemCheck_Shoot+=PlacementFacing;IL_Player.ItemCheck_ApplyUseStyle_Inner+=HeadlessGeometry;IL_Player.ItemCheck_GetMeleeHitbox+=HeadlessGeometry;On_Item.GetDrawHitbox+=DrawHitbox;On_Player.GetItemDrawFrame+=ItemFrame;On_NetMessage.SendData+=SendNative;On_Player.ItemCheck_PlayInstruments+=Instruments;On_Projectile.Update+=UpdateShot;On_Projectile.CanHitWithMeleeWeapon+=MeleeSight;On_Projectile.Kill+=KillShot;On_Main.DrawProj_Inner+=DrawShot;On_Player.ItemCheck_CutTiles+=CutTiles;On_Main.GetPlayerArmPosition+=ArmPosition;IL_Main.SortBabyBirdProjectiles+=FinchDrawOwner;On_NPC.PlayerInteraction+=Interaction;On_NPC.AnyInteractions+=AnyInteractions;On_Player.HealEffect+=Heal;On_Player.ManaEffect+=ManaFeedback;}
+    public override void Unload(){On_Recipe.FindRecipes-=FindRecipes;IL_Player.ItemCheck_Shoot-=HeadlessShoot;IL_Player.ItemCheck_Shoot-=PlacementFacing;IL_Player.ItemCheck_ApplyUseStyle_Inner-=HeadlessGeometry;IL_Player.ItemCheck_GetMeleeHitbox-=HeadlessGeometry;On_Item.GetDrawHitbox-=DrawHitbox;On_Player.GetItemDrawFrame-=ItemFrame;On_NetMessage.SendData-=SendNative;On_Player.ItemCheck_PlayInstruments-=Instruments;On_Projectile.Update-=UpdateShot;On_Projectile.CanHitWithMeleeWeapon-=MeleeSight;On_Projectile.Kill-=KillShot;On_Main.DrawProj_Inner-=DrawShot;On_Player.ItemCheck_CutTiles-=CutTiles;On_Main.GetPlayerArmPosition-=ArmPosition;IL_Main.SortBabyBirdProjectiles-=FinchDrawOwner;On_NPC.PlayerInteraction-=Interaction;On_NPC.AnyInteractions-=AnyInteractions;On_Player.HealEffect-=Heal;On_Player.ManaEffect-=ManaFeedback;}
     static void FindRecipes(On_Recipe.orig_FindRecipes orig,bool canDelayCheck){
         // The crafting list belongs to the human UI. Native actor item and
         // projectile hooks can request a refresh inside nested scopes; let
@@ -677,6 +695,14 @@ public sealed class CompanionNativeHooks : ModSystem {
     // change the global dedicated-server flag or create GPU assets on a server.
     static void HeadlessGeometry(ILContext il){var c=new ILCursor(il);while(c.TryGotoNext(MoveType.After,i=>i.MatchLdsfld<Main>(nameof(Main.dedServ))))c.EmitDelegate<Func<bool,bool>>(dedicated=>dedicated&&CompanionNativeUse.Current==null&&CompanionFishing.Current==null);}
     static Rectangle DrawHitbox(On_Item.orig_GetDrawHitbox orig,int type,Player player)=>Main.dedServ&&(CompanionNativeUse.Current?.Actor==player||CompanionFishing.Current?.Actor==player)?CompanionGrip.ItemFrame(type):orig(type,player);
+    static void PlacementFacing(ILContext il){
+        var c=new ILCursor(il);
+        // Preserve facing only while placing on an actor-relative carrier.
+        // Other shots and human players retain the item's native direction rule.
+        if(!c.TryGotoNext(MoveType.After,i=>i.MatchCall<Item>("get_ChangePlayerDirectionOnShoot")||i.MatchCallvirt<Item>("get_ChangePlayerDirectionOnShoot")))
+            throw new InvalidOperationException("Native shot facing rule not found");
+        c.EmitDelegate<Func<bool,bool>>(turn=>turn&&CompanionNativeUse.Current?.CarrierPlacement!=true);
+    }
     static void HeadlessShoot(ILContext il){
         var c=new ILCursor(il);
         // Harp note speed/pitch uses viewport height. The server has no view

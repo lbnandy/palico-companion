@@ -19,7 +19,7 @@ internal sealed class CompanionLoadouts {
         int bit=1<<(slot-CompanionEquipment.AccessoryStart);
         HiddenAccessories[Current]=(byte)(hidden?HiddenAccessories[Current]|bit:HiddenAccessories[Current]&~bit);
     }
-    const int Count=16;
+    const int Count=17;
     internal readonly Item[][] Sets={InventoryTransfer.Empty(Count),InventoryTransfer.Empty(Count),InventoryTransfer.Empty(Count)};
     internal bool Switch(CompanionPlayer s,int index,out string message) {
         message=CompanionText.Message("CompanionLoadouts.Invalid");if(index<0||index>=3)return false;
@@ -27,7 +27,7 @@ internal sealed class CompanionLoadouts {
         var incoming=Sets[index];
         // Preserve items from a stronger world's extra slot. The existing
         // ReturnLocked policy returns them to the bag and disables their effects.
-        Sets[Current]=new[]{s.Gear[0],s.Training.Slots[0],s.Training.Slots[1],s.Training.Slots[2],s.Training.Slots[3],CompanionWeapons.Summon(s.Gear),s.Gear[1],s.Gear[2],s.Gear[3],s.Gear[5],s.Gear[6],s.Gear[7],s.Gear[8],s.Gear[9],s.Gear[10],s.Gear[11]};
+        Sets[Current]=new[]{s.Gear[0],s.Training.Slots[0],s.Training.Slots[1],s.Training.Slots[2],s.Training.Slots[3],CompanionWeapons.Summon(s.Gear),s.Gear[1],s.Gear[2],s.Gear[3],s.Gear[5],s.Gear[6],s.Gear[7],s.Gear[8],s.Gear[9],s.Gear[10],s.Gear[11],CompanionWeapons.Sentry(s.Gear)};
         for(int slot=0;slot<incoming.Length;slot++)Equip(s,slot,incoming[slot]);
         // Keep real item ownership in exactly one set. Empty slots borrow a
         // shared item, preferring the set we just left over other inactive sets.
@@ -38,7 +38,7 @@ internal sealed class CompanionLoadouts {
                 var item=Sets[source][slot];
                 if(source==index||item.IsAir||!item.favorited)continue;
                 byte group=(byte)(slot==0||slot>=5?1:3);
-                int indexInGroup=slot>=6?(slot<9?slot-5:slot-4):slot==5?CompanionWeapons.SummonSlot:slot==0?0:slot-1;
+                int indexInGroup=slot==16?CompanionWeapons.SentrySlot:slot>=6?(slot<9?slot-5:slot-4):slot==5?CompanionWeapons.SummonSlot:slot==0?0:slot-1;
                 if(!CompanionInventoryOperations.Accepts(s,item,group,indexInGroup))continue;
                 incoming[slot]=item;Equip(s,slot,item);Sets[source][slot]=new Item();break;
             }
@@ -50,17 +50,18 @@ internal sealed class CompanionLoadouts {
     static void Equip(CompanionPlayer s,int slot,Item item){
         if(slot==0)s.Gear[0]=item;
         else if(slot==5)s.Gear[CompanionWeapons.SummonSlot]=item;
+        else if(slot==16)s.Gear[CompanionWeapons.SentrySlot]=item;
         else if(slot>=6)s.Gear[slot<9?slot-5:slot-4]=item;
         else s.Training.Slots[slot-1]=item;
     }
-    internal TagCompound SaveData()=>new(){["format"]=3,["hiddenAccessories"]=HiddenAccessories,["independent"]=Independent,["current"]=Current,["sets"]=Sets.Select(a=>new TagCompound{["items"]=a.Select(ItemIO.Save).ToList()}).ToList()};
+    internal TagCompound SaveData()=>new(){["format"]=4,["hiddenAccessories"]=HiddenAccessories,["independent"]=Independent,["current"]=Current,["sets"]=Sets.Select(a=>new TagCompound{["items"]=a.Select(ItemIO.Save).ToList()}).ToList()};
     internal void LoadData(TagCompound data) {
         // Unreleased template prototypes were copies, never owned items.
-        if(data.GetInt("format") is not (1 or 2 or 3))return;
+        if(data.GetInt("format") is not (1 or 2 or 3 or 4))return;
         Independent=data.GetBool("independent");
         var hidden=data.GetByteArray("hiddenAccessories");for(int i=0;i<Math.Min(3,hidden.Length);i++)HiddenAccessories[i]=(byte)(hidden[i]&127);
         Current=Math.Clamp(data.GetInt("current"),0,2);var sets=data.GetList<TagCompound>("sets");
-        for(int i=0;i<Math.Min(3,sets.Count);i++)if(i!=Current){var items=sets[i].GetList<TagCompound>("items");if(items.Count is 5 or 6 or 14 or Count){for(int n=0;n<items.Count;n++)Sets[i][n]=ItemIO.Load(items[n]);if(Sets[i][5].IsAir&&CompanionWeapons.SummonWeapon(Sets[i][0])){Sets[i][5]=Sets[i][0];Sets[i][0]=new Item();}}}
+        for(int i=0;i<Math.Min(3,sets.Count);i++)if(i!=Current){var items=sets[i].GetList<TagCompound>("items");if(items.Count is 5 or 6 or 14 or 16 or Count){for(int n=0;n<items.Count;n++)Sets[i][n]=ItemIO.Load(items[n]);if(Sets[i][5].IsAir&&CompanionWeapons.SummonWeapon(Sets[i][0])){Sets[i][5]=Sets[i][0];Sets[i][0]=new Item();}if(Sets[i][16].IsAir&&CompanionWeaponPolicy.Sentry(Sets[i][5])){Sets[i][16]=Sets[i][5];Sets[i][5]=new Item();}}}
     }
     internal void Write(BinaryWriter w){w.Write((byte)Current);w.Write(Independent);w.Write(HiddenAccessories);for(int i=0;i<3;i++)if(i!=Current)foreach(var item in Sets[i])ItemIO.Send(item,w,true,true);}
     internal static CompanionLoadouts Read(BinaryReader r) {

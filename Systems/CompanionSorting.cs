@@ -15,13 +15,13 @@ public static class CompanionSorting {
     internal static void Request(CompanionPlayer s){if(CompanionNetwork.Client){CompanionNetwork.SortBag(s);return;}if(Sort(s))new InventoryOutcome(InventoryCue.Tick).Present(s);}
     public static bool Sort(CompanionPlayer s){
         if(nativeSort==null){s.Report(CompanionText.MessageFull("Mods.PalicoCompanion.UI.SortUnavailable"));return false;}
-        var copy=s.Bag.Select(i=>i.Clone()).ToArray();int previousOwner=Main.myPlayer;
+        var copy=s.Bag.Select(i=>i.Clone()).ToArray();int previousOwner=Main.myPlayer;float[] hues;
         // Native sorting prioritizes weapon classes from Main.LocalPlayer's
         // damage modifiers. Dedicated servers otherwise read the dummy player.
         // Bound synchronous scope only; no UI input or player-array replacement.
-        try{Main.myPlayer=s.Player.whoAmI;nativeSort(copy,Array.Empty<int>());}
+        try{Main.myPlayer=s.Player.whoAmI;hues=CompanionSortGlow.Capture(()=>nativeSort(copy,Array.Empty<int>()),copy.Length,s.Player.chest!=-1);}
         catch(Exception e){Terraria.ModLoader.ModContent.GetInstance<PalicoCompanion>().Logger.Warn("Native bag sort failed; original inventory retained",e);s.Report(CompanionText.MessageFull("Mods.PalicoCompanion.UI.SortUnavailable"));return false;}
         finally{Main.myPlayer=previousOwner;}
-        s.Bag=copy;s.Report(CompanionText.MessageFull("Mods.PalicoCompanion.UI.SortDone"));return true;
+        s.Bag=copy;s.SortGlow.Start(hues);s.Report(CompanionText.MessageFull("Mods.PalicoCompanion.UI.SortDone"));return true;
     }
 }

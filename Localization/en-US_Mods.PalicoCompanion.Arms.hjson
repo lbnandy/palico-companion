@@ -1,0 +1,8 @@
+{
+  "Title": "Mechanical claws",
+  "MoveHint": "Click to remove; Shift-click to take back.",
+  "Hint": "Hold a claw and click to install; click an installed claw to remove or swap.",
+  "ItemsHint": "Shift-click to take back. Capacity and reach follow Homeward's rules.",
+  "Inactive": "Inactive with this backpack. Click to remove.",
+  "DragHint": "Drag the handle to move; right-click to reset."
+}

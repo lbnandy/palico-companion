@@ -48,11 +48,14 @@ public sealed class CompanionPlayer : ModPlayer
     public CompanionVitals Vitals = new();
     public CompanionTraining Training = new();
     internal CompanionLoadouts Loadouts=new();
+    internal CompanionArmLayout ArmLayout=new();
     internal readonly CompanionEquipment Equipment=new();
     internal CompanionDirective Directive=new();
     internal System.Collections.Generic.List<Item> DeliveryRemainder=new();
     internal int DeliveryTicks;
     public Item[] Bag = InventoryTransfer.Empty(24);
+    public Item[] SupplySlots = InventoryTransfer.Empty(CompanionSupplySlots.Count);
+    internal readonly CompanionSortGlow SortGlow=new();
     public bool Enabled, Paused, Pickup=true, Combat=true, Bridges, Ropes;
     public CompanionLightingMode Lighting=CompanionLightingMode.Automatic;
     public bool Torches { get=>Lighting!=CompanionLightingMode.Off; set=>Lighting=value?(Torches?Lighting:CompanionLightingMode.Automatic):CompanionLightingMode.Off; }
@@ -88,14 +91,14 @@ public sealed class CompanionPlayer : ModPlayer
     public ChestPermissions Chests=new();
     public override void SaveData(TagCompound tag) {
         tag["deliveryRemainder"]=DeliveryRemainder.Select(ItemIO.Save).ToList();
-        tag["training"]=Training.Save();tag["loadouts"]=Loadouts.SaveData();
+        tag["training"]=Training.Save();tag["loadouts"]=Loadouts.SaveData();tag["armLayout"]=ArmLayout.Save();
         tag["networkSession"]=NetSession;tag["networkResume"]=CompanionNetwork.SaveResume(this);
         tag["hoodColor"]=HoodColor;tag["dye"]=ItemIO.Save(Dyes[0]);tag["introduced"]=Introduced;
         tag["bonded"]=Bonded;tag["stowed"]=Stowed;tag["recoveryTotal"]=Vitals.RecoveryTotal;tag["recoveryPosition"]=RecoveryPosition;tag["recoveryWorld"]=RecoveryWorld;
         tag["lifeSteal"]=Vitals.LifeSteal;tag["manaSickness"]=Vitals.ManaSickness;tag["manaDelay"]=Vitals.ManaDelay;
         tag["dialogue"]=Dialogue.Save();
         tag["discoveries"]=Discovery.Save();
-        tag["foodTime"]=Vitals.FoodTime;tag["foodDuration"]=Vitals.FoodDuration;tag["potionDelay"]=Vitals.PotionDelay; tag["autoLogistics"]=AutoLogistics; tag["schema"]=5; tag["maxHealth"]=Vitals.MaxHealth;tag["maxMana"]=Vitals.MaxMana;tag["mana"]=Vitals.Mana; tag["gear"]=Gear.Select(ItemIO.Save).ToList(); tag["health"]=Vitals.Health;tag["recovery"]=Vitals.Recovery; tag["bag"]=Bag.Select(ItemIO.Save).ToList();
+        tag["foodTime"]=Vitals.FoodTime;tag["foodDuration"]=Vitals.FoodDuration;tag["potionDelay"]=Vitals.PotionDelay; tag["autoLogistics"]=AutoLogistics; tag["schema"]=5; tag["maxHealth"]=Vitals.MaxHealth;tag["maxMana"]=Vitals.MaxMana;tag["mana"]=Vitals.Mana; tag["gear"]=Gear.Select(ItemIO.Save).ToList(); tag["health"]=Vitals.Health;tag["recovery"]=Vitals.Recovery; tag["bag"]=Bag.Select(ItemIO.Save).ToList();tag["supplySlots"]=SupplySlots.Select(ItemIO.Save).ToList();
         tag["environmentPaused"]=EnvironmentPaused;tag["workMode"]=(int)WorkMode;tag["fishingMode"]=(int)FishingMode;
         tag["combatMode"]=(int)CombatMode;
         tag["enabled"]=Enabled; tag["paused"]=Paused; tag["name"]=CatName;
@@ -106,6 +109,7 @@ public sealed class CompanionPlayer : ModPlayer
         DeliveryRemainder=tag.GetList<TagCompound>("deliveryRemainder").Select(ItemIO.Load).ToList();
         Training=new();if(tag.ContainsKey("training"))Training.Load(tag.GetCompound("training"));
         Loadouts=new();if(tag.ContainsKey("loadouts"))Loadouts.LoadData(tag.GetCompound("loadouts"));
+        ArmLayout=new();if(tag.ContainsKey("armLayout"))ArmLayout.Load(tag.GetCompound("armLayout"));
         NetSession=tag.GetString("networkSession");NetResume=tag.ContainsKey("networkResume")?tag.GetCompound("networkResume"):new();
         HoodColor=tag.ContainsKey("hoodColor")?CompanionPalette.Valid(tag.GetInt("hoodColor")):CompanionPalette.Default;
         Dyes=InventoryTransfer.Empty(1);if(tag.ContainsKey("dye"))Dyes[0]=ItemIO.Load(tag.GetCompound("dye"));
@@ -129,6 +133,9 @@ public sealed class CompanionPlayer : ModPlayer
         if(Vitals.Health==0 && !Vitals.Downed)Vitals.Recovery=CompanionVitals.RecoveryTime;
         float lifeSteal=tag.ContainsKey("lifeSteal")?tag.GetFloat("lifeSteal"):80;Vitals.LifeSteal=float.IsFinite(lifeSteal)?Math.Clamp(lifeSteal,-100000,80):80;
         Vitals.ManaSickness=Math.Clamp(tag.GetInt("manaSickness"),0,Terraria.Player.manaSickTimeMax);Vitals.ManaDelay=Math.Clamp(tag.GetInt("manaDelay"),0,3600);
+        SupplySlots=InventoryTransfer.Empty(CompanionSupplySlots.Count);
+        var supplies=tag.GetList<TagCompound>("supplySlots");
+        for(int i=0;i<supplies.Count;i++){var item=ItemIO.Load(supplies[i]);if(i<SupplySlots.Length)SupplySlots[i]=item;else if(!item.IsAir)DeliveryRemainder.Add(item);}
         var items=tag.GetList<TagCompound>("bag");
         // Preserve every saved slot if capacity ever shrinks in a future version.
         Bag=InventoryTransfer.Empty(Math.Max(24,items.Count));
@@ -220,7 +227,7 @@ public sealed class CompanionPlayer : ModPlayer
     }
     public void GiveHeld() {
         if(Player.HeldItem.favorited) { Status="Unfavorite the item first"; return; }
-        Status=$"Stored {InventoryTransfer.Move(Player.HeldItem,Bag)} items";
+        Status=$"Stored {CompanionSupplySlots.Move(Player.HeldItem,this)} items";
     }
     public void AuthorizeChest() {
         if(CompanionNetwork.Client){CompanionNetwork.ChestPermission(true);return;}

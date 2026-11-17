@@ -1,5 +1,33 @@
 # Changelog
 
+## 1.2.14 — 2026-11-17
+
+### 简体中文
+
+- 新增 4 个弹药格、1 个血药格和 1 个蓝药格，与背包同页显示，不占背包容量。
+- 专属格沿用拾取、取用和补货逻辑；整理和全部取回保留其中的补给，钱币按原版规则收纳。
+- 箱子和魔法存储补货优先选择恢复量更高的药水；喝血药兼顾恢复量和当前缺血，保留原有冷却。
+- 修复玩家与呆猫整理高亮互相干扰、呆猫格子高亮错位的问题。
+- 新增哨兵武器栏，可与主武器、仆从武器同时配装，保留原有召唤上限。
+- 支持旅人归途机械背包：手动装卸机械爪，沿用原模组的装配规则和效果，使用可拖动的独立装配窗口。
+- 满载机械爪保留携带的哨兵；普通地面哨兵只在战斗需要时补放，修复鬼爪等放置时因转身抓取失败的问题。
+- 修复呆猫面板顶部部分空白无法拖动的问题。
+- 修复金属反光染料在头像中的光照方向随主人转身错误翻转的问题。
+- 修复与 CIVE 同用时反复提示、攻击失败的问题，沿用主人的武器分组和连招配置，并支持联机。
+
+### English
+
+- Added four ammunition slots, one healing-potion slot and one mana-potion slot on the backpack page without reducing backpack capacity.
+- Dedicated supplies reuse pickup, consumption and restocking. Sort and Take All preserve these reserves; coins follow native inventory rules.
+- Chest and Magic Storage restocking prefer stronger potions. Healing considers restoration and missing health while preserving existing cooldowns.
+- Fixed sorting highlights leaking between the player and companion inventories and appearing on the wrong companion slots.
+- Added a dedicated sentry weapon slot alongside the main and minion weapon slots, preserving existing summon limits.
+- Added Homeward Journey mechanical backpack support with manual claw installation, native placement rules and effects, and a separate draggable assembly window.
+- Full claws retain carried sentries. Ground sentries are replaced only when combat requires it. Fixed turning during placement preventing claws, including Ghost Claws, from grabbing sentries.
+- Fixed part of the companion panel header not supporting dragging.
+- Fixed reflective dye lighting on portraits incorrectly flipping when the owner turns.
+- Fixed repeated CIVE prompts and failed companion attacks. Companions reuse the owner's weapon groups and sequences, including multiplayer support.
+
 ## 1.2.13 — 2026-11-17
 
 ### 简体中文

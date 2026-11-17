@@ -12,7 +12,18 @@ internal static class CompanionWeaponPolicy {
     const float SentryRange=700;
     internal static bool Rain(Item item)=>item.type is ItemID.CrimsonRod or ItemID.NimbusRod;
     internal static bool Sentry(Item item)=>item.sentry||CompanionCombatReach.Sample(item)?.sentry==true;
-    internal static bool Plan(Item item,CompanionNativeUse use,NPC target,ref Vector2 aim) {
+    internal static bool Plan(Item item,CompanionNativeUse use,NPC target,ref Vector2 aim)=>Plan(item,use,target,ref aim,out _);
+    internal static bool Plan(Item item,CompanionNativeUse use,NPC target,ref Vector2 aim,out bool carrierPlacement) {
+        carrierPlacement=false;
+        if(Sentry(item)&&CompanionCrossMod.SentryPoint(use) is {} carried){
+            // Let native Shoot/ItemCheck place and pay for the sentry at an
+            // available carrier grip. Never replace a full set each tick.
+            if(carried.Carried>=use.Actor.maxTurrets||carried.Point is not {} point)return false;
+            carrierPlacement=true;aim=point;return true;
+        }
+        // Ground deployments serve a fight; idle exploration must not repeatedly
+        // spend mana and interrupt work. Carrier grips above may be filled at rest.
+        if(Sentry(item)&&(target==null||!target.active||target.life<=0))return false;
         if(target==null)return true;
         if(item.type==ItemID.MagnetSphere){
             // Each recast shortens the previous sphere's remaining life to 30
@@ -25,6 +36,8 @@ internal static class CompanionWeaponPolicy {
             }
         }
         if(Sentry(item)){
+            Vector2 center=target?.Center??use.Cat.Center;
+            Rectangle area=target?.Hitbox??use.Cat.Hitbox;
             // Some mod weapons mark only their projectile as a sentry. Treat
             // these as persistent placements too, not an ordinary repeated
             // shot which keeps killing the old turret and resetting its AI.
@@ -32,19 +45,19 @@ internal static class CompanionWeaponPolicy {
             // the oldest turret when the fight moves beyond our combat area.
             int useful=0;
             foreach(var p in Main.projectile)if(p.active&&p.sentry&&CompanionOwnedShot.Of(p)==use&&
-                Vector2.DistanceSquared(p.Center,target.Hitbox.ClosestPointInRect(p.Center))<=
+                Vector2.DistanceSquared(p.Center,area.ClosestPointInRect(p.Center))<=
                 SentryRange*SentryRange)useful++;
             if(useful>=use.Actor.maxTurrets)return false;
             // Spread placements. DD2's native CanUse rejects overlapping turrets.
             // ItemCheck/Shoot still decides whether the item rests or floats.
-            float side=use.Cat.Center.X<target.Center.X?-1:1;
+            float side=use.Cat.Center.X<center.X?-1:1;
             // Native grounded sentries scan down to terrain. Avoid paying for
             // one hundreds of tiles below an airborne fight.
             bool nativeGround=item.type is ItemID.QueenSpiderStaff or ItemID.StaffoftheFrostHydra or ItemID.HoundiusShootius||
                 item.shoot>ProjectileID.None&&ProjectileID.Sets.IsADD2Turret[item.shoot];
             for(int candidate=0;candidate<6;candidate++){
                 float offset=(64+(useful+candidate/2)*96)*side*(candidate%2==0?1:-1);
-                var point=target.Center+new Vector2(offset,-16);
+                var point=center+new Vector2(offset,-16);
                 if(!WorldGen.InWorld((int)point.X/16,(int)point.Y/16,10)||
                     Collision.SolidCollision(point-new Vector2(8),16,16)||!CompanionCombatReach.Clear(use.Cat.Center,point))continue;
                 if(nativeGround){
@@ -53,7 +66,7 @@ internal static class CompanionWeaponPolicy {
                     int x,y;
                     try{using(new CompanionNativeUse.Scope(use))use.Actor.FindSentryRestingSpot(item.shoot,out x,out y,out _);}
                     finally{use.PlacementAim(previous);}
-                    if(Vector2.DistanceSquared(new Vector2(x,y),target.Hitbox.ClosestPointInRect(new Vector2(x,y)))>
+                    if(Vector2.DistanceSquared(new Vector2(x,y),area.ClosestPointInRect(new Vector2(x,y)))>
                         SentryRange*SentryRange)continue;
                     if(ProjectileID.Sets.IsADD2Turret[item.shoot]&&Terraria.GameContent.Events.DD2Event.Ongoing&&
                         Player.WouldSpotOverlapWithSentry(x,y,item.shoot is ProjectileID.DD2LightningAuraT1 or ProjectileID.DD2LightningAuraT2 or ProjectileID.DD2LightningAuraT3))continue;

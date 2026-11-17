@@ -20,8 +20,8 @@ public sealed class CompanionPanel : ModSystem
 {
     bool showStats;
     bool previousMouse, previousRight, dragging, mineVein, inventoryWasOpen;
-    readonly Texture2D[] slotPlaceholders=new Texture2D[3];
-    readonly Item[] weaponPlaceholderItems=new Item[2];
+    readonly Texture2D[] slotPlaceholders=new Texture2D[7];
+    readonly Item[] weaponPlaceholderItems=new Item[7];
     Vector2 position = new(900, 250), dragOffset;
     int tab, length = 3, direction = 1, targeting;
     static readonly Color Ink = Color.White, Accent = Color.Gold, Muted = new(190, 200, 230);
@@ -43,15 +43,17 @@ public sealed class CompanionPanel : ModSystem
         }
     }
     static bool IndependentLayout=>CompanionEquipment.Independent(Main.LocalPlayer.GetModPlayer<CompanionPlayer>());
-    internal static int BackpackWidth=>Math.Max(544+ExtraBagWidth,EquipmentSlotLeft+SlotOffset(IndependentLayout?CompanionEquipmentSlots.Visible(Main.LocalPlayer.GetModPlayer<CompanionPlayer>())-1:2)+SlotSize+16);
+    internal static int BackpackWidth=>Math.Max(544+ExtraBagWidth,EquipmentSlotLeft+SlotOffset(Math.Max(IndependentLayout?CompanionEquipmentSlots.Visible(Main.LocalPlayer.GetModPlayer<CompanionPlayer>())-1:2,CompanionCrossMod.ArmLayoutAvailable?.Invoke(Main.LocalPlayer.GetModPlayer<CompanionPlayer>())==true?3:2))+SlotSize+16);
     const int BackpackHeaderSpacing=10;
+    const int BackpackContentTop=140+BackpackHeaderSpacing;
+    const int SupplyRowHeight=76;
     internal static int BagColumns=>Main.LocalPlayer.GetModPlayer<CompanionPlayer>().Bag.Length>36?8:6;
     static int ExtraBagWidth=>SlotOffset(BagColumns-6);
     static int ExtraBagHeight(CompanionPlayer state)=>SlotOffset(Math.Max(0,(state.Bag.Length+BagColumns-1)/BagColumns-4));
     internal float Fit {
         get {
             var state=Main.LocalPlayer.GetModPlayer<CompanionPlayer>();
-            if(tab!=0||targeting!=0||state.Bag.Length<=24)return 1;
+            if(tab!=0||targeting!=0)return 1;
             var buffer=Main.graphics.GraphicsDevice.PresentationParameters;
             return Math.Min(1,Math.Min((buffer.BackBufferWidth/Main.UIScale-8)/BackpackWidth,(buffer.BackBufferHeight/Main.UIScale-8)/PanelHeight(state)));
         }
@@ -63,7 +65,7 @@ public sealed class CompanionPanel : ModSystem
     internal static int SlotOffset(int index)=>(int)(index*56*SlotScale);
     static int SlotSize=>(int)Math.Ceiling(TextureAssets.InventoryBack.Width()*SlotScale);
     internal Rectangle HitBounds=>ScreenBounds(Layout(Main.LocalPlayer.GetModPlayer<CompanionPlayer>()).Body);
-    internal bool Covers(Rectangle bounds){var layout=Layout(Main.LocalPlayer.GetModPlayer<CompanionPlayer>());return ScreenBounds(layout.Body).Intersects(bounds)||ScreenBounds(layout.Details).Intersects(bounds);}
+    internal bool Covers(Rectangle bounds){var layout=Layout(Main.LocalPlayer.GetModPlayer<CompanionPlayer>());return ScreenBounds(layout.Body).Intersects(bounds)||ScreenBounds(layout.Details).Intersects(bounds)||ScreenBounds(CompanionCrossMod.ArmLayoutBounds?.Invoke()??Rectangle.Empty).Intersects(bounds);}
     (Rectangle Body,Rectangle Details,bool Inline) Layout(CompanionPlayer state){
         var buffer=Main.graphics.GraphicsDevice.PresentationParameters;
         int screenW=(int)(buffer.BackBufferWidth/(Main.UIScale*Fit)),screenH=(int)(buffer.BackBufferHeight/(Main.UIScale*Fit));
@@ -76,7 +78,7 @@ public sealed class CompanionPanel : ModSystem
         if(inline){body.Width=510;body.Height=height;body.Y=Math.Clamp(y,4,Math.Max(4,screenH-body.Height-4));}
         return (body,details,inline);
     }
-    internal int PanelHeight(CompanionPlayer state)=>(tab==1?410:536+BackpackHeaderSpacing+ExtraBagHeight(state)+(CompanionEquipment.Independent(state)?42:0)-(HasHeaderRow(state)?0:36))-ActivityOffset+16;
+    internal int PanelHeight(CompanionPlayer state)=>(tab==1?410:536+BackpackHeaderSpacing+ExtraBagHeight(state)+SupplyRowHeight+(CompanionEquipment.Independent(state)?42:0)-(HasHeaderRow(state)?0:36))-ActivityOffset+16;
     internal static Rectangle HeaderPortraitPixels(Rectangle area,float scale){
         // Scale continuously with the header, retaining its shared centre at
         // 24 and eight UI pixels of space above the portrait.
@@ -115,7 +117,7 @@ public sealed class CompanionPanel : ModSystem
             Texture2D source;
             if(icon==2){source=CompanionSprite.Head;if(source==null)return;}
             else {
-                int type=icon==0?ItemID.CopperBroadsword:ItemID.BabyBirdStaff;
+                int type=icon switch {0=>ItemID.CopperBroadsword,1=>ItemID.BabyBirdStaff,3=>ItemID.WoodenArrow,4=>ItemID.HealingPotion,6=>ItemID.DD2BallistraTowerT1Popper,_=>ItemID.ManaPotion};
                 weaponPlaceholderItems[icon]=new Item(type);Main.instance.LoadItem(type);source=TextureAssets.Item[type].Value;
             }
             var pixels=new Color[source.Width*source.Height];source.GetData(pixels);
@@ -129,7 +131,7 @@ public sealed class CompanionPanel : ModSystem
         var texture=slotPlaceholders[icon];var frame=texture.Frame();float scale;
         if(icon==2)scale=SlotScale*Math.Min(1f,28f/Math.Max(frame.Width,frame.Height));
         else {var color=Color.White;ItemSlot.DrawItem_GetColorAndScale(weaponPlaceholderItems[icon],SlotScale,ref color,32f,ref frame,out _,out scale);}
-        batch.Draw(texture,position+TextureAssets.InventoryBack.Value.Size()*SlotScale/2,frame,Color.White*.35f,0,frame.Size()/2,scale,SpriteEffects.None,0);
+        batch.Draw(texture,position+TextureAssets.InventoryBack.Value.Size()*SlotScale/2,frame,(icon==4?new Color(255,190,190):icon==5?new Color(170,210,255):Color.White)*.35f,0,frame.Size()/2,scale,SpriteEffects.None,0);
     }
     public override void Load() => On_Main.DrawInventory += DrawVanillaInventory;
     public override void Unload() {
@@ -142,7 +144,7 @@ public sealed class CompanionPanel : ModSystem
     void DrawVanillaInventory(On_Main.orig_DrawInventory orig,Main self) {
         int mx=Main.mouseX,my=Main.mouseY;
         var state=Main.LocalPlayer.GetModPlayer<CompanionPlayer>();
-        bool covered=CompanionNetwork.Pending || state.PanelOpen && Main.netMode!=NetmodeID.Server && Covers(new Rectangle(mx,my,1,1));
+        bool covered=CompanionNetwork.Pending || state.PanelOpen && Main.netMode!=NetmodeID.Server && (Covers(new Rectangle(mx,my,1,1))||CompanionCrossMod.ArmLayoutBlocks?.Invoke(new Point((int)(mx/Fit),(int)(my/Fit)))==true);
         // Run after vanilla's per-layer zoom reset; keep slot rendering, suppress covered hit tests.
         try {if(covered){Main.mouseX=-10000;Main.mouseY=-10000;}orig(self);}
         finally {Main.mouseX=mx;Main.mouseY=my;}
@@ -158,6 +160,22 @@ public sealed class CompanionPanel : ModSystem
         batch.End();Begin();
         try{Main.mouseX=(int)(mouseX/fit);Main.mouseY=(int)(mouseY/fit);return DrawPanel();}
         finally{Main.mouseX=mouseX;Main.mouseY=mouseY;batch.End();batch.Begin(SpriteSortMode.Deferred,BlendState.AlphaBlend,SamplerState.LinearClamp,null,null,null,Main.UIScaleMatrix);}
+    }
+    // Draw the floating window last, while the panel's scale and gamepad
+    // collection are still active. Covered controls keep drawing, not receiving input.
+    readonly struct ArmOverlayScope:IDisposable {
+        readonly CompanionPlayer state;
+        readonly bool active,clicked;
+        readonly Point pointer;
+        internal Point Mouse=>new(Main.mouseX,Main.mouseY);
+        internal ArmOverlayScope(CompanionPlayer state,bool active,bool clicked){
+            this.state=state;this.active=active;this.clicked=clicked;pointer=new(Main.mouseX,Main.mouseY);
+            if(active&&CompanionCrossMod.ArmLayoutBlocks?.Invoke(pointer)==true){Main.mouseX=Main.mouseY=-10000;}
+        }
+        public void Dispose(){
+            Main.mouseX=pointer.X;Main.mouseY=pointer.Y;
+            if(active)CompanionCrossMod.ArmLayoutOverlay?.Invoke(Main.spriteBatch,state,pointer,clicked);
+        }
     }
     bool DrawPanel() {
         CompanionItemTooltip.Clear();
@@ -210,6 +228,8 @@ public sealed class CompanionPanel : ModSystem
         if(dragging)position=new Vector2(mouse.X,mouse.Y)-dragOffset;
         var layout=Layout(s);
         using var navigation=CompanionGamepad.Begin(layout.Inline?"attributes":"bag-"+tab,Fit);
+        using var overlay=new ArmOverlayScope(s,tab==0&&!layout.Inline,clicked);
+        mouse=overlay.Mouse;
         var area=layout.Body;
         int width=area.Width,height=area.Height,x=area.X,y=area.Y;
         if(!layout.Inline)position=area.Location.ToVector2();
@@ -238,13 +258,16 @@ public sealed class CompanionPanel : ModSystem
             Main.instance.MouseText(CompanionAppearance.L("AppearanceEntry"));
             if(clicked&&Main.mouseItem.IsAir){dragging=false;CompanionAppearance.Open(s);return true;}
         }
-        else if(!environmentButton.Contains(mouse)&&!fishingButton.Contains(mouse)&&!combatButton.Contains(mouse)&&title.Contains(mouse)&&Main.mouseLeft&&!dragging&&Main.mouseItem.IsAir){dragging=true;dragOffset=new Vector2(mouse.X,mouse.Y)-position;}
+        else if(!environmentButton.Contains(mouse)&&!fishingButton.Contains(mouse)&&!combatButton.Contains(mouse)&&new Rectangle(x+12,y,statsX-x-12,48).Contains(mouse)&&clicked&&!dragging&&Main.mouseItem.IsAir){dragging=true;dragOffset=new Vector2(mouse.X,mouse.Y)-position;}
         CompanionEnvironmentButton.Draw(sb,s,environmentButton,mouse,clicked);
         CompanionFishingButton.Draw(sb,s,fishingButton,mouse,clicked);
         CompanionCombatButton.Draw(sb,s,combatButton,mouse,clicked);
         Button("Attributes",Language.GetTextValue("Mods.PalicoCompanion.Attributes.Button"),statsX,guideButton.Y,statsWidth,()=>{showStats=!showStats;Terraria.Audio.SoundEngine.PlaySound(Terraria.ID.SoundID.MenuTick);},showStats);
         Button("Guide",CompanionText.Get("CompanionPanel.Guide"),guideButton.X,guideButton.Y,guideButton.Width,TrainingPanel.OpenGuide);
         if(CenteredButtonText.Close(sb,CompanionPanelHeader.CloseBounds(headerArea),mouse,clicked)){s.PanelOpen=false;showStats=false;return true;}
+        int backpackTop=y+16+BackpackContentTop-(HasHeaderRow(s)?0:36)-52;
+        var armButton=new Rectangle(x+EquipmentSlotLeft+SlotOffset(3),backpackTop+26,SlotSize,SlotSize);
+        if(tab==0&&!layout.Inline&&CompanionCrossMod.ArmLayoutUI?.Invoke(sb,s,area,armButton,mouse,clicked,rightClicked)==true)return true;
         if(layout.Inline){CompanionStatsPanel.Draw(sb,s,new Rectangle(x+16,y+56,width-32,height-72),mouse);return true;}
         if(!layout.Details.IsEmpty){
             var details=layout.Details;
@@ -324,17 +347,21 @@ public sealed class CompanionPanel : ModSystem
                 slotDisplay[drawSlot]=items[i];
                 // Favorite belongs to the item, but equipment keeps its slot
                 // colour. Preserve the actual flag for returning it to a bag.
-                if(group!=0&&items[i].favorited){slotDisplay[drawSlot]=items[i].Clone();slotDisplay[drawSlot].favorited=false;}
+                if(group is not (0 or CompanionSupplySlots.Group)&&items[i].favorited){slotDisplay[drawSlot]=items[i].Clone();slotDisplay[drawSlot].favorited=false;}
                 bool locked=armor&&!CompanionEquipmentSlots.Unlocked(s,i);
                 int equipmentContext=dye?ItemSlot.Context.EquipDye:training||armor&&i>=CompanionEquipment.AccessoryStart?ItemSlot.Context.EquipAccessory:ItemSlot.Context.EquipArmor;
                 // Both native contexts share the functional slot background;
                 // armor slot 3 has no built-in accessory placeholder.
                 if(training&&items[i].IsAir)equipmentContext=ItemSlot.Context.EquipArmor;
                 if(equipment||training)CompanionLoadoutTint.Draw(sb,s,slotDisplay,equipmentContext,drawSlot,new Vector2(bx,by),tint:locked?new Color(65,65,75):null,shared:CompanionInventoryOperations.SharedSlot(group,i)&&items[i].favorited);
-                else ItemSlot.Draw(sb,slotDisplay,dye?ItemSlot.Context.EquipDye:ItemSlot.Context.InventoryItem,drawSlot,new Vector2(bx,by),Color.White);
-                if(training&&items[i].IsAir)DrawEmptyIcon(sb,2,new Vector2(bx,by));
-                else if(equipment&&!armor&&!dye&&!training&&(i==0||i==CompanionWeapons.SummonSlot)&&items[i].IsAir)
-                    DrawEmptyIcon(sb,i==0?0:1,new Vector2(bx,by));
+                else {
+                    using var glow=s.SortGlow.Draw(drawSlot,group==0?i:-1);
+                    ItemSlot.Draw(sb,slotDisplay,dye?ItemSlot.Context.EquipDye:ItemSlot.Context.InventoryItem,drawSlot,new Vector2(bx,by),Color.White);
+                }
+                if(group==CompanionSupplySlots.Group&&items[i].IsAir)DrawEmptyIcon(sb,i<4?3:i,new Vector2(bx,by));
+                else if(training&&items[i].IsAir)DrawEmptyIcon(sb,2,new Vector2(bx,by));
+                else if(equipment&&!armor&&!dye&&!training&&(i==0||CompanionWeapons.IsSummonSlot(i))&&items[i].IsAir)
+                    DrawEmptyIcon(sb,i==0?0:i==CompanionWeapons.SentrySlot?6:1,new Vector2(bx,by));
             } finally {Main.inventoryScale=oldScale;}
             if(visibility){
                 CompanionGamepad.Add("accessory-visibility-"+i,eyeBounds);
@@ -347,7 +374,7 @@ public sealed class CompanionPanel : ModSystem
             }
         }
         if(tab==0) {
-            int top=y+140+BackpackHeaderSpacing,extraHeight=ExtraBagHeight(s);
+            int top=backpackTop,extraHeight=ExtraBagHeight(s)+SupplyRowHeight;
             bool independent=CompanionEquipment.Independent(s);
             int GearRow(int row)=>row==0?0:row+(independent?2:0);
             const float detailScale=DetailScale;
@@ -381,6 +408,16 @@ public sealed class CompanionPanel : ModSystem
             string capacity=$"{s.Bag.Count(i=>!i.IsAir)} / {s.Bag.Length}";
             HeaderText(capacity,x+299+ExtraBagWidth-(int)(FontAssets.MouseText.Value.MeasureString(capacity).X*.75f),Muted,.75f,96);
             for(int i=0;i<s.Bag.Length;i++)Slot(s.Bag,i,x+16+SlotOffset(i%BagColumns),top+26+SlotOffset(i/BagColumns));
+            int supplyTop=top+228+ExtraBagHeight(s);
+            Text(L("AmmoSlots"),x+16,supplyTop,Muted,.75f,SlotOffset(4)-8);
+            int potionLeft=x+16+SlotOffset(BagColumns-2);
+            Text(L("PotionSlots"),potionLeft,supplyTop,Muted,.75f,SlotOffset(2));
+            for(int i=0;i<CompanionSupplySlots.Count;i++){
+                int left=i<4?x+16+SlotOffset(i):potionLeft+SlotOffset(i-4);
+                Slot(s.SupplySlots,i,left,supplyTop+24);
+                if(s.SupplySlots[i].IsAir&&new Rectangle(left,supplyTop+24,SlotSize,SlotSize).Contains(mouse))
+                    Main.instance.MouseText(L(i<4?"AmmoSlots":i==4?"HealingSlot":"ManaSlot"));
+            }
             int actionWidth=(283+ExtraBagWidth-16)/3;
             Button("QuickStack",L("QuickStack"),x+16,top+228+extraHeight,actionWidth,s.QuickStack);
             Button("Take",L("Take"),x+24+actionWidth,top+228+extraHeight,actionWidth,s.TakeAll);
@@ -397,8 +434,13 @@ public sealed class CompanionPanel : ModSystem
             EquipmentLabel(CompanionText.Get("CompanionPanel.Support"),2);
             EquipmentLabel(L("DyeSlot"),3);
             Slot(s.Gear,0,equipmentLeft,top+26,true);
-            Slot(s.Gear,CompanionWeapons.SummonSlot,equipmentLeft+SlotOffset(1),top+26,true);
-            if(new Rectangle(equipmentLeft+SlotOffset(1),top+26,SlotSize,SlotSize).Contains(mouse)&&s.Gear[CompanionWeapons.SummonSlot].IsAir)Main.instance.MouseText(L("SummonWeapon")+"\n"+L("SummonWeaponHint"));
+            for(int column=1;column<=2;column++){
+                int slot=column==1?CompanionWeapons.SummonSlot:CompanionWeapons.SentrySlot;
+                string label=column==1?"SummonWeapon":"SentryWeapon";
+                Slot(s.Gear,slot,equipmentLeft+SlotOffset(column),top+26,true);
+                if(new Rectangle(equipmentLeft+SlotOffset(column),top+26,SlotSize,SlotSize).Contains(mouse)&&s.Gear[slot].IsAir)
+                    Main.instance.MouseText(L(label)+"\n"+L(label+"Hint"));
+            }
             if(new Rectangle(equipmentLeft,top+26,SlotSize,SlotSize).Contains(mouse)){
                 if(s.Gear[0].IsAir)Main.instance.MouseText(L("DefaultWeaponHint")+"\n"+L("GearHint"));
             }
@@ -417,10 +459,10 @@ public sealed class CompanionPanel : ModSystem
             var resource=CompanionResourceDisplay.Read(s);
             Stat(resource.Label,resource.Value,statLeft,statRight,top+extraHeight+statOffset+256,resource.Low?Color.LightSkyBlue:Ink,resource.Hint);
             Stat(L("Defense"),$"{s.Vitals.EffectiveDefense}",statLeft,statRight,top+extraHeight+statOffset+282,Ink,independent?Language.GetTextValue("Mods.PalicoCompanion.Equipment.DefenseHint"):L("DefenseHint",CompanionBalanceConfig.Current.DefenseRatio));
-            bool sentry=CompanionWeaponPolicy.Sentry(CompanionWeapons.Summon(s.Gear));
             var use=(s.Cat?.ModProjectile as CompanionCat)?.Weapons;
-            float slots=sentry?use?.SentryCount??0:use?.SummonSlots??0;
-            Stat(L(sentry?"SentrySlots":"MinionSlots"),$"{slots:0.#} / {(sentry?CompanionNativeUse.SentryLimit(s.Player):CompanionNativeUse.MinionLimit(s.Player))}",statLeft,statRight,top+extraHeight+statOffset+308,Ink,independent?Language.GetTextValue("Mods.PalicoCompanion.Equipment.SummonHint"):L(sentry?"SentrySlotsHint":"MinionSlotsHint"));
+            string summonCounts=$"{use?.SummonSlots??0:0.#}/{CompanionNativeUse.MinionLimit(s.Player)} · {use?.SentryCount??0}/{CompanionNativeUse.SentryLimit(s.Player)}";
+            Stat(L("SummonCounts"),summonCounts,statLeft,statRight,top+extraHeight+statOffset+308,Ink,
+                independent?Language.GetTextValue("Mods.PalicoCompanion.Equipment.SummonHint"):L("MinionSlotsHint")+"\n"+L("SentrySlotsHint"));
             CompanionFoodDisplay.Draw(sb,s,new Rectangle(independent?equipmentLeft:x+16,top+extraHeight+(independent?332:278),independent?width-EquipmentSlotLeft-16:283+ExtraBagWidth,32));
 
             if(independent){

@@ -9,7 +9,7 @@ internal static partial class CompanionNetwork {
     internal static bool QuickTrashHeld=>ItemSlot.ControlInUse&&!ItemSlot.Options.DisableQuickTrash&&ItemSlot.Options.DisableLeftShiftTrashCan;
     internal static void Trash(CompanionPlayer s,Item[] items,int index){
         if(!Client||Pending||CompanionSession.Closing||!s.NetReady||items[index].IsAir||items[index].favorited)return;
-        byte group=(byte)(ReferenceEquals(items,s.Bag)?0:ReferenceEquals(items,s.Gear)?1:ReferenceEquals(items,s.Dyes)?2:3);
+        byte group=CompanionInventoryOperations.Group(s,items);
         var p=Packet(QuickTrash);pending=++sequence;p.Write(pending);p.Write(group);p.Write((ushort)index);ItemIO.Send(items[index],p,true,true);RememberRequest(p);p.Send();
     }
     static void ReadTrashResult(BinaryReader r){
@@ -24,8 +24,8 @@ internal static partial class CompanionNetwork {
     static void ReadTrash(CompanionPlayer s,BinaryReader r){
         int id=r.ReadInt32();byte group=r.ReadByte();int index=r.ReadUInt16();var expected=ItemIO.Receive(r,true,true);
         if(id<=s.NetCommand){ReplyAgain(s,id);return;}s.NetCommand=id;
-        var items=group==0?s.Bag:group==1?s.Gear:group==2?s.Dyes:s.Training.Slots;var returned=new Item();
-        if(group<=3&&index<items.Length&&!items[index].favorited&&Same(items[index],expected)){returned=items[index];items[index]=new Item();}
+        var items=CompanionInventoryOperations.Slots(s,group);var returned=new Item();
+        if(items!=null&&index<items.Length&&!items[index].favorited&&Same(items[index],expected)){returned=items[index];items[index]=new Item();}
         CommitInventoryReply(s,QuickTrashResult,id,returned:[returned]);
     }
 }

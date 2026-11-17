@@ -26,20 +26,21 @@ internal readonly record struct InventoryOutcome(InventoryCue Cue, int Moved=0) 
 
 internal static class CompanionInventoryOperations {
     static bool SameKind(Item a,Item b)=>a.netID==b.netID&&a.type==b.type;
-    internal static Item[] Slots(CompanionPlayer s,byte group)=>group switch {0=>s.Bag,1=>s.Gear,2=>s.Dyes,3=>s.Training.Slots,_=>null};
-    internal static byte Group(CompanionPlayer s,Item[] items)=>ReferenceEquals(items,s.Bag)?(byte)0:ReferenceEquals(items,s.Gear)?(byte)1:ReferenceEquals(items,s.Dyes)?(byte)2:(byte)3;
-    internal static bool SharedSlot(byte group,int index)=>group==3&&index is >=0 and <4||group==1&&(index==0||index==CompanionWeapons.SummonSlot||CompanionEquipment.IsSlot(index));
-    internal static bool CanFavorite(byte group,int index)=>group==0||SharedSlot(group,index);
+    internal static Item[] Slots(CompanionPlayer s,byte group)=>group switch {0=>s.Bag,1=>s.Gear,2=>s.Dyes,3=>s.Training.Slots,CompanionSupplySlots.Group=>s.SupplySlots,CompanionArmLayout.Group=>s.ArmLayout.Items,_=>null};
+    internal static byte Group(CompanionPlayer s,Item[] items)=>ReferenceEquals(items,s.ArmLayout.Items)?CompanionArmLayout.Group:ReferenceEquals(items,s.Bag)?(byte)0:ReferenceEquals(items,s.Gear)?(byte)1:ReferenceEquals(items,s.Dyes)?(byte)2:ReferenceEquals(items,s.SupplySlots)?CompanionSupplySlots.Group:(byte)3;
+    internal static bool SharedSlot(byte group,int index)=>group==3&&index is >=0 and <4||group==1&&(index==0||CompanionWeapons.IsSummonSlot(index)||CompanionEquipment.IsSlot(index));
+    internal static bool CanFavorite(byte group,int index)=>group is 0 or CompanionSupplySlots.Group||SharedSlot(group,index);
     internal static bool Accepts(CompanionPlayer s,Item item,byte group,int index)=>group switch {
-        0=>true,1=>CompanionEquipment.IsSlot(index)?CompanionEquipment.Accepts(s,item,index):CompanionVitals.Accepts(item,index),2=>CompanionDye.Accepts(item),3=>s.Training.Accepts(s,item,index),_=>false
+        0=>true,1=>CompanionEquipment.IsSlot(index)?CompanionEquipment.Accepts(s,item,index):CompanionVitals.Accepts(item,index),2=>CompanionDye.Accepts(item),3=>s.Training.Accepts(s,item,index),CompanionSupplySlots.Group=>CompanionSupplySlots.Accepts(item,index),CompanionArmLayout.Group=>item.IsAir||CompanionCrossMod.ArmAccepts?.Invoke(s,item,index)==true,_=>false
     };
-    internal static bool CanSplit(Item item,byte group,int index)=>item.maxStack>1&&(group==0||group==2||group==1&&index==0&&item.consumable);
+    internal static bool CanSplit(Item item,byte group,int index)=>item.maxStack>1&&(group is 0 or CompanionSupplySlots.Group||group==2||group==1&&index==0&&item.consumable);
     internal static bool CanTogglePickupStone(Item item,byte group)=>group==0&&!item.IsAir&&item.type is ItemID.EncumberingStone or ItemID.UncumberingStone;
 
     // Shared BankItem-style cursor transaction, preserving item favorites.
     // Never run client-only ItemSlot on a server by swapping player/input globals.
     // Conformance tests compare these rules to the installed native ItemSlot.
     internal static InventoryOutcome Click(Item[] items,int index,ref Item cursor,bool right,bool favorite,byte group){
+        if(group==CompanionArmLayout.Group)return right||favorite?default:CompanionArmLayout.Click(items,index,ref cursor);
         PickupCredit.Clear(cursor);var item=items[index];
         if(!right&&favorite&&cursor.IsAir&&!item.IsAir){
             if(!CanFavorite(group,index))return default;
@@ -68,10 +69,10 @@ internal static class CompanionInventoryOperations {
     internal static InventoryOutcome Deposit(CompanionPlayer s,Item[] offered,bool equip=false,bool matchingOnly=false,bool preserveFresh=false){
         int moved=0;
         foreach(var item in offered){
-            if(item.IsAir||item.favorited||matchingOnly&&!s.Bag.Any(b=>!b.IsAir&&b.type==item.type))continue;
+            if(item.IsAir||item.favorited||matchingOnly&&!CompanionSupplySlots.Carried(s).Any(b=>!b.IsAir&&b.type==item.type))continue;
             if(!preserveFresh)PickupCredit.Clear(item);int before=item.stack;
             if(equip&&!s.Training.TryEquip(s,item))CompanionEquipment.TryEquip(s,item);
-            InventoryTransfer.Move(item,s.Bag);
+            CompanionSupplySlots.Move(item,s);
             moved+=before-(item.IsAir?0:item.stack);
         }
         return InventoryOutcome.Transfer(moved);

@@ -35,7 +35,7 @@ public static class Logistics
         int count=0;
         foreach(var item in CompanionRestock.Candidates(s,chest)) {
             int wanted=CompanionRestock.Wanted(s,item);
-            if(wanted>0){PickupCredit.Clear(item);count+=InventoryTransfer.Move(item,CompanionRestock.Destination(s,item),wanted);}
+            if(wanted>0){PickupCredit.Clear(item);count+=CompanionRestock.Move(s,item,wanted);}
         }
         Sync(chest);s.Status=CompanionText.Message("Logistics.Restocked" ,count);return count;
     }

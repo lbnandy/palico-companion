@@ -21,7 +21,6 @@ UI: {
 	FishingAssistHint: Fish only when you fish, not merely when passing water
 	FishingOffHint: No automatic or cooperative fishing; you can still select a fishing spot
 	WorkModeNext: Click to switch: {0}
-
 	CombatProactive: Attack proactively
 	CombatAssist: Assist owner
 	CombatPassive: Do not attack
@@ -94,11 +93,15 @@ UI: {
 	GardenDone: Harvested and replanted with one seed.
 	GardenReplantBlocked: Replant blocked; seed and normal drops retained.
 	GardenBlocked: Harvest blocked; seed retained.
+	AmmoSlots: Ammo
+	PotionSlots: Potions
+	HealingSlot: Healing potion
+	ManaSlot: Mana potion
 	QuickStack: Quick stack
 	NativeBagHint: Shift-click non-favorited items in your inventory or a chest to transfer them here. Backpack favorites stay during bulk withdrawal but remain usable and consumable.
 	Transferred: Transferred {0} items
 	Recovering: Recovering: back in {0}s
-	GearHint: Equip throwing weapons as a stack; keep ammo in the Palico inventory
+	GearHint: Equip a direct-attack weapon, including whips. Minion and sentry weapons have dedicated slots. Throwing weapons accept stacks.
 	DefaultWeaponHint: An empty weapon slot uses a Copper Shortsword
 	RecoverArmor: Retrieve
 	LegacyArmorHint: Legacy armor is withdrawal-only; defense now scales with the player
@@ -108,8 +111,11 @@ UI: {
 	DefenseHint: Defense is {0}% of the player
 	HealthLabel: Life
 	ManaLabel: Mana
-	SummonWeapon: Summon weapon
-	SummonWeaponHint: Equip a minion or sentry weapon. Returns to the main weapon after summoning or deploying. Replacing this slot dismisses its summons.
+	SummonWeapon: Minion weapon
+	SummonWeaponHint: Equip a minion weapon. Returns to the main weapon after summoning. Replacing this slot dismisses only minions.
+	SentryWeapon: Sentry weapon
+	SentryWeaponHint: Equip a sentry weapon. Returns to the main weapon after deployment. Replacing this slot dismisses only sentries.
+	SummonCounts: Minions / sentries
 	MinionSlots: Minion slots
 	SentrySlots: Sentry slots
 	SentrySlotsHint: Placed / limit. Matches your sentry limit, with a minimum of 1. Uses separate slots and repositions as combat moves. Old One's Army weapons follow vanilla unlock rules and use Etherian Mana from the Palico inventory during the event.
@@ -229,10 +235,12 @@ Configs: {
 			Label: Share potion and station buffs
 			Tooltip: Both modes share the owner's regular potion buffs and buffs from the Sharpening Station, Ammo Box, Crystal Ball, Bewitching Table and War Table until they end. Identical buffs do not stack. Inherited stats still use their own percentages, even with sharing disabled. Excludes food, pets, mounts, equipment procs and class bursts.
 		}
+
 		DamageReductionInheritancePercent: {
 			Label: Damage reduction inherited (%)
 			Tooltip: Percentage of the owner's ordinary damage reduction to inherit. For example, 50% of the owner's 20% reduction gives your Palico 10% reduction. Set to 0 to disable. Excludes dodges, shields and mod-specific conditional reductions.
 		}
+
 		RegenInheritancePercent: {
 			Label: Health regeneration inherited (%)
 			Tooltip:
@@ -294,6 +302,11 @@ Configs: {
 				Agile: anticipates hits earlier, with a 0.75-second cooldown; body contact allows another attempt before the cooldown ends
 				Evasion adds no invincibility frames; normal combat positioning remains active when evasion is off
 				'''
+		}
+
+		PersonalMode: {
+			Label: Personal Mode
+			Tooltip: ""
 		}
 	}
 
@@ -399,7 +412,6 @@ Configs: {
 			Tooltip: Quiet Terraria cat sounds when chatting, hurt or petted, with limits on repeated playback.
 		}
 
-
 		DeliverRecoveryDrops: {
 			Label: Bring Hearts and Stars
 			Tooltip: Brings nearby Hearts and Stars when you need life or mana, without interrupting digging.
@@ -422,7 +434,7 @@ Configs: {
 
 		AutoHeal: {
 			Label: Use recovery potions
-			Tooltip: Drinks Healing Potions at half life and Mana Potions when a spell needs mana. Uses Palico supplies, including favorites. Potion cooldowns and Mana Sickness are separate from yours.
+			Tooltip: Uses Healing Potions when enough life is missing for the best carried potion, or at half life. Uses Mana Potions when a spell needs mana. Chooses suitable potions from dedicated slots and the backpack, including favorites. Potion cooldowns and Mana Sickness are separate from yours.
 		}
 
 		Chatter: {
@@ -571,6 +583,28 @@ Configs: {
 		Occasional.Tooltip: ""
 		EveryTime.Tooltip: ""
 		Off.Tooltip: ""
+	}
+
+	PickupFilterMode: {
+		Tooltip: ""
+		Blacklist.Tooltip: ""
+		Whitelist.Tooltip: ""
+		Coins.Tooltip: ""
+	}
+
+	CompanionLightingMode: {
+		Tooltip: ""
+		Off.Tooltip: ""
+		Held.Tooltip: ""
+		Automatic.Tooltip: ""
+	}
+
+	CompanionSpeechMode: {
+		Tooltip: ""
+		Automatic.Tooltip: ""
+		Overhead.Tooltip: ""
+		Chat.Tooltip: ""
+		Both.Tooltip: ""
 	}
 }
 
@@ -1440,6 +1474,10 @@ Items: {
 	MasterTools.Tooltip: ""
 	CatWorkbench.Tooltip: ""
 	GigaBarrelBomb.Tooltip: ""
+	ReinforcedTools.Tooltip: ""
+	CelestialTools.Tooltip: ""
+	ExpandedBackpack.Tooltip: ""
+	ReinforcedBackpack.Tooltip: ""
 }
 
 EvasionChoices: {

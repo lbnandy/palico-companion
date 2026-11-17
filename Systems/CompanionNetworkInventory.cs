@@ -18,6 +18,7 @@ internal static partial class CompanionNetwork {
         if(receipt.Kind is SlotResult or QuickTrashResult or FeedResult)ItemIO.Send(receipt.Returned[0],packet,true,true);
         else if(receipt.Kind==BulkResult)Items(packet,receipt.Returned);
         if(receipt.Kind!=QuickTrashResult)receipt.Outcome.Write(packet);
+        if(receipt.Kind==SortResult)s.SortGlow.Write(packet);
         if(receipt.Kind is ControlResult or FeedResult)packet.Write(receipt.Message);
         return packet;
     }
@@ -34,11 +35,11 @@ internal static partial class CompanionNetwork {
     internal static bool CanMoveInventory(Player player)=>player.itemAnimation==0&&player.itemTime==0;
     internal static void Click(CompanionPlayer s,Item[] items,int index,bool right,bool favorite=false) {
         if(!Client||Pending||CompanionSession.Closing||!s.NetReady||!CanMoveInventory(s.Player))return;
-        trainingApplication=false;byte group=(byte)(ReferenceEquals(items,s.Bag)?0:ReferenceEquals(items,s.Gear)?1:ReferenceEquals(items,s.Dyes)?2:3);
+        trainingApplication=false;byte group=CompanionInventoryOperations.Group(s,items);
         // Like native dye slots, classify dyes on the rendering client. A
         // dedicated server has no armor shader registrations (Item.dye is 0).
         if(group==2&&!CompanionDye.Accepts(Main.mouseItem))return;
-        if(group==1&&!CompanionInventoryOperations.Accepts(s,Main.mouseItem,group,index))return;
+        if((group==1||group==CompanionSupplySlots.Group||group==CompanionArmLayout.Group)&&!CompanionInventoryOperations.Accepts(s,Main.mouseItem,group,index))return;
         var p=Packet(Slot);pending=++sequence;p.Write(pending);p.Write(group);p.Write((ushort)index);p.Write(right);p.Write(favorite);
         ItemIO.Send(items[index],p,true,true);escrow=Main.mouseItem;Main.mouseItem=new Item();ItemIO.Send(escrow,p,true,true);RememberRequest(p);p.Send();
     }
@@ -54,10 +55,10 @@ internal static partial class CompanionNetwork {
         for(int i=0;i<58;i++)if(ReferenceEquals(s.Player.inventory[i],material))NetMessage.SendData(MessageID.SyncEquipment,-1,-1,null,Main.myPlayer,i);
     }
     internal static void Transfer(CompanionPlayer state,bool deposit,int slot=-1,byte group=0){
-        if(!Client||Pending||CompanionSession.Closing||!state.NetReady||!Main.mouseItem.IsAir||!CanMoveInventory(state.Player))return;
+        if(!Client||Pending||CompanionSession.Closing||!state.NetReady||!Main.mouseItem.IsAir&&group!=CompanionArmLayout.Group||!CanMoveInventory(state.Player))return;
         var offered=InventoryTransfer.Empty(50);var p=Packet(Bulk);pending=++sequence;p.Write(pending);p.Write(deposit);p.Write(slot);p.Write(group);
         if(deposit){for(int i=0;i<50;i++){var item=state.Player.inventory[i];if(item.IsAir||item.favorited||slot>=0&&i!=slot)continue;
-            if(slot<0&&!System.Linq.Enumerable.Any(state.Bag,b=>!b.IsAir&&b.type==item.type))continue;
+            if(slot<0&&!System.Linq.Enumerable.Any(CompanionSupplySlots.Carried(state),b=>!b.IsAir&&b.type==item.type))continue;
             offered[i]=item;state.Player.inventory[i]=new Item();NetMessage.SendData(MessageID.SyncEquipment,-1,-1,null,Main.myPlayer,i);}}
         bulkEscrow=offered;Items(p,offered);Items(p,state.Player.inventory);RememberRequest(p);p.Send();
     }
@@ -70,8 +71,10 @@ internal static partial class CompanionNetwork {
     }
     static void FinishInventoryReply(){automaticMaterial=false;pending=0;request=null;escrow=null;bulkEscrow=null;}
     static void ReadSortResult(BinaryReader r){
-        int id=r.ReadInt32();ReadState(r,true,apply:MatchesPending(id));var outcome=InventoryOutcome.Read(r);
-        if(!MatchesPending(id))return;FinishInventoryReply();outcome.Present(Main.LocalPlayer.GetModPlayer<CompanionPlayer>());
+        int id=r.ReadInt32();ReadState(r,true,apply:MatchesPending(id));var outcome=InventoryOutcome.Read(r);var hues=CompanionSortGlow.Read(r);
+        if(!MatchesPending(id))return;FinishInventoryReply();var state=Main.LocalPlayer.GetModPlayer<CompanionPlayer>();
+        if(outcome.Cue==InventoryCue.Tick)state.SortGlow.Start(hues);
+        outcome.Present(state);
     }
     static void ReadSort(CompanionPlayer s,BinaryReader r,int sender){
         int id=r.ReadInt32();if(id<=s.NetCommand){ReplyAgain(s,id);return;}s.NetCommand=id;
@@ -88,7 +91,7 @@ internal static partial class CompanionNetwork {
     static void ReadBulk(CompanionPlayer state,BinaryReader r,int sender){
         int id=r.ReadInt32();bool deposit=r.ReadBoolean();int selected=r.ReadInt32();byte group=r.ReadByte();var offered=Items(r,50);var capacity=Items(r,100);
         if(id<=state.NetCommand){ReplyAgain(state,id);return;}
-        if(offered.Length!=50||capacity.Length<50||group>6||group==4&&!deposit||group==5&&deposit||group==6&&!deposit||selected< -1)return;
+        if(offered.Length!=50||capacity.Length<50||group>CompanionArmLayout.Group||group>=CompanionSupplySlots.Group&&deposit||group==4&&!deposit||group==5&&deposit||group==6&&!deposit||selected< -1)return;
         state.NetCommand=id;Item[] returned;InventoryOutcome outcome;
         if(group is 5 or 6){
             if(group==6){CompanionInventoryOperations.Deposit(state,offered,preserveFresh:true);returned=offered.Where(i=>!i.IsAir).ToArray();outcome=new(InventoryCue.DeliveryReturn);}

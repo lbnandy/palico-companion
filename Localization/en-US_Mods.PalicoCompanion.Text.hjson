@@ -99,7 +99,6 @@ CompanionLoadouts: {
 	Unshare: Stop sharing across loadouts
 	SharedHint: Shared across loadouts when the same slot is empty. Unfavorite to keep it in the current loadout.
 	ShareHint: Favorite to share this item across loadouts when the same slot is empty.
-
 	Invalid: Invalid loadout
 	AlreadyActive: Already using loadout {0}
 	Switched: Switched to loadout {0}
@@ -400,6 +399,7 @@ Guide: {
 		'''
 		[Transfers and favorites]
 		Craft an Expanded Palico Backpack at the Palico Workbench to expand from 24 to 36 slots. In Hardmode, use a Reinforced Palico Backpack to reach 48 slots.
+		Dedicated ammo and potion slots do not use backpack space. Sort, Take all and automatic storage leave these supplies in place; you can still take them out individually. Ammo and potions in the backpack remain usable.
 		With the panel open, Shift-click non-favorited items in your inventory or a chest to transfer them to your Palico.
 		Backpack favorites stay put during bulk withdrawal but remain usable and consumable. Equipment favorites are shared between loadouts; see Equipment & growth.
 
@@ -458,9 +458,11 @@ Guide: {
 
 
 		[Minions and sentries]
-		The slot beside the main weapon accepts a minion or sentry weapon. Your Palico returns to its main weapon after summoning or deploying. Replacing the summon weapon dismisses its summons.
+		Three dedicated slots hold the main, minion and sentry weapons. Whips go in the main slot. Your Palico returns to it after summoning or deploying; replacing a summon weapon dismisses only its own family. Equipment and stats still determine summon limits.
+		Missing or distant sentries are redeployed nearby. Useful sentries are kept instead of repeatedly recast.
 		Limits follow the owner in inheritance mode, or the Palico's equipment and buffs in independent mode. Both have a minimum of 1 and do not use your own slots.
 		Old One's Army weapons follow vanilla unlock rules. During the event, keep Etherian Mana in the Palico inventory.
+		Homeward Journey: equip a mechanical backpack accessory in independent mode, then open the claw button in the Palico panel. Hold a claw and click a position to install it; click to remove or swap, or Shift-click to take it back. Native capacity, reach and grab effects apply. Claws are not installed automatically. Free grips can be filled with sentries before combat; full grips keep their sentries when distant enemies appear. Ground sentries deploy only for combat.
 		'''
 	QotAmmo:
 		'''

@@ -9,6 +9,7 @@ namespace PalicoCompanion.Systems;
 // art is submitted here; held items keep their own native drawing/effects.
 public static class CompanionDye {
     static Projectile current;
+    static readonly Projectile portraitLighting=new Projectile();
     public static Matrix? WorldMatrixOverride;
     public static bool Accepts(Item item)=>item.IsAir||item.dye>0;
     public static int Shader(CompanionPlayer s)=>s.Dyes[0].IsAir?0:s.Dyes[0].dye;
@@ -53,7 +54,17 @@ public static class CompanionDye {
             data.texture=layers.Original;data.Draw(batch);
             data.texture=layers.Cloth;
         }
-        try{if(shader>0)GameShaders.Armor.Apply(shader,player,data);data.Draw(batch);}
+        try{
+            if(shader>0){
+                // Keep the owner's light sample and team dye, but use this
+                // sprite's facing and texture coordinates, not player armor frames.
+                portraitLighting.position=player.position;
+                portraitLighting.width=player.width;portraitLighting.height=player.height;
+                portraitLighting.direction=(data.effect&SpriteEffects.FlipHorizontally)!=0?-1:1;
+                GameShaders.Armor.GetSecondaryShader(shader,player)?.Apply(portraitLighting,data);
+            }
+            data.Draw(batch);
+        }
         finally{if(shader>0)Main.pixelShader.CurrentTechnique.Passes[0].Apply();}
     }
 }

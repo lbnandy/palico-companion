@@ -100,7 +100,7 @@ internal static class CompanionCombatReach {
         bool followsOwner=companion!=null&&!state.Stationed&&!CompanionWeapons.SummonWeapon(item)&&
             !close&&!standOff&&distance&&Range(item,cat)>=RangedRange&&
             CompanionWeaponAim.CanReach(item,companion.Weapons,companion.Navigation.Riding?CompanionNavigation.FlightFollowGoal(owner):follow,target);
-        bool summoning=CompanionWeapons.SummonWeapon(item)||state.Gear[0].IsAir&&CompanionWeapons.SummonWeapon(CompanionWeapons.Summon(state.Gear));
+        bool summoning=CompanionWeapons.SummonWeapon(item)||state.Gear[0].IsAir&&(CompanionWeapons.SummonWeapon(CompanionWeapons.Summon(state.Gear))||CompanionWeapons.SummonWeapon(CompanionWeapons.Sentry(state.Gear)));
         // Seeing a distant enemy does not require leaving the owner to reach it.
         // Reuse return/approach selection; targeting, evasion and station limits stay separate.
         bool limitApproach=!state.Stationed&&!summoning&&NeedsApproach(item,cat);

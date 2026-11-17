@@ -63,8 +63,8 @@ public sealed class CompanionPickup {
     // Selection is not pickup: a fresh throw or an obstacle may delay taking
     // an item without making it disappear from a direct work request.
     internal static bool HasRoom(Item item,CompanionPlayer state)=>
-        CompanionRestock.Thrown(state,item)&&InventoryTransfer.HasRoom(item,CompanionRestock.Destination(state,item))||
-        InventoryTransfer.HasRoom(item,state.Bag);
+        CompanionRestock.Thrown(state,item)&&CompanionRestock.Capacity(state,item)>0||
+        CompanionSupplySlots.HasRoom(item,state);
     // Player.CanAcceptItemIntoInventory's native exception set, with the
     // companion's own inventory supplying the lock instead of the owner's.
     internal static bool AllowsGroundPickup(Item item,CompanionPlayer state)=>
@@ -102,8 +102,8 @@ public sealed class CompanionPickup {
         try{
             // Recovered throwing weapons refill the equipped stack first.
             // Chest stock targets do not limit an item already being collected.
-            moved=CompanionRestock.Thrown(state,item)?InventoryTransfer.Move(item,CompanionRestock.Destination(state,item)):0;
-            moved+=InventoryTransfer.Move(item,state.Bag);
+            moved=CompanionRestock.Thrown(state,item)?CompanionRestock.Move(state,item):0;
+            moved+=CompanionSupplySlots.Move(item,state);
         }finally{PickupCredit.Clear(item);if(!item.IsAir)courtesy.until=until;}
         if(moved>0){
             display.Center=cat.Center;display.stack=moved;

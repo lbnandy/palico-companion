@@ -1,7 +1,11 @@
-1.2.13 Update
-
-- Players and companions can now share damage through the Paladin's Shield, its upgrades and modded accessories using the same effect, preserving their native effects and activation conditions.
-- Fixed some AlchemistNPC Lite combination-potion benefits not being shared with companions, including sources in the player's inventory and Quality of Terraria potion bag.
-- Fixed companion kills failing to count toward enemy banners. Melee, ranged and minion kills now contribute normally.
-- Fixed abnormal repeated hits during a melee attack with weapons such as the Keybrand, preserving existing damage, attack speed and projectile effects.
-- Fixed errors when Magic Storage refreshes crafting recipes while a companion is active, which could interrupt crafting.
+1.2.14 Update
+- Added four ammunition slots, one healing-potion slot and one mana-potion slot on the backpack page without reducing backpack capacity.
+- Dedicated supplies reuse pickup, consumption and restocking. Sort and Take All preserve these reserves; coins follow native inventory rules.
+- Chest and Magic Storage restocking prefer stronger potions. Healing considers restoration and missing health while preserving existing cooldowns.
+- Fixed sorting highlights leaking between the player and companion inventories and appearing on the wrong companion slots.
+- Added a dedicated sentry weapon slot alongside the main and minion weapon slots, preserving existing summon limits.
+- Added Homeward Journey mechanical backpack support with manual claw installation, native placement rules and effects, and a separate draggable assembly window.
+- Full claws retain carried sentries. Ground sentries are replaced only when combat requires it. Fixed turning during placement preventing claws, including Ghost Claws, from grabbing sentries.
+- Fixed part of the companion panel header not supporting dragging.
+- Fixed reflective dye lighting on portraits incorrectly flipping when the owner turns.
+- Fixed repeated CIVE prompts and failed companion attacks. Companions reuse the owner's weapon groups and sequences, including multiplayer support.

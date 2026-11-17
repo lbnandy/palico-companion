@@ -6,10 +6,14 @@ using Terraria.Localization;
 
 namespace PalicoCompanion.Systems;
 
+internal readonly record struct CompanionSentryPlacement(Vector2? Point,int Carried);
+
 public sealed class CompanionCrossMod:ModSystem {
     internal static Func<float> InfernoOpacity;
     internal static Func<float> SupportProgression;
     internal static Action<Player,Vector2> PrepareActor;
+    internal static Action<System.IO.BinaryReader,int> CiveDefaults;
+    internal const byte CiveDefaultsPacket=202;
     // Optional non-combat respawn limits, queried without running death hooks.
     internal static Func<int,int> PeacefulRespawnLimit;
     internal static int PeacefulRespawnTicks(int normal){
@@ -28,6 +32,18 @@ public sealed class CompanionCrossMod:ModSystem {
     internal static Action<CompanionNativeUse,CompanionStats> CaptureResources;
     internal static Func<Item,bool> UsesInspiration;
     internal static Action<CompanionNativeUse> UpdateEquipment;
+    internal static Func<CompanionNativeUse,CompanionSentryPlacement?> SentryPlacement;
+    internal static Func<CompanionPlayer,Item,int,bool> ArmAccepts;
+    internal static Func<CompanionPlayer,bool> ArmLayoutAvailable;
+    internal static Func<Rectangle> ArmLayoutBounds;
+    internal static Func<Point,bool> ArmLayoutBlocks;
+    internal static Action<Microsoft.Xna.Framework.Graphics.SpriteBatch,CompanionPlayer,Point,bool> ArmLayoutOverlay;
+    internal static Func<Microsoft.Xna.Framework.Graphics.SpriteBatch,CompanionPlayer,Rectangle,Rectangle,Point,bool,bool,bool> ArmLayoutUI;
+    internal static CompanionSentryPlacement? SentryPoint(CompanionNativeUse use){
+        if(SentryPlacement!=null)foreach(Func<CompanionNativeUse,CompanionSentryPlacement?> place in SentryPlacement.GetInvocationList())
+            if(place(use) is {} point)return point;
+        return null;
+    }
     internal static Action<CompanionNativeUse> UpdateInheritedStatus;
     internal static Action<Player,Player,float> InheritStats;
     internal static Action<CompanionNativeUse> BeforeReset;
@@ -72,5 +88,5 @@ public sealed class CompanionCrossMod:ModSystem {
         var result=recipes.Call("AddItemCategory",Language.ActiveCulture.Name=="zh-Hans"?"呆猫装备":"Palico equipment","",icon,(Predicate<Item>)(item=>item.ModItem is TrainingItem));
         RecipeCategoryRegistered=result is string status&&status=="Success";
     }
-    public override void Unload(){SupportProgression=null;PeacefulRespawnLimit=null;PrepareActor=null;CaptureResources=null;UsesInspiration=null;SupportTool=null;SafeThrow=null;UpdateResources=null;UpdateEquipment=null;UpdateInheritedStatus=null;InheritStats=null;BeforeReset=null;SupportTarget=null;ResourceReady=null;PlanUse=null;MaintainHeldWeapon=null;WeaponReach=null;ProjectileFlight=null;WeaponEffect=null;Storage=null;UsesPerMaterial=null;ChargeComplete.Clear();InfiniteStack=null;MinedOre=null;RecipeCategoryRegistered=false;CompanionRecovery.Unload();}
+    public override void Unload(){SupportProgression=null;PeacefulRespawnLimit=null;PrepareActor=null;CaptureResources=null;UsesInspiration=null;SupportTool=null;SafeThrow=null;UpdateResources=null;UpdateEquipment=null;SentryPlacement=null;ArmAccepts=null;ArmLayoutUI=null;ArmLayoutAvailable=null;ArmLayoutBounds=null;ArmLayoutBlocks=null;ArmLayoutOverlay=null;UpdateInheritedStatus=null;InheritStats=null;BeforeReset=null;SupportTarget=null;ResourceReady=null;PlanUse=null;MaintainHeldWeapon=null;WeaponReach=null;ProjectileFlight=null;WeaponEffect=null;Storage=null;UsesPerMaterial=null;ChargeComplete.Clear();InfiniteStack=null;MinedOre=null;RecipeCategoryRegistered=false;CompanionRecovery.Unload();}
 }
