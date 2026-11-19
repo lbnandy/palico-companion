@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.2.15 — 2026-11-20
+
+### 简体中文
+
+- 改善呆猫使用鞭子时的站位，目标在攻击范围内时减少不必要的贴近。
+- 修复呆猫与 Terraria Origins 同时启用时可能导致模组加载失败的问题。
+
+### English
+
+- Improved Palico’s positioning with whips so it keeps its distance when the target is already within reach.
+- Fixed a loading failure that could occur when Palico Companion and Terraria Origins were enabled together.
+
 ## 1.2.14 — 2026-11-17
 
 ### 简体中文

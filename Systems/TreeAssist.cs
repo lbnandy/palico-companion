@@ -18,7 +18,7 @@ public sealed class TreeAssist
     internal bool OwnerRequested=>requestedManual;
     int requestedType;
     public bool Requested => requested && (Active || ReplantPending);
-    readonly Item basicAxe=new(ItemID.CopperAxe); // Companion-owned tool; never inserted into an inventory.
+    Item basicAxe;
     public bool Active {get;private set;}
     public Vector2 Target=>root.ToWorldCoordinates();
     public Vector2 MoveTarget {get;private set;}
@@ -49,7 +49,8 @@ public sealed class TreeAssist
     }
     public void FailRoute(){Cancel();cooldown=600;Status=CompanionText.Message("TreeAssist.Blocked");}
     Item BestAxe(Player p) {
-        Item best=basicAxe;
+        // ModPlayer instances are also created while modded item defaults are still loading.
+        Item best = basicAxe ??= new Item(ItemID.CopperAxe);
         for(int i=0;i<50;i++){var item=p.inventory[i];if(item==null||item.IsAir||item.axe<=0)continue;
             if(best==null||item.axe>best.axe||item.axe==best.axe&&item.useTime<best.useTime)best=item;}
         return best;

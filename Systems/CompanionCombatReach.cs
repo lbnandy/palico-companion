@@ -34,11 +34,13 @@ internal static class CompanionCombatReach {
             ProjectileID.GolemFist=>500,ProjectileID.ChainGuillotine=>525,_=>700});
         if(shot.aiStyle==ProjAIStyleID.Flail)return cat?.ModProjectile is CompanionCat c?c.Weapons.FlailRange:100;
         if(shot.aiStyle==ProjAIStyleID.Yoyo)return Math.Clamp(ProjectileID.Sets.YoyosMaximumRange[shot.type]*0.85f,80,700);
-        // FillWhipControlPoints uses base animation, launch speed and the
-        // projectile's native range multiplier. Reserve the last part of the
-        // extension for moving targets rather than standing at the tip.
-        if(ProjectileID.Sets.IsAWhip[shot.type])return item.shootSpeed*ContentSamples.ItemsByType[item.type].useAnimation*
-            shot.WhipSettings.RangeMultiplier*(cat?.ModProjectile is CompanionCat whipCat?whipCat.Weapons.Actor.whipRangeMultiplier:1);
+        // At full extension the native whip curve reaches twice the base animation
+        // times launch speed and the two range multipliers. Leave room for target motion.
+        if(IsWhip(shot)){
+            float extension=2f*item.shootSpeed*ContentSamples.ItemsByType[item.type].useAnimation*
+                shot.WhipSettings.RangeMultiplier*(cat?.ModProjectile is CompanionCat whipCat?whipCat.Weapons.Actor.whipRangeMultiplier:1);
+            return extension*.9f;
+        }
         // These are the sword's swing arc, not traveling sword beams.
         if(shot.aiStyle==ProjAIStyleID.LightsBane)return CompanionWeapons.Range(item)+24;
         if(shot.aiStyle==ProjAIStyleID.NightsEdge&&shot.type!=ProjectileID.TerraBlade2)return 100;
@@ -61,12 +63,15 @@ internal static class CompanionCombatReach {
         if(!item.noMelee&&shot.aiStyle==ProjAIStyleID.SuperStarBeam)return CompanionWeapons.Range(item)+24; // auxiliary spores on a sword swing
         return RangedRange;
     }
+    static bool IsWhip(Projectile shot)=>shot!=null&&ProjectileID.Sets.IsAWhip[shot.type];
+    static bool StandOff(Projectile shot)=>IsWhip(shot)||
+        shot?.aiStyle is ProjAIStyleID.Yoyo or ProjAIStyleID.Harpoon or ProjAIStyleID.Flail or ProjAIStyleID.Boomerang;
     internal static bool Distance(Item item) {
         var shot=Sample(item);
         // Attached swings and thrusts still have reach even below 120 pixels.
         // Classify their native attack shape before the numeric fallback, also
         // covering mod weapons which reuse these projectile behaviors.
-        return shot?.aiStyle is ProjAIStyleID.Yoyo or ProjAIStyleID.Spear or ProjAIStyleID.Harpoon or ProjAIStyleID.Flail or ProjAIStyleID.SleepyOctopod or ProjAIStyleID.ForwardStab||
+        return IsWhip(shot)||shot?.aiStyle is ProjAIStyleID.Yoyo or ProjAIStyleID.Spear or ProjAIStyleID.Harpoon or ProjAIStyleID.Flail or ProjAIStyleID.SleepyOctopod or ProjAIStyleID.ForwardStab||
             shot!=null&&item.CountsAsClass(DamageClass.Melee)&&shot.aiStyle is (ProjAIStyleID.HeldProjectile or ProjAIStyleID.LightsBane or ProjAIStyleID.NightsEdge)||
             item.consumable&&CompanionWeapons.SafeThrow(item)||Range(item)>120||CompanionNativeUse.Summoning(item);
     }
@@ -96,7 +101,8 @@ internal static class CompanionCombatReach {
         if(companion!=null)companion.tactics.Approaching=companion.tactics.FollowingOwner=false;
         Vector2 follow=CompanionNavigation.FollowGoal(owner,cat.Center);
         bool distance=Distance(item),close=CloseCombat(item);
-        bool standOff=Sample(item)?.aiStyle is ProjAIStyleID.Yoyo or ProjAIStyleID.Harpoon or ProjAIStyleID.Flail or ProjAIStyleID.Boomerang;
+        var shot=Sample(item);
+        bool standOff=StandOff(shot);
         bool followsOwner=companion!=null&&!state.Stationed&&!CompanionWeapons.SummonWeapon(item)&&
             !close&&!standOff&&distance&&Range(item,cat)>=RangedRange&&
             CompanionWeaponAim.CanReach(item,companion.Weapons,companion.Navigation.Riding?CompanionNavigation.FlightFollowGoal(owner):follow,target);
@@ -158,7 +164,9 @@ internal static class CompanionCombatReach {
             }
             // Contact weapons approach their stand point even when cautious;
             // caution changes that spacing, not whether a short attack can reach.
-            if(distance&&edge>=minimumGap+cat.width/2f&&edge<=upper)return cat.Center;
+            // A whip that already reaches from safe footing can stay there. Missed swings
+            // shorten EffectiveRange through the same feedback used by CanUse.
+            if(distance&&edge>=minimumGap+cat.width/2f&&(IsWhip(shot)||edge<=upper))return cat.Center;
         }
         // If contact really is too close, separate only enough to clear it.
         // The wider approach point still applies when closing on a distant foe.
@@ -219,9 +227,9 @@ internal static class CompanionCombatReach {
     }
     static bool CloseCombat(Item item){
         if(!item.CountsAsClass(DamageClass.Melee))return false;
-        int? style=Sample(item)?.aiStyle;
-        return style is not (ProjAIStyleID.Yoyo or ProjAIStyleID.Harpoon or ProjAIStyleID.Flail or ProjAIStyleID.Boomerang)&&
-            (!item.noMelee||style is not (ProjAIStyleID.ThrownProjectile or ProjAIStyleID.StickProjectile));
+        var shot=Sample(item);
+        return !StandOff(shot)&&
+            (!item.noMelee||shot?.aiStyle is not (ProjAIStyleID.ThrownProjectile or ProjAIStyleID.StickProjectile));
     }
     // Finite-reach weapons must approach targets inside the existing targeting
     // leash. The tighter ranged hover area must not cancel that approach.
