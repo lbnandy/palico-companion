@@ -13,7 +13,8 @@ namespace PalicoCompanion.Systems;
 // engine-owned, including dedicated-server simulation. Never run a human's
 // Hurt or equipment hooks against the owner's Player to injure their companion.
 public sealed class CompanionIncomingDamage : ModSystem {
-    static readonly List<CompanionCat> cats=new();
+    // Slots do not keep retired companions or their equipment actors alive.
+    static readonly List<int> catSlots=new();
     // Observe hazards only after the native damage gate. In particular, arena
     // borders have custom collision and telegraphs need not deal damage yet.
     static readonly Dictionary<int,(Projectile Shot,ModProjectile Instance,int Identity,Rectangle Box,ulong Tick)> hazards=new();
@@ -41,10 +42,21 @@ public sealed class CompanionIncomingDamage : ModSystem {
         NPC.GetMeleeCollisionData(body,enemy.whoAmI,ref cooldown,ref multiplier,ref box);
         return float.IsFinite(multiplier)&&multiplier>0&&body.Intersects(box);
     }
-    internal static void Register(CompanionCat cat){if(!CompanionNetwork.Client&&!cats.Contains(cat))cats.Add(cat);}
-    internal static void Remove(CompanionCat cat)=>cats.Remove(cat);
-    public override void OnWorldLoad(){cats.Clear();hazards.Clear();}
-    public override void OnWorldUnload(){cats.Clear();hazards.Clear();}
+    internal static void Register(CompanionCat cat){
+        if(CompanionNetwork.Client)return;
+        for(int i=catSlots.Count-1;i>=0;i--){
+            var p=Main.projectile[catSlots[i]];
+            if(!p.active||p.ModProjectile is not CompanionCat existing||existing.OwnerIndex==cat.OwnerIndex)
+                catSlots.RemoveAt(i);
+        }
+        catSlots.Add(cat.Projectile.whoAmI);
+    }
+    internal static void Remove(CompanionCat cat){
+        int slot=cat.Projectile.whoAmI;
+        if(ReferenceEquals(Main.projectile[slot].ModProjectile,cat))catSlots.Remove(slot);
+    }
+    public override void OnWorldLoad(){catSlots.Clear();hazards.Clear();}
+    public override void OnWorldUnload(){catSlots.Clear();hazards.Clear();}
     public override void Load()=>IL_Projectile.Damage+=Patch;
     public override void Unload()=>IL_Projectile.Damage-=Patch;
     static void Patch(ILContext il){
@@ -77,9 +89,9 @@ public sealed class CompanionIncomingDamage : ModSystem {
             hazards[shot.whoAmI]=(shot,shot.ModProjectile,shot.identity,box,Main.GameUpdateCount);
         else hazards.Remove(shot.whoAmI);
         // Scan actual companions, not all projectiles for every hostile shot.
-        for(int i=cats.Count-1;i>=0;i--){
-            var cat=cats[i];var p=cat.Projectile;
-            if(!p.active||!ReferenceEquals(p.ModProjectile,cat)){cats.RemoveAt(i);continue;}
+        for(int i=catSlots.Count-1;i>=0;i--){
+            var p=Main.projectile[catSlots[i]];
+            if(!p.active||p.ModProjectile is not CompanionCat cat){catSlots.RemoveAt(i);continue;}
             var owner=Main.player[cat.OwnerIndex];var state=owner.GetModPlayer<CompanionPlayer>();
             if(!owner.active||owner.dead||!state.Enabled||state.Stowed||state.Paused||state.Vitals.Downed||state.Vitals.Immunity>0||CompanionNetwork.Server&&(!state.NetReady||state.NetLeaving))continue;
             if(!shot.Colliding(box,p.Hitbox))continue;

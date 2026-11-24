@@ -1,5 +1,2 @@
-1.2.16 Update
-- Added Ore Excavator support. Palico follows its ore whitelist and excavation limit.
-- Improved following when you turn. Palico no longer circles behind you when you turn in place to aim at it, and lets you pass when you reverse direction.
-- Fixed Palico swinging certain Calamity true melee weapons, such as Grand Dad, before enemies came within reach.
-- Fixed missing hit and swing sounds for some weapons in multiplayer and prevented duplicate playback.
+1.2.17 Update
+- Fixed a server memory leak that could occur when a palico was repeatedly respawned in multiplayer.

@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.2.17 — 2026-11-25
+
+### 简体中文
+
+- 修复联机时呆猫被反复重新生成后，服务器可能持续占用更多内存的问题。
+
+### English
+
+- Fixed a server memory leak that could occur when a palico was repeatedly respawned in multiplayer.
+
 ## 1.2.16 — 2026-11-25
 
 ### 简体中文

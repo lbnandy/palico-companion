@@ -92,12 +92,12 @@ public sealed class CompanionCat : ModProjectile
     public readonly CompanionFlightVisual Flight=new();
     public readonly CompanionLighting Light=new();
     public override void OnSpawn(Terraria.DataStructures.IEntitySource source){
-        CompanionIncomingDamage.Register(this);
         if(CompanionNetwork.Server&&Projectile.owner!=255){
             int owner=Projectile.owner;Projectile.ai[0]=owner;
             if(Main.projectileIdentity[owner,Projectile.identity]==Projectile.whoAmI)Main.projectileIdentity[owner,Projectile.identity]=-1;
             Projectile.owner=255;Main.projectileIdentity[255,Projectile.identity]=Projectile.whoAmI;
         }
+        CompanionIncomingDamage.Register(this);
         if(CompanionNetwork.Server)NetworkInstance=CompanionRoster.Next();
         var state=Main.player[OwnerIndex].GetModPlayer<CompanionPlayer>();
         if(!CompanionNetwork.Server&&!state.Vitals.Downed)CompanionTransitEffects.At(Projectile.Center);
