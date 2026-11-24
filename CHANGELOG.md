@@ -1,5 +1,21 @@
 # Changelog
 
+## 1.2.16 — 2026-11-25
+
+### 简体中文
+
+- 支持 Ore Excavator 连锁挖矿，沿用其矿物白名单和连锁上限。
+- 改善跟随时的转身：原地转身瞄准呆猫时，它不会绕到身后，移动中掉头时，它会等你经过再跟上。
+- 修复雄祖之护等灾厄真近战武器在敌人还没进入攻击范围时提前空挥的问题。
+- 修复联机时部分武器缺少命中音效或挥动音效的问题，避免同一声音重复播放。
+
+### English
+
+- Added Ore Excavator support. Palico follows its ore whitelist and excavation limit.
+- Improved following when you turn. Palico no longer circles behind you when you turn in place to aim at it, and lets you pass when you reverse direction.
+- Fixed Palico swinging certain Calamity true melee weapons, such as Grand Dad, before enemies came within reach.
+- Fixed missing hit and swing sounds for some weapons in multiplayer and prevented duplicate playback.
+
 ## 1.2.15 — 2026-11-20
 
 ### 简体中文

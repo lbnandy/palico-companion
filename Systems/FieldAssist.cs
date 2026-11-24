@@ -131,6 +131,8 @@ public sealed class FieldAssist
         cadence = 0;
         // PickTile applies Terraria's actual pick-power rules, mining damage and normal drops.
         // Revalidated borrowed or built-in tool; do not change selectedItem or player input.
+        var excavate=CompanionCrossMod.ExcavateOre;
+        int oreStyle=excavate!=null&&AllowedOre(originalType)?Terraria.ObjectData.TileObjectData.GetTileStyle(Main.tile[Tile.X,Tile.Y]):-1;
         MiningObservation.CompanionHit=true;
         try {using(CompanionTileActions.Begin())player.PickTile(Tile.X, Tile.Y, miningTool.pick);miningClock.Commit();}
         finally {MiningObservation.CompanionHit=false;}
@@ -138,7 +140,10 @@ public sealed class FieldAssist
         if(CompanionNetwork.Server)NetMessage.SendTileSquare(-1,Tile.X,Tile.Y,1);
         Terraria.Tile result = Main.tile[Tile.X, Tile.Y];
         if (!result.HasTile) {
-            if(AllowedOre(originalType))CompanionCrossMod.MinedOre?.Invoke(player,Tile,originalType);
+            if(AllowedOre(originalType)){
+                CompanionCrossMod.MinedOre?.Invoke(player,Tile,originalType);
+                excavate?.Invoke(player,Tile,originalType,oreStyle);
+            }
             Completed++;
             if(!Terrain&&pending.Count==0) {
                 var state=player.GetModPlayer<CompanionPlayer>();

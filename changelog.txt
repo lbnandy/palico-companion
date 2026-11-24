@@ -1,3 +1,5 @@
-1.2.15 Update
-- Improved Palico’s positioning with whips so it keeps its distance when the target is already within reach.
-- Fixed a loading failure that could occur when Palico Companion and Terraria Origins were enabled together.
+1.2.16 Update
+- Added Ore Excavator support. Palico follows its ore whitelist and excavation limit.
+- Improved following when you turn. Palico no longer circles behind you when you turn in place to aim at it, and lets you pass when you reverse direction.
+- Fixed Palico swinging certain Calamity true melee weapons, such as Grand Dad, before enemies came within reach.
+- Fixed missing hit and swing sounds for some weapons in multiplayer and prevented duplicate playback.

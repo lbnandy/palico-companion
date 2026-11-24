@@ -12,6 +12,16 @@ public sealed class CompanionPlayer : ModPlayer
 {
     internal readonly System.Collections.Generic.HashSet<int> ExcludedMining=new(),ExcludedPickup=new(),AllowedPickup=new();
     internal PickupFilterMode PickupFilter;
+    internal const float GroundFollowDistance=52f;
+    float? followAnchorX;
+    internal float TrailingOffset(float distance){
+        float x=Player.Center.X;
+        // Let the owner walk past the trailing point on a turn.
+        float anchor=Math.Clamp(followAnchorX??(x-Player.direction*GroundFollowDistance),
+            x-GroundFollowDistance,x+GroundFollowDistance);
+        followAnchorX=anchor;
+        return (anchor-x)*(distance/GroundFollowDistance);
+    }
     public override void OnHurt(Player.HurtInfo info){
         if(!CompanionNetwork.Client&&Enabled&&!Stowed&&!Vitals.Downed&&Cat is {} cat)
             Expression.OwnerHit(this,cat,info.DamageSource);
@@ -150,6 +160,7 @@ public sealed class CompanionPlayer : ModPlayer
         Chests=new();Chests.Load(tag);
     }
     public override void OnEnterWorld() {
+        followAnchorX=null;
         Stationed=false;
         CompanionNetwork.Enter(this);
         var config=ModContent.GetInstance<CompanionConfig>();

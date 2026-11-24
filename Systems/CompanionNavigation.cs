@@ -21,15 +21,16 @@ public sealed class CompanionNavigation
     readonly CompanionFlightRoute followRoute=new();
     public static float FollowSpeed(float ownerHorizontalSpeed)=>Math.Clamp(Math.Abs(ownerHorizontalSpeed)+1.5f,3.8f,9f);
     internal static Vector2 FlightFollowGoal(Player owner) => owner.GetModPlayer<CompanionPlayer>().Stationed
-        ? CompanionStation.Origin(owner) : owner.MountedCenter+new Vector2(-owner.direction*24,-30);
+        ? CompanionStation.Origin(owner) : owner.MountedCenter+new Vector2(owner.GetModPlayer<CompanionPlayer>().TrailingOffset(24f),-30);
     public static Vector2 FollowGoal(Player owner,Vector2 catCenter) {
         if(owner.GetModPlayer<CompanionPlayer>().Stationed)return CompanionStation.Origin(owner);
-        Vector2 behind=CompanionStation.Origin(owner)-new Vector2(owner.direction*52,0);
+        var offset=new Vector2(owner.GetModPlayer<CompanionPlayer>().TrailingOffset(CompanionPlayer.GroundFollowDistance),0);
+        Vector2 behind=CompanionStation.Origin(owner)+offset;
         // Reuse landing support when the owner is standing: an empty pocket
         // over a cliff is no more a ground destination than one over lava.
         bool grounded=Supported(owner.position,owner.width,owner.height);
         if(LavaBelow(behind)||grounded&&Fits(behind)&&!TryStand(behind,out _)){
-            var ahead=CompanionStation.Origin(owner)+new Vector2(owner.direction*52,0);
+            var ahead=CompanionStation.Origin(owner)-offset;
             return Fits(ahead)&&!LavaBelow(ahead)&&(!grounded||TryStand(ahead,out _))&&Reachability.Clear(ahead,CompanionStation.Origin(owner))?ahead:CompanionStation.Origin(owner);
         }
         // A collision-free pocket behind the player may be on the far side of
@@ -322,7 +323,11 @@ public sealed class CompanionNavigation
         bool ground=Grounded(cat);
         if(ground&&needsTravel&&desired!=0)CompanionDoors.TryOpen(cat,owner,desired);
         cat.velocity.X=MathHelper.Lerp(cat.velocity.X,desired,combat?0.3f:0.18f);
-        if(Math.Abs(dx)>8)cat.direction=Math.Sign(dx);
+        if(working||combat){
+            if(Math.Abs(dx)>8)cat.direction=Math.Sign(dx);
+        }else if(Math.Abs(cat.velocity.X)>0.5f){
+            cat.direction=Math.Sign(cat.velocity.X);
+        }
         if(ground&&!DropThrough&&desired!=0) {
             // Same 1.4.4 collision API used by AI_026 ground pets for tile steps.
             Collision.StepUp(ref cat.position,ref cat.velocity,cat.width,cat.height,ref cat.stepSpeed,ref cat.gfxOffY);

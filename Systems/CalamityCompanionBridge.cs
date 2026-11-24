@@ -1,5 +1,7 @@
 using System;
 using System.Linq.Expressions;
+using System.Collections.Generic;
+using CalamityMod.Items.BaseItems;
 using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.ModLoader;
@@ -128,7 +130,8 @@ public sealed class CalamityCompanionBridge:ModSystem {
     static int Material(Item weapon,Item material)=>weapon.type==ModContent.ItemType<CalamityMod.Items.Weapons.Ranged.WulfrumBlunderbuss>()&&material.type==ModContent.ItemType<CalamityMod.Items.Materials.WulfrumMetalScrap>()?CalamityMod.Items.Weapons.Ranged.WulfrumBlunderbuss.ShotsPerScrap:0;
     // Primary use is a held slash, not the alternate thrown attack. Approach
     // within its native hitbox instead of treating its holdout as a long shot.
-    static float? Range(Item weapon,Player actor){
+    readonly Dictionary<int,float?> contactRadii=new();
+    float? Range(Item weapon,Player actor){
         // MurasamaSlash.Colliding uses velocity * 8.6 for the shorter cuts.
         // Reuse its melee scale and leave the collision thickness as margin.
         if(weapon.ModItem is Murasama){
@@ -148,7 +151,42 @@ public sealed class CalamityCompanionBridge:ModSystem {
         // that reach for the whole native family, including Earth and Collider.
         if(weapon.CountsAsClass(DamageClass.Melee)&&CompanionCombatReach.Sample(weapon) is {} shot&&shot.ModProjectile is BaseCustomUseStyleProjectile held)
             return (held.HitboxOutset+held.HitboxSize.X*.5f)*shot.scale*.85f;
+        // These channelled weapons swing the primary projectile itself. A
+        // holdout alone is not enough: beam emitters and thrown blades also use one.
+        if(weapon.ModItem is CustomUseProjItem&&weapon.channel&&weapon.noMelee&&weapon.noUseGraphic&&weapon.shootSpeed==0&&
+            weapon.DamageType==ModContent.GetInstance<CalamityMod.TrueMeleeDamageClass>()&&
+            CompanionCombatReach.Sample(weapon) is {friendly:true,tileCollide:false,ModProjectile:not null} contact&&
+            contact.DamageType==weapon.DamageType&&contact.ModProjectile.Mod==weapon.DamageType.Mod){
+            if(!contactRadii.TryGetValue(contact.type,out var radius))
+                contactRadii[contact.type]=radius=ContactRadius(contact);
+            if(radius.HasValue){
+                float scale=actor==null?weapon.scale:CalamityMod.CalamityUtils.GetMeleeScale(actor,false)+weapon.scale-1;
+                return radius.Value*scale;
+            }
+        }
         return null;
+    }
+    // Measure the native contact shape at unit scale, once per projectile type.
+    // Its neutral aim omits any forward extension, leaving room for the windup.
+    // The detached instance only answers collision queries; it never enters the world.
+    static float? ContactRadius(Projectile sample){
+        var center=Main.player[Main.myPlayer].Center.ToPoint();
+        var probe=new Projectile{type=sample.type,owner=Main.myPlayer,width=sample.width,height=sample.height,scale=1f};
+        probe.Center=center.ToVector2();
+        var shape=sample.ModProjectile.NewInstance(probe);
+        bool Reaches(int dx,int dy)=>shape.Colliding(probe.Hitbox,new Rectangle(center.X+dx,center.Y+dy,1,1))==true;
+        bool Inside(int radius)=>Reaches(radius,0)&&Reaches(-radius,0)&&Reaches(0,radius)&&Reaches(0,-radius);
+        if(!Reaches(0,0))return null;
+        // Spawn-scale hitboxes can be zero pixels wide. Bracket the native
+        // shape itself, and disregard a collision override with no finite edge.
+        int low=0,high=1;
+        while(high<short.MaxValue&&Inside(high)){low=high;high*=2;}
+        if(high>short.MaxValue)return null;
+        while(high-low>1){
+            int mid=low+(high-low)/2;
+            if(Inside(mid))low=mid;else high=mid;
+        }
+        return low>1?low-1:null;
     }
     // Only report native completion. Shared input policy owns release latching
     // and interruption for every damage class; no charge timers are simulated.

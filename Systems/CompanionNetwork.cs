@@ -14,6 +14,12 @@ internal static partial class CompanionNetwork {
     internal static void TrainingSpent(byte kind){var p=Packet(TrainingUse);p.Write(kind);p.Send();}
     internal static void BuiltAt(int x,int y,int type){var p=Packet(BuildStroke);p.Write(x);p.Write(y);p.Write(type);p.Send();}
     internal static void ChopAt(int x,int y){var p=Packet(Chop);p.Write(x);p.Write(y);p.Send();}
+    const byte ExcavatedOre=203;
+    internal static void NotifyExcavatedOre(Player owner,Point cell,int type,int style){
+        var packet=Packet(ExcavatedOre);
+        packet.Write((short)cell.X);packet.Write((short)cell.Y);packet.Write((ushort)type);packet.Write(style);
+        packet.Send(owner.whoAmI);
+    }
     internal static void StopDig(){if(!Client)return;var p=Packet(StopDigging);p.Send();}
     internal static void DigAt(Point cell,int type,Vector2 aim){var p=Packet(Dig);p.Write(cell.X);p.Write(cell.Y);p.Write(type);p.Write(aim.X);p.Write(aim.Y);p.Send();}
     internal static void Say(CompanionPlayer s,string line,string context=""){var p=Packet(Speech);p.Write((byte)s.Player.whoAmI);p.Write(line);p.Write(context??"");p.Send(s.Player.whoAmI);}
@@ -90,8 +96,13 @@ internal static partial class CompanionNetwork {
             s.Stats=stats;s.Training=training;s.Loadouts=loadouts;s.ArmLayout=armLayout;s.SupplySlots=supplies;s.Bag=bag;s.Gear=gear;s.Dyes=dyes;s.Chests=permissions;s.NetReady=true;
         }
     internal static void Receive(byte kind,BinaryReader r,int sender) {
+        if(kind==ExcavatedOre){
+            if(Client)CompanionCrossMod.ExcavateOre?.Invoke(Main.LocalPlayer,new Point(r.ReadInt16(),r.ReadInt16()),r.ReadUInt16(),r.ReadInt32());
+            return;
+        }
         if(kind==CompanionCrossMod.CiveDefaultsPacket){CompanionCrossMod.CiveDefaults?.Invoke(r,sender);return;}
         if(kind==CompanionPaladinShield.TransferPacket){CompanionPaladinShield.Receive(r,sender);return;}
+        if(kind==NativeHitSound){if(Client)ReadHitSound(r);return;}
         if(kind==NativeWeaponEffect){if(Client)ReadWeaponEffect(r);return;}
         if(kind==ChestDiscoveryState){if(Client)DiscoveryChests.Apply(new Point(r.ReadInt16(),r.ReadInt16()),r.ReadBoolean());return;}
         if(kind==KiteResult&&Client){CompanionKiteInput.Result(r.ReadString());return;}

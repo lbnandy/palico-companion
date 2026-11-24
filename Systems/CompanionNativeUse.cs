@@ -571,6 +571,7 @@ public sealed class CompanionOwnedShot : GlobalProjectile {
     internal int BondOwner;
     internal bool PendingNativeLinkRepair;
     internal bool HasRunAI;
+    internal Dictionary<string,(bool FromServer,int LocalPlays)> HeldSounds;
     int unboundTicks;
     ulong inputTime;byte input;
     public override void SendExtraAI(Projectile p,Terraria.ModLoader.IO.BitWriter bits,System.IO.BinaryWriter w){
@@ -753,6 +754,9 @@ public sealed class CompanionNativeHooks : ModSystem {
         if(CompanionNetwork.Server&&!fromNet&&!noPlayerInteraction&&npc.active&&npc.life>0&&
             (hit.Damage>0||hit.InstantKill)&&CompanionNativeUse.Current is {} use)
             npc.PlayerInteraction(use.State.Player.whoAmI);
+        // A mod hit callback can apply a secondary native strike. Its standard
+        // hit sound already travels with Terraria's strike packet.
+        using var nativeSound=new CompanionHitAudio.HitScope(null);
         return orig(npc,hit,fromNet,noPlayerInteraction);
     }
     static bool AnyInteractions(On_NPC.orig_AnyInteractions orig,NPC npc){

@@ -80,6 +80,7 @@ public sealed class CompanionCrossMod:ModSystem {
     // Optional metadata only. Actual consumption remains in tML's item hooks.
     internal static Func<Item,int> InfiniteStack;
     internal static Action<Player,Point,int> MinedOre;
+    internal static Action<Player,Point,int,int> ExcavateOre;
     internal static bool RecipeCategoryRegistered {get;private set;}
     public override void PostSetupContent(){
         if(Main.dedServ||!ModLoader.TryGetMod("RecipeBrowser",out var recipes))return;
@@ -88,5 +89,5 @@ public sealed class CompanionCrossMod:ModSystem {
         var result=recipes.Call("AddItemCategory",Language.ActiveCulture.Name=="zh-Hans"?"呆猫装备":"Palico equipment","",icon,(Predicate<Item>)(item=>item.ModItem is TrainingItem));
         RecipeCategoryRegistered=result is string status&&status=="Success";
     }
-    public override void Unload(){SupportProgression=null;PeacefulRespawnLimit=null;PrepareActor=null;CaptureResources=null;UsesInspiration=null;SupportTool=null;SafeThrow=null;UpdateResources=null;UpdateEquipment=null;SentryPlacement=null;ArmAccepts=null;ArmLayoutUI=null;ArmLayoutAvailable=null;ArmLayoutBounds=null;ArmLayoutBlocks=null;ArmLayoutOverlay=null;UpdateInheritedStatus=null;InheritStats=null;BeforeReset=null;SupportTarget=null;ResourceReady=null;PlanUse=null;MaintainHeldWeapon=null;WeaponReach=null;ProjectileFlight=null;WeaponEffect=null;Storage=null;UsesPerMaterial=null;ChargeComplete.Clear();InfiniteStack=null;MinedOre=null;RecipeCategoryRegistered=false;CompanionRecovery.Unload();}
+    public override void Unload(){SupportProgression=null;PeacefulRespawnLimit=null;PrepareActor=null;CaptureResources=null;UsesInspiration=null;SupportTool=null;SafeThrow=null;UpdateResources=null;UpdateEquipment=null;SentryPlacement=null;ArmAccepts=null;ArmLayoutUI=null;ArmLayoutAvailable=null;ArmLayoutBounds=null;ArmLayoutBlocks=null;ArmLayoutOverlay=null;UpdateInheritedStatus=null;InheritStats=null;BeforeReset=null;SupportTarget=null;ResourceReady=null;PlanUse=null;MaintainHeldWeapon=null;WeaponReach=null;ProjectileFlight=null;WeaponEffect=null;Storage=null;UsesPerMaterial=null;ChargeComplete.Clear();InfiniteStack=null;MinedOre=null;ExcavateOre=null;RecipeCategoryRegistered=false;CompanionRecovery.Unload();}
 }
