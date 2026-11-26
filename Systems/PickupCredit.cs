@@ -16,14 +16,24 @@ public sealed class PickupCredit:GlobalItem {
     internal static long Get(Item i){if(i==null||i.IsAir)return 0;var g=i.GetGlobalItem<PickupCredit>();g.credit=Math.Clamp(g.credit-Math.Max(0,g.observed-i.stack)*Unit(i),0,i.stack*Unit(i));g.observed=i.stack;return g.credit;}
     internal static void Set(Item i,long value){if(i==null||i.IsAir)return;var g=i.GetGlobalItem<PickupCredit>();g.credit=Math.Clamp(value,0,i.stack*Unit(i));g.observed=i.stack;}
     internal static void Clear(Item i)=>Set(i,0);
-    public override void OnStack(Item destination,Item source,int numToTransfer){
-        long own=Get(destination),from=Get(source),moved=Math.Min(from,numToTransfer*Unit(source));
-        credit=own+moved;observed=destination.stack+numToTransfer;
-        var other=source.GetGlobalItem<PickupCredit>();other.credit=from-moved;other.observed=source.stack-numToTransfer;
-    }
-    public override void SplitStack(Item destination,Item source,int numToTransfer){
-        long from=Get(source),moved=Math.Min(from,numToTransfer*Unit(source));credit=moved;observed=numToTransfer;
-        var other=source.GetGlobalItem<PickupCredit>();other.credit=from-moved;other.observed=source.stack-numToTransfer;
+    public override void OnStack(Item destination,Item source,int numToTransfer) =>
+        TransferCredit(destination,source,numToTransfer,false);
+    public override void SplitStack(Item destination,Item source,int numToTransfer) =>
+        TransferCredit(destination,source,numToTransfer,true);
+
+    void TransferCredit(Item destination,Item source,int count,bool split){
+        // A pending network withdrawal can reach the stack hook with an empty source.
+        if(count<=0 || source is null || source.IsAir) return;
+
+        long existing=split ? 0 : Get(destination);
+        long available=Get(source);
+        long moved=Math.Min(available,count*Unit(source));
+        credit=existing+moved;
+        observed=split ? count : destination.stack+count;
+
+        var remaining=source.GetGlobalItem<PickupCredit>();
+        remaining.credit=available-moved;
+        remaining.observed=source.stack-count;
     }
     public override void SaveData(Item item,TagCompound tag){long n=Get(item);if(n>0)tag["freshPickup"]=n;}
     public override void LoadData(Item item,TagCompound tag)=>Set(item,tag.GetLong("freshPickup"));

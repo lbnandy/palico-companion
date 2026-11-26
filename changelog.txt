@@ -1,2 +1,4 @@
-1.2.17 Update
-- Fixed a server memory leak that could occur when a palico was repeatedly respawned in multiplayer.
+1.2.18 Update
+- Fixed flickering and repeated errors when withdrawing items from Magic Storage in multiplayer.
+- Fixed the inventory becoming unresponsive after reconnecting if the game closed unexpectedly during an item or coin transfer from the palico.
+- Adjusted the draw order of the palico’s Stardust Guardian so it no longer covers the palico.

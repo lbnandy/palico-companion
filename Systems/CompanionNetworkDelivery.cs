@@ -4,7 +4,7 @@ using Terraria.ModLoader;
 namespace PalicoCompanion.Systems;
 
 internal static partial class CompanionNetwork {
-    internal static void RetryAutomatic(){if(Client&&Pending&&automaticMaterial)RetryRequest();}
+    internal static void RetryAutomatic(){if(Client&&Pending&&automaticMaterial&&localState?.NetReady==true)RetryRequest();}
     internal static void Deliver(CompanionPlayer s){
         if(!Client||!s.NetReady||CompanionSession.Closing)return;
         if(Pending){if(automaticMaterial)RetryRequest();return;}

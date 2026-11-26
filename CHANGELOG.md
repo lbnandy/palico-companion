@@ -1,5 +1,19 @@
 # Changelog
 
+## 1.2.18 — 2026-11-26
+
+### 简体中文
+
+- 修复联机从魔法存储连续取物时界面闪烁、反复报错的问题。
+- 修复联机领取呆猫的物品或钱币时异常退出，重连后可能无法操作物品栏的问题。
+- 调整呆猫的星尘守卫绘制顺序，避免守卫遮住呆猫。
+
+### English
+
+- Fixed flickering and repeated errors when withdrawing items from Magic Storage in multiplayer.
+- Fixed the inventory becoming unresponsive after reconnecting if the game closed unexpectedly during an item or coin transfer from the palico.
+- Adjusted the draw order of the palico’s Stardust Guardian so it no longer covers the palico.
+
 ## 1.2.17 — 2026-11-25
 
 ### 简体中文

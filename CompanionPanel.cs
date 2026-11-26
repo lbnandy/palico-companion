@@ -144,7 +144,7 @@ public sealed class CompanionPanel : ModSystem
     void DrawVanillaInventory(On_Main.orig_DrawInventory orig,Main self) {
         int mx=Main.mouseX,my=Main.mouseY;
         var state=Main.LocalPlayer.GetModPlayer<CompanionPlayer>();
-        bool covered=CompanionNetwork.Pending || state.PanelOpen && Main.netMode!=NetmodeID.Server && (Covers(new Rectangle(mx,my,1,1))||CompanionCrossMod.ArmLayoutBlocks?.Invoke(new Point((int)(mx/Fit),(int)(my/Fit)))==true);
+        bool covered=CompanionNetwork.BlocksItemUse || state.PanelOpen && Main.netMode!=NetmodeID.Server && (Covers(new Rectangle(mx,my,1,1))||CompanionCrossMod.ArmLayoutBlocks?.Invoke(new Point((int)(mx/Fit),(int)(my/Fit)))==true);
         // Run after vanilla's per-layer zoom reset; keep slot rendering, suppress covered hit tests.
         try {if(covered){Main.mouseX=-10000;Main.mouseY=-10000;}orig(self);}
         finally {Main.mouseX=mx;Main.mouseY=my;}

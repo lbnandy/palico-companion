@@ -605,6 +605,12 @@ public sealed class CompanionOwnedShot : GlobalProjectile {
         return true;
     }
     public static CompanionNativeUse Of(Projectile p)=>CompanionProjectileData.TryGet<CompanionOwnedShot>(p,out var tag)?tag.Context:null;
+    public override void DrawBehind(Projectile projectile,int index,List<int> behindNPCsAndTiles,List<int> behindNPCs,List<int> behindProjectiles,List<int> overPlayers,List<int> overWiresUI){
+        if(projectile.type!=ProjectileID.StardustGuardian||(Context==null&&CatIdentity<0))return;
+        // The companion body is drawn in the normal projectile pass.
+        projectile.hide=true;
+        behindProjectiles.Add(index);
+    }
     // Ownership can arrive before the cat replica. Block friendly fire during
     // that interval too, without changing team data used by support weapons.
     public override bool CanHitPvp(Projectile projectile,Player target)=>Context==null&&CatIdentity<0;
